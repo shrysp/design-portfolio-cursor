@@ -7,9 +7,9 @@ import { Palette } from '@phosphor-icons/react';
 export default function Craft() {
   return (
     <div className="min-h-screen flex justify-center">
-      <main className="w-full max-w-[800px] flex flex-col gap-12 py-6">
+      <main className="w-full max-w-[800px] flex flex-col gap-12 py-6 ">
 
-        <div className="flex flex-col gap-12 items-start border border-slate-200 p-8 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl">
+        <div className="flex flex-col gap-12 items-start border border-slate-200 p-8 h-[94vh] overflow-y-auto  rounded-4xl scrollbar-hide">
         {/* Page header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -47,7 +47,7 @@ export default function Craft() {
           </div>
         </div>
         
-        <div className="fixed flex items-center justify-center left-0 right-0 bottom-8 z-10">
+        <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-10 z-10">
           <Navbar />
         </div>
 

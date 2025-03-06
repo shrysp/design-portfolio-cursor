@@ -5,61 +5,8 @@ import Navbar from '@/components/Navbar';
 import { ProjectCard } from '@/components/ProjectCard';
 import { Tabs } from '@phosphor-icons/react';
 
-// Sample project data
-const projectsData = [
-  {
-    title: "Design System",
-    description: [
-      "Created a comprehensive design system for a fintech application",
-      "Implemented consistent UI components across web and mobile platforms",
-      "Improved design-to-development handoff efficiency by 40%"
-    ],
-    images: [
-      "/images/projects/design-system-1.jpg",
-      "/images/projects/design-system-2.jpg",
-      "/images/projects/design-system-3.jpg"
-    ]
-  },
-  {
-    title: "E-commerce Redesign",
-    description: [
-      "Redesigned the user experience for an e-commerce platform",
-      "Increased conversion rate by 25% through improved checkout flow",
-      "Implemented responsive design for all device sizes"
-    ],
-    images: [
-      "/images/projects/ecommerce-1.jpg",
-      "/images/projects/ecommerce-2.jpg"
-    ]
-  },
-  {
-    title: "Mobile App UI/UX",
-    description: [
-      "Designed the user interface for a health tracking mobile application",
-      "Created intuitive navigation and data visualization components",
-      "Conducted user testing and implemented feedback iterations"
-    ],
-    images: [
-      "/images/projects/mobile-app-1.jpg",
-      "/images/projects/mobile-app-2.jpg",
-      "/images/projects/mobile-app-3.jpg",
-      "/images/projects/mobile-app-4.jpg"
-    ]
-    
-  },
-  {
-    title: "Brand Identity",
-    description: [
-      "Developed complete brand identity for a sustainable product company",
-      "Created logo, color palette, typography, and brand guidelines",
-      "Designed packaging and marketing materials"
-    ],
-    images: [
-      "/images/projects/brand-1.jpg",
-      "/images/projects/brand-2.jpg"
-    ]
-  }
-];
+// Import project data from separate file
+import { projectsData } from '@/data/projectsData';
 
 export default function Projects() {
   return (
@@ -99,15 +46,17 @@ export default function Projects() {
             >
               <ProjectCard 
                 title={project.title}
-                description={project.description}
                 images={project.images}
-                
+                technologies={project.technologies}
+                github={project.github}
+                live={project.live}
+               
               />
             </motion.div>
           ))}
             </div>
         
-            <div className="fixed flex items-center justify-center left-0 right-0 bottom-8 z-10">
+            <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-10 z-10">
           <Navbar />
             </div>
 
