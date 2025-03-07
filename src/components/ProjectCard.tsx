@@ -218,17 +218,17 @@ export function ProjectCard({
       <div 
         className="w-full max-w-full relative bg-gradient-to-br from-white to-neutral-50 rounded-3xl shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 overflow-hidden">
         {/* Content container */}
-        <div className="p-6 flex flex-col justify-top items-start gap-6">
+        <div className="p-6 flex flex-col justify-top items-start gap-4">
           {/* Title section */}
-          <div className="border-b border-black/10 flex justify-between items-center pb-2 gap-2 self-stretch">
-            <div className="text-black text-2xl font-semibold">
+          <div className=" flex justify-between items-center gap-2 self-stretch">
+            <div className="text-black text-2xl font-semibold ml-2">
               {title}
             </div>
             
           </div>
 
           {/* Main content area */}
-          <div className="relative w-full h-full bg-gradient-to-b from-white to-slate-50 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_4px_0px_rgba(28,57,142,0.25)] rounded-2xl border border-slate-200 flex flex-col justify-top items-start overflow-hidden" style={{ minHeight: "500px" }}>
+          <div className="relative w-full h-full mb-2 bg-gradient-to-b from-white to-slate-50 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_4px_0px_rgba(28,57,142,0.25)] rounded-2xl border border-slate-200 flex flex-col justify-top items-start overflow-hidden" style={{ minHeight: "500px" }}>
             {/* Image/Video carousel */}
             {images.length > 0 && (
               <div className="absolute inset-0 w-full h-full">

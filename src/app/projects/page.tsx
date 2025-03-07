@@ -12,7 +12,7 @@ export default function Projects() {
   return (
     <div className="min-h-screen flex justify-center bg-gradient-to-b from-slate-50 to-white">
       <main className="w-full max-w-[800px] flex flex-col gap-12 py-6">
-        <div className="flex flex-col gap-12 items-start border border-slate-200 p-8 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl">
+        <div className="flex flex-col gap-6 items-start border border-slate-200 p-8 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl">
         {/* Page header */}
          <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -36,7 +36,7 @@ export default function Projects() {
          </motion.div>
         
         {/* Project grid */}
-            <div className="grid grid-cols-1 gap-12 mb-24 w-full">
+            <div className="grid grid-cols-1 gap-6.5 mb-24 w-full">
           {projectsData.map((project, index) => (
             <motion.div 
               key={index}

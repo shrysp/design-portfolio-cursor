@@ -47,9 +47,9 @@ export const projectsData = [
     title: "DashWorks",
     
     images: [
-      "/images/projects/DashWorks- Landing Page.png",
-      "/images/projects/DashWorks- Onboarding.png",
-      "/images/projects/DashWorks-Design System.png"
+      "/images/projects/DashWorks-Landing-Page.png",
+      "/images/projects/DashWorks-Onboarding.png",
+      "/images/projects/DashWorks-Design-System.png"
     ],
     // Additional information specific to this project
     role: "Lead UI/UX Designer",

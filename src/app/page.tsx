@@ -9,7 +9,7 @@ export default function Home() {
     <div className="min-h-screen flex justify-center">
       <main className="relative w-full max-w-[800px] py-6">
 
-        <div className="relative flex flex-col gap-8 items-start border border-slate-200 p-8 pb-24 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl">
+        <div className="relative flex flex-col gap-6 items-start border border-slate-200 p-8 pb-24 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl">
         {/* Hero section */}
           <motion.div 
           className="w-full border-b space-y-1 border-slate-200 pb-4"
@@ -26,7 +26,7 @@ export default function Home() {
           
           </motion.div>
 
-          <div className="grid grid-cols-7 auto-rows-auto gap-6 w-full">
+          <div className="grid grid-cols-7 auto-rows-auto gap-x-6 gap-y-6.5 w-full">
             
             {/* quick Projects links */}
             <div className="flex flex-col col-span-5 h-32 bg-slate-50 rounded-3xl px-6 p-4 items-center justify-center gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
@@ -65,10 +65,15 @@ export default function Home() {
               <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> Reach out</div>
               <div className="w-full flex items-center justify-between gap-2">
                 
-                <div className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-slate-400 via-slate-600 to-slate-800 hover:from-slate-500 hover:via-slate-700 hover:to-slate-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-700 cursor-pointer transition-all duration-300'>                  
+                <a 
+                  href="https://x.com/ShreyasPatil_" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-slate-400 via-slate-600 to-slate-800 hover:from-slate-500 hover:via-slate-700 hover:to-slate-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-700 cursor-pointer transition-all duration-300'
+                >                  
                   <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
                   <XLogo size={18} weight="fill" />
-                </div>
+                </a>
 
                 <button className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-red-400 via-red-600 to-red-800 hover:from-red-500 hover:via-red-700 hover:to-red-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-red-700 cursor-pointer transition-all duration-300'>                  
                   <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10 pointer-events-none`}></div>
@@ -122,10 +127,15 @@ export default function Home() {
                     })()}
                 </button>
 
-                <div className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 hover:from-blue-400 hover:via-blue-600 hover:to-blue-800 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-blue-700 cursor-pointer transition-all duration-300'>                  
+                <a 
+                  href="https://www.linkedin.com/in/shreyastpatil/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 hover:from-blue-400 hover:via-blue-600 hover:to-blue-800 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-blue-700 cursor-pointer transition-all duration-300'
+                >                  
                   <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
                   <LinkedinLogo size={18} weight="fill" />
-                </div>
+                </a>
                   
 
                   
@@ -177,7 +187,7 @@ export default function Home() {
               const formattedTime = currentTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
               
               return (
-                <div style={{backgroundImage: `url(/images/projects/${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative flex flex-col col-span-3 h-[276px] bg-slate-50 rounded-3xl p-4 items-center justify-center gap-6 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset] overflow-hidden">
+                <div style={{backgroundImage: `url(/images/projects/${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative flex flex-col col-span-3 h-[276px] bg-slate-50 rounded-3xl p-6 items-center justify-start gap-6 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset] overflow-hidden">
                   
                   <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center bg-gradient-to-b from-white/80  to-white/10 rounded-t-[22px] rounded-b-[12px] z-20 rounded-3xl`}></div>
                   
@@ -209,7 +219,7 @@ export default function Home() {
 
               <div className="w-full flex flex-col">
                 <div className="w-full flex items-center justify-between gap-2">
-                  <div className="font-semibold text-slate-800">Rochester Institute of Technology</div>
+                  <div className="text-sm font-semibold text-slate-800">Rochester Institute of Technology</div>
                   <div className="text-sm font-light text-slate-600">Dec 2024</div>
                 </div>
 
@@ -218,7 +228,7 @@ export default function Home() {
 
               <div className="w-full flex flex-col">
                 <div className="w-full flex items-center justify-between gap-2">
-                  <div className="font-semibold text-slate-800">Dashworks</div>
+                  <div className="text-sm font-semibold text-slate-800">Dashworks</div>
                   <div className="text-sm font-light text-slate-600">Jan - Apr 2024</div>
                 </div>
 
@@ -275,6 +285,42 @@ export default function Home() {
 
               
               
+            </div>
+
+            <div className="flex flex-col col-span-4 h-[425px] bg-slate-50 rounded-3xl p-6 items-top justify-start gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+              
+              <div className="w-full flex flex-col gap-4 h-full">
+                <div className='w-full flex justify-between'>
+                  
+                  <div className='relative flex items-center justify-center gap-1.5 h-8 pr-2 pl-2.5 text-slate-500 rounded-full bg-radial-[at_50%_75%] from-slate-100 via-slate-200 to-slate-300 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-400 hover:bg-radial-[at_50%_75%] hover:from-slate-200 hover:via-slate-300 hover:to-slate-400 transition-all duration-300 cursor-pointer'>
+                    
+                    <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white/80  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
+                    <div className='text-sm font-regular'>ItinerAI</div>
+                    <ArrowSquareOut size={16} weight="regular" />
+                  </div>
+
+                  <div className='relative flex items-center justify-center gap-1.5 h-8 pr-2 pl-2.5 text-slate-500 rounded-full bg-radial-[at_50%_75%] from-slate-100 via-slate-200 to-slate-300 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-400 hover:bg-radial-[at_50%_75%] hover:from-slate-200 hover:via-slate-300 hover:to-slate-400 transition-all duration-300 cursor-pointer'>
+                 
+                  <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white/80  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
+                    <div className='text-sm font-regular'>Dashworks</div>
+                    <ArrowSquareOut size={16} weight="regular" />
+
+                  </div>
+
+                  <div className='relative flex items-center justify-center gap-1.5 h-8 pr-2 pl-2.5 text-slate-500 rounded-full bg-radial-[at_50%_75%] from-slate-100 via-slate-200 to-slate-300 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-400 hover:bg-radial-[at_50%_75%] hover:from-slate-200 hover:via-slate-300 hover:to-slate-400 transition-all duration-300 cursor-pointer'>
+                 
+                  <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white/80  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
+                    <div className='text-sm font-regular'>WeatherWise</div>
+                    <ArrowSquareOut size={16} weight="regular" />
+                  </div>
+
+                  
+                </div>
+
+                <div className='w-full h-full border border-slate-200 bg-[url(/images/projects/DashWorks-Onboarding.png)] bg-cover bg-center flex items-center justify-center gap-2 rounded-lg'>
+                  
+                </div>
+              </div>
             </div>
 
             

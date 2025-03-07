@@ -20,7 +20,7 @@ export default function Home() {
     <div className="min-h-screen flex justify-center">
       <main className="w-full max-w-[800px] py-6">
 
-        <div className="flex flex-col gap-8 items-start border border-slate-200 p-8 pb-24 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl ">
+        <div className="flex flex-col gap-6 items-start border border-slate-200 p-8 pb-24 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl ">
         {/* Hero section */}
           <motion.div 
           className="w-full border-b flex gap-4 items-center border-slate-200 pb-4"
@@ -36,7 +36,7 @@ export default function Home() {
           </h1>
           </motion.div>
 
-          <div className="grid grid-cols-7 grid-flow-rows gap-6 w-full">
+          <div className="grid grid-cols-7 grid-flow-rows gap-x-6 gap-y-6.5 w-full">
 
             {/* Making it feel right */}
             <div className="flex flex-col col-span-4 bg-slate-50 rounded-3xl p-6 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
@@ -66,10 +66,15 @@ export default function Home() {
               <div className="w-full flex flex-col items-center justify-between gap-5">
                 
                 <div className='flex w-full items-center justify-start gap-4 text-base font-semibold'>
-                  <div className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-slate-400 via-slate-600 to-slate-800 hover:from-slate-500 hover:via-slate-700 hover:to-slate-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-700 cursor-pointer transition-all duration-300'>                  
-                  <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-                  <XLogo size={18} weight="fill" />
-                  </div>
+                  <a 
+                    href="https://x.com/ShreyasPatil_" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-slate-400 via-slate-600 to-slate-800 hover:from-slate-500 hover:via-slate-700 hover:to-slate-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-700 cursor-pointer transition-all duration-300'
+                  >                  
+                    <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
+                    <XLogo size={18} weight="fill" />
+                  </a>
                   <div className='flex flex-col'>
                     <div className='text-sm font-semibold text-slate-800'>Twitter</div>
                     <div className='text-xs font-light text-slate-600'>@ShreyasPatil_</div>
@@ -137,10 +142,15 @@ export default function Home() {
                 </div>
 
                 <div className='flex w-full items-center justify-start gap-4 text-base font-semibold'>
-                <div className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 hover:from-blue-400 hover:via-blue-600 hover:to-blue-800 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-blue-700 cursor-pointer transition-all duration-300'>                  
+                <a 
+                  href="https://www.linkedin.com/in/shreyastpatil/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 hover:from-blue-400 hover:via-blue-600 hover:to-blue-800 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-blue-700 cursor-pointer transition-all duration-300'
+                >                  
                   <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
                   <LinkedinLogo size={18} weight="fill" />
-                </div>
+                </a>
                   <div className='flex flex-col'>
                     <div className='text-sm font-semibold text-slate-800'>LinkedIn</div>
                     <div className='text-xs font-light text-slate-600'>Shreyas Patil</div>
@@ -148,10 +158,16 @@ export default function Home() {
                 </div>
 
                 <div className='flex w-full items-center justify-start gap-4 text-base font-semibold'>
-                <div className='relative flex items-center justify-center size-8 text-stone-500 rounded-full bg-radial-[at_50%_75%] from-stone-100 via-stone-200 to-stone-300 hover:from-stone-200 hover:via-stone-300 hover:to-stone-400 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-stone-400 cursor-pointer transition-all duration-300'>                  
+                <a 
+                  href="/document/Shreyas-Patil-Resume-2025.pdf" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  download
+                  className='relative flex items-center justify-center size-8 text-stone-500 rounded-full bg-radial-[at_50%_75%] from-stone-100 via-stone-200 to-stone-300 hover:from-stone-200 hover:via-stone-300 hover:to-stone-400 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-stone-400 cursor-pointer transition-all duration-300'
+                >                  
                   <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white/70  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
                   <ReadCvLogo size={18} weight="fill" />
-                </div>
+                </a>
                   <div className='flex flex-col'>
                     <div className='text-sm font-semibold text-slate-800'>Resume</div>
                     <div className='text-xs font-light text-slate-600'>Download</div>
@@ -168,26 +184,41 @@ export default function Home() {
                 Reads
               </div>
 
-              <div className='group relative flex flex-col gap-1 w-full p-2 bg-stone-50 rounded-lg hover:rounded-tr-2xl border border-stone-200 overflow-hidden transition-all duration-300 cursor-pointer'>
+              <a 
+                href="https://publish.obsidian.md/philippepage/Work/Agent+Clouds" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className='group relative flex flex-col gap-1 w-full p-2 bg-stone-50 rounded-lg hover:rounded-tr-2xl border border-stone-200 overflow-hidden transition-all duration-300 cursor-pointer'
+              >
                 <div className='absolute size-4 -top-4 -right-4 group-hover:-top-[1px] group-hover:-right-[1px] rounded-bl-lg rounded-tr-[26px] bg-stone-100 group-hover:bg-stone-50 border border-stone-200 shadow-sm transition-all duration-300'></div>
                 
                   <div className="text-sm font-semibold text-slate-800 truncate pb-0.5 border-b border-stone-100">Agent Cloud</div>
                 <div className="text-xs font-light text-slate-600 pb-0.5 border-b border-stone-100">@Philippe Page</div>
-              </div>
+              </a>
 
-              <div className='group relative flex flex-col gap-1 w-full p-2 bg-stone-50 rounded-lg hover:rounded-tr-2xl border border-stone-200 overflow-hidden transition-all duration-300 cursor-pointer'>
+              <a 
+                href="https://rauno.me/craft/interaction-design" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className='group relative flex flex-col gap-1 w-full p-2 bg-stone-50 rounded-lg hover:rounded-tr-2xl border border-stone-200 overflow-hidden transition-all duration-300 cursor-pointer'
+              >
                 <div className='absolute size-4 -top-4 -right-4 group-hover:-top-[1px] group-hover:-right-[1px] rounded-bl-lg rounded-tr-[26px] bg-stone-100 group-hover:bg-stone-50 border border-stone-200 shadow-sm transition-all duration-300'></div>
                 
                   <div className="text-sm font-semibold text-slate-800 truncate pb-0.5 border-b border-stone-100">Invisible Details of Interaction Design</div>
                 <div className="text-xs font-light text-slate-600 pb-0.5 border-b border-stone-100">@Rauno Freiberg</div>
-              </div>
+              </a>
 
-              <div className='group relative flex flex-col gap-1 w-full p-2 bg-stone-50 rounded-lg hover:rounded-tr-2xl border border-stone-200 overflow-hidden transition-all duration-300 cursor-pointer'>
+              <a 
+                href="https://www.perplexity.ai/search/shoedog-phil-knight-zA.qaPNaSlGnPv8q1W3UvQ#0" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className='group relative flex flex-col gap-1 w-full p-2 bg-stone-50 rounded-lg hover:rounded-tr-2xl border border-stone-200 overflow-hidden transition-all duration-300 cursor-pointer'
+              >
                 <div className='absolute size-4 -top-4 -right-4 group-hover:-top-[1px] group-hover:-right-[1px] rounded-bl-lg rounded-tr-[26px] bg-stone-100 group-hover:bg-stone-50 border border-stone-200 shadow-sm transition-all duration-300'></div>
                 
                   <div className="text-sm font-semibold text-slate-800 truncate pb-0.5 border-b border-stone-100">Shoe Dog</div>
                 <div className="text-xs font-light text-slate-600 pb-0.5 border-b border-stone-100">@Phil Knight</div>
-              </div>
+              </a>
               
             </div>
 
@@ -205,9 +236,11 @@ export default function Home() {
                     <div className="absolute inset-0.5 h-1/2 bg-gradient-to-b from-emerald-50/50 via-white/20 to-white/30 rounded"></div>
                     <div className="text-sm font-semibold text-emerald-900">Moved to Bay Area</div>
                     <div className="text-sm leading-6 font-medium text-emerald-800">Looking for new opportunities in product design!</div>
+                    
                     <div className='absolute size-[9px] bg-radial-[at_50%_75%] from-emerald-300 via-emerald-500 to-emerald-700 rounded-full -left-[22px] top-1/2 -translate-y-1/2 shadow-[0px_2px_2px_-1px_rgba(0,96,69,0.25),0px_4px_8px_1px_rgba(0,96,69,0.12)_inset,0px_-2px_2px_0px_rgba(0,96,69,0.12)_inset]'>
-                      <div className='absolute inset-[1px] h-[4px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/30 rounded-t-[14px] rounded-b-[4px]'></div>
+                      <div className='absolute size-[7px] left-1/2 -translate-x-1/2 top-[1px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/0 to-70% rounded-full'></div>
                     </div>
+                    
                   </div>
 
 
@@ -217,10 +250,11 @@ export default function Home() {
                       {/* <div className="text-sm font-light text-slate-600">Dec 2024</div> */}
                     </div>
                     <div className='absolute size-[9px] bg-radial-[at_50%_75%] from-emerald-300 via-emerald-500 to-emerald-700 rounded-full -left-[21px] top-2 shadow-[0px_2px_2px_-1px_rgba(0,96,69,0.25),0px_4px_8px_1px_rgba(0,96,69,0.12)_inset,0px_-2px_2px_0px_rgba(0,96,69,0.12)_inset]'>
-                      <div className='absolute inset-[1px] h-[4px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/30 rounded-t-[14px] rounded-b-[4px]'></div>
+                      <div className='absolute size-[7px] left-1/2 -translate-x-1/2 top-[1px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/0 to-70% rounded-full'></div>
                     </div>
 
                     <div className="text-sm font-light text-slate-600">MS - Human Computer Interaction</div>
+                    
                   </div>
 
                   <div className="relative w-full flex flex-col px-2">
@@ -229,7 +263,7 @@ export default function Home() {
                       {/* <div className="text-sm font-light text-slate-600">Jan - Apr 2024</div> */}
                     </div>
                     <div className='absolute size-[9px] bg-radial-[at_50%_75%] from-emerald-300 via-emerald-500 to-emerald-700 rounded-full -left-[21px] top-2 shadow-[0px_2px_2px_-1px_rgba(0,96,69,0.25),0px_4px_8px_1px_rgba(0,96,69,0.12)_inset,0px_-2px_2px_0px_rgba(0,96,69,0.12)_inset]'>
-                      <div className='absolute inset-[1px] h-[4px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/30 rounded-t-[14px] rounded-b-[4px]'></div>
+                      <div className='absolute size-[7px] left-1/2 -translate-x-1/2 top-[1px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/0 to-70% rounded-full'></div>
                     </div>
                     <div className="text-sm font-light text-slate-600">Product Design Intern</div>
                   </div>
@@ -240,7 +274,7 @@ export default function Home() {
                       {/* <div className="text-sm font-light text-slate-600">Jan - Apr 2024</div> */}
                     </div>
                     <div className='absolute size-[9px] bg-radial-[at_50%_75%] from-emerald-300 via-emerald-500 to-emerald-700 rounded-full -left-[21px] top-2 shadow-[0px_2px_2px_-1px_rgba(0,96,69,0.25),0px_4px_8px_1px_rgba(0,96,69,0.12)_inset,0px_-2px_2px_0px_rgba(0,96,69,0.12)_inset]'>
-                      <div className='absolute inset-[1px] h-[4px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/30 rounded-t-[14px] rounded-b-[4px]'></div>
+                      <div className='absolute size-[7px] left-1/2 -translate-x-1/2 top-[1px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/0 to-70% rounded-full'></div>
                     </div>
 
                     <div className="text-sm font-light text-slate-600">Started my Masters</div>
@@ -252,7 +286,7 @@ export default function Home() {
                       {/* <div className="text-sm font-light text-slate-600">Jan - Apr 2024</div> */}
                     </div>
                     <div className='absolute size-[9px] bg-radial-[at_50%_75%] from-emerald-300 via-emerald-500 to-emerald-700 rounded-full -left-[21px] top-2 shadow-[0px_2px_2px_-1px_rgba(0,96,69,0.25),0px_4px_8px_1px_rgba(0,96,69,0.12)_inset,0px_-2px_2px_0px_rgba(0,96,69,0.12)_inset]'>
-                      <div className='absolute inset-[1px] h-[4px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/30 rounded-t-[14px] rounded-b-[4px]'></div>
+                      <div className='absolute size-[7px] left-1/2 -translate-x-1/2 top-[1px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/0 to-70% rounded-full'></div>
                     </div>
 
                     <div className="text-sm font-light text-slate-600">Electrical Engineering | Minor in Machine Learning</div>
@@ -264,7 +298,7 @@ export default function Home() {
                       {/* <div className="text-sm font-light text-slate-600">Jan - Apr 2024</div> */}
                     </div>
                     <div className='absolute size-[9px] bg-radial-[at_50%_75%] from-emerald-300 via-emerald-500 to-emerald-700 rounded-full -left-[21px] top-2 shadow-[0px_2px_2px_-1px_rgba(0,96,69,0.25),0px_4px_8px_1px_rgba(0,96,69,0.12)_inset,0px_-2px_2px_0px_rgba(0,96,69,0.12)_inset]'>
-                      <div className='absolute inset-[1px] h-[4px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/30 rounded-t-[14px] rounded-b-[4px]'></div>
+                      <div className='absolute size-[7px] left-1/2 -translate-x-1/2 top-[1px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/0 to-70% rounded-full'></div>
                     </div>
 
                     <div className="text-sm font-light text-slate-600">building auto-encoders to turn 2D images into 3D models and exploring generative AI.</div>
@@ -292,7 +326,7 @@ export default function Home() {
             
         </div>
         
-        <div className="fixed flex items-center justify-center left-0 right-0 bottom-10 z-10">
+        <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-10 z-10">
           <Navbar />
         </div>
       </main>

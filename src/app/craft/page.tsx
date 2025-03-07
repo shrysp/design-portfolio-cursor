@@ -9,7 +9,7 @@ export default function Craft() {
     <div className="min-h-screen flex justify-center">
       <main className="w-full max-w-[800px] flex flex-col gap-12 py-6 ">
 
-        <div className="flex flex-col gap-12 items-start border border-slate-200 p-8 h-[94vh] overflow-y-auto  rounded-4xl scrollbar-hide">
+        <div className="flex flex-col gap-6 items-start border border-slate-200 p-8 pb-24 h-[94vh] overflow-y-auto  rounded-4xl scrollbar-hide">
         {/* Page header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -35,15 +35,29 @@ export default function Craft() {
         </motion.div>
         
         {/* Craft sections */}
-        <div className="grid grid-cols-2 gap-4 h-auto w-full">
-          <div className="col-span-1 flex flex-col gap-4 w-full h-fit">
-            <div className="aspect-square w-full h-full rounded-2xl border border-slate-200"></div>
-            <div className="aspect-16/9 w-full h-full rounded-2xl border border-slate-200"></div>
+        <div className="grid grid-cols-2 gap-6 h-auto w-full">
+          <div className="col-span-1 flex flex-col gap-6.5 w-full h-fit">
+            <div className="relative aspect-[3/4] w-full h-full rounded-3xl border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+                <video src="/videos/ItinerAIbuild-1.mp4" autoPlay muted loop className='absolute inset-0 w-full h-full object-cover rounded-3xl -z-10'></video>
+            </div>
+            <div className="relative aspect-4/3 w-full h-full rounded-3xl border border-slate-200 bg-[url('/images/Craft/BuiLD09.png')] bg-cover bg-center shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"></div>
+            
+            <div className="aspect-4/3 w-full h-full rounded-3xl border border-slate-200 bg-[url('/images/Craft/BuiLD11.png')] bg-cover bg-center shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"></div>
+            <div className="aspect-square w-full h-full rounded-3xl border border-slate-200 bg-[url('/images/Craft/BuiLD08.png')] bg-cover bg-center shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"></div>
           </div>
-          <div className="col-span-1 flex flex-col gap-4 w-full h-fit">
-            <div className="aspect-16/9 w-full h-full rounded-2xl border border-slate-200"></div>
-            <div className="aspect-4/3 w-full h-full rounded-2xl border border-slate-200"></div>
-            <div className="aspect-square w-full h-full rounded-2xl border border-slate-200"></div>
+          <div className="col-span-1 flex flex-col gap-6.5 w-full h-fit">
+            <div className="relative aspect-16/9 w-full h-full rounded-3xl border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+              <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop className='absolute inset-0 w-full h-full object-cover rounded-3xl -z-10'></video>
+            </div>
+            <div className="aspect-4/3 w-full h-full rounded-3xl border border-slate-200 bg-[url('/images/Craft/BuiLD04.png')] bg-cover bg-center shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"></div>
+            <div className="aspect-4/3 w-full h-full rounded-3xl border border-slate-200 bg-[url('/images/Craft/BuiLD10.png')] bg-cover bg-center shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"></div>
+            <div className="relative aspect-16/9 w-full h-full rounded-3xl border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+                <video src="/images/Craft/Modals.mp4" autoPlay muted loop className='absolute inset-0 w-full h-full object-cover rounded-3xl -z-10'></video>
+            </div>
+            <div className="relative aspect-square w-full h-full rounded-3xl border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+                <video src="/images/Craft/Whop-Modal.mp4" autoPlay muted loop className='absolute inset-0 w-full h-full object-cover rounded-3xl -z-10'></video>
+            </div>
+            
           </div>
         </div>
         
