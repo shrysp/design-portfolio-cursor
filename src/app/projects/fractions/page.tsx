@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, GithubLogo, Globe } from '@phosphor-icons/react';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
+import Footer from '@/components/Footer';
 
 // Import the project data
 import { projectsData } from '@/data/projectsData';
@@ -242,6 +243,10 @@ export default function FractionsProject() {
           <div className="fixed flex items-center justify-center left-0 right-0 bottom-10 z-10 pointer-events-none">
             <Navbar />
           </div>
+        </div>
+
+        <div className="mt-6">
+          <Footer />
         </div>
       </main>
     </div>

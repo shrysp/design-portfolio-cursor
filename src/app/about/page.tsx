@@ -2,9 +2,10 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
-import { At, LinkedinLogo, XLogo, ReadCvLogo, Clipboard } from '@phosphor-icons/react';
+import { At, LinkedinLogo, XLogo, ReadCvLogo, Clipboard, User } from '@phosphor-icons/react';
 import React from 'react';
 import VerticalCarousel from '@/components/VerticalCarousel';
+import Footer from '@/components/Footer';
 
 export default function Home() {
   // Define the images for the carousel
@@ -17,10 +18,10 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen flex justify-center">
-      <main className="w-full max-w-[800px] py-6">
+    <div className="min-h-screen flex justify-center bg-gradient-to-b from-slate-50 to-white">
+      <main className="w-full md:max-w-[800px] max-w-[361px] flex flex-col gap-12 py-6">
 
-        <div className="flex flex-col gap-6 items-start border border-slate-200 p-8 pb-24 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl ">
+        <div className="flex flex-col gap-6 items-start border border-slate-200 md:p-8 p-4 md:pb-24 pb-24 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl ">
         {/* Hero section */}
           <motion.div 
           className="w-full border-b flex gap-4 items-center border-slate-200 pb-4"
@@ -36,10 +37,10 @@ export default function Home() {
           </h1>
           </motion.div>
 
-          <div className="grid grid-cols-7 grid-flow-rows gap-x-6 gap-y-6.5 w-full">
+          <div className="grid md:grid-cols-7 grid-cols-1 auto-rows-auto md:gap-x-6 md:gap-y-6.5 gap-y-6 w-full">
 
             {/* Making it feel right */}
-            <div className="flex flex-col col-span-4 bg-slate-50 rounded-3xl p-6 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+            <div className="flex flex-col md:col-span-4 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
               <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200 font-mono"> 
                 Making it feel right
               </div>
@@ -51,7 +52,7 @@ export default function Home() {
             </div>
 
             {/* things i like to do */}
-            <div className="relative overflow-hidden flex flex-col col-span-3 bg-slate-50 rounded-3xl px-6 items-center justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+            <div className="relative overflow-hidden flex flex-col md:col-span-3 col-span-1 md:h-full h-[400px] bg-slate-50 rounded-3xl md:px-6 px-4 items-center justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
               {/* <div className="relative w-full font-semibold text-slate-800 mt-6 pb-2 border-b border-slate-200 z-30"> Things I like to do</div> */}
               {/* <div className="absolute inset-0 bg-radial-[at_50%] from-transparent via-slate-50/10 to-slate-50/50 z-20"></div> */}
               <div className="absolute h-full w-full z-10 overflow-hidden border-4 border-slate-200 rounded-3xl">
@@ -61,7 +62,7 @@ export default function Home() {
 
             
             {/* Reach out */}
-            <div className="flex flex-col col-span-3 row-start-3 bg-slate-50 rounded-3xl px-6 p-4 items-center justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+            <div className="flex flex-col md:col-span-3 md:row-start-3 col-span-1 bg-slate-50 rounded-3xl md:px-6 px-4 p-4 items-center justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
               <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> Reach out</div>
               <div className="w-full flex flex-col items-center justify-between gap-5">
                 
@@ -179,7 +180,7 @@ export default function Home() {
             </div>
 
             {/* Reads */}
-            <div className="flex flex-col col-span-3 row-start-2 bg-slate-50 rounded-3xl p-6 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+            <div className="flex flex-col md:col-span-3 md:row-start-2 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
               <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
                 Reads
               </div>
@@ -223,7 +224,7 @@ export default function Home() {
             </div>
 
             {/* Experience */}
-            <div className="flex flex-col col-span-4 row-span-2 bg-slate-50 rounded-3xl p-6 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+            <div className="flex flex-col md:col-span-4 md:row-span-2 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
               <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
                 Journey
               </div>
@@ -320,15 +321,17 @@ export default function Home() {
             
 
           </div>
+          <div className="w-full">
+            <Footer />
+          </div>
 
-          
-
-            
         </div>
         
-        <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-10 z-10">
+        <div className="fixed flex items-center justify-center left-0 right-0 bottom-10 z-10">
           <Navbar />
         </div>
+
+        
       </main>
     </div>
   );

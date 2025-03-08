@@ -3,13 +3,14 @@
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { Palette } from '@phosphor-icons/react';
+import Footer from '@/components/Footer';
 
 export default function Craft() {
   return (
     <div className="min-h-screen flex justify-center">
-      <main className="w-full max-w-[800px] flex flex-col gap-12 py-6 ">
+      <main className="w-full md:max-w-[800px] max-w-[361px] flex flex-col gap-12 py-6 ">
 
-        <div className="flex flex-col gap-6 items-start border border-slate-200 p-8 pb-24 h-[94vh] overflow-y-auto  rounded-4xl scrollbar-hide">
+        <div className="flex flex-col gap-6 items-start border border-slate-200 md:p-8 p-4 md:pb-24 pb-24 h-[94vh] overflow-y-auto rounded-4xl scrollbar-hide">
         {/* Page header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -35,8 +36,8 @@ export default function Craft() {
         </motion.div>
         
         {/* Craft sections */}
-        <div className="grid grid-cols-2 gap-6 h-auto w-full">
-          <div className="col-span-1 flex flex-col gap-6.5 w-full h-fit">
+        <div className="grid md:grid-cols-2 grid-cols-1 gap-6 h-auto w-full">
+          <div className="md:col-span-1 col-span-1 flex flex-col gap-6.5 w-full h-fit">
             <div className="relative aspect-[3/4] w-full h-full rounded-3xl border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
                 <video src="/videos/ItinerAIbuild-1.mp4" autoPlay muted loop className='absolute inset-0 w-full h-full object-cover rounded-3xl -z-10'></video>
             </div>
@@ -45,7 +46,7 @@ export default function Craft() {
             <div className="aspect-4/3 w-full h-full rounded-3xl border border-slate-200 bg-[url('/images/Craft/BuiLD11.png')] bg-cover bg-center shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"></div>
             <div className="aspect-square w-full h-full rounded-3xl border border-slate-200 bg-[url('/images/Craft/BuiLD08.png')] bg-cover bg-center shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"></div>
           </div>
-          <div className="col-span-1 flex flex-col gap-6.5 w-full h-fit">
+          <div className="md:col-span-1 col-span-1 flex flex-col gap-6.5 w-full h-fit">
             <div className="relative aspect-16/9 w-full h-full rounded-3xl border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
               <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop className='absolute inset-0 w-full h-full object-cover rounded-3xl -z-10'></video>
             </div>
@@ -60,8 +61,12 @@ export default function Craft() {
             
           </div>
         </div>
+
+          <div className="w-full">
+            <Footer />
+          </div>
         
-        <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-10 z-10">
+        <div className="fixed flex items-center justify-center left-0 right-0 bottom-10 z-10">
           <Navbar />
         </div>
 

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { ProjectCard } from '@/components/ProjectCard';
 import { Tabs } from '@phosphor-icons/react';
+import Footer from '@/components/Footer';
 
 // Import project data from separate file
 import { projectsData } from '@/data/projectsData';
@@ -11,8 +12,8 @@ import { projectsData } from '@/data/projectsData';
 export default function Projects() {
   return (
     <div className="min-h-screen flex justify-center bg-gradient-to-b from-slate-50 to-white">
-      <main className="w-full max-w-[800px] flex flex-col gap-12 py-6">
-        <div className="flex flex-col gap-6 items-start border border-slate-200 p-8 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl">
+      <main className="w-full md:max-w-[800px] max-w-[361px] flex flex-col gap-12 py-6">
+        <div className="flex flex-col gap-6 items-start border border-slate-200 md:p-8 p-4 h-[94vh] md:pb-24 pb-24 overflow-y-auto scrollbar-hide rounded-4xl">
         {/* Page header */}
          <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -36,7 +37,7 @@ export default function Projects() {
          </motion.div>
         
         {/* Project grid */}
-            <div className="grid grid-cols-1 gap-6.5 mb-24 w-full">
+            <div className="grid grid-cols-1 gap-6.5 w-full">
           {projectsData.map((project, index) => (
             <motion.div 
               key={index}
@@ -46,6 +47,7 @@ export default function Projects() {
             >
               <ProjectCard 
                 title={project.title}
+                description={project.description || []}
                 images={project.images}
                 technologies={project.technologies}
                 github={project.github}
@@ -54,13 +56,22 @@ export default function Projects() {
               />
             </motion.div>
           ))}
+
+
             </div>
+
+            <div className="w-full">
+            <Footer />
+          </div>
         
             <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-10 z-10">
           <Navbar />
             </div>
 
         </div>
+        
+          
+        
       </main>
     </div>
   );

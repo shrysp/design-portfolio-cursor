@@ -192,7 +192,7 @@ export function ProjectCard({
 
   // Progress bar component
   const ProgressBar = ({ value }: { value: number }) => (
-    <div className="relative h-3 w-12 rounded-full overflow-hidden shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
+    <div className="relative md:h-3 h-2 md:w-12 w-8 rounded-full overflow-hidden shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
       {/* Background (gray part) */}
       <div className="absolute inset-0 bg-gradient-to-r from-slate-200 to-slate-300 border border-[#62748E]/30 rounded-full">
         <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/80 to-transparent rounded-t-full" />
@@ -218,17 +218,17 @@ export function ProjectCard({
       <div 
         className="w-full max-w-full relative bg-gradient-to-br from-white to-neutral-50 rounded-3xl shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 overflow-hidden">
         {/* Content container */}
-        <div className="p-6 flex flex-col justify-top items-start gap-4">
+        <div className="md:p-6 p-4 flex flex-col justify-top items-start gap-4">
           {/* Title section */}
           <div className=" flex justify-between items-center gap-2 self-stretch">
-            <div className="text-black text-2xl font-semibold ml-2">
+            <div className="text-slate-800 md:text-2xl text-xl font-semibold ml-2">
               {title}
             </div>
             
           </div>
 
           {/* Main content area */}
-          <div className="relative w-full h-full mb-2 bg-gradient-to-b from-white to-slate-50 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_4px_0px_rgba(28,57,142,0.25)] rounded-2xl border border-slate-200 flex flex-col justify-top items-start overflow-hidden" style={{ minHeight: "500px" }}>
+          <div className="relative w-full h-full md:min-h-[500px] min-h-[300px] mb-2 bg-gradient-to-b from-white to-slate-50 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_4px_0px_rgba(28,57,142,0.25)] rounded-2xl border border-slate-200 flex flex-col justify-top items-start overflow-hidden" >
             {/* Image/Video carousel */}
             {images.length > 0 && (
               <div className="absolute inset-0 w-full h-full">
@@ -271,7 +271,7 @@ export function ProjectCard({
           {/* Bottom controls */}
           <div className="self-stretch flex justify-between items-center">
             {/* Pagination and progress indicator */}
-            <div className="flex gap-4 px-3 items-center">
+            <div className="flex md:gap-4 gap-2 px-3 items-center">
                 {(images.length > 0 ? images : description).map((_, index) => {
                   // Determine what type of indicator to show
                   if (index < selectedIndex) {
@@ -280,9 +280,9 @@ export function ProjectCard({
                       <button
                         key={index}
                         onClick={() => handleSlideChange(index)}
-                        className="relative size-3 flex items-center justify-center cursor-pointer"
+                        className="relative md:size-3 size-2 flex items-center justify-center cursor-pointer"
                       >
-                        <div className="size-3 rounded-full bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] border border-[#2B7FFF] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
+                        <div className="md:size-3 size-2 rounded-full bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] border border-[#2B7FFF] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
                           <div className="absolute inset-[1px] h-1/2 bg-gradient-to-b from-white/80 to-transparent rounded-t-full" />
                         </div>
                       </button>
@@ -293,7 +293,7 @@ export function ProjectCard({
                       <button
                         key={index}
                         onClick={() => handleSlideChange(index)}
-                        className="relative h-3 flex items-center justify-center"
+                        className="relative md:h-3 h-2 flex items-center justify-center"
                       >
                         <ProgressBar value={progress} />
                       </button>
@@ -304,9 +304,9 @@ export function ProjectCard({
                       <button
                         key={index}
                         onClick={() => handleSlideChange(index)}
-                        className="relative size-3 flex items-center justify-center cursor-pointer"
+                        className="relative md:size-3 size-2 flex items-center justify-center cursor-pointer"
                       >
-                        <div className="size-3 rounded-full bg-gradient-to-r from-slate-200 to-slate-300 border border-[#62748E]/30 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
+                        <div className="md:size-3 size-2 rounded-full bg-gradient-to-r from-slate-200 to-slate-300 border border-[#62748E]/30 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
                           <div className="absolute inset-[1px] h-1/2 bg-gradient-to-b from-white/80 to-transparent rounded-t-full" />
                         </div>
                       </button>
@@ -317,13 +317,13 @@ export function ProjectCard({
 
             {/* Read More button */}
             <Button 
-              className="group text-white font-semibold w-full md:w-[240px] h-[36px] bg-gradient-to-b from-blue-700 via-blue-500 to-blue-300 border border-blue-500 rounded-full shadow-[0px_2px_2px_-1px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.0),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:shadow-[0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:border-blue-700 active:shadow-[0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.0),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] transition-all duration-300 relative overflow-hidden active:bg-gradient-to-b active:from-blue-800 active:via-blue-600 active:to-blue-400 cursor-pointer"
+              className="group text-white font-semibold md:w-[240px] w-fit h-[36px] md:px-6 px-6 bg-gradient-to-b from-blue-700 via-blue-500 to-blue-300 border border-blue-500 rounded-full shadow-[0px_2px_2px_-1px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.0),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:shadow-[0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:border-blue-700 active:shadow-[0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.0),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] transition-all duration-300 relative overflow-hidden active:bg-gradient-to-b active:from-blue-800 active:via-blue-600 active:to-blue-400 cursor-pointer"
               onClick={navigateToProjectDetail}
             >
                 Read More
               
               <div className="absolute inset-2 top-0.5 h-1/2 rounded-t-[12px] rounded-b-[4px] bg-gradient-to-b from-white/70 group-active:from-white/30" />
-            </Button>
+            </Button> 
           </div>
         </div>
       </div>

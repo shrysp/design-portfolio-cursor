@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, GithubLogo, Globe } from '@phosphor-icons/react';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
+import Footer from '@/components/Footer';
 
 // Import the project data
 import { projectsData } from '@/data/projectsData';
@@ -215,6 +216,10 @@ export default function ShoeDogProject() {
           <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-10 z-10">
             <Navbar />
           </div>
+        </div>
+
+        <div className="mt-6">
+          <Footer />
         </div>
       </main>
     </div>

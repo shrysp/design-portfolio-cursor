@@ -4,15 +4,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { Envelope, LinkedinLogo, XLogo, ArrowSquareOut, Clipboard, At } from '@phosphor-icons/react';
 import React from 'react';
+import Footer from '@/components/Footer';
 
 export default function Home() {
 
 
   return (
     <div className="min-h-screen flex justify-center">
-      <main className="relative w-full max-w-[800px] py-6">
+      <main className="relative w-full md:max-w-[800px] max-w-[361px] py-6">
 
-        <div className="relative flex flex-col gap-6 items-start border border-slate-200 p-8 pb-24 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl">
+        <div className="relative flex flex-col gap-6 items-start border border-slate-200 md:p-8 p-4 md:pb-24 pb-24 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl">
         {/* Hero section */}
           <motion.div 
           className="w-full border-b flex gap-4 items-center border-slate-200 pb-4"
@@ -35,7 +36,7 @@ export default function Home() {
           
           </motion.div>
 
-          <div className="grid grid-cols-7 auto-rows-auto gap-x-6 gap-y-6.5 w-full">
+          <div className="grid md:grid-cols-7 grid-cols-1 auto-rows-auto md:gap-x-6 md:gap-y-6.5 gap-y-6 w-full">
             
             {/* quick Projects links */}
             {/* <div className="flex flex-col col-span-5 h-32 bg-slate-50 rounded-3xl px-6 p-4 items-center justify-center gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
@@ -69,7 +70,7 @@ export default function Home() {
               </div>
             </div> */}
 
-            <div className="flex flex-col col-span-3 bg-slate-50 rounded-3xl p-6 items-center justify-center gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+            <div className="flex flex-col md:col-span-3 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-center justify-center gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
               <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> See my work here</div>
               <div className='flex flex-col w-full gap-3'>
                   
@@ -130,7 +131,7 @@ export default function Home() {
               
             </div> */}
 
-            <div className="flex flex-col col-span-4 row-span-2 bg-slate-50 rounded-3xl p-6 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+            <div className="flex flex-col md:col-span-4 md:row-span-2 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
               <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
                 Journey
               </div>
@@ -265,7 +266,7 @@ export default function Home() {
               const formattedTime = currentTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
               
               return (
-                <div style={{backgroundImage: `url(/images/projects/${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="isolate relative flex flex-col col-span-3 h-[276px] bg-slate-50 rounded-3xl p-6 items-center justify-start gap-6 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset] overflow-hidden">
+                <div style={{backgroundImage: `url(/images/projects/${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="isolate relative flex flex-col md:col-span-3 col-span-1 h-[276px] bg-slate-50 rounded-3xl md:p-6 p-4 items-center justify-start gap-6 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset] overflow-hidden">
                   
                   <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center bg-gradient-to-b from-white/80  to-white/10 rounded-t-[22px] rounded-b-[12px] z-20 rounded-3xl`}></div>
                   
@@ -292,7 +293,7 @@ export default function Home() {
 
 
             {/* infinite scroll */}
-            <div className="isolate flex flex-col col-span-7 h-[276px] bg-slate-50 rounded-3xl py-6 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+            <div className="isolate flex flex-col md:col-span-7 col-span-1 h-[276px] bg-slate-50 rounded-3xl md:py-6 py-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
               {/* <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
                 Making it feel right
               </div> */}
@@ -300,7 +301,7 @@ export default function Home() {
               <div className="relative w-full h-full overflow-hidden">
 
                 
-                <div className="w-full h-full flex gap-6 overflow-x-auto scrollbar-hide snap-x scroll-pl-12 px-8 py-2">
+                <div className="w-full h-full flex gap-6 overflow-x-auto scrollbar-hide snap-x scroll-pl-8 px-8 py-2">
                     
                     <div  className="relative h-full aspect-16/9 bg-white border-4 border-slate-200 rounded-2xl snap-start  shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_-2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_8px_2px_rgba(0,0,0,0.07)_inset]">
                         <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center bg-gradient-to-b from-white/80  to-white/10 rounded-t-[12px] rounded-b-[12px] z-20`}></div>
@@ -334,93 +335,13 @@ export default function Home() {
               
             </div>
 
-             {/* Reach out */}
-            <div className="isolate relative flex flex-col-reverse col-span-7 h-fit border border-slate-200 rounded-2xl p-6 items-center justify-center gap-2.5  mt-6">
-              
-              <div className='text font-medium text-slate-500 flex items-center'>Made with &nbsp; <span className='text-xs'> ❤️ </span> &nbsp; and &nbsp; <img src="/images/About/Cursor-Icon.png" alt="Cursor" className="h-5 inline-block" /> </div>
-
-              <div className="flex items-center justify-center gap-3 pb-2.5 border-b border-slate-200">
-                
-                <a 
-                  href="https://x.com/ShreyasPatil_" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-slate-400 via-slate-600 to-slate-800 hover:from-slate-500 hover:via-slate-700 hover:to-slate-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-700 cursor-pointer transition-all duration-300'
-                >                  
-                  <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-                  <XLogo size={18} weight="fill" />
-                </a>
-
-                <button className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-red-400 via-red-600 to-red-800 hover:from-red-500 hover:via-red-700 hover:to-red-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-red-700 cursor-pointer transition-all duration-300'>                  
-                  <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10 pointer-events-none`}></div>
-                    {(() => {
-                      const [copied, setCopied] = React.useState(false);
-                      
-                      React.useEffect(() => {
-                        if (copied) {
-                          const timer = setTimeout(() => {
-                            setCopied(false);
-                          }, 2000);
-                          return () => clearTimeout(timer);
-                        }
-                      }, [copied]);
-
-                      return (
-                        <>
-                          <div 
-                            onClick={() => {
-                              navigator.clipboard.writeText('shreyaspatil.design@gmail.com');
-                              setCopied(true);
-                            }}
-                            className="w-full h-full flex items-center justify-center"
-                          >
-                            <AnimatePresence mode="wait" initial={false}>
-                              {copied ? (
-                                <motion.span
-                                  key="copied"
-                                  initial={{ opacity: 0, scale: 0.5 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  exit={{ opacity: 0, scale: 0.5 }}
-                                  transition={{ duration: 0.1 }}
-                                >
-                                  <Clipboard size={16} weight="fill" />
-                                </motion.span>
-                              ) : (
-                                <motion.span
-                                  key="at"
-                                  initial={{ opacity: 0, scale: 0.5 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  exit={{ opacity: 0, scale: 0.5 }}
-                                  transition={{ duration: 0.3 }}
-                                >
-                                  <At size={18} weight="fill" />
-                                </motion.span>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        </>
-                      );
-                    })()}
-                </button>
-
-                <a 
-                  href="https://www.linkedin.com/in/shreyastpatil/" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 hover:from-blue-400 hover:via-blue-600 hover:to-blue-800 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-blue-700 cursor-pointer transition-all duration-300'
-                >                  
-                  <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-                  <LinkedinLogo size={18} weight="fill" />
-                </a>
-                  
-
-                  
-                
-              </div>
-              
-            </div>
+            
             
 
+          </div>
+
+          <div className="w-full">
+            <Footer />
           </div>
 
 
@@ -428,9 +349,14 @@ export default function Home() {
         </div>
         
         
-        <div className="fixed flex items-center justify-center left-0 right-0 bottom-10 z-10">
+        <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-10 z-10">
           <Navbar />
         </div>
+        
+        
+        
+        
+        
       </main>
     </div>
   );
