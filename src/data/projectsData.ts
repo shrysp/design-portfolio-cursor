@@ -1,7 +1,7 @@
 // Project data with different information structures for each project
 export const projectsData = [
   {
-    title: "ItinerAII",
+    title: "ItinerAI",
     description: [
       "",
       "Implemented consistent UI components across web and mobile platforms",
@@ -46,7 +46,7 @@ export const projectsData = [
     description: ["..."],
     
     images: [
-      "/images/projects/DashWorks-Landing-Page.png",
+      "/images/projects/Dashworks-Landing-Page.png",
       "/images/projects/DashWorks-Onboarding.png",
       "/images/projects/DashWorks-Design-System.png"
     ],
