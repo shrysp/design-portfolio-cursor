@@ -88,7 +88,9 @@ export default function ProjectDetail() {
                 autoPlay 
                 loop 
                 muted 
-                controls
+                playsInline
+                disablePictureInPicture
+                controlsList="nodownload nofullscreen noremoteplayback"
               />
             ) : (
               <img 
@@ -116,6 +118,9 @@ export default function ProjectDetail() {
                     src={image} 
                     className="w-full h-full object-cover" 
                     muted 
+                    playsInline
+                    disablePictureInPicture
+                    controlsList="nodownload nofullscreen noremoteplayback"
                   />
                 ) : (
                   <img 

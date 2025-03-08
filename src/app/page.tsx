@@ -243,23 +243,23 @@ export default function Home() {
                     
                     <div  className="relative h-full aspect-16/9 bg-white border-4 border-slate-200 rounded-2xl snap-start  shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_-2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_8px_2px_rgba(0,0,0,0.07)_inset]">
                         <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center bg-gradient-to-b from-white/80  to-white/10 rounded-t-[12px] rounded-b-[12px] z-20`}></div>
-                        <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
+                        <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
                     </div>
                     <div style={{backgroundImage: `url(/images/Craft/Glass-Dock.mp4)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative h-full aspect-16/9 bg-white border-4 border-slate-200 rounded-2xl snap-start shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_-2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_8px_2px_rgba(0,0,0,0.07)_inset]">
                         <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center bg-gradient-to-b from-white/80  to-white/10 rounded-t-[12px] rounded-b-[12px] z-20`}></div>
-                        <video src="/images/Craft/Glass-Dock.mp4" autoPlay muted loop className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
+                        <video src="/images/Craft/Glass-Dock.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
                     </div>
                     <div style={{backgroundImage: `url(/images/Craft/Whop-Modal.mp4)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative h-full aspect-square bg-white border-4 border-slate-200 rounded-2xl snap-start shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_-2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_8px_2px_rgba(0,0,0,0.07)_inset]">
                         <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center bg-gradient-to-b from-white/80  to-white/10 rounded-t-[12px] rounded-b-[12px] z-20`}></div>
-                        <video src="/images/Craft/Whop-Modal.mp4" autoPlay muted loop className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
+                        <video src="/images/Craft/Whop-Modal.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
                     </div>
                     <div style={{backgroundImage: `url(/images/Craft/Modals.mp4)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative h-full aspect-16/9 bg-white border-4 border-slate-200 rounded-2xl snap-start  shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_-2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_8px_2px_rgba(0,0,0,0.07)_inset]">
                         <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center bg-gradient-to-b from-white/80  to-white/10 rounded-t-[12px] rounded-b-[12px] z-20`}></div>
-                        <video src="/images/Craft/Modals.mp4" autoPlay muted loop className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
+                        <video src="/images/Craft/Modals.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
                     </div>
                     <div style={{backgroundImage: `url(/images/projects/ItinerAI-1.png)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative h-full aspect-3/2 bg-white border-4 border-slate-200 rounded-2xl snap-start shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_-2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_8px_2px_rgba(0,0,0,0.07)_inset]">
                         <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center bg-gradient-to-b from-white/80  to-white/10 rounded-t-[12px] rounded-b-[12px] z-20`}></div>                    
-                        <video src="/images/Craft/ItinerAI-1.mp4" autoPlay muted loop className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
+                        <video src="/images/Craft/ItinerAI-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
                     </div>
                   
                   

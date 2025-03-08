@@ -245,6 +245,8 @@ export function ProjectCard({
                     autoPlay
                     muted
                     playsInline
+                    disablePictureInPicture
+                    controlsList="nodownload nofullscreen noremoteplayback"
                     onTimeUpdate={handleVideoTimeUpdate}
                     onEnded={() => {
                       // Only change slide if we're still on this video
