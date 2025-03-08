@@ -293,13 +293,13 @@ export function ProjectCard({
                   <>
                     {currentItemIsVideo ? (
                       // Show progress bar for single video
-                      <div className="relative md:h-3 h-2 flex items-center justify-center">
+                      <div className="relative md:h-3 h-2.5 flex items-center justify-center">
                         <ProgressBar value={progress} />
                       </div>
                     ) : (
                       // Show blue dot for single image
-                      <div className="relative md:size-3 size-2 flex items-center justify-center">
-                        <div className="md:size-3 size-2 rounded-full bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] border border-[#2B7FFF] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
+                      <div className="relative md:size-3 size-2.5 flex items-center justify-center">
+                        <div className="md:size-3 size-2.5 rounded-full bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] border border-[#2B7FFF] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
                           <div className="absolute inset-[1px] h-1/2 bg-gradient-to-b from-white/80 to-transparent rounded-t-full" />
                         </div>
                       </div>
@@ -315,9 +315,9 @@ export function ProjectCard({
                         <button
                           key={index}
                           onClick={() => handleSlideChange(index)}
-                          className="relative md:size-3 size-2 flex items-center justify-center cursor-pointer"
+                          className="relative md:size-3 size-2.5 flex items-center justify-center cursor-pointer"
                         >
-                          <div className="md:size-3 size-2 rounded-full bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] border border-[#2B7FFF] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
+                          <div className="md:size-3 size-2.5 rounded-full bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] border border-[#2B7FFF] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
                             <div className="absolute inset-[1px] h-1/2 bg-gradient-to-b from-white/80 to-transparent rounded-t-full" />
                           </div>
                         </button>
@@ -328,7 +328,7 @@ export function ProjectCard({
                         <button
                           key={index}
                           onClick={() => handleSlideChange(index)}
-                          className="relative md:h-3 h-2 flex items-center justify-center"
+                          className="relative md:h-3 h-2.5 flex items-center justify-center"
                         >
                           <ProgressBar value={progress} />
                         </button>
@@ -339,9 +339,9 @@ export function ProjectCard({
                         <button
                           key={index}
                           onClick={() => handleSlideChange(index)}
-                          className="relative md:size-3 size-2 flex items-center justify-center cursor-pointer"
+                          className="relative md:size-3 size-2.5 flex items-center justify-center cursor-pointer"
                         >
-                          <div className="md:size-3 size-2 rounded-full bg-gradient-to-r from-slate-200 to-slate-300 border border-[#62748E]/30 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
+                          <div className="md:size-3 size-2.5 rounded-full bg-gradient-to-r from-slate-200 to-slate-300 border border-[#62748E]/30 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
                             <div className="absolute inset-[1px] h-1/2 bg-gradient-to-b from-white/80 to-transparent rounded-t-full" />
                           </div>
                         </button>

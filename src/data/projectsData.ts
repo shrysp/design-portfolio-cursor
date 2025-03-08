@@ -43,6 +43,7 @@ export const projectsData = [
   },
   {
     title: "DashWorks",
+    description: ["..."],
     
     images: [
       "/images/projects/DashWorks-Landing-Page.png",
