@@ -91,8 +91,28 @@ export default function WeatherWiseProject() {
               transition={{ duration: 0.3, delay: 0.3 }}
               className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
             >
-              <h2 className="text-xl font-semibold text-slate-800 mb-4">Overview</h2>
-              
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-slate-800 mb-4">Overview</h2>
+                <ul className="space-y-2">
+                  {project.description?.map((desc, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mt-2 mr-2"></span>
+                      <p className="text-slate-700">{desc}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-slate-800 mb-4">Technologies</h2>
+                <div className="flex flex-wrap gap-2">
+                  {project.technologies?.map((tech, index) => (
+                    <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </motion.div>
 
             {/* Role and Timeline */}

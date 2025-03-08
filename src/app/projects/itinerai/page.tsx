@@ -103,24 +103,19 @@ export default function ItinerAIProject() {
               transition={{ duration: 0.3, delay: 0.3 }}
               className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
             >
-              <h2 className="text-xl font-semibold text-slate-800 mb-4">Overview</h2>
-              <ul className="space-y-2">
-                {project.description.map((desc, index) => (
-                  <li key={index} className="flex items-start">
-                    <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mt-2 mr-2"></span>
-                    <p className="text-slate-700">{desc}</p>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-slate-800 mb-4">Overview</h2>
+                <ul className="space-y-2">
+                  {project.description?.map((desc, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mt-2 mr-2"></span>
+                      <p className="text-slate-700">{desc}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            {/* Role and Timeline */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.35 }}
-              className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
-            >
+              {/* Role and Timeline */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h3 className="text-lg font-semibold text-slate-800 mb-2">My Role</h3>
@@ -184,38 +179,42 @@ export default function ItinerAIProject() {
             </motion.div>
 
             {/* Team */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.55 }}
-              className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
-            >
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">Team</h3>
-              <ul className="space-y-1">
-                {project.team.map((member, index) => (
-                  <li key={index} className="text-slate-700">{member}</li>
-                ))}
-              </ul>
-            </motion.div>
-
-            {/* Testimonial */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.6 }}
-              className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
-            >
-              <div className="relative">
-                <div className="text-blue-500 text-4xl absolute -top-2 -left-1">"</div>
-                <blockquote className="pl-6 italic text-slate-700">
-                  {project.testimonial.quote}
-                </blockquote>
-                <div className="mt-4 pl-6">
-                  <p className="font-semibold text-slate-800">{project.testimonial.author}</p>
-                  <p className="text-sm text-slate-600">{project.testimonial.position}</p>
+            {project.team && (
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-slate-800 mb-4">Team</h2>
+                <div className="flex flex-wrap gap-2">
+                  {project.team?.map((member, index) => (
+                    <div key={index} className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
+                      <div className="w-6 h-6 rounded-full bg-blue-200 flex items-center justify-center text-blue-800 text-xs font-bold">
+                        {member.split(' ').map((n) => n[0]).join('')}
+                      </div>
+                      <span className="text-blue-800">{member}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </motion.div>
+            )}
+
+            {/* Testimonial */}
+            {project.testimonial && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.6 }}
+                className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
+              >
+                <div className="relative">
+                  <div className="text-blue-500 text-4xl absolute -top-2 -left-1">&quot;</div>
+                  <blockquote className="pl-6 italic text-slate-700">
+                    Great work on the ItinerAI project! The AI-powered travel planning tool is impressive.
+                  </blockquote>
+                  <div className="mt-4 pl-6">
+                    <p className="font-semibold text-slate-800">John Doe</p>
+                    <p className="text-sm text-slate-600">Project Manager</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             
 

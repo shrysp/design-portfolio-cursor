@@ -8,9 +8,7 @@ export const projectsData = [
       "Improved design-to-development handoff efficiency by 40%"
     ],
     images: [
-      "/videos/Walk-Through-Video.mp4",
-      "/images/projects/ItinerAI-1.png",
-      "/images/projects/ItinerAI-2.png"
+      "/videos/Walk-Through-Video.mp4"
     ],
     // Additional information specific to this project
     role: "Lead UI/UX Designer",
@@ -91,9 +89,9 @@ export const projectsData = [
       "Implemented responsive design for all device sizes"
     ],
     images: [
-      "/images/projects/WeatherWise-Planning.png",
-      "/images/projects/WeatherWise-Onboarding.png",
-      "/images/projects/WeatherWise-Warning.png"
+      "/images/projects/Weather-Wise-Warning.png",
+      "/images/projects/Weather-Wise-Safer-Route.png",
+      "/images/projects/Weather-Wise-Planning.png"
     ],
     technologies: ["Adobe XD", "Sketch", "Principle"],
     github: "https://github.com/username/weatherwise",
@@ -130,10 +128,7 @@ export const projectsData = [
       "Conducted user testing and implemented feedback iterations"
     ],
     images: [
-      "/images/projects/mobile-app-1.jpg",
-      "/images/projects/mobile-app-2.jpg",
-      "/images/projects/mobile-app-3.jpg",
-      "/images/projects/mobile-app-4.jpg"
+      "/images/projects/ShoeDog-1.png"
     ],
     technologies: ["Figma", "Protopie", "After Effects"],
     github: "https://github.com/username/shoedog",
@@ -172,8 +167,7 @@ export const projectsData = [
       "Designed packaging and marketing materials"
     ],
     images: [
-      "/images/projects/brand-1.jpg",
-      "/images/projects/brand-2.jpg"
+      "/images/projects/Fractions-1.png",
     ],
     technologies: ["Illustrator", "Photoshop", "InDesign"],
     github: "https://github.com/username/fractions",

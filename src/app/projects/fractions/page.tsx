@@ -91,15 +91,17 @@ export default function FractionsProject() {
               transition={{ duration: 0.3, delay: 0.3 }}
               className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
             >
-              <h2 className="text-xl font-semibold text-slate-800 mb-4">Overview</h2>
-              <ul className="space-y-2">
-                {project.description.map((desc, index) => (
-                  <li key={index} className="flex items-start">
-                    <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mt-2 mr-2"></span>
-                    <p className="text-slate-700">{desc}</p>
-                  </li>
-                ))}
-              </ul>
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-slate-800 mb-4">Overview</h2>
+                <ul className="space-y-2">
+                  {project.description?.map((desc, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mt-2 mr-2"></span>
+                      <p className="text-slate-700">{desc}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </motion.div>
 
             {/* Role and Timeline */}
@@ -178,7 +180,7 @@ export default function FractionsProject() {
               <div className="space-y-6">
                 {project.testimonial && Array.isArray(project.testimonial) && project.testimonial.map((item: { quote: string; name: string; role: string }, index: number) => (
                   <div key={index} className="bg-gradient-to-br from-blue-50 to-slate-50 p-6 rounded-xl border border-blue-100 shadow-sm">
-                    <p className="text-slate-700 italic mb-4">"{item.quote}"</p>
+                    <p className="text-slate-700 italic mb-4">&quot;{item.quote}&quot;</p>
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-800 font-bold">
                         {item.name.split(' ').map((n: string) => n[0]).join('')}
@@ -202,11 +204,8 @@ export default function FractionsProject() {
             >
               <h2 className="text-xl font-semibold text-slate-800 mb-4">Technologies</h2>
               <div className="flex flex-wrap gap-2">
-                {project.technologies.map((tech, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
-                  >
+                {project.technologies?.map((tech, index) => (
+                  <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
                     {tech}
                   </span>
                 ))}

@@ -48,11 +48,7 @@ export default function Projects() {
               <ProjectCard 
                 title={project.title}
                 description={project.description || []}
-                images={project.images}
-                technologies={project.technologies}
-                github={project.github}
-                live={project.live}
-               
+                images={project.images || []}
               />
             </motion.div>
           ))}

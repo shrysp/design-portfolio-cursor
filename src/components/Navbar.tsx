@@ -1,16 +1,12 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { UserCircle, Palette, Tabs, House } from '@phosphor-icons/react';
-import { List, X } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
   const [clickedItem, setClickedItem] = useState<string | null>(null);
-  const toggleMenu = () => setIsOpen(!isOpen);
   const pathname = usePathname();
 
   // Reset clicked state once navigation is complete

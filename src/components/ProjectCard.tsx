@@ -6,28 +6,16 @@ interface ProjectCardProps {
   title: string;
   description: string[];
   images?: string[]; // Array of image/video URLs
-  technologies?: string[];
-  github?: string;
-  live?: string;
   autoSlideInterval?: number; // Time in ms between auto slides for images
   expanded?: boolean;
-  shouldBeExpanded?: boolean;
-  // Array to control description visibility for each slide (controlled from backend)
-  descriptionVisibility?: boolean[];
 }
 
 export function ProjectCard({ 
   title, 
   description, 
   images = [], 
-  technologies, 
-  github, 
-  live,
   autoSlideInterval = 5000, // Default 5 seconds
   expanded,
-  shouldBeExpanded,
-  // Default to showing all descriptions if not provided
-  descriptionVisibility
 }: ProjectCardProps) {
   console.log(`[${title}] Component initializing`);
   
@@ -47,11 +35,12 @@ export function ProjectCard({
   
   // Helper function to check if the current item is a video
   const isVideo = (url: string) => {
+    if (!url) return false;
     return url.toLowerCase().endsWith('.mp4') || url.toLowerCase().includes('video/');
   };
 
   // Check if current slide is a video
-  const currentItemIsVideo = images.length > 0 && isVideo(images[selectedIndex]);
+  const currentItemIsVideo = images.length > 0 && selectedIndex < images.length && isVideo(images[selectedIndex]);
   
   // Log every render with more detail
   console.log(`[${title}] Render #${++renderCountRef.current}`, {
@@ -92,6 +81,22 @@ export function ProjectCard({
       }
     }
   };
+  
+  // Auto-advance slides
+  useEffect(() => {
+    if (images.length <= 1) return;
+    
+    // Reset progress when slide changes
+    setProgress(0);
+    
+    // Start auto-slide timer
+    const interval = setInterval(() => {
+      setSelectedIndex((prevIndex) => (prevIndex + 1) % description.length);
+    }, autoSlideInterval);
+    
+    // Cleanup on unmount
+    return () => clearInterval(interval);
+  }, [autoSlideInterval, images.length, description.length]);
   
   // Handle auto-sliding and progress
   useEffect(() => {
@@ -156,7 +161,7 @@ export function ProjectCard({
         progressIntervalRef.current = null;
       }
     };
-  }, [isMounted, selectedIndex, autoSlideInterval, images.length, expanded, title, currentItemIsVideo]);
+  }, [isMounted, selectedIndex, autoSlideInterval, images.length, expanded, title, currentItemIsVideo, description.length]);
   
   // Handle slide change (both manual and automatic)
   const handleSlideChange = (index: number) => {
@@ -228,7 +233,7 @@ export function ProjectCard({
           </div>
 
           {/* Main content area */}
-          <div className="relative w-full h-full md:min-h-[500px] min-h-[300px] mb-2 bg-gradient-to-b from-white to-slate-50 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_4px_0px_rgba(28,57,142,0.25)] rounded-2xl border border-slate-200 flex flex-col justify-top items-start overflow-hidden" >
+          <div className="relative w-full h-full md:min-h-[500px] min-h-[280px] mb-2 bg-gradient-to-b from-white to-slate-50 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_4px_0px_rgba(28,57,142,0.25)] rounded-2xl border border-slate-200 flex flex-col justify-top items-start overflow-hidden" >
             {/* Image/Video carousel */}
             {images.length > 0 && (
               <div className="absolute inset-0 w-full h-full">
@@ -245,7 +250,18 @@ export function ProjectCard({
                       // Only change slide if we're still on this video
                       // This prevents race conditions with manual slide changes
                       if (isVideoPlayingRef.current) {
-                        setSelectedIndex(prev => (prev + 1) % (images.length || description.length));
+                        if (images.length === 1) {
+                          // For single video case, restart the video
+                          if (videoRef.current) {
+                            videoRef.current.currentTime = 0;
+                            videoRef.current.play();
+                            // Reset progress
+                            setProgress(0);
+                          }
+                        } else {
+                          // For multiple items, advance to next slide
+                          setSelectedIndex(prev => (prev + 1) % (images.length || description.length));
+                        }
                       }
                     }}
                   />
@@ -272,47 +288,67 @@ export function ProjectCard({
           <div className="self-stretch flex justify-between items-center">
             {/* Pagination and progress indicator */}
             <div className="flex md:gap-4 gap-2 px-3 items-center">
-                {(images.length > 0 ? images : description).map((_, index) => {
-                  // Determine what type of indicator to show
-                  if (index < selectedIndex) {
-                    // Already seen - blue dot
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => handleSlideChange(index)}
-                        className="relative md:size-3 size-2 flex items-center justify-center cursor-pointer"
-                      >
+                {(images.length > 0 ? images : description).length === 1 ? (
+                  // Special case for single item
+                  <>
+                    {currentItemIsVideo ? (
+                      // Show progress bar for single video
+                      <div className="relative md:h-3 h-2 flex items-center justify-center">
+                        <ProgressBar value={progress} />
+                      </div>
+                    ) : (
+                      // Show blue dot for single image
+                      <div className="relative md:size-3 size-2 flex items-center justify-center">
                         <div className="md:size-3 size-2 rounded-full bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] border border-[#2B7FFF] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
                           <div className="absolute inset-[1px] h-1/2 bg-gradient-to-b from-white/80 to-transparent rounded-t-full" />
                         </div>
-                      </button>
-                    );
-                  } else if (index === selectedIndex) {
-                    // Current - pill with progress
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => handleSlideChange(index)}
-                        className="relative md:h-3 h-2 flex items-center justify-center"
-                      >
-                        <ProgressBar value={progress} />
-                      </button>
-                    );
-                  } else {
-                    // Yet to be seen - gray dot
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => handleSlideChange(index)}
-                        className="relative md:size-3 size-2 flex items-center justify-center cursor-pointer"
-                      >
-                        <div className="md:size-3 size-2 rounded-full bg-gradient-to-r from-slate-200 to-slate-300 border border-[#62748E]/30 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
-                          <div className="absolute inset-[1px] h-1/2 bg-gradient-to-b from-white/80 to-transparent rounded-t-full" />
-                        </div>
-                      </button>
-                    );
-                  }
-                })}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  // Original pagination for multiple items
+                  (images.length > 0 ? images : description).map((_, index) => {
+                    // Determine what type of indicator to show
+                    if (index < selectedIndex) {
+                      // Already seen - blue dot
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => handleSlideChange(index)}
+                          className="relative md:size-3 size-2 flex items-center justify-center cursor-pointer"
+                        >
+                          <div className="md:size-3 size-2 rounded-full bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] border border-[#2B7FFF] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
+                            <div className="absolute inset-[1px] h-1/2 bg-gradient-to-b from-white/80 to-transparent rounded-t-full" />
+                          </div>
+                        </button>
+                      );
+                    } else if (index === selectedIndex) {
+                      // Current - pill with progress
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => handleSlideChange(index)}
+                          className="relative md:h-3 h-2 flex items-center justify-center"
+                        >
+                          <ProgressBar value={progress} />
+                        </button>
+                      );
+                    } else {
+                      // Yet to be seen - gray dot
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => handleSlideChange(index)}
+                          className="relative md:size-3 size-2 flex items-center justify-center cursor-pointer"
+                        >
+                          <div className="md:size-3 size-2 rounded-full bg-gradient-to-r from-slate-200 to-slate-300 border border-[#62748E]/30 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
+                            <div className="absolute inset-[1px] h-1/2 bg-gradient-to-b from-white/80 to-transparent rounded-t-full" />
+                          </div>
+                        </button>
+                      );
+                    }
+                  })
+                )}
               </div>
 
             {/* Read More button */}

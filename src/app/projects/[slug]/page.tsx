@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, GithubLogo, Globe } from '@phosphor-icons/react';
 import Navbar from '@/components/Navbar';
-import { Button } from '@/components/ui/button';
 import Footer from '@/components/Footer';
 
 // Import the project data from the separate file
@@ -35,7 +34,7 @@ interface Project {
     position?: string;
   }[];
   // Any other custom fields
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export default function ProjectDetail() {

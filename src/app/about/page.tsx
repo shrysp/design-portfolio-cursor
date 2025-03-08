@@ -1,11 +1,12 @@
 "use client";
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
-import { At, LinkedinLogo, XLogo, ReadCvLogo, Clipboard, User } from '@phosphor-icons/react';
+import { LinkedinLogo, XLogo, ReadCvLogo } from '@phosphor-icons/react';
 import React from 'react';
 import VerticalCarousel from '@/components/VerticalCarousel';
 import Footer from '@/components/Footer';
+import EmailCopyButton from '@/components/EmailCopyButton';
 
 export default function Home() {
   // Define the images for the carousel
@@ -46,7 +47,7 @@ export default function Home() {
               </div>
 
               <p className="text-xs leading-6 text-slate-600 font-mono">
-              For me, design is all about the feeling it evokes. Every feature and interaction is crafted to spark joy, comfort, or excitement. I'm passionate about creating standout experiences by deeply understanding users, making every touchpoint not just user-friendly, but truly engaging. I believe it's the little details, like the smoothness of an animation or the tactile response of a button, that make a product not just functional, but memorable. My philosophy combines emotion with usability, aiming to create products that resonate on a deeper level. Because for me, it's not just about meeting needs—it's about creating something people love.
+              For me, design is all about the feeling it evokes. Every feature and interaction is crafted to spark joy, comfort, or excitement. I&apos;m passionate about creating standout experiences by deeply understanding users, making every touchpoint not just user-friendly, but truly engaging. I believe it&apos;s the little details, like the smoothness of an animation or the tactile response of a button, that make a product not just functional, but memorable. My philosophy combines emotion with usability, aiming to create products that resonate on a deeper level. Because for me, it&apos;s not just about meeting needs—it&apos;s about creating something people love.
               </p>
               
             </div>
@@ -87,54 +88,7 @@ export default function Home() {
                 <div className='flex w-full items-center justify-start gap-4 text-base font-semibold'>
                 <button className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-red-400 via-red-600 to-red-800 hover:from-red-500 hover:via-red-700 hover:to-red-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-red-700 cursor-pointer transition-all duration-300'>                  
                   <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10 pointer-events-none`}></div>
-                    {(() => {
-                      const [copied, setCopied] = React.useState(false);
-                      
-                      React.useEffect(() => {
-                        if (copied) {
-                          const timer = setTimeout(() => {
-                            setCopied(false);
-                          }, 2000);
-                          return () => clearTimeout(timer);
-                        }
-                      }, [copied]);
-
-                      return (
-                        <>
-                          <div 
-                            onClick={() => {
-                              navigator.clipboard.writeText('shreyaspatil.design@gmail.com');
-                              setCopied(true);
-                            }}
-                            className="w-full h-full flex items-center justify-center"
-                          >
-                            <AnimatePresence mode="wait" initial={false}>
-                              {copied ? (
-                                <motion.span
-                                  key="copied"
-                                  initial={{ opacity: 0, scale: 0.5 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  exit={{ opacity: 0, scale: 0.5 }}
-                                  transition={{ duration: 0.1 }}
-                                >
-                                  <Clipboard size={16} weight="fill" />
-                                </motion.span>
-                              ) : (
-                                <motion.span
-                                  key="at"
-                                  initial={{ opacity: 0, scale: 0.5 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  exit={{ opacity: 0, scale: 0.5 }}
-                                  transition={{ duration: 0.3 }}
-                                >
-                                  <At size={18} weight="fill" />
-                                </motion.span>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        </>
-                      );
-                    })()}
+                  <EmailCopyButton />
                 </button>
                   <div className='flex flex-col'>
                     <div className='text-sm font-semibold text-slate-800'>Email</div>
