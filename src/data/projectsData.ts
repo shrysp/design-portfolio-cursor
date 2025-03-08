@@ -1,7 +1,7 @@
 // Project data with different information structures for each project
 export const projectsData = [
   {
-    title: "ItinerAI",
+    title: "ItinerAII",
     description: [
       "",
       "Implemented consistent UI components across web and mobile platforms",
