@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, GithubLogo, Globe } from '@phosphor-icons/react';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
-import Footer from '@/components/Footer';
+import Image from 'next/image';
 
 // Import the project data
 import { projectsData } from '@/data/projectsData';
@@ -23,20 +23,33 @@ export default function WeatherWiseProject() {
       <main className="w-full max-w-[800px] flex flex-col gap-12 py-6">
         <div className="flex flex-col gap-12 items-start border border-slate-200 p-8 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl">
           {/* Back button and header */}
+          {/* Back button and header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
             className="flex w-full items-center gap-4 border-b border-slate-200 pb-4"
           >
-            <motion.div
-              onClick={() => router.push('/projects')}
-              className={`group relative flex items-center justify-center text-white/80 size-[32px] border border-blue-700 bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] rounded-full cursor-pointer
-                active:bg-radial-[at_50%_75%] active:from-blue-300 active:via-blue-500 active:to-blue-700 active:border-blue-700 active:text-white/80 active:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset]`}
-            >
-              <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-              <ArrowLeft size={20} weight="bold" />
-            </motion.div>
+            
+
+            <motion.button
+                      key="back-button"
+                      layoutId="back-button"
+                      layout="position"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{
+                        duration: 0.3
+                      }}
+                      onClick={() => router.push('/projects')}
+                      
+                      className="group relative rounded-full p-1 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-amber-900 transition-colors cursor-pointer active:scale-95 hover:bg-[radial-gradient(at_50%_75%,theme(colors.amber.300),theme(colors.amber.500),theme(colors.amber.400))] active:scale-95 transition-all duration-300 hover:shadow-[0px_2px_2px_-1px_rgba(193,0,7,0.25),0px_4px_8px_1px_rgba(193,0,7,0.25)_inset,0px_-2px_2px_0px_rgba(193,0,7,0.25)_inset] hover:border-amber-700 transition-all duration-300"
+                      aria-label="Back"
+                    >
+                      <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[3px] top-0.5 h-1/2 transition-all duration-300"></div>
+                      <ArrowLeft size={20} weight="bold" />
+                    </motion.button>
+
             <h1 className="text-[24px] font-bold text-slate-800">
               {project.title}
             </h1>
@@ -51,10 +64,13 @@ export default function WeatherWiseProject() {
               transition={{ duration: 0.3, delay: 0.1 }}
               className="w-full h-[400px] rounded-3xl overflow-hidden mb-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12)]"
             >
-              <img
+              <Image
                 src={project.images[selectedImageIndex]}
                 alt={`${project.title} - main image`}
                 className="w-full h-full object-cover"
+                width={1200}
+                height={800}
+                priority={selectedImageIndex === 0}
               />
             </motion.div>
 
@@ -75,98 +91,181 @@ export default function WeatherWiseProject() {
                       : 'opacity-70 hover:opacity-100'
                   }`}
                 >
-                  <img
+                  <Image
                     src={image}
                     alt={`${project.title} - thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
+                    width={80}
+                    height={80}
                   />
                 </div>
               ))}
             </motion.div>
 
-            {/* Project overview */}
+            {/* Project Header */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.3 }}
-              className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
+              className=""
             >
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold text-slate-800 mb-4">Overview</h2>
-                <ul className="space-y-2">
-                  {project.description?.map((desc, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mt-2 mr-2"></span>
-                      <p className="text-slate-700">{desc}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold text-slate-800 mb-4">Technologies</h2>
-                <div className="flex flex-wrap gap-2">
-                  {project.technologies?.map((tech, index) => (
-                    <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
+              <div className="">
+                <h2 className="text-[40px] font-bold text-slate-800 pb-4">WeatherWise</h2>
+                <p className="text-xl text-slate-600 pb-2">Weather-Aware Routing for Safer Travels</p>
               </div>
             </motion.div>
 
-            {/* Role and Timeline */}
+            {/* Challenge Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.35 }}
-              className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
+              className=""
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-2">My Role</h3>
-                  <p className="text-slate-700">{project.role}</p>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-2">Timeline</h3>
-                  <p className="text-slate-700">{project.timeline}</p>
-                </div>
+              <div className="pt-5">
+                <h2 className="text-lg leading-[1.2] font-semibold text-slate-800 pb-2 border-b border-slate-200">Challenge</h2>
+                <p className="text leading-8 text-slate-700 py-3">
+                  The majority of shoe shoppers still prefer brick and mortar stores, but how do we bring them into the digital age?
+                </p>
               </div>
             </motion.div>
 
-            {/* Challenge and Solution */}
+            {/* Research Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.4 }}
-              className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
+              className=""
             >
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Challenge</h3>
-                <p className="text-slate-700">{project.challenge}</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Solution</h3>
-                <p className="text-slate-700">{project.solution}</p>
+              <div className="pt-5">
+                <h2 className="text-lg leading-[1.2] font-semibold text-slate-800 pb-2 border-b border-slate-200">Research: Understanding Trust Barriers</h2>
+                <div className="">
+                  <ul className="text leading-8 text-slate-700 list-disc pl-5 py-3">
+                    <li><strong>Objective:</strong> Understanding Trust Barriers</li>
+                    <li><strong>Method:</strong> Survey followed by interviews</li>
+                    <li><strong>Survey Participants:</strong> 23</li>
+                    <li><strong>Interview Participants:</strong> 5 offline shoppers</li>
+                    <li><strong>Age Range:</strong> 19-25</li>
+                  </ul>
+                </div>
+                <p className="text leading-8 text-slate-800 p-3 bg-slate-100 rounded-lg my-3">
+                  Through my research, I found that offline shoppers have trust issues when it comes to online shoe shopping. They fear they won't get the perfect fit or the quality won't be up to their standards.
+                </p>
               </div>
             </motion.div>
 
-            {/* Outcome */}
+            {/* User Journey Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.45 }}
-              className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
+              className=""
             >
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">Outcome</h3>
-              <p className="text-slate-700">{project.outcome}</p>
+              <div className="pt-5">
+                <h2 className="text-lg leading-[1.2] font-semibold text-slate-800 pb-2 border-b border-slate-200">User Journey: Navigating Shopper Emotions</h2>
+                
+                <p className="text font-semibold leading-8 text-slate-700 pb-3 pt-5">
+                  Online shoppers: Browsing Buzz vs. Arrival Anticlimax
+                </p>
+                <p className="text leading-8 text-slate-700 pb-3">
+                  Online shoppers often feel a lack of excitement when receiving their shoes as compared to offline shoppers. The high of the journey often comes during browsing of the shoe.
+                </p>
+                
+                <div className="w-full h-[672px] bg-[#F5F8F6] rounded-3xl mb-6 flex items-center justify-center">
+                  <p className="text-slate-400 text-sm">User Journey Visualization</p>
+                </div>
+                
+                <p className="text font-semibold leading-8 text-slate-700 pb-3 pt-5">
+                  Offline shoppers: The Joy of Discovery
+                </p>
+                <p className="text leading-8 text-slate-700 pb-3">
+                  Offline shoppers have a difficult time finding the perfect pair. But the joy of finding a perfect pair is high point of the journey.
+                </p>
+                
+                <div className="w-full h-[672px] bg-[#F5F8F6] rounded-3xl mb-6 flex items-center justify-center">
+                  <p className="text-slate-400 text-sm">Offline Shopper Journey Visualization</p>
+                </div>
+                
+                <p className="text leading-8 text-slate-700 pb-3">
+                  Offline shoe shoppers just love that feeling of finding the perfect pair in person, making it tough to get them to switch to online shopping. But by using psychology tricks like the peak-end rule and the mere exposure effect, a shoe shopping app can create a similar emotional experience and make online shopping more appealing.
+                </p>
+                
+                <div className="w-full h-[328px] bg-[#F5F8F6] rounded-3xl mb-6 flex items-center justify-center">
+                  <p className="text-slate-400 text-sm">Psychology Principles Visualization</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Solution Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.5 }}
+              className=""
+            >
+              <div className="pt-5">
+                <h2 className="text-lg leading-[1.2] font-semibold text-slate-800 pb-2 border-b border-slate-200">Solution: Try, Triumph, and Take Home</h2>
+                <p className="text leading-8 text-slate-700 py-3">
+                  Say goodbye to the hassle of searching for shoes in store after store! With this app, you can have up to 3 pairs delivered right to your nearest store, so you can try them on and find the perfect fit. No more endless searching, just the joy of finding your dream shoes in person.
+                </p>
+                
+                <p className="text-lg leading-[1.2] font-semibold text-slate-800 py-3">
+                  New User Journey
+                </p>
+                
+                <div className="w-full h-[672px] bg-[#F5F8F6] rounded-3xl mb-6 flex items-center justify-center">
+                  <p className="text-slate-400 text-sm">New User Journey Visualization</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Visual Design Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.55 }}
+              className=""
+            >
+              <div className="pt-5">
+                <h2 className="text-lg leading-[1.2] font-semibold text-slate-800 pb-2 border-b border-slate-200">Visual Design</h2>
+                
+                <p className="text font-semibold leading-8 text-slate-700 pb-3 pt-5">
+                  Wireframes
+                </p>
+                <p className="text leading-8 text-slate-700 pb-3">
+                  This level was about adapting designs to different contexts and environments, particularly for theming in light and dark modes for both the products. It was a step towards making design not just visually appealing, but also responsive and user-centric.
+                </p>
+                
+                <div className="w-full h-[672px] bg-[#F5F8F6] rounded-3xl mb-6 flex items-center justify-center">
+                  <p className="text-slate-400 text-sm">Wireframes Visualization</p>
+                </div>
+                
+                <p className="text font-semibold leading-8 text-slate-700 pb-3 pt-5">
+                  Moodboard
+                </p>
+                <p className="text leading-8 text-slate-700 pb-3">
+                  The transparent Air Max shoes are so cool because you can see all the tech inside, and those glowing Nike Adapt shoes are like something out of a sci-fi movie! I wanted to capture that same futuristic vibe in the visual design of my project. To make a mood board that really pops, I used AI image generation to find all kinds of awesome pictures that have that same edgy, high-tech feel. The end result is a look that's totally fresh and exciting, just like those iconic Nike designs.
+                </p>
+                
+                <div className="w-full h-[328px] bg-[#F5F8F6] rounded-3xl mb-6 flex items-center justify-center">
+                  <p className="text-slate-400 text-sm">Moodboard Visualization</p>
+                </div>
+                
+                <p className="text font-semibold leading-8 text-slate-700 pb-3 pt-5">
+                  Mockups
+                </p>
+                
+                <div className="w-full h-[672px] bg-[#F5F8F6] rounded-3xl mb-6 flex items-center justify-center">
+                  <p className="text-slate-400 text-sm">Mockups Visualization</p>
+                </div>
+              </div>
             </motion.div>
 
             {/* Links */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.55 }}
+              transition={{ duration: 0.3, delay: 0.6 }}
               className="flex flex-col sm:flex-row gap-4 mt-6"
             >
               <Button
@@ -192,11 +291,12 @@ export default function WeatherWiseProject() {
           <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-10 z-10">
             <Navbar />
           </div>
+
+          
+
         </div>
 
-        <div className="mt-6">
-          <Footer />
-        </div>
+        
       </main>
     </div>
   );

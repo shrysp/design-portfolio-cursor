@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import Image from 'next/image';
 
 interface VerticalCarouselProps {
   images: string[];
@@ -72,10 +73,12 @@ export default function VerticalCarousel({
             key={`image-${i}`}
             className="w-full h-full flex-shrink-0"
           >
-            <img
+            <Image
               src={image}
               alt={`Hobby ${(i % images.length) + 1}`}
               className="w-full h-full object-cover rounded-xl"
+              width={400}
+              height={600}
             />
           </div>
         ))}

@@ -198,7 +198,7 @@ export default function Home() {
                       <div className='absolute size-[7px] left-1/2 -translate-x-1/2 top-[1px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/0 to-70% rounded-full'></div>
                     </div>
 
-                    <div className="text-sm font-light text-slate-600">Electrical Engineering | Minor in Machine Learning</div>
+                    <div className="text-sm font-light text-slate-600">Electronics Engineering | Minor in Machine Learning</div>
                   </div>
 
                   <div className="relative w-full flex flex-col px-2">

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, GithubLogo, Globe } from '@phosphor-icons/react';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import Footer from '@/components/Footer';
+import Image from 'next/image';
 
 // Import the project data
 import { projectsData } from '@/data/projectsData';
@@ -51,10 +52,13 @@ export default function FractionsProject() {
               transition={{ duration: 0.3, delay: 0.1 }}
               className="w-full h-[400px] rounded-3xl overflow-hidden mb-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12)]"
             >
-              <img
+              <Image
                 src={project.images[selectedImageIndex]}
                 alt={`${project.title} - main image`}
                 className="w-full h-full object-cover"
+                width={1200}
+                height={800}
+                priority={selectedImageIndex === 0}
               />
             </motion.div>
 
@@ -75,10 +79,12 @@ export default function FractionsProject() {
                       : 'opacity-70 hover:opacity-100'
                   }`}
                 >
-                  <img
+                  <Image
                     src={image}
                     alt={`${project.title} - thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
+                    width={80}
+                    height={80}
                   />
                 </div>
               ))}

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, GithubLogo, Globe } from '@phosphor-icons/react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import Image from 'next/image';
 
 // Import the project data from the separate file
 import { projectsData } from '@/data/projectsData';
@@ -93,10 +94,13 @@ export default function ProjectDetail() {
                 controlsList="nodownload nofullscreen noremoteplayback"
               />
             ) : (
-              <img 
+              <Image 
                 src={project.images[selectedImageIndex]} 
                 alt={`${project.title} - Image ${selectedImageIndex + 1}`} 
                 className="w-full h-full object-cover"
+                width={1200}
+                height={675}
+                priority={selectedImageIndex === 0}
               />
             )}
           </div>
@@ -123,10 +127,12 @@ export default function ProjectDetail() {
                     controlsList="nodownload nofullscreen noremoteplayback"
                   />
                 ) : (
-                  <img 
+                  <Image 
                     src={image} 
                     alt={`Thumbnail ${index + 1}`} 
                     className="w-full h-full object-cover"
+                    width={80}
+                    height={45}
                   />
                 )}
                 {selectedImageIndex === index && (

@@ -1,6 +1,9 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from 'next/image';
 
 interface ProjectCardProps {
   title: string;
@@ -268,10 +271,13 @@ export function ProjectCard({
                     }}
                   />
                 ) : (
-                  <img 
+                  <Image 
                     src={images[selectedIndex]} 
                     alt={`${title} - slide ${selectedIndex + 1}`} 
                     className="w-full h-full object-cover"
+                    width={600}
+                    height={400}
+                    priority={selectedIndex === 0}
                   />
                 )}
                 {/* Overlay gradient for better text readability */}
