@@ -8,6 +8,24 @@ import VerticalCarousel from '@/components/VerticalCarousel';
 import Footer from '@/components/Footer';
 import EmailCopyButton from '@/components/EmailCopyButton';
 
+const gridVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+};
+
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.4
+    },
+    
+    
+    
+  }
+};
+
 export default function Home() {
   // Define the images for the carousel
   const hobbyImages = [
@@ -23,47 +41,59 @@ export default function Home() {
       <main className="w-full md:max-w-[800px] max-w-[361px] flex flex-col gap-12 py-6">
 
         <div className="flex flex-col gap-6 items-start border border-slate-200 md:p-8 p-4 md:pb-24 pb-24 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl ">
-        {/* Hero section */}
-          <motion.div 
-          className="w-full border-b flex gap-4 items-center border-slate-200 pb-4"
+          {/* Page header */}
+         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ duration: 0.3 }}
+          className="isolate relative min-h-14 flex w-full bg-slate-800 border-3 border-slate-800 rounded-full items-center gap-4 overflow-hidden"
+        
         >
-          <div style={{backgroundImage: `url(/images/About/Profile.jpeg)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className='relative size-8 bg-emerald-500 rounded-full border border-slate-400 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]'>
-          <div className='absolute inset-0.5 h-1/2 bg-gradient-to-b from-white/80  to-white/10 rounded-t-[36px] rounded-b-[12px] z-20 rounded-3xl'></div>
-          </div>
-          <h1 className="text-[24px] font-bold text-slate-800">
-            More about me
-          </h1>
-          </motion.div>
 
-          <div className="grid md:grid-cols-7 grid-cols-1 auto-rows-auto md:gap-x-6 md:gap-y-6.5 gap-y-6 w-full">
+          <div className="absolute inset-x-1 top-0.5 h-1/2 bg-gradient-to-b from-slate-50/40 to-slate-50/5 rounded-t-[24px] rounded-b-[6px] z-10"></div>
+          <div className="flex items-center w-full h-full">
+            <h1 className="text-[24px] font-bold text-slate-50 w-full px-6 py-2">
+            More about me
+           </h1>
+           <div className="flex w-full h-full bg-[url('/images/About/About-5.jpeg')] bg-cover bg-center [mask-image:radial-gradient(50%_400%_at_0%_50%,transparent_10%,black_100%)] [mask-type:alpha]">
+            
+           </div>
+          </div>
+          
+         </motion.div>
+
+          <motion.div className="grid md:grid-cols-7 grid-cols-1 auto-rows-auto md:gap-x-6 md:gap-y-6.5 gap-y-6 w-full"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible">
 
             {/* Making it feel right */}
-            <div className="flex flex-col md:col-span-4 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
-              <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200 font-mono"> 
+            <motion.div className="flex flex-col md:col-span-4 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
+              variants={gridVariants}
+              initial="hidden"
+              animate="visible">
+              <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200 "> 
                 Making it feel right
               </div>
 
-              <p className="text-xs leading-6 text-slate-600 font-mono">
-              For me, design is all about the feeling it evokes. Every feature and interaction is crafted to spark joy, comfort, or excitement. I&apos;m passionate about creating standout experiences by deeply understanding users, making every touchpoint not just user-friendly, but truly engaging. I believe it&apos;s the little details, like the smoothness of an animation or the tactile response of a button, that make a product not just functional, but memorable. My philosophy combines emotion with usability, aiming to create products that resonate on a deeper level. Because for me, it&apos;s not just about meeting needs—it&apos;s about creating something people love.
+              <p className="text-sm leading-7 text-slate-600 ">
+              For me, design is all about the feeling it evokes. Every feature and interaction is crafted to spark joy, comfort, or excitement. I&apos;m passionate about creating standout experiences by deeply understanding users, making every touchpoint not just user-friendly, but truly engaging. I believe it&apos;s the little details, like the smoothness of an animation or the tactile response of a button, that make a product not just functional, but memorable. Ultimately, my goal is to blend practicality with emotion, designing products that don&apos;t just meet expectations, but actually captivate and inspire people to connect more deeply. To me, excellent design means creating something users genuinely love.
               </p>
               
-            </div>
+            </motion.div>
 
             {/* things i like to do */}
-            <div className="relative overflow-hidden flex flex-col md:col-span-3 col-span-1 md:h-full h-[400px] bg-slate-50 rounded-3xl md:px-6 px-4 items-center justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
-              {/* <div className="relative w-full font-semibold text-slate-800 mt-6 pb-2 border-b border-slate-200 z-30"> Things I like to do</div> */}
-              {/* <div className="absolute inset-0 bg-radial-[at_50%] from-transparent via-slate-50/10 to-slate-50/50 z-20"></div> */}
+            <motion.div className="relative overflow-hidden flex flex-col md:col-span-3 col-span-1 md:h-full h-[400px] bg-slate-50 rounded-3xl md:px-6 px-4 items-center justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
+                 variants={gridVariants}>
               <div className="absolute h-full w-full z-10 overflow-hidden border-4 border-slate-200 rounded-3xl">
                 <VerticalCarousel images={hobbyImages} autoScrollInterval={5000} />
               </div>
-            </div>
+            </motion.div>
 
             
             {/* Reach out */}
-            <div className="flex flex-col md:col-span-3 md:row-start-3 col-span-1 bg-slate-50 rounded-3xl md:px-6 px-4 p-4 items-center justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+            <motion.div className="flex flex-col md:col-span-3 md:row-start-3 col-span-1 bg-slate-50 rounded-3xl md:px-6 px-4 p-4 items-center justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
+                 variants={gridVariants}>
               <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> Reach out</div>
               <div className="w-full flex flex-col items-center justify-between gap-5">
                 
@@ -131,10 +161,11 @@ export default function Home() {
                   
                 
               </div>
-            </div>
+            </motion.div>
 
             {/* Reads */}
-            <div className="flex flex-col md:col-span-3 md:row-start-2 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+            <motion.div className="flex flex-col md:col-span-3 md:row-start-2 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
+                 variants={gridVariants}>
               <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
                 Reads
               </div>
@@ -175,10 +206,11 @@ export default function Home() {
                 <div className="text-xs font-light text-slate-600 pb-0.5 border-b border-stone-100">@Phil Knight</div>
               </a>
               
-            </div>
+            </motion.div>
 
             {/* Experience */}
-            <div className="flex flex-col md:col-span-4 md:row-span-2 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+            <motion.div className="flex flex-col md:col-span-4 md:row-span-2 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
+                 variants={gridVariants}>
               <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
                 Journey
               </div>
@@ -268,20 +300,20 @@ export default function Home() {
               </div>
 
               
-            </div>
+            </motion.div>
 
             
 
             
 
-          </div>
+          </motion.div>
           <div className="w-full">
             <Footer />
           </div>
 
         </div>
         
-        <div className="fixed flex items-center justify-center left-0 right-0 bottom-10 z-10">
+        <div className="fixed flex items-center justify-center left-0 right-0 bottom-8 z-10">
           <Navbar />
         </div>
 

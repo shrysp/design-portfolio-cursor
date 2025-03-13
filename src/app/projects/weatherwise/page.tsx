@@ -149,7 +149,7 @@ export default function WeatherWiseProject() {
                   </ul>
                 </div>
                 <p className="text leading-8 text-slate-800 p-3 bg-slate-100 rounded-lg my-3">
-                  Through my research, I found that offline shoppers have trust issues when it comes to online shoe shopping. They fear they won't get the perfect fit or the quality won't be up to their standards.
+                  Through my research, I found that offline shoppers have trust issues when it comes to online shoe shopping. They fear they won&apos;t get the perfect fit or the quality won&apos;t be up to their standards.
                 </p>
               </div>
             </motion.div>
@@ -244,7 +244,7 @@ export default function WeatherWiseProject() {
                   Moodboard
                 </p>
                 <p className="text leading-8 text-slate-700 pb-3">
-                  The transparent Air Max shoes are so cool because you can see all the tech inside, and those glowing Nike Adapt shoes are like something out of a sci-fi movie! I wanted to capture that same futuristic vibe in the visual design of my project. To make a mood board that really pops, I used AI image generation to find all kinds of awesome pictures that have that same edgy, high-tech feel. The end result is a look that's totally fresh and exciting, just like those iconic Nike designs.
+                  The transparent Air Max shoes are so cool because you can see all the tech inside, and those glowing Nike Adapt shoes are like something out of a sci-fi movie! I wanted to capture that same futuristic vibe in the visual design of my project. To make a mood board that really pops, I used AI image generation to find all kinds of awesome pictures that have that same edgy, high-tech feel. The end result is a look that&apos;s totally fresh and exciting, just like those iconic Nike designs.
                 </p>
                 
                 <div className="w-full h-[328px] bg-[#F5F8F6] rounded-3xl mb-6 flex items-center justify-center">

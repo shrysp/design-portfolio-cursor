@@ -250,7 +250,7 @@ export default function ItinerAIProject() {
           </div>
 
           {/* Navigation */}
-          <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-10 z-10 pointer-events-none">
+          <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-8 z-10">
             <Navbar />
           </div>
         </div>

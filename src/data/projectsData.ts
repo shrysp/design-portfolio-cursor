@@ -3,12 +3,12 @@ export const projectsData = [
   {
     title: "ItinerAI",
     description: [
-      "",
+      "A travel companion that learns and evolves with every user interaction.",
       "Implemented consistent UI components across web and mobile platforms",
       "Improved design-to-development handoff efficiency by 40%"
     ],
     images: [
-      "/videos/Walk-Through-Video.mp4"
+      "/images/projects/thumbnails/ItinerAI-Thumbnail.png"
     ],
     // Additional information specific to this project
     role: "Lead UI/UX Designer",
@@ -46,9 +46,7 @@ export const projectsData = [
     description: ["..."],
     
     images: [
-      "/images/projects/Dashworks-Landing-Page.png",
-      "/images/projects/Dashworks-Onboarding.png",
-      "/images/projects/Dashworks-Design-System.png"
+      "/images/projects/thumbnails/Dashworks-Thumbnail.webp"
     ],
     // Additional information specific to this project
     role: "Lead UI/UX Designer",
@@ -85,14 +83,11 @@ export const projectsData = [
   {
     title: "WeatherWise",
     description: [
-      "Redesigned the user experience for an e-commerce platform",
-      "Increased conversion rate by 25% through improved checkout flow",
-      "Implemented responsive design for all device sizes"
+      "Improving Navigational Safety with Weather-Adaptive Routing in Google Maps."
+     
     ],
     images: [
-      "/images/projects/Weather-Wise-Warning.png",
-      "/images/projects/Weather-Wise-Safer-Route.png",
-      "/images/projects/Weather-Wise-Planning.png"
+      "/images/projects/thumbnails/WeatherWise-Thumbnail.webp",
     ],
     technologies: ["Adobe XD", "Sketch", "Principle"],
     github: "https://github.com/username/weatherwise",
@@ -103,9 +98,7 @@ export const projectsData = [
     challenge: "The client's e-commerce platform had a high cart abandonment rate (78%) and poor mobile experience, leading to lost sales and customer frustration.",
     solution: "I redesigned the checkout process to reduce friction points and created a fully responsive design that works seamlessly across all device sizes.",
     outcome: [
-      "Conversion: The redesign resulted in a 25% increase in conversion rate",
-      "Retention: 40% reduction in cart abandonment",
-      "Mobile Growth: Mobile sales increased by 35% within the first month after launch"
+      "Improving Navigational Safety with Weather-Adaptive Routing in Google Maps."
     ],
     process: [
       "Analysis: Analyzed user behavior data to identify pain points in the checkout process",
@@ -124,12 +117,11 @@ export const projectsData = [
   {
     title: "ShoeDog",
     description: [
-      "Designed the user interface for a health tracking mobile application",
-      "Created intuitive navigation and data visualization components",
-      "Conducted user testing and implemented feedback iterations"
+      "revolutionizing online shoe shopping with the thrill of the perfect in-store find, delivered digitally."
+      
     ],
     images: [
-      "/images/projects/ShoeDog-1.png"
+      "/images/projects/thumbnails/Shoedog-Thumbnail.webp"
     ],
     technologies: ["Figma", "Protopie", "After Effects"],
     github: "https://github.com/username/shoedog",
@@ -163,12 +155,11 @@ export const projectsData = [
   {
     title: "Fractions",
     description: [
-      "Developed complete brand identity for a sustainable product company",
-      "Created logo, color palette, typography, and brand guidelines",
-      "Designed packaging and marketing materials"
+      "mindful approach to staying connected without the clutter."
+      
     ],
     images: [
-      "/images/projects/Fractions-1.png",
+      "/images/projects/thumbnails/Fractions-Thumbnail.webp",
     ],
     technologies: ["Illustrator", "Photoshop", "InDesign"],
     github: "https://github.com/username/fractions",

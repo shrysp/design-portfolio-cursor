@@ -2,10 +2,50 @@
 
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
-import { ArrowSquareOut } from '@phosphor-icons/react';
-import React from 'react';
+import { ArrowSquareOut, XLogo, LinkedinLogo } from '@phosphor-icons/react';
+import React, { useState, useEffect } from 'react';
 import Footer from '@/components/Footer';
-import TimeDisplay from '@/components/TimeDisplay';
+import EmailCopyButton from '@/components/EmailCopyButton';
+import router from 'next/router';
+
+function BayAreaTimeDisplay() {
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const options = {
+    timeZone: 'America/Los_Angeles',
+    hour: '2-digit' as const,
+    minute: '2-digit' as const,
+    
+    hour12: true,
+  };
+
+  const timeString = new Intl.DateTimeFormat('en-US', options).format(currentTime);
+
+  return <div className='w-full flex justify-end text-slate-300 font-mono font-medium'>{timeString}</div>;
+}
+
+const gridVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+};
+
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.4
+    }
+  }
+};
 
 export default function Home() {
 
@@ -16,29 +56,100 @@ export default function Home() {
 
         <div className="relative flex flex-col gap-6 items-start border border-slate-200 md:p-8 p-4 md:pb-24 pb-24 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl">
         {/* Hero section */}
-          <motion.div 
-          className="w-full border-b flex gap-4 items-center border-slate-200 pb-4"
+          {/* Page header */}
+         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }} >
-            
-            <div style={{backgroundImage: `url(/images/About/Profile.jpeg)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className='relative size-14 bg-emerald-500 rounded-full border border-slate-400 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]'>
-            <div className='absolute inset-0.5 h-1/2 bg-gradient-to-b from-white/80  to-white/10 rounded-t-[36px] rounded-b-[12px] z-20 rounded-3xl'></div>
+          transition={{ duration: 0.3 }}
+          className="isolate relative min-h-[276px] flex w-full bg-slate-800 border-3 border-slate-800 rounded-4xl items-center gap-4 overflow-hidden shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_2px_0px_0px_rgba(0,0,0,0.15),0px_1px_1px_0px_rgba(255,255,255,0.07)_inset]"
+        
+        >
+
+          <div className="absolute inset-x-[2px] top-0.5 h-1/3 bg-gradient-to-b from-slate-50/20 to-slate-50/0 rounded-t-[26px] rounded-b-[6px] z-10"></div>
+          <div className="absolute inset-x-[2px] bottom-0.5 h-1/4 bg-gradient-to-t from-slate-50/10 to-slate-50/0 rounded-t-[6px] rounded-b-[26px] z-10"></div>
+          <div className="items-center w-full h-full grid grid-cols-5">
+
+            {/* Left side */}
+            <div className='flex flex-col h-full items-start justify-between gap-0.5 p-6 col-span-2'>
+              {/* top */}
+              <div className='flex flex-col gap-0'>
+                <h1 className="text-[24px] font-bold text-slate-50 w-full ">
+                  Shreyas Patil
+                </h1>
+
+                <p className="text-[16px] text-slate-300 font-medium">
+                  Product Designer
+                </p>
+              </div>
+
+              {/* bottom */}
+              <div className='flex flex-col gap-3 items-start'>
+
+                <div className="flex items-center justify-center gap-3">
+        
+                  <a 
+                    href="https://x.com/ShreyasPatil_" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-slate-400 via-slate-600 to-slate-800 hover:from-slate-500 hover:via-slate-700 hover:to-slate-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset]  cursor-pointer transition-all duration-300'
+                  >                  
+                    <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
+                    <XLogo size={18} weight="fill" />
+                  </a>
+
+        
+
+                  <button className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-red-400 via-red-600 to-red-800 hover:from-red-500 hover:via-red-700 hover:to-red-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] cursor-pointer transition-all duration-300'>                  
+                    <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10 pointer-events-none`}></div>
+                    <EmailCopyButton />
+                  </button>
+
+                  <a 
+                    href="https://www.linkedin.com/in/shreyastpatil/" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 hover:from-blue-400 hover:via-blue-600 hover:to-blue-800 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] cursor-pointer transition-all duration-300'
+                   >                  
+                    <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
+                    <LinkedinLogo size={18} weight="fill" />
+                  </a>
+                </div>
+
+                <div className='relative isolate flex items-center justify-center gap-2'>
+
+                  <div className='absolute isolate left-0 flex items-center justify-center size-2 bg-radial-[at_50%_75%] from-green-500 via-green-600 to-green-700 rounded-full -z-10 animate-[ping_3s_ease-in-out_infinite]'></div>
+
+                  <div className='relative isolate flex items-center justify-center size-2 bg-radial-[at_50%_75%] from-green-500 via-green-600 to-green-700 rounded-full'>
+                    <div className='absolute inset-[1px] top-[0.5px] h-1/2 bg-gradient-to-b from-white/70 to-white/20 rounded-t-[24px] rounded-b-[6px]'></div>
+                  </div>
+                  <p className="text-base text-slate-300 font-medium">
+                    Looking for new opportunities!
+                  </p>
+
+                </div>
+
+                
+              </div>
+
             </div>
 
-            <div className='flex flex-col gap-0'>
-            <h1 className="text-[24px] font-bold text-slate-800">
-            Shreyas Patil
-            </h1>
-            <p className="text-[16px] text-slate-600 font-medium">
-            Product Designer
-            </p>
+            {/* Right side */}
+            <div className='isolate relative w-full h-full col-span-3 justify-between'>
+              <div className='relative w-full h-full p-6 flex flex-col justify-between z-10'>
+                <BayAreaTimeDisplay />
+                <div className='w-full flex justify-end text-slate-300 font-mono font-medium'>Bay Area, CA</div>
+              </div>
+              <div className="absolute inset-0  w-full h-full bg-[url('/images/About/About-1.jpeg')] bg-cover bg-[50%_60%] [mask-image:radial-gradient(50%_400%_at_0%_50%,transparent_10%,rgba(0,0,0,0.7)_100%)] [mask-type:alpha]"></div>
             </div>
+          </div>
           
-          </motion.div>
+         </motion.div>
 
-          <div className="grid md:grid-cols-7 grid-cols-1 auto-rows-auto md:gap-x-6 md:gap-y-6.5 gap-y-6 w-full">
-            
+          <motion.div className="grid md:grid-cols-6 grid-cols-1 auto-rows-auto md:gap-x-6 md:gap-y-6.5 gap-y-6 w-full"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible">
+
             {/* quick Projects links */}
             {/* <div className="flex flex-col col-span-5 h-32 bg-slate-50 rounded-3xl px-6 p-4 items-center justify-center gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
               <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> See my work here</div>
@@ -71,68 +182,146 @@ export default function Home() {
               </div>
             </div> */}
 
-            <div className="flex flex-col md:col-span-3 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-center justify-center gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
-              <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> See my work here</div>
-              <div className='flex flex-col w-full gap-2'>
-                  
-                  <div className='relative w-full flex items-center justify-between p-2 px-2.5 gap-3 h-8 text-slate-500 rounded-md bg-slate-100/0 hover:bg-slate-200/50  transition-all duration-300 cursor-pointer'>
-                 
-                    <div className='font-medium'>ItinerAI</div>
+            {/* infinite scroll */}
+            <motion.div className="isolate flex flex-col md:col-span-6 row-span-2 col-span-1 h-[400px] bg-slate-50 rounded-3xl md:py-6 py-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
+              variants={gridVariants}>
+              {/* <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
+                Making it feel right
+              </div> */}
+
+              <div className="relative w-full h-full overflow-hidden">
+                <div className="w-full h-full flex gap-6 overflow-x-auto scrollbar-hide snap-x scroll-pl-8 px-8 py-2">
                     
-                    <ArrowSquareOut size={16} weight="regular" />
-                  </div>
-
-                  <div className='relative w-full flex items-center justify-between p-2 px-3 gap-1.5 h-8 text-slate-500 rounded-md bg-slate-100/0 hover:bg-slate-200/50  transition-all duration-300 cursor-pointer'>
-                 
+                    <div  className="relative h-full aspect-4/3 bg-white border-4 border-white rounded-2xl snap-start  shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_6px_6px_rgba(0,0,0,0.17)_inset]">
+                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center rounded-t-[12px] rounded-b-[12px] z-20`}></div>
+                        <div className="relative h-full w-full overflow-hidden">
+                          <video src="/videos/Walk-Through-Video.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>   
+                        </div>                 
+                    </div>
+                    <div  className="relative h-full aspect-3/4 bg-white border-4 border-white rounded-2xl snap-start  shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_6px_6px_rgba(0,0,0,0.17)_inset]">
+                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center rounded-t-[12px] rounded-b-[12px] z-20`}></div>
+                        <div className="relative h-full w-full overflow-hidden">
+                          <video src="/videos/ItinerAIbuild-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>                    
+                        </div>
+                    </div>
+                    <div  className="relative h-full aspect-16/9 bg-white border-4 border-white rounded-2xl snap-start  shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_6px_6px_rgba(0,0,0,0.17)_inset]">
+                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center rounded-t-[12px] rounded-b-[12px] z-20`}></div>
+                        <div className="relative h-full w-full overflow-hidden">
+                          <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>                    
+                        </div>
+                    </div>
+                    <div style={{backgroundImage: `url(/images/Craft/Glass-Dock.mp4)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative h-full aspect-16/9 bg-white border-4 border-white rounded-2xl snap-start shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_6px_6px_rgba(0,0,0,0.17)_inset]">
+                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center rounded-t-[12px] rounded-b-[12px] z-20`}></div>
+                        <div className="relative h-full w-full overflow-hidden">
+                          <video src="/images/Craft/Glass-Dock.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>                    
+                        </div>
+                    </div>
+                    <div style={{backgroundImage: `url(/images/Craft/Whop-Modal.mp4)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative h-full aspect-square bg-white border-4 border-white rounded-2xl snap-start shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_6px_6px_rgba(0,0,0,0.17)_inset]">
+                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center rounded-t-[12px] rounded-b-[12px] z-20`}></div>
+                        <div className="relative h-full w-full overflow-hidden">
+                          <video src="/images/Craft/Whop-Modal.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>         
+                        </div>
+                    </div>
+                    <div style={{backgroundImage: `url(/images/Craft/Modals.mp4)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative h-full aspect-16/9 bg-white border-4 border-white rounded-2xl snap-start  shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_6px_6px_rgba(0,0,0,0.17)_inset]">
+                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center rounded-t-[12px] rounded-b-[12px] z-20`}></div>
+                        <div className="relative h-full w-full overflow-hidden">
+                          <video src="/images/Craft/Modals.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>                    
+                        </div>
+                    </div>
+                   
                   
-                    <div className='font-medium'>Dashworks</div>
-                    <ArrowSquareOut size={16} weight="regular" />
-
-                  </div>
-
-                  <div className='relative w-full flex items-center justify-between p-2 px-3 gap-1.5 h-8 text-slate-500 rounded-md bg-slate-100/0 hover:bg-slate-200/50  transition-all duration-300 cursor-pointer'>
-                 
-                    <div className='font-medium'>WeatherWise</div>
-                    <ArrowSquareOut size={16} weight="regular" />
-                  </div>
                   
                 </div>
-            </div>
-            
-
-            {/* Experience
-            <div className="flex flex-col col-span-4 h-[276px] bg-slate-50 rounded-3xl p-6 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
-              <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
-                Journey
-              </div>
-
-              <div className="w-full flex flex-col">
-                <div className="w-full flex items-center justify-between gap-2">
-                  <div className="text-sm font-semibold text-slate-800">Rochester Institute of Technology</div>
-                  <div className="text-sm font-light text-slate-600">Dec 2024</div>
-                </div>
-
-                <div className="text-sm font-light text-slate-600">MS - Human Computer Interaction</div>
-              </div>
-
-              <div className="w-full flex flex-col">
-                <div className="w-full flex items-center justify-between gap-2">
-                  <div className="text-sm font-semibold text-slate-800">Dashworks</div>
-                  <div className="text-sm font-light text-slate-600">Jan - Apr 2024</div>
-                </div>
-
-                <div className="text-sm font-light text-slate-600">Product Design Intern</div>
-              </div>
-
-              <div className="w-full relative bg-slate-100 border border-dashed border-slate-300 rounded-lg p-2 flex flex-col">
                 
-                <div className="text-xs leading-5 font-light text-slate-600">Before design, I worked on AI research, building auto-encoders to turn 2D images into 3D models and exploring generative AI.</div>
+                
+
               </div>
 
               
-            </div> */}
+              
+            </motion.div>
 
-            <div className="flex flex-col md:col-span-4 md:row-span-2 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
+            <motion.div className="flex flex-col md:col-span-3 col-span-1 row-span-2 bg-slate-50 rounded-3xl md:p-6 p-4 items-center justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
+              variants={gridVariants}>
+              <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200">Projects</div>
+              <div className='flex flex-col w-full h-max max-h-[448px] overflow-y-auto scrollbar-hide gap-4 rounded-md'>
+                  
+                  <div className='flex flex-col-reverse gap-2 bg-white p-1 pb-2 rounded-lg border border-slate-200 '>
+                    <div className='relative w-full flex items-center justify-between p-2 px-2.5 gap-3 h-8 text-slate-500'>
+                 
+                    <div className='font-medium'>ItinerAI</div>
+
+                    <button
+                      onClick={() => router.push('/projects')}
+                      
+                      className="group relative rounded-full p-1 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-blue-50 cursor-pointer hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] active:scale-95 hover:shadow-[0px_2px_2px_-1px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:border-blue-700 transition-all duration-300"
+                      aria-label="Open Project"
+                    >
+                      <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[2px] top-0.5 h-1/2 transition-all duration-300"></div>
+                      <ArrowSquareOut size={14} weight="fill" />
+                    </button>
+                    
+                      
+                    </div>
+                    <div className='w-full h-full bg-slate-200 bg-[url("/images/projects/thumbnails/ItinerAI-Thumbnail.png")] bg-cover bg-center aspect-4/3 rounded-md [mask-image:radial-gradient(120%_70%_at_50%_37%,black_60%,rgba(0,0,0,0.4)_80%,transparent_90%)] [mask-type:alpha]'></div>
+                  </div>
+
+                  <div className='flex flex-col-reverse gap-2 bg-white p-1 rounded-lg border border-slate-200'>
+                    <div className='relative w-full flex items-center justify-between p-2 px-2.5 gap-3 h-8 text-slate-500 '>
+                 
+                    <div className='font-medium'>Dashworks</div>
+
+                    <button
+                      onClick={() => router.push('/projects')}
+                      
+                      className="group relative rounded-full p-1 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-blue-50 cursor-pointer hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] active:scale-95 hover:shadow-[0px_2px_2px_-1px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:border-blue-700 transition-all duration-300"
+                      aria-label="Open Project"
+                    >
+                      <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[2px] top-0.5 h-1/2 transition-all duration-300"></div>
+                      <ArrowSquareOut size={14} weight="fill" />
+                    </button>
+                    
+                      
+                    </div>
+                    <div className='w-full h-full bg-slate-200 bg-[url("/images/projects/thumbnails/Dashworks-Thumbnail.webp")] bg-cover bg-center aspect-4/3 rounded-md [mask-image:radial-gradient(120%_70%_at_50%_37%,black_60%,rgba(0,0,0,0.4)_80%,transparent_90%)] [mask-type:alpha]'></div>
+                  </div>
+
+                  <div className='flex flex-col-reverse gap-2 bg-white p-1 rounded-lg border border-slate-200'>
+                    <div className='relative w-full flex items-center justify-between p-2 px-2.5 gap-3 h-8 text-slate-500 '>
+                 
+                    <div className='font-medium'>WeatherWise</div>
+
+                    <button
+                      onClick={() => router.push('/projects')}
+                      
+                      className="group relative rounded-full p-1 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-blue-50 cursor-pointer hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] active:scale-95 hover:shadow-[0px_2px_2px_-1px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:border-blue-700 transition-all duration-300"
+                      aria-label="Open Project"
+                    >
+                      <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[2px] top-0.5 h-1/2 transition-all duration-300"></div>
+                      <ArrowSquareOut size={14} weight="fill" />
+                    </button>
+                    
+                      
+                    </div>
+                    <div className='w-full h-full bg-slate-200 bg-[url("/images/projects/thumbnails/WeatherWise-Thumbnail.webp")] bg-cover bg-center aspect-4/3 rounded-md [mask-image:radial-gradient(120%_70%_at_50%_37%,black_60%,rgba(0,0,0,0.7)_70%,transparent_90%)] [mask-type:alpha]'></div>
+                  </div>
+
+                  
+
+                  
+
+                 
+
+                  
+                  
+                </div>
+            </motion.div>
+            
+
+
+
+            <motion.div className="flex flex-col md:col-span-3 md:row-span-2 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
+              variants={gridVariants}>
               <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
                 Journey
               </div>
@@ -222,61 +411,20 @@ export default function Home() {
               </div>
 
               
-            </div>
+            </motion.div>
 
 
-            {/* Based out of Bay Area */}
-            <TimeDisplay />
+            {/* Based out of Bay Area
+            <TimeDisplay /> */}
 
 
 
-            {/* infinite scroll */}
-            <div className="isolate flex flex-col md:col-span-7 col-span-1 h-[276px] bg-slate-50 rounded-3xl md:py-6 py-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
-              {/* <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
-                Making it feel right
-              </div> */}
-
-              <div className="relative w-full h-full overflow-hidden">
-
-                
-                <div className="w-full h-full flex gap-6 overflow-x-auto scrollbar-hide snap-x scroll-pl-8 px-8 py-2">
-                    
-                    <div  className="relative h-full aspect-16/9 bg-white border-4 border-slate-200 rounded-2xl snap-start  shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_-2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_8px_2px_rgba(0,0,0,0.07)_inset]">
-                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center bg-gradient-to-b from-white/80  to-white/10 rounded-t-[12px] rounded-b-[12px] z-20`}></div>
-                        <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
-                    </div>
-                    <div style={{backgroundImage: `url(/images/Craft/Glass-Dock.mp4)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative h-full aspect-16/9 bg-white border-4 border-slate-200 rounded-2xl snap-start shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_-2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_8px_2px_rgba(0,0,0,0.07)_inset]">
-                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center bg-gradient-to-b from-white/80  to-white/10 rounded-t-[12px] rounded-b-[12px] z-20`}></div>
-                        <video src="/images/Craft/Glass-Dock.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
-                    </div>
-                    <div style={{backgroundImage: `url(/images/Craft/Whop-Modal.mp4)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative h-full aspect-square bg-white border-4 border-slate-200 rounded-2xl snap-start shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_-2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_8px_2px_rgba(0,0,0,0.07)_inset]">
-                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center bg-gradient-to-b from-white/80  to-white/10 rounded-t-[12px] rounded-b-[12px] z-20`}></div>
-                        <video src="/images/Craft/Whop-Modal.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
-                    </div>
-                    <div style={{backgroundImage: `url(/images/Craft/Modals.mp4)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative h-full aspect-16/9 bg-white border-4 border-slate-200 rounded-2xl snap-start  shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_-2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_8px_2px_rgba(0,0,0,0.07)_inset]">
-                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center bg-gradient-to-b from-white/80  to-white/10 rounded-t-[12px] rounded-b-[12px] z-20`}></div>
-                        <video src="/images/Craft/Modals.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
-                    </div>
-                    <div style={{backgroundImage: `url(/images/projects/ItinerAI-1.png)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative h-full aspect-3/2 bg-white border-4 border-slate-200 rounded-2xl snap-start shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_-2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_8px_2px_rgba(0,0,0,0.07)_inset]">
-                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center bg-gradient-to-b from-white/80  to-white/10 rounded-t-[12px] rounded-b-[12px] z-20`}></div>                    
-                        <video src="/images/Craft/ItinerAI-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="absolute inset-0 w-full h-full object-cover rounded-xl"></video>                    
-                    </div>
-                  
-                  
-                </div>
-                
-                
-
-              </div>
-
-              
-              
-            </div>
+            
 
             
             
 
-          </div>
+          </motion.div>
 
           <div className="w-full">
             <Footer />
@@ -287,7 +435,7 @@ export default function Home() {
         </div>
         
         
-        <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-10 z-10">
+        <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-8 z-10">
           <Navbar />
         </div>
         

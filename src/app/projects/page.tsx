@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { ProjectCard } from '@/components/ProjectCard';
-import { Tabs } from '@phosphor-icons/react';
 import Footer from '@/components/Footer';
 
 // Import project data from separate file
@@ -18,21 +17,20 @@ export default function Projects() {
          <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="flex w-full items-center gap-4 border-b border-slate-200 pb-4"
+          transition={{ duration: 0.5 }}
+          className="isolate relative min-h-14 flex w-full bg-slate-800 border-3 border-slate-800 rounded-full items-center gap-4 overflow-hidden"
+        
         >
 
-            <motion.div      
-              className={`group relative flex items-center justify-center text-white/80 size-[32px] border border-blue-700 bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] rounded-full pointer-cursor
-                                active:bg-radial-[at_50%_75%] active:from-blue-300 active:via-blue-500 active:to-blue-700 active:border-blue-700 active:text-white/80 active:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset]`}
-            > 
-            <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-            <Tabs size={20} weight="fill" />
-            
-          </motion.div>
-          <h1 className="text-[24px] font-bold text-slate-800 ">
+          <div className="absolute inset-x-1 top-0.5 h-1/2 bg-gradient-to-b from-slate-50/40 to-slate-50/5 rounded-t-[24px] rounded-b-[6px] z-10"></div>
+          <div className="flex items-center w-full h-full">
+            <h1 className="text-[24px] font-bold text-slate-50 w-full px-6 py-2">
             Projects
-          </h1>
+           </h1>
+           <div className="flex w-full h-full bg-[url('/images/Banners/Banner-Projects.png')] bg-cover bg-center [mask-image:radial-gradient(50%_400%_at_0%_50%,transparent_10%,black_100%)] [mask-type:alpha]">
+            
+           </div>
+          </div>
           
          </motion.div>
         
@@ -43,7 +41,7 @@ export default function Projects() {
               key={index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: 0.2 + index * 0.2, duration: 0.5 }}
             >
               <ProjectCard 
                 title={project.title}
@@ -60,7 +58,7 @@ export default function Projects() {
             <Footer />
           </div>
         
-            <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-10 z-10">
+            <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-8 z-10">
           <Navbar />
             </div>
 

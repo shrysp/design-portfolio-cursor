@@ -167,7 +167,8 @@ export function ProjectCard({
   }, [isMounted, selectedIndex, autoSlideInterval, images.length, expanded, title, currentItemIsVideo, description.length]);
   
   // Handle slide change (both manual and automatic)
-  const handleSlideChange = (index: number) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _handleSlideChange = (index: number) => {
     // Prevent changing to the same slide
     if (index === selectedIndex) return;
     
@@ -198,8 +199,9 @@ export function ProjectCard({
     router.push(route);
   };
 
-  // Progress bar component
-  const ProgressBar = ({ value }: { value: number }) => (
+  // Progress bar component - using underscore prefix to indicate it's intentionally unused but kept for future use
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _ProgressBar = ({ value }: { value: number }) => (
     <div className="relative md:h-3 h-2 md:w-12 w-8 rounded-full overflow-hidden shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
       {/* Background (gray part) */}
       <div className="absolute inset-0 bg-gradient-to-r from-slate-200 to-slate-300 border border-[#62748E]/30 rounded-full">
@@ -224,19 +226,13 @@ export function ProjectCard({
     <div className="w-full">
       {/* Card container */}
       <div 
-        className="w-full max-w-full relative bg-gradient-to-br from-white to-neutral-50 rounded-3xl shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 overflow-hidden">
+        className="w-full max-w-full relative bg-gradient-to-br from-slate-800 to-slate-950 rounded-3xl shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),0px_2px_0px_0px_rgba(0,0,0,0.12)] border-3 border-slate-800 overflow-hidden">
         {/* Content container */}
-        <div className="md:p-6 p-4 flex flex-col justify-top items-start gap-4">
-          {/* Title section */}
-          <div className=" flex justify-between items-center gap-2 self-stretch">
-            <div className="text-slate-800 md:text-2xl text-xl font-semibold ml-2">
-              {title}
-            </div>
-            
-          </div>
+          <div className="flex flex-col justify-top items-start">
+          
 
           {/* Main content area */}
-          <div className="relative w-full h-full md:min-h-[500px] min-h-[280px] mb-2 bg-gradient-to-b from-white to-slate-50 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_4px_0px_rgba(28,57,142,0.25)] rounded-2xl border border-slate-200 flex flex-col justify-top items-start overflow-hidden" >
+          <div className="relative w-full h-full md:min-h-[504px] min-h-[280px] bg-slate-950 rounded-2xl flex flex-col justify-top items-start overflow-hidden [mask-image:radial-gradient(120%_70%_at_50%_37%,black_60%,rgba(0,0,0,0.4)_80%,transparent_90%)] [mask-type:alpha]">
             {/* Image/Video carousel */}
             {images.length > 0 && (
               <div className="absolute inset-0 w-full h-full">
@@ -281,7 +277,7 @@ export function ProjectCard({
                   />
                 )}
                 {/* Overlay gradient for better text readability */}
-                <div className="absolute inset-1 top-0.5 h-1/3 rounded-t-xl bg-gradient-to-b from-white/70 via-transparent to-transparent"></div>
+                <div className="absolute inset-0 h-1/3 rounded-t-2xl bg-gradient-to-b from-white/70 via-transparent to-transparent"></div>
               </div>
             )}
 
@@ -293,80 +289,28 @@ export function ProjectCard({
           </div>
 
           {/* Bottom controls */}
-          <div className="self-stretch flex justify-between items-center">
-            {/* Pagination and progress indicator */}
-            <div className="flex md:gap-4 gap-2 px-3 items-center">
-                {(images.length > 0 ? images : description).length === 1 ? (
-                  // Special case for single item
-                  <>
-                    {currentItemIsVideo ? (
-                      // Show progress bar for single video
-                      <div className="relative md:h-3 h-2.5 flex items-center justify-center">
-                        <ProgressBar value={progress} />
-                      </div>
-                    ) : (
-                      // Show blue dot for single image
-                      <div className="relative md:size-3 size-2.5 flex items-center justify-center">
-                        <div className="md:size-3 size-2.5 rounded-full bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] border border-[#2B7FFF] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
-                          <div className="absolute inset-[1px] h-1/2 bg-gradient-to-b from-white/80 to-transparent rounded-t-full" />
-                        </div>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  // Original pagination for multiple items
-                  (images.length > 0 ? images : description).map((_, index) => {
-                    // Determine what type of indicator to show
-                    if (index < selectedIndex) {
-                      // Already seen - blue dot
-                      return (
-                        <button
-                          key={index}
-                          onClick={() => handleSlideChange(index)}
-                          className="relative md:size-3 size-2.5 flex items-center justify-center cursor-pointer"
-                        >
-                          <div className="md:size-3 size-2.5 rounded-full bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] border border-[#2B7FFF] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
-                            <div className="absolute inset-[1px] h-1/2 bg-gradient-to-b from-white/80 to-transparent rounded-t-full" />
-                          </div>
-                        </button>
-                      );
-                    } else if (index === selectedIndex) {
-                      // Current - pill with progress
-                      return (
-                        <button
-                          key={index}
-                          onClick={() => handleSlideChange(index)}
-                          className="relative md:h-3 h-2.5 flex items-center justify-center"
-                        >
-                          <ProgressBar value={progress} />
-                        </button>
-                      );
-                    } else {
-                      // Yet to be seen - gray dot
-                      return (
-                        <button
-                          key={index}
-                          onClick={() => handleSlideChange(index)}
-                          className="relative md:size-3 size-2.5 flex items-center justify-center cursor-pointer"
-                        >
-                          <div className="md:size-3 size-2.5 rounded-full bg-gradient-to-r from-slate-200 to-slate-300 border border-[#62748E]/30 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.15),inset_0px_1px_1px_0px_rgba(255,255,255,0.5)]">
-                            <div className="absolute inset-[1px] h-1/2 bg-gradient-to-b from-white/80 to-transparent rounded-t-full" />
-                          </div>
-                        </button>
-                      );
-                    }
-                  })
-                )}
+          <div className="self-stretch h-[160px] flex flex-col justify-between items-end text-slate-50 md:p-6 md:pt-2 p-4">
+
+            {/* Title section */}
+            <div className=" flex flex-col items-start gap-2 self-stretch">
+              <div className="text-slate-50 md:text-2xl text-xl font-semibold">
+              {title}
               </div>
+              <div className="text-slate-50/70 md:text-base text-xs">
+                {description[selectedIndex]}
+              </div>
+            
+            </div>
+            
 
             {/* Read More button */}
             <Button 
-              className="group text-white font-semibold md:w-[240px] w-fit h-[36px] md:px-6 px-6 bg-gradient-to-b from-blue-700 via-blue-500 to-blue-300 border border-blue-500 rounded-full shadow-[0px_2px_2px_-1px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.0),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:shadow-[0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:border-blue-700 active:shadow-[0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.0),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] transition-all duration-300 relative overflow-hidden active:bg-gradient-to-b active:from-blue-800 active:via-blue-600 active:to-blue-400 cursor-pointer"
+className="isolate group relative text-slate-800 font-semibold md:w-[240px] w-fit h-[36px] md:px-6 px-6 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] hover:bg-[radial-gradient(at_50%_75%,theme(colors.slate.200),theme(colors.slate.300),theme(colors.slate.400))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.25)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.25)_inset] border border-slate-500 rounded-full hover:shadow-[0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_8px_8px_-4px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.25)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.25)_inset] active:shadow-[0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_8px_8px_-4px_rgba(0,0,0,0.0),0px_4px_8px_1px_rgba(0,0,0,0.25)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.25)_inset] active:bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] cursor-pointer  transition-all duration-300 overflow-hidden "
               onClick={navigateToProjectDetail}
             >
                 Read More
               
-              <div className="absolute inset-2 top-0.5 h-1/2 rounded-t-[12px] rounded-b-[4px] bg-gradient-to-b from-white/70 group-active:from-white/30" />
+              <div className="absolute inset-2 top-0.5 h-1/2 rounded-t-[12px] rounded-b-[4px] bg-gradient-to-b from-white/70 to-white/20 group-active:from-white/50 z-10" />
             </Button> 
           </div>
         </div>
