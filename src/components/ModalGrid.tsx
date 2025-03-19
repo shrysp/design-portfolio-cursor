@@ -129,7 +129,7 @@ export default function ModalGrid() {
       </div>
 
       {/* Tab content area */}
-      <div className="relative flex-1 h-[600px] overflow-hidden rounded-lg">
+      <div className="relative flex-1 min-h-[600px] overflow-hidden rounded-lg">
         <div className="w-full h-full relative">
           <AnimatePresence
             mode="wait"
@@ -209,7 +209,7 @@ function NewWorkflowTab() {
             <input
               type="text"
               id="title"
-              className="w-full px-3 py-2 rounded-md border border-[1px] text-sm outline-none transition-all duration-200 ease-in-out bg-white text-[#111827] border-[#D1D5DB] focus:border-[#4F0D52] focus:ring-1 focus:ring-[#972AA1]"
+              className="w-full px-3 py-2 rounded-md border text-sm outline-none transition-all duration-200 ease-in-out bg-white text-[#111827] border-[#D1D5DB] focus:border-[#4F0D52] focus:ring-1 focus:ring-[#972AA1]"
               placeholder="Enter workflow title"
             />
           </div>
@@ -221,7 +221,7 @@ function NewWorkflowTab() {
             <input
               type="text"
               id="structure"
-              className="w-full px-3 py-2 rounded-md border border-[1px] text-sm outline-none transition-all duration-200 ease-in-out bg-white text-[#111827] border-[#D1D5DB] focus:border-[#4F0D52] focus:ring-1 focus:ring-[#972AA1]"
+              className="w-full px-3 py-2 rounded-md border text-sm outline-none transition-all duration-200 ease-in-out bg-white text-[#111827] border-[#D1D5DB] focus:border-[#4F0D52] focus:ring-1 focus:ring-[#972AA1]"
               placeholder="Enter workflow Description"
             />
           </div>
@@ -267,7 +267,7 @@ function NewWorkflowTab() {
             <textarea
               id="description"
               rows={3}
-              className="w-full px-3 py-2 rounded-md border border-[1px] text-sm outline-none transition-all duration-200 ease-in-out bg-white text-[#111827] border-[#D1D5DB] focus:border-[#4F0D52] focus:ring-1 focus:ring-[#972AA1]"
+              className="w-full px-3 py-2 rounded-md border text-sm outline-none transition-all duration-200 ease-in-out bg-white text-[#111827] border-[#D1D5DB] focus:border-[#4F0D52] focus:ring-1 focus:ring-[#972AA1]"
               placeholder="Enter workflow description"
             ></textarea>
             <div className="text-[10px] leading-[14px] text-[#4B5563]">Tip: Change specific keywords into generic keywords for ease of use. Eg. Pizza &gt; Food Name</div>
