@@ -129,8 +129,8 @@ export default function ModalGrid() {
       </div>
 
       {/* Tab content area */}
-      <div className="relative flex-1 min-h-[600px] overflow-hidden rounded-lg">
-        <div className="w-full h-full relative">
+      <div className="relative flex-1   items-center justify-center overflow-hidden rounded-lg">
+        <div className="w-full h-full min-h-[600px] relative items-center justify-center">
           <AnimatePresence
             mode="wait"
             initial={false}

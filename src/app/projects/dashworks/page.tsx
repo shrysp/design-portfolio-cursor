@@ -297,7 +297,7 @@ export default function DashworksProject() {
                         </div>
                     </div>
 
-                    <div className="relative mt-8 w-full bg-slate-100 rounded-3xl overflow-hidden">
+                    <div className="relative w-full mt-8 rounded-3xl overflow-hidden border border-slate-200">
                       <ModalGrid />
                     </div>
 
