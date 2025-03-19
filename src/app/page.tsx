@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import Footer from '@/components/Footer';
 import EmailCopyButton from '@/components/EmailCopyButton';
 import router from 'next/router';
+import ModalGrid from '@/components/ModalGrid';
 
 function BayAreaTimeDisplay() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -61,12 +62,12 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="isolate relative min-h-[276px] flex w-full bg-slate-800 border-3 border-slate-800 rounded-4xl items-center gap-4 overflow-hidden shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_2px_0px_0px_rgba(0,0,0,0.15),0px_1px_1px_0px_rgba(255,255,255,0.07)_inset]"
+          className="isolate relative min-h-[276px] flex w-full bg-slate-800 border-3 border-slate-800 rounded-3xl items-center gap-4 overflow-hidden shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_2px_0px_0px_rgba(0,0,0,0.15),0px_1px_1px_0px_rgba(255,255,255,0.07)_inset]"
         
         >
 
-          <div className="absolute inset-x-[2px] top-0.5 h-1/3 bg-gradient-to-b from-slate-50/20 to-slate-50/0 rounded-t-[26px] rounded-b-[6px] z-10 pointer-events-none"></div>
-          <div className="absolute inset-x-[2px] bottom-0.5 h-1/4 bg-gradient-to-t from-slate-50/10 to-slate-50/0 rounded-t-[6px] rounded-b-[26px] z-10 pointer-events-none"></div>
+          <div className="absolute inset-x-[2px] top-0.5 h-1/3 bg-gradient-to-b from-slate-50/20 to-slate-50/0 rounded-t-[21px] rounded-b-[6px] z-10 pointer-events-none"></div>
+          <div className="absolute inset-x-[2px] bottom-0.5 h-1/4 bg-gradient-to-t from-slate-50/10 to-slate-50/0 rounded-t-[6px] rounded-b-[21px] z-10 pointer-events-none"></div>
           <div className="items-center w-full h-full grid grid-cols-5">
 
             {/* Left side */}
@@ -146,7 +147,7 @@ export default function Home() {
          </motion.div>
 
           {/* Main section */}
-          <motion.div className="grid md:grid-cols-6 grid-cols-1 auto-rows-auto py-2 md:gap-x-6 md:gap-y-6.5 gap-y-6 w-full"
+          <motion.div className="grid md:grid-cols-6 grid-cols-1 auto-rows-auto pb-1.5 pt-2 md:gap-x-6 md:gap-y-12 gap-y-6 w-full"
             variants={containerVariants}
             initial="hidden"
             animate="visible">
@@ -210,7 +211,7 @@ export default function Home() {
              */}
 
             {/* Prototyping section */}
-            <motion.div className="isolate flex flex-col md:col-span-6 col-span-1 gap-8"
+            <motion.div className="isolate flex flex-col md:col-span-6 col-span-1 gap-6"
               variants={gridVariants}>
                 
               <div className='flex flex-col gap-2'>
@@ -226,13 +227,13 @@ export default function Home() {
                       <div className="w-full text-sm font-semibold text-slate-600"> ItinerAI</div>
                       <div className="text-sm leading-6 font-light text-slate-600">My capstone project, where I designed the full experience and built an interactive prototype using Play. Later, I developed an MVP using Cursor to test feasibility.</div>
                     </div>
-                    <div  className="relative w-full col-span-2 aspect-3/4 border border-slate-200  bg-white  rounded-2xl overflow-hidden">
+                    <div  className="relative w-full col-span-2 aspect-3/4 border border-slate-200  bg-white  rounded-3xl overflow-hidden">
                         
                         <div className="relative h-full w-full overflow-hidden">
                           <video src="/videos/Walk-Through-Video.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>   
                         </div>                 
                     </div>
-                    <div  className="relative h-full col-span-2  aspect-3/4 border border-slate-200  bg-white  rounded-2xl overflow-hidden">
+                    <div  className="relative h-full col-span-2  aspect-3/4 border border-slate-200  bg-white  rounded-3xl overflow-hidden">
                         
                         <div className="relative h-full w-full overflow-hidden">
                           <video src="/videos/ItinerAIbuild-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>                    
@@ -246,9 +247,9 @@ export default function Home() {
                     <div className='col-span-4 h-fit flex flex-col gap-2 sticky top-0'>
                       <div className="w-full text-sm font-semibold text-slate-600"> Mindlab</div>
                       <div className="text-sm leading-6 font-light text-slate-600">A way to train your thinking muscle with Perplexity.
-                        Perplexity makes knowledge accessible, but it’s easy to offload thinking to LLMs. I challenged this by designing Mindlab, a prototype that guides thinking instead of spoon-feeding answers—helping users arrive at insights without losing context.</div>
+                        Perplexity makes knowledge accessible, but it&apos;s easy to offload thinking to LLMs. I challenged this by designing Mindlab, a prototype that guides thinking instead of spoon-feeding answers—helping users arrive at insights without losing context.</div>
                      </div>
-                     <div  className="relative h-full aspect-16/9 col-span-4 row-start-1 border border-slate-200  bg-white  rounded-2xl overflow-hidden">
+                     <div  className="relative h-full aspect-16/9 col-span-4 row-start-1 border border-slate-200  bg-white  rounded-3xl overflow-hidden">
                      <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="relative w-full h-full object-cover rounded-xl bg-white"></video>                    
                     </div>
 
@@ -258,15 +259,17 @@ export default function Home() {
             </motion.div>
 
             {/* Design System section */}
-            <motion.div className="isolate flex flex-col md:col-span-6 col-span-1 py-6 gap-8" variants={gridVariants}>
+            <motion.div className="isolate flex flex-col md:col-span-6 col-span-1 gap-6" variants={gridVariants}>
               <div className='flex flex-col gap-2'>
                   <div className="w-full text-base font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
                     Design System
                   </div>
-                  <div className="text-sm leading-6 font-light text-slate-600">At Dashworks, I designed a modal system that balances flexibility and usability for various workflows. Now, I’m bringing select modals to life using Tailwind to showcase my ability to both design and build UI—ensuring consistency while improving developer handoff.</div>
+                  <div className="text-sm leading-6 font-light text-slate-600">At Dashworks, I designed a modal system that balances flexibility and usability for various workflows. Now, I&apos;m bringing select modals to life using Tailwind to showcase my ability to both design and build UI—ensuring consistency while improving developer handoff.</div>
               </div>
 
-              <div className="relative w-full aspect-4/3 bg-slate-200 rounded-2xl grid grid-cols-3 gap-6 py-2"></div>
+              <div className="relative w-full  rounded-3xl overflow-hidden border border-slate-200">
+                <ModalGrid />
+              </div>
             </motion.div>
 
 

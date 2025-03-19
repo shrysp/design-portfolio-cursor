@@ -10,6 +10,7 @@ import Image from 'next/image';
 
 // Import the project data
 import { projectsData } from '@/data/projectsData';
+import ModalGrid from '@/components/ModalGrid';
 
 export default function DashworksProject() {
   const router = useRouter();
@@ -249,6 +250,8 @@ export default function DashworksProject() {
                     <div className='text-base text-slate-600 leading-7'>Our team set a goal to deliver our product faster to meet customer demands and stand out in a competitive market. To reach this goal, we needed a design system for better quality and speed.</div>
                     <div className='aspect-4/3 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/Dashworks-Design-System.png")] bg-cover bg-center overflow-hidden mt-8'></div>
 
+                    
+                    
                     {/* Image comparison slider - React implementation */}
                     <div 
                         className='relative rounded-3xl overflow-hidden mt-8 aspect-4/3' 
@@ -293,6 +296,11 @@ export default function DashworksProject() {
                             </div>
                         </div>
                     </div>
+
+                    <div className="relative mt-8 w-full bg-slate-100 rounded-3xl overflow-hidden">
+                      <ModalGrid />
+                    </div>
+
                 </div>
             </motion.div>
 
