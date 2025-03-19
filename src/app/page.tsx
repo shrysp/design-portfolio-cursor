@@ -154,86 +154,38 @@ export default function Home() {
 
             
 
-            {/* Craft scroll */}
-
-            {/* <motion.div className="isolate flex flex-col md:col-span-6 row-span-2 col-span-1 h-[400px] bg-slate-50 rounded-3xl md:py-6 py-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
+            
+            {/* What I Do Best section */}
+            <motion.div className="isolate flex flex-col md:col-span-6 col-span-1 gap-6 bg-slate-50 rounded-3xl md:p-6 p-4 items-center justify-top border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
               variants={gridVariants}>
-             
-              <div className="relative w-full h-full overflow-hidden">
-                <div className="w-full h-full flex gap-6 overflow-x-auto scrollbar-hide snap-x scroll-pl-8 px-8 py-2">
-                    
-                    <div  className="relative h-full aspect-4/3 bg-white border-4 border-white rounded-2xl snap-start  shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_6px_6px_rgba(0,0,0,0.17)_inset]">
-                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center rounded-t-[12px] rounded-b-[12px] z-20`}></div>
-                        <div className="relative h-full w-full overflow-hidden">
-                          <video src="/videos/Walk-Through-Video.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>   
-                        </div>                 
-                    </div>
-                    <div  className="relative h-full aspect-3/4 bg-white border-4 border-white rounded-2xl snap-start  shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_6px_6px_rgba(0,0,0,0.17)_inset]">
-                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center rounded-t-[12px] rounded-b-[12px] z-20`}></div>
-                        <div className="relative h-full w-full overflow-hidden">
-                          <video src="/videos/ItinerAIbuild-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>                    
-                        </div>
-                    </div>
-                    <div  className="relative h-full aspect-16/9 bg-white border-4 border-white rounded-2xl snap-start  shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_6px_6px_rgba(0,0,0,0.17)_inset]">
-                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center rounded-t-[12px] rounded-b-[12px] z-20`}></div>
-                        <div className="relative h-full w-full overflow-hidden">
-                          <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>                    
-                        </div>
-                    </div>
-                    <div style={{backgroundImage: `url(/images/Craft/Glass-Dock.mp4)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative h-full aspect-16/9 bg-white border-4 border-white rounded-2xl snap-start shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_6px_6px_rgba(0,0,0,0.17)_inset]">
-                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center rounded-t-[12px] rounded-b-[12px] z-20`}></div>
-                        <div className="relative h-full w-full overflow-hidden">
-                          <video src="/images/Craft/Glass-Dock.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>                    
-                        </div>
-                    </div>
-                    <div style={{backgroundImage: `url(/images/Craft/Whop-Modal.mp4)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative h-full aspect-square bg-white border-4 border-white rounded-2xl snap-start shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_6px_6px_rgba(0,0,0,0.17)_inset]">
-                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center rounded-t-[12px] rounded-b-[12px] z-20`}></div>
-                        <div className="relative h-full w-full overflow-hidden">
-                          <video src="/images/Craft/Whop-Modal.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>         
-                        </div>
-                    </div>
-                    <div style={{backgroundImage: `url(/images/Craft/Modals.mp4)`, backgroundSize: 'cover', backgroundPosition: 'center'}} className="relative h-full aspect-16/9 bg-white border-4 border-white rounded-2xl snap-start  shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_0px_6px_6px_rgba(0,0,0,0.17)_inset]">
-                        <div className={`absolute flex inset-[2px] h-1/3 items-center justify-center rounded-t-[12px] rounded-b-[12px] z-20`}></div>
-                        <div className="relative h-full w-full overflow-hidden">
-                          <video src="/images/Craft/Modals.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>                    
-                        </div>
-                    </div>
-                   
-                  
-                  
+                
+              {/* Prototyping section */}
+              <div className='flex flex-col w-full gap-2 items-start'>
+
+                <div className="w-full text-[24px] font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
+                  What I Do Best
                 </div>
-                
-                
 
-              </div>
-              
-            </motion.div>
-             */}
+                <div className="w-full text-base font-semibold text-slate-600 mt-8"> 
+                  Turning Ideas into Interactive Prototypes
 
-            {/* Prototyping section */}
-            <motion.div className="isolate flex flex-col md:col-span-6 col-span-1 gap-6"
-              variants={gridVariants}>
-                
-              <div className='flex flex-col gap-2'>
-                  <div className="w-full text-base font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
-                    Prototyping
-                  </div>
-                  <div className="text-sm leading-6 font-light text-slate-600">I explore new interaction models by building fast, interactive prototypes that refine ideas and test usability early.</div>
+                </div>
+                <div className="text-sm leading-6 font-light text-slate-600">I quickly translate concepts into prototypes to test usability early and refine experiences.</div>
               </div>
 
               <div className="relative w-full h-fit  grid grid-cols-4 gap-4 gap-x-6">
                 
                     <div className='col-span-4 h-fit  space-y-1 row-start-2 sticky top-0'>
                       <div className="w-full text-sm font-semibold text-slate-600"> ItinerAI</div>
-                      <div className="text-sm leading-6 font-light text-slate-600">My capstone project, where I designed the full experience and built an interactive prototype using Play. Later, I developed an MVP using Cursor to test feasibility.</div>
+                      <div className="text-sm leading-6 font-light text-slate-600">My capstone project, where I designed the full experience and built an interactive prototype using Play. Later, I developed an MVP in SwiftUI using Cursor to test feasibility.</div>
                     </div>
-                    <div  className="relative w-full col-span-2 aspect-3/4 border border-slate-200  bg-white  rounded-3xl overflow-hidden">
+                    <div  className="relative w-full col-span-2 aspect-3/4 border border-slate-200  bg-white  rounded-2xl overflow-hidden">
                         
                         <div className="relative h-full w-full overflow-hidden">
                           <video src="/videos/Walk-Through-Video.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>   
                         </div>                 
                     </div>
-                    <div  className="relative h-full col-span-2  aspect-3/4 border border-slate-200  bg-white  rounded-3xl overflow-hidden">
+                    <div  className="relative h-full col-span-2  aspect-3/4 border border-slate-200  bg-white  rounded-2xl overflow-hidden">
                         
                         <div className="relative h-full w-full overflow-hidden">
                           <video src="/videos/ItinerAIbuild-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>                    
@@ -247,30 +199,33 @@ export default function Home() {
                     <div className='col-span-4 h-fit flex flex-col gap-2 sticky top-0'>
                       <div className="w-full text-sm font-semibold text-slate-600"> Mindlab</div>
                       <div className="text-sm leading-6 font-light text-slate-600">A way to train your thinking muscle with Perplexity.
-                        Perplexity makes knowledge accessible, but it&apos;s easy to offload thinking to LLMs. I challenged this by designing Mindlab, a prototype that guides thinking instead of spoon-feeding answers—helping users arrive at insights without losing context.</div>
+                        Perplexity makes knowledge accessible, but it&apos;s easy to offload thinking to LLMs. I challenged this by building Mindlab using V0, a prototype that guides thinking instead of spoon-feeding answers, helping users arrive at insights without losing context.</div>
                      </div>
-                     <div  className="relative h-full aspect-16/9 col-span-4 row-start-1 border border-slate-200  bg-white  rounded-3xl overflow-hidden">
+                     <div  className="relative h-full aspect-16/9 col-span-4 row-start-1 border border-slate-200  bg-white  rounded-2xl overflow-hidden">
                      <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="relative w-full h-full object-cover rounded-xl bg-white"></video>                    
                     </div>
 
                       
                 
               </div>
-            </motion.div>
 
-            {/* Design System section */}
-            <motion.div className="isolate flex flex-col md:col-span-6 col-span-1 gap-6" variants={gridVariants}>
-              <div className='flex flex-col gap-2'>
-                  <div className="w-full text-base font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
-                    Design System
+
+              {/* Design System section */}
+              <div className='flex flex-col gap-2 mt-8'>
+                  <div className="w-full text-base font-semibold text-slate-600"> 
+                    Building Scalable Design Systems
                   </div>
-                  <div className="text-sm leading-6 font-light text-slate-600">At Dashworks, I designed a modal system that balances flexibility and usability for various workflows. Now, I&apos;m bringing select modals to life using Tailwind to showcase my ability to both design and build UI—ensuring consistency while improving developer handoff.</div>
+                  <div className="text-sm leading-6 font-light text-slate-600">At Dashworks, I built a design system that balances flexibility and usability for various workflows. To demonstrate my ability to bring designs to life with precision, I developed select modals using Tailwind below.</div>
               </div>
 
-              <div className="relative w-full  rounded-3xl overflow-hidden border border-slate-200">
+              <div className="relative w-full  rounded-2xl overflow-hidden border border-slate-200">
                 <ModalGrid />
               </div>
+
             </motion.div>
+
+            
+            
 
 
             {/* Projects section */}
