@@ -16,7 +16,7 @@ export default function WeatherWiseProject() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   
   // Get the WeatherWise project data
-  const project = projectsData[1]; // WeatherWise is the second project in the array
+  const project = projectsData[2]; // WeatherWise is the second project in the array
 
   return (
     <div className="min-h-screen flex justify-center bg-gradient-to-b from-slate-50 to-white">

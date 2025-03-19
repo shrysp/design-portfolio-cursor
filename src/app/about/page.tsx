@@ -38,9 +38,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex justify-center bg-gradient-to-b from-slate-50 to-white">
-      <main className="w-full md:max-w-[800px] max-w-[361px] flex flex-col gap-12 py-6">
+      <main className="w-full md:max-w-[800px] max-w-[361px] flex flex-col gap-12">
 
-        <div className="flex flex-col gap-6 items-start border border-slate-200 md:p-8 p-4 md:pb-24 pb-24 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl ">
+        <div className="flex flex-col gap-6 items-start border border-slate-200 md:p-8 p-4 md:pb-24 pb-24 h-[100vh] overflow-y-auto scrollbar-hide">
           {/* Page header */}
          <motion.div
           initial={{ opacity: 0, y: 20 }}

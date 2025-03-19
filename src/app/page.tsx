@@ -29,7 +29,7 @@ function BayAreaTimeDisplay() {
 
   const timeString = new Intl.DateTimeFormat('en-US', options).format(currentTime);
 
-  return <div className='w-full flex justify-end text-slate-300 font-mono font-medium'>{timeString}</div>;
+  return <div className='w-full flex justify-end text-slate-100 font-mono font-medium'>{timeString}</div>;
 }
 
 const gridVariants = {
@@ -52,9 +52,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex justify-center">
-      <main className="relative w-full md:max-w-[800px] max-w-[361px] py-6">
+      <main className="relative w-full md:max-w-[800px] max-w-[361px]">
 
-        <div className="relative flex flex-col gap-6 items-start border border-slate-200 md:p-8 p-4 md:pb-24 pb-24 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl">
+        <div className="relative flex flex-col gap-6 items-start border-x border-slate-200 md:p-8 p-4 md:pb-24 pb-24 h-[100vh] overflow-y-auto scrollbar-hide">
         {/* Hero section */}
           {/* Page header */}
          <motion.div
@@ -65,8 +65,8 @@ export default function Home() {
         
         >
 
-          <div className="absolute inset-x-[2px] top-0.5 h-1/3 bg-gradient-to-b from-slate-50/20 to-slate-50/0 rounded-t-[26px] rounded-b-[6px] z-10"></div>
-          <div className="absolute inset-x-[2px] bottom-0.5 h-1/4 bg-gradient-to-t from-slate-50/10 to-slate-50/0 rounded-t-[6px] rounded-b-[26px] z-10"></div>
+          <div className="absolute inset-x-[2px] top-0.5 h-1/3 bg-gradient-to-b from-slate-50/20 to-slate-50/0 rounded-t-[26px] rounded-b-[6px] z-10 pointer-events-none"></div>
+          <div className="absolute inset-x-[2px] bottom-0.5 h-1/4 bg-gradient-to-t from-slate-50/10 to-slate-50/0 rounded-t-[6px] rounded-b-[26px] z-10 pointer-events-none"></div>
           <div className="items-center w-full h-full grid grid-cols-5">
 
             {/* Left side */}
@@ -137,7 +137,7 @@ export default function Home() {
             <div className='isolate relative w-full h-full col-span-3 justify-between'>
               <div className='relative w-full h-full p-6 flex flex-col justify-between z-10'>
                 <BayAreaTimeDisplay />
-                <div className='w-full flex justify-end text-slate-300 font-mono font-medium'>Bay Area, CA</div>
+                <div className='w-full flex justify-end text-slate-200 font-mono font-medium'>Bay Area, CA</div>
               </div>
               <div className="absolute inset-0  w-full h-full bg-[url('/images/About/About-1.jpeg')] bg-cover bg-[50%_60%] [mask-image:radial-gradient(50%_400%_at_0%_50%,transparent_10%,rgba(0,0,0,0.7)_100%)] [mask-type:alpha]"></div>
             </div>
@@ -145,50 +145,19 @@ export default function Home() {
           
          </motion.div>
 
-          <motion.div className="grid md:grid-cols-6 grid-cols-1 auto-rows-auto md:gap-x-6 md:gap-y-6.5 gap-y-6 w-full"
+          {/* Main section */}
+          <motion.div className="grid md:grid-cols-6 grid-cols-1 auto-rows-auto py-2 md:gap-x-6 md:gap-y-6.5 gap-y-6 w-full"
             variants={containerVariants}
             initial="hidden"
             animate="visible">
 
-            {/* quick Projects links */}
-            {/* <div className="flex flex-col col-span-5 h-32 bg-slate-50 rounded-3xl px-6 p-4 items-center justify-center gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]">
-              <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> See my work here</div>
-              <div className="w-full flex items-center justify-between gap-2">
-                <div className='flex gap-3'>
-                  
-                  <div className='relative flex items-center justify-center gap-1.5 h-8 px-4 text-slate-500 rounded-full bg-radial-[at_50%_75%] from-slate-100 via-slate-200 to-slate-300 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-400 hover:bg-radial-[at_50%_75%] hover:from-slate-200 hover:via-slate-300 hover:to-slate-400 transition-all duration-300 cursor-pointer'>
-                 
-                  <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white/80  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-                    <div className='text-sm font-regular'>ItinerAI</div>
-                    <ArrowSquareOut size={16} weight="regular" />
-                  </div>
+            
 
-                  <div className='relative flex items-center justify-center gap-1.5 h-8 px-4 text-slate-500 rounded-full bg-radial-[at_50%_75%] from-slate-100 via-slate-200 to-slate-300 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-400 hover:bg-radial-[at_50%_75%] hover:from-slate-200 hover:via-slate-300 hover:to-slate-400 transition-all duration-300 cursor-pointer'>
-                 
-                  <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white/80  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-                    <div className='text-sm font-regular'>Dashworks</div>
-                    <ArrowSquareOut size={16} weight="regular" />
+            {/* Craft scroll */}
 
-                  </div>
-
-                  <div className='relative flex items-center justify-center gap-1.5 h-8 px-4 text-slate-500 rounded-full bg-radial-[at_50%_75%] from-slate-100 via-slate-200 to-slate-300 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-400 hover:bg-radial-[at_50%_75%] hover:from-slate-200 hover:via-slate-300 hover:to-slate-400 transition-all duration-300 cursor-pointer'>
-                 
-                  <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white/80  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-                    <div className='text-sm font-regular'>WeatherWise</div>
-                    <ArrowSquareOut size={16} weight="regular" />
-                  </div>
-                  
-                </div>
-              </div>
-            </div> */}
-
-            {/* infinite scroll */}
-            <motion.div className="isolate flex flex-col md:col-span-6 row-span-2 col-span-1 h-[400px] bg-slate-50 rounded-3xl md:py-6 py-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
+            {/* <motion.div className="isolate flex flex-col md:col-span-6 row-span-2 col-span-1 h-[400px] bg-slate-50 rounded-3xl md:py-6 py-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
               variants={gridVariants}>
-              {/* <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
-                Making it feel right
-              </div> */}
-
+             
               <div className="relative w-full h-full overflow-hidden">
                 <div className="w-full h-full flex gap-6 overflow-x-auto scrollbar-hide snap-x scroll-pl-8 px-8 py-2">
                     
@@ -236,11 +205,72 @@ export default function Home() {
                 
 
               </div>
-
-              
               
             </motion.div>
+             */}
 
+            {/* Prototyping section */}
+            <motion.div className="isolate flex flex-col md:col-span-6 col-span-1 gap-8"
+              variants={gridVariants}>
+                
+              <div className='flex flex-col gap-2'>
+                  <div className="w-full text-base font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
+                    Prototyping
+                  </div>
+                  <div className="text-sm leading-6 font-light text-slate-600">I explore new interaction models by building fast, interactive prototypes that refine ideas and test usability early.</div>
+              </div>
+
+              <div className="relative w-full h-fit  grid grid-cols-4 gap-4 gap-x-6">
+                
+                    <div className='col-span-4 h-fit  space-y-1 row-start-2 sticky top-0'>
+                      <div className="w-full text-sm font-semibold text-slate-600"> ItinerAI</div>
+                      <div className="text-sm leading-6 font-light text-slate-600">My capstone project, where I designed the full experience and built an interactive prototype using Play. Later, I developed an MVP using Cursor to test feasibility.</div>
+                    </div>
+                    <div  className="relative w-full col-span-2 aspect-3/4 border border-slate-200  bg-white  rounded-2xl overflow-hidden">
+                        
+                        <div className="relative h-full w-full overflow-hidden">
+                          <video src="/videos/Walk-Through-Video.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>   
+                        </div>                 
+                    </div>
+                    <div  className="relative h-full col-span-2  aspect-3/4 border border-slate-200  bg-white  rounded-2xl overflow-hidden">
+                        
+                        <div className="relative h-full w-full overflow-hidden">
+                          <video src="/videos/ItinerAIbuild-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>                    
+                        </div>
+                    </div>   
+                
+              </div>
+
+              <div className="relative w-full h-fit  grid grid-cols-4 gap-4 gap-x-6">
+                
+                    <div className='col-span-4 h-fit flex flex-col gap-2 sticky top-0'>
+                      <div className="w-full text-sm font-semibold text-slate-600"> Mindlab</div>
+                      <div className="text-sm leading-6 font-light text-slate-600">A way to train your thinking muscle with Perplexity.
+                        Perplexity makes knowledge accessible, but it’s easy to offload thinking to LLMs. I challenged this by designing Mindlab, a prototype that guides thinking instead of spoon-feeding answers—helping users arrive at insights without losing context.</div>
+                     </div>
+                     <div  className="relative h-full aspect-16/9 col-span-4 row-start-1 border border-slate-200  bg-white  rounded-2xl overflow-hidden">
+                     <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="relative w-full h-full object-cover rounded-xl bg-white"></video>                    
+                    </div>
+
+                      
+                
+              </div>
+            </motion.div>
+
+            {/* Design System section */}
+            <motion.div className="isolate flex flex-col md:col-span-6 col-span-1 py-6 gap-8" variants={gridVariants}>
+              <div className='flex flex-col gap-2'>
+                  <div className="w-full text-base font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
+                    Design System
+                  </div>
+                  <div className="text-sm leading-6 font-light text-slate-600">At Dashworks, I designed a modal system that balances flexibility and usability for various workflows. Now, I’m bringing select modals to life using Tailwind to showcase my ability to both design and build UI—ensuring consistency while improving developer handoff.</div>
+              </div>
+
+              <div className="relative w-full aspect-4/3 bg-slate-200 rounded-2xl grid grid-cols-3 gap-6 py-2"></div>
+            </motion.div>
+
+
+            {/* Projects section */}
             <motion.div className="flex flex-col md:col-span-3 col-span-1 row-span-2 bg-slate-50 rounded-3xl md:p-6 p-4 items-center justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
               variants={gridVariants}>
               <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200">Projects</div>
@@ -425,6 +455,8 @@ export default function Home() {
             
 
           </motion.div>
+
+          
 
           <div className="w-full">
             <Footer />

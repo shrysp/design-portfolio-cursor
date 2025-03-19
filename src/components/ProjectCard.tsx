@@ -189,6 +189,7 @@ export function ProjectCard({
     // Map project titles to their dedicated page routes
     const projectRoutes: Record<string, string> = {
       'ItinerAI': '/projects/itinerai',
+      'DashWorks': '/projects/dashworks',
       'WeatherWise': '/projects/weatherwise',
       'ShoeDog': '/projects/shoedog',
       'Fractions': '/projects/fractions'
