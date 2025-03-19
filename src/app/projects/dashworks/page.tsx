@@ -196,7 +196,7 @@ export default function DashworksProject() {
             >
               <div className="">
                 <h2 className="text-base font-semibold text-slate-800 mb-2">What is Dashworks?</h2>
-                <p className="text-slate-600 leading-7">Dashworks is an AI-powered knowledge assistant that helps companies centralize their knowledge scattered across various apps. It provides accurate answers to employee questions by searching across the company's connected applications.</p>
+                <p className="text-slate-600 leading-7">Dashworks is an AI-powered knowledge assistant that helps companies centralize their knowledge scattered across various apps. It provides accurate answers to employee questions by searching across the company&apos;s connected applications.</p>
                 <p className="text-slate-600 leading-7">Dashworks integrates with over 50 apps, including Slack, Jira, Confluence, and Google Drive, to create a unified knowledge base.</p>
               </div>
             </motion.div>
