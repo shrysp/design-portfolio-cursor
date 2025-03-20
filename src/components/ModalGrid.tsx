@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowSquareOut, Code, Play, PencilLine, X, Info } from '@phosphor-icons/react';
+import { ArrowSquareOut, Code, Play, PencilLine, X, Info, Lightning, CaretDown, Copy } from '@phosphor-icons/react';
 import Image from 'next/image';
 
 // Tab data structure
@@ -191,16 +191,16 @@ function NewWorkflowTab() {
         {/* Modal header */}
         <div className="flex items-center justify-between px-6 pt-4 pb-2">
           <div className="flex items-center gap-2">
-            <PencilLine size={20} weight="bold" />
+            <Lightning size={18} weight="bold" />
             <span className="text-xl font-semibold">New Workflow</span>
           </div>
           {/* Close button */}
-          <button className="p-1 rounded-full hover:bg-opacity-10 hover:bg-gray-500">
-            <ArrowSquareOut size={16} weight="bold" className="text-[#6B7280]" />
+          <button className="p-1 rounded-full hover:bg-opacity-10 hover:bg-gray-100 cursor-pointer">
+            <X size={16} weight="bold" className="text-[#6B7280]" />
           </button>
         </div>
         {/* Modal body */}
-        <div className="flex flex-col p-6 gap-6">
+        <div className="flex flex-col p-6 pb-8 gap-4">
           {/* Title input */}
           <div>
             <label htmlFor="title" className="block text-sm font-medium mb-1 text-[#4B5563]">
@@ -246,10 +246,10 @@ function NewWorkflowTab() {
               <div className="text-sm font-medium text-[#4B5563]">Sources</div>
               <div className="flex items-center rounded p-1 bg-[#F9FAFB] border-[#D1D5DB] border">
                 <div className="py-1.5 pr-2 pl-3 rounded-sm border bg-[#FFFFFF] text-[#4F0D52] border-[#D1D5DB]">
-                  <div className="flex items-center gap-1 text-sm">
-                    <div>Apps</div>
+                  <div className="flex items-center gap-1 text-sm divide-x divide-gray-200">
+                    <div className="w-full">Apps</div>
                     <div className="w-1 h-full bg-[#F9FAFB]"></div>
-                    <ArrowSquareOut size={16} weight="bold"/>
+                    <CaretDown size={16} weight="bold"/>
                   </div>
                 </div>
                 <div className="py-1.5 px-3 rounded-sm text-sm text-[#4B5563]">
@@ -276,11 +276,11 @@ function NewWorkflowTab() {
         {/* Modal footer */}
         <div className="flex justify-end px-6 pb-4 pt-2 gap-3">
           {/* Cancel button */}
-          <button className="px-[14px] py-1 text-[14px] leading-[24px] border rounded-md bg-[#FFFFFF] border-[#D1D5DB] text-[#4B5563] active:bg-[#E5E7EB]">
+          <button className="px-[14px] py-1 text-[14px] leading-[24px] border rounded-md bg-[#FFFFFF] border-[#D1D5DB] text-[#4B5563] active:bg-[#E5E7EB] cursor-pointer">
             Cancel
           </button>
           {/* Save button */}
-          <button className="px-[14px] py-1 text-[14px] leading-[24px] rounded-md bg-[#4F0D52] text-white hover:bg-[#3D0A3F]">
+          <button className="px-[14px] py-1 text-[14px] leading-[24px] rounded-md bg-[#4F0D52] text-white hover:bg-[#3D0A3F] cursor-pointer">
             Save
           </button>
         </div>
@@ -324,18 +324,16 @@ function PreviewTab() {
         {/* Modal header */}
         <div className="flex items-center justify-between px-6 pt-4 pb-2">
           <div className="flex items-center gap-2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M13 3L4 14H13L11 21L20 10H11L13 3Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <Lightning size={18} weight="bold"/>
             <span className="text-xl font-semibold">Workflow Preview</span>
           </div>
-          <button className="p-1 rounded-full hover:bg-opacity-10 hover:bg-gray-500">
+          <button className="p-1 rounded-full hover:bg-opacity-10 hover:bg-gray-100 cursor-pointer">
             <X size={16} weight="bold" className="text-[#6B7280]" />
           </button>
         </div>
         
         {/* Modal body */}
-        <div className="flex flex-col p-6 gap-6">
+        <div className="flex flex-col p-6 pb-8 gap-4">
           {/* Title */}
           <motion.div>
             <div className="text-sm font-medium mb-1 text-[#4B5563]">
@@ -376,11 +374,11 @@ function PreviewTab() {
               </div>
               <div className="flex items-center gap-2">
                 <Image 
-                  src="/images/projects/Dashworks/profile.jpeg" 
+                  src="/images/About/About-1.jpeg" 
                   alt="User" 
                   width={24} 
                   height={24}
-                  className="rounded-full object-cover"
+                  className="rounded-full object-cover object-center aspect-square"
                 />
                 <span className="text-base leading-6 text-[#111827]">You</span>
               </div>
@@ -430,15 +428,22 @@ function PreviewTab() {
         </div>
         
         {/* Modal footer */}
-        <motion.div className="flex justify-end px-6 pb-4 pt-2 gap-3">
+        <motion.div className="flex justify-between px-6 pb-4 pt-2 gap-3">
+            
+            <div className="size-7 flex items-center justify-center text-gray-600 rounded-sm hover:bg-gray-100 cursor-pointer">
+                <Copy size={16} weight="bold" />
+            </div>
+
+            <div className="flex gap-3">
           {/* Cancel button */}
-          <button className="px-[14px] py-1 text-[14px] leading-[24px] border rounded-md bg-[#FFFFFF] border-[#D1D5DB] text-[#4B5563] active:bg-[#E5E7EB]">
+          <button className="px-[14px] py-1 text-[14px] leading-[24px] border rounded-md bg-[#FFFFFF] border-[#D1D5DB] text-[#4B5563] active:bg-[#E5E7EB] cursor-pointer">
             Cancel
           </button>
           {/* Use button */}
-          <button className="px-[14px] py-1 text-[14px] leading-[24px] rounded-md bg-[#4F0D52] text-white hover:bg-[#3D0A3F]">
+          <button className="px-[14px] py-1 text-[14px] leading-[24px] rounded-md bg-[#4F0D52] text-white hover:bg-[#3D0A3F] cursor-pointer">
             Use
           </button>
+          </div>
         </motion.div>
       </motion.div>
     </motion.div>
@@ -479,62 +484,62 @@ function ApiTab() {
       <div className="w-[480px] border rounded-lg shadow-[0px_24px_24px_-12px] shadow-black/10 bg-white text-[#111827] border-[#D1D5DB]">
         {/* Modal header */}
         <div className="flex items-center justify-between px-6 pt-4 pb-2">
-          <div className="flex items-center gap-2">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <div className="flex items-center gap-2.5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M2.5 2.5L16 1.5L22 5.5V21.5L5.5 22L2.5 2.5Z" fill="white"/>
               <path fillRule="evenodd" clipRule="evenodd" d="M14.9774 1.05017L2.76757 1.94864C1.78307 2.03385 1.43994 2.67567 1.43994 3.44508V16.7898C1.43994 17.3894 1.65378 17.9019 2.16814 18.5868L5.03833 22.308C5.50979 22.9072 5.93821 23.0353 6.83845 22.9924L21.0177 22.1369C22.2169 22.0517 22.5599 21.4953 22.5599 20.5543V5.54117C22.5599 5.05475 22.3674 4.91424 21.7996 4.50005C21.7684 4.47732 21.736 4.45371 21.7025 4.42914L17.8049 1.69181C16.8625 1.00774 16.4768 0.921665 14.9774 1.05017ZM7.15994 5.29491C6.0023 5.37301 5.73925 5.39076 5.08182 4.85704L3.41004 3.53117C3.23954 3.35972 3.32505 3.14588 3.75317 3.10342L15.4916 2.24791C16.4766 2.16219 16.9906 2.50495 17.3763 2.80415L19.3897 4.25857C19.4754 4.30117 19.6892 4.55747 19.4321 4.55747L7.30939 5.28487L7.15994 5.29491ZM5.80965 20.4258V7.68015C5.80965 7.12421 5.98103 6.8674 6.49481 6.82421L20.4173 6.01182C20.8896 5.96907 21.1034 6.26871 21.1034 6.82421V19.4844C21.1034 20.0409 21.0174 20.5119 20.2461 20.5543L6.92329 21.3247C6.15227 21.3671 5.80965 21.1108 5.80965 20.4258ZM18.9619 8.36384C19.0473 8.7492 18.9619 9.13413 18.5756 9.17747L17.9336 9.30529V18.7149C17.3763 19.0143 16.8624 19.1854 16.4341 19.1854C15.7484 19.1854 15.5767 18.9714 15.0631 18.3301L10.8642 11.7433V18.1163L12.1929 18.4159C12.1929 18.4159 12.1929 19.1854 11.121 19.1854L8.16578 19.3567C8.07991 19.1854 8.16578 18.758 8.46549 18.6724L9.23667 18.4588V10.0326L8.16593 9.94689C8.08005 9.56159 8.29389 9.00602 8.89413 8.9629L12.0644 8.74935L16.4341 15.4219V9.51913L15.32 9.39139C15.2345 8.92029 15.5767 8.57827 16.0052 8.53581L18.9619 8.36384Z" fill="black"/>
             </svg>
             <span className="text-xl font-semibold">Connect Notion</span>
           </div>
-          <button className="p-1 rounded-full hover:bg-opacity-10 hover:bg-gray-500">
+          <button className="p-1 rounded-full hover:bg-opacity-10 hover:bg-gray-100 cursor-pointer">
             <X size={16} weight="bold" className="text-[#6B7280]" />
           </button>
         </div>
         
         {/* Modal body */}
-        <div className="flex flex-col px-6 py-4 gap-6">
+        <div className="flex flex-col p-6 pb-8 gap-4">
           {/* Info box */}
-          <div className="flex items-start gap-3 py-4 px-3 rounded-md border border-[#D1D5DB]">
+          <div className="flex items-start gap-3 py-4 pl-3 pr-4 rounded-md border border-[#D1D5DB]">
             <div className="flex p-1 items-center justify-center size-7">
               <Info size={20} className="text-[#4B5563]" />
             </div>
-            <p className="text-[14px] leading-[21px] text-[#4B5563]">
+            <p className="text-[14px] mt-1 leading-[21px] text-[#4B5563]">
               Dashworks will only show each user content they already have access to in
               Notion. Users will not see anyone else&apos;s private content.
             </p>
           </div>
           
-          <p className="text-[14px] leading-[21px] text-[#111827]">
+          <p className="text-[14px] leading-[21px] text-[#4B5563]">
             Follow the set-up process in order to connect Notion to Dashworks. If you run into
             difficulty reach out to <a href="#" className="text-[#972AA1] hover:underline">Support</a>.
           </p>
 
           {/* Install Dashworks Extension */}
           <div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-6 h-6 rounded-full border border-[#D1D5DB] text-[#4B5563]">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center text-sm justify-center w-6 h-6 rounded-full border border-[#D1D5DB] text-[#4B5563]">
                 1
               </div>
               <h3 className="text-base leading-6 font-semibold text-[#111827]">Install Dashworks Extension</h3>
             </div>
-            <p className="mt-3 text-[14px] leading-[21px] text-[#4B5563]">
+            <p className="mt-2 text-[14px] leading-[21px] text-[#4B5563]">
               Notion connection requires the Dashworks browser extension. Please contact support if
               you have questions.
             </p>
-            <button className="mt-3 px-4 py-2 rounded-md text-[14px] leading-[21px] border bg-[#FFFFFF] border-[#D1D5DB] text-[#4B5563] active:bg-[#E5E7EB]">
+            <button className="mt-2 px-4 py-2 rounded-md text-[14px] leading-[21px] border bg-[#FFFFFF] border-[#D1D5DB] text-[#4B5563] active:bg-[#E5E7EB]">
               Install Extension
             </button>
           </div>
 
           {/* Grant Notion access */}
           <div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-6 h-6 rounded-full border border-[#D1D5DB] text-[#4B5563]">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center text-sm justify-center w-6 h-6 rounded-full border border-[#D1D5DB] text-[#4B5563]">
                 2
               </div>
               <h3 className="text-base leading-6 font-semibold text-[#111827]">Grant Notion access</h3>
             </div>
-            <p className="mt-3 text-[14px] leading-[21px] text-[#4B5563]">
+            <p className="mt-2 text-[14px] leading-[21px] text-[#4B5563]">
               Click Connect and select the pages Dash works can search. We recommend selecting all
               top-level pages for complete results.
             </p>
@@ -543,10 +548,10 @@ function ApiTab() {
         
         {/* Modal footer */}
         <div className="flex justify-end items-center px-6 pb-4 pt-2 gap-3">
-          <button className="px-[14px] py-1 text-[14px] leading-[24px] border rounded-md bg-[#FFFFFF] border-[#D1D5DB] text-[#4B5563] active:bg-[#E5E7EB]">
+          <button className="px-[14px] py-1 text-[14px] leading-[24px] border rounded-md bg-[#FFFFFF] border-[#D1D5DB] text-[#4B5563] active:bg-[#E5E7EB] cursor-pointer">
             Cancel
           </button>
-          <button className="px-[14px] py-1 text-[14px] leading-[24px] rounded-md bg-[#4F0D52] text-white hover:bg-[#3D0A3F]">
+          <button className="px-[14px] py-1 text-[14px] leading-[24px] rounded-md bg-[#4F0D52] text-white hover:bg-[#3D0A3F] opacity-30">
             Connect
           </button>
         </div>
