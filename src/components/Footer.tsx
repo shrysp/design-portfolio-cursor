@@ -8,10 +8,13 @@ import Image from 'next/image';
 export default function Footer() {
   return (
     <div className="isolate relative flex flex-col-reverse w-full md:col-span-7 col-span-1 h-fit border border-slate-200 rounded-2xl md:p-6 p-4 items-center justify-center gap-2.5">
+      <div className='flex w-full items-center gap-2 justify-between'>
+        <p className='text-slate-500 text-sm'>© 2025 Shreyas Patil</p>
+        <div className='text font-medium text-slate-500 flex items-center'>Made with &nbsp; <span className='text-xs'> ❤️ </span> &nbsp; and &nbsp; <Image src="/images/About/Cursor-Icon.png" alt="Cursor" width={20} height={20} className="h-5 inline-block" /> </div>
+      </div>
       
-      <div className='text font-medium text-slate-500 flex items-center'>Made with &nbsp; <span className='text-xs'> ❤️ </span> &nbsp; and &nbsp; <Image src="/images/About/Cursor-Icon.png" alt="Cursor" width={20} height={20} className="h-5 inline-block" /> </div>
 
-      <div className="flex items-center justify-center gap-3 pb-2.5 border-b border-slate-200">
+      <div className="flex w-full items-center justify-start gap-3 pb-2.5 border-b border-slate-200">
         
         <a 
           href="https://x.com/ShreyasPatil_" 

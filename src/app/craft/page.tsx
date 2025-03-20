@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/navigation';
 
@@ -104,10 +103,7 @@ export default function Craft() {
             <Footer />
           </div>
         
-        <div className="fixed flex items-center justify-center left-0 right-0 bottom-8 z-10">
-          <Navbar />
-        </div>
-
+        
         </div>
       </main>
     </div>

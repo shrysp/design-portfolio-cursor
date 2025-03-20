@@ -43,41 +43,40 @@ export const projectsData = [
   },
   {
     title: "DashWorks",
-    description: ["..."],
+    description: ["AI-powered knowledge assistant helping companies centralize scattered information."],
     
     images: [
       "/images/projects/thumbnails/Dashworks-Thumbnail.webp",
       "/images/projects/Dashworks/Dashworks-Onboarding-1.png",
+      "/images/projects/Dashworks/Dashworks-Onboarding-2.png",
+      "/images/projects/Dashworks/Dashworks-Website-1.png",
+      "/images/projects/Dashworks/Dashworks-Website-2.png",
+      "/images/projects/Dashworks/Dashworks-Website-3.png",
+      "/images/projects/Dashworks/Dashworks-Design-System.png",
+      "/images/projects/Dashworks/Audit.png",
+      "/images/projects/Dashworks/How-Dashworks-works.png",
+      "/images/projects/Dashworks/Light.png",
+      "/images/projects/Dashworks/Dark.png"
     ],
     // Additional information specific to this project
-    role: "Lead UI/UX Designer",
-    timeline: "Jan 2023 - Apr 2023 (4 months)",
-    challenge: "The client needed a scalable design system that could accommodate rapid growth while maintaining consistency across multiple platforms. The existing design was fragmented and led to inconsistent user experiences.",
-    solution: "I created a comprehensive design system with modular components that could be easily combined and customized. This included a detailed style guide, component library, and usage documentation.",
+    role: "Product Designer Intern",
+    timeline: "Jan 2024 - Apr 2024 (4 months)",
+    challenge: "Speeding up product development and simplifying onboarding to help teams quickly grasp and benefit from the product.",
+    solution: "Created a comprehensive design system with modular components and redesigned the onboarding process to minimize setup time.",
     outcome: [
-      "Efficiency: The new design system reduced design-to-development handoff time by 40%",
-      "Consistency: Improved overall design consistency across all platforms",
-      "Scalability: The client was able to scale their product more efficiently with the new system in place"
+      "Created a comprehensive design system that improved product development speed",
+      "Redesigned website and social media presence resulting in increased traffic",
+      "Simplified onboarding process to help teams quickly start using the product"
     ],
     process: [
-      "Research: Conducted an audit of existing UI elements and identified inconsistencies",
-      "Foundation: Created a design token system for colors, typography, spacing, and other foundational elements",
-      "Components: Designed core components with multiple states and variants",
-      "Documentation: Built a component library in Figma with proper documentation",
-      "Implementation: Collaborated with developers to ensure proper implementation"
+      "Conducted a comprehensive product audit to identify areas for improvement",
+      "Developed a design system for better quality and development speed",
+      "Redesigned website and social media presence",
+      "Simplified the onboarding process"
     ],
     team: [
-      "Shreyas (Lead UI/UX Designer)",
-      "Alex Chen (Product Manager)",
-      "Maria Rodriguez (Frontend Developer)",
-      "David Kim (Backend Developer)"
-    ],
-    testimonial: [
-      {
-        quote: "The design system Shreyas created has transformed how our team works. We're now able to design and develop new features much faster while maintaining a consistent look and feel across our entire platform.",
-        name: "Alex Chen",
-        role: "Product Manager at ItinerAI"
-      }
+      "Shreyas (Product Designer Intern)",
+      "Aahel Iyer (Team Lead)"
     ]
   },
   

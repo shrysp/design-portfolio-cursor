@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import Navbar from '@/components/Navbar';
 import { ProjectCard } from '@/components/ProjectCard';
 import Footer from '@/components/Footer';
 
@@ -58,10 +57,6 @@ export default function Projects() {
             <Footer />
           </div>
         
-            <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-8 z-10">
-          <Navbar />
-            </div>
-
         </div>
         
           

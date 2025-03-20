@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, SplitHorizontal } from '@phosphor-icons/react';
-import Navbar from '@/components/Navbar';
+import { ArrowLeft, SplitHorizontal, ArrowRight } from '@phosphor-icons/react';
 import Image from 'next/image';
+import EmailCopyButton from '@/components/EmailCopyButton';
+import { LinkedinLogo, XLogo } from '@phosphor-icons/react';
 
 // Import the project data
 import { projectsData } from '@/data/projectsData';
@@ -76,8 +77,8 @@ export default function DashworksProject() {
 
   return (
     <div className="min-h-screen flex justify-center bg-gradient-to-b from-slate-50 to-white">
-      <main className="w-full max-w-[800px] flex flex-col gap-12 py-6">
-        <div className="flex flex-col gap-8 items-start border border-slate-200 p-8 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl">
+      <main className="w-full max-w-[800px] flex flex-col gap-12">
+        <div className="flex flex-col gap-8 items-start border border-slate-200 md:p-8 p-4 md:pb-24 pb-24 h-[100vh] overflow-y-auto scrollbar-hide">
           {/* Back button and header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -90,12 +91,7 @@ export default function DashworksProject() {
             <motion.button
                       key="back-button"
                       layoutId="back-button"
-                      layout="position"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{
-                        duration: 0.3
-                      }}
+                      
                       onClick={() => router.push('/projects')}
                       
                       className="group relative rounded-full p-1 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-amber-900 cursor-pointer hover:bg-[radial-gradient(at_50%_75%,theme(colors.amber.300),theme(colors.amber.500),theme(colors.amber.400))] active:scale-95 hover:shadow-[0px_2px_2px_-1px_rgba(193,0,7,0.25),0px_4px_8px_1px_rgba(193,0,7,0.25)_inset,0px_-2px_2px_0px_rgba(193,0,7,0.25)_inset] hover:border-amber-700 transition-all duration-300"
@@ -103,7 +99,7 @@ export default function DashworksProject() {
                     >
                       <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[3px] top-0.5 h-1/2 transition-all duration-300"></div>
                       <ArrowLeft size={20} weight="bold" />
-                    </motion.button>
+            </motion.button>
 
             <h1 className="text-[24px] font-bold text-slate-800">
               {project.title}
@@ -121,9 +117,9 @@ export default function DashworksProject() {
               className="w-full aspect-[4/3] rounded-3xl border border-slate-200 overflow-hidden mb-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12)]"
             >
               <Image
-                src={project.images[selectedImageIndex]}
+                src={project.images[selectedImageIndex + 1]}
                 alt={`${project.title} - main image`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover bg-slate-100"
                 width={1200}
                 height={800}
                 priority={selectedImageIndex === 0}
@@ -138,13 +134,13 @@ export default function DashworksProject() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
-              className="flex gap-4 mb-6 overflow-x-auto p-2"
+              className="flex flex-wrap gap-4 mb-6 overflow-x-auto p-2"
             >
-              {project.images.map((image, index) => (
+              {project.images.slice(1).map((image, index) => (
                 <div
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`w-20 h-20 rounded-lg overflow-hidden cursor-pointer transition-all duration-200 ${
+                  className={`w-20 h-20 rounded-lg bg-slate-100 overflow-hidden cursor-pointer transition-all duration-200 ${
                     selectedImageIndex === index
                       ? 'ring-2 ring-blue-500 ring-offset-2'
                       : 'opacity-70 hover:opacity-100 border border-slate-200'
@@ -296,7 +292,7 @@ export default function DashworksProject() {
                         </div>
                     </div>
 
-                    <div className="relative w-full mt-8 rounded-3xl overflow-hidden border border-slate-200">
+                    <div className="relative w-full mt-8 rounded-3xl overflow-hidden border border-slate-100">
                       <ModalGrid />
                     </div>
 
@@ -313,9 +309,9 @@ export default function DashworksProject() {
                 <h2 className="text-base font-semibold text-slate-800 mb-2">New Website</h2>
                 <div className='flex flex-col gap-2'>
                     <div className='text-base text-slate-600 leading-7'>I led a comprehensive redesign of our website and social media presence. Managing a team of freelance developers and designers, we crafted a fresh look with branded graphics and collateral. This effort resulted in a substantial increase in website traffic, reaching a significantly larger audience.</div>
-                    <div className='aspect-4/3 rounded-3xl bg-slate-200 bg-[url("/images/projects/Dashworks/Dashworks-Website-1.png")] bg-cover bg-center overflow-hidden mt-8'></div>
-                    <div className='aspect-4/3 rounded-3xl bg-slate-200 bg-[url("/images/projects/Dashworks/Dashworks-Website-2.png")] bg-cover bg-center overflow-hidden mt-8'></div>
-                    <div className='aspect-4/3 rounded-3xl bg-slate-200 bg-[url("/images/projects/Dashworks/Dashworks-Website-3.png")] bg-cover bg-center overflow-hidden mt-8'></div>
+                    <div className='aspect-4/3 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/Dashworks-Website-1.png")] bg-cover bg-center overflow-hidden mt-8'></div>
+                    <div className='aspect-4/3 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/Dashworks-Website-2.png")] bg-cover bg-center overflow-hidden mt-8'></div>
+                    <div className='aspect-4/3 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/Dashworks-Website-3.png")] bg-cover bg-center overflow-hidden mt-8'></div>
                 </div>
             </motion.div>
 
@@ -329,18 +325,89 @@ export default function DashworksProject() {
                 <h2 className="text-base font-semibold text-slate-800 mb-2">Onboarding</h2>
                 <div className='flex flex-col gap-2'>
                     <div className='text-base text-slate-600 leading-7'>Redesigning onboarding to minimize setup time and help teams quickly grasp and benefit from the product.</div>
-                    <div className='aspect-4/3 rounded-3xl bg-slate-200 bg-[url("/images/projects/Dashworks/Dashworks-Onboarding-1.png")] bg-cover bg-center overflow-hidden mt-8'></div>
-                    <div className='aspect-4/3 rounded-3xl bg-slate-200 bg-[url("/images/projects/Dashworks/Dashworks-Onboarding-2.png")] bg-cover bg-center overflow-hidden mt-8'></div>
+                    <div className='aspect-4/3 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/Dashworks-Onboarding-1.png")] bg-cover bg-center overflow-hidden mt-8'></div>
+                    <div className='aspect-4/3 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/Dashworks-Onboarding-2.png")] bg-cover bg-center overflow-hidden mt-8'></div>
                 </div>
             </motion.div>
 
             
           </div>
 
-          {/* Navigation */}
-          <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-8 z-10">
-            <Navbar />
+          {/* Footer */}
+          <div className="isolate relative flex flex-col-reverse w-full md:col-span-7 col-span-1 h-fit border border-slate-200 rounded-2xl md:p-6 p-4 items-center justify-center gap-2.5">
+            <div className='flex w-full items-center gap-2 justify-between'>
+        <p className='text-slate-500 text-sm'>© 2025 Shreyas Patil</p>
+        <div className='text font-medium text-slate-500 flex items-center'>Made with &nbsp; <span className='text-xs'> ❤️ </span> &nbsp; and &nbsp; <Image src="/images/About/Cursor-Icon.png" alt="Cursor" width={20} height={20} className="h-5 inline-block" /> </div>
+            </div>
+      
+
+            <div className="flex w-full items-center justify-start gap-3 pb-2.5 border-b border-slate-200">
+        
+        <a 
+          href="https://x.com/ShreyasPatil_" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-slate-400 via-slate-600 to-slate-800 hover:from-slate-500 hover:via-slate-700 hover:to-slate-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-700 cursor-pointer transition-all duration-300'
+        >                  
+          <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
+          <XLogo size={18} weight="fill" />
+        </a>
+
+        
+
+        <button className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-red-400 via-red-600 to-red-800 hover:from-red-500 hover:via-red-700 hover:to-red-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-red-700 cursor-pointer transition-all duration-300'>                  
+          <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10 pointer-events-none`}></div>
+          <EmailCopyButton />
+        </button>
+
+        <a 
+          href="https://www.linkedin.com/in/shreyastpatil/" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 hover:from-blue-400 hover:via-blue-600 hover:to-blue-800 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-blue-700 cursor-pointer transition-all duration-300'
+        >                  
+          <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
+          <LinkedinLogo size={18} weight="fill" />
+        </a>
+            </div>
+
+            <div className='w-full text-slate-500 text-sm flex items-center justify-between mb-6'>
+
+              <div className='flex items-center gap-2'>
+              <button
+                      key="back-button"
+                      onClick={() => router.push('/projects/itinerai')}
+                      
+                      className="group relative rounded-full p-0.5 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-white cursor-pointer hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.400))] active:scale-95 hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:border-blue-700 transition-all duration-300"
+                      aria-label="Previous Project"
+                    >
+                      <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[3px] top-0.5 h-1/2 transition-all duration-300"></div>
+                      <ArrowLeft size={14} weight="bold" />
+              </button>
+                <div className='text-xl font-medium'>Itinerai</div>
+              </div>
+
+
+              <div className='flex items-center gap-2'>
+                <div className='text-slate-500 text-xl'>Weatherwise</div>
+                <button
+                      key="back-button"
+                      onClick={() => router.push('/projects/weatherwise')}
+                      
+                      className="group relative rounded-full p-0.5 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-white cursor-pointer hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.400))] active:scale-95 hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:border-blue-700 transition-all duration-300"
+                      aria-label="Previous Project"
+                    >
+                      <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[3px] top-0.5 h-1/2 transition-all duration-300"></div>
+                      <ArrowRight size={14} weight="bold" />
+              </button>
+              </div>
+
+              
+
+            </div>
           </div>
+
+          
         </div>
 
         

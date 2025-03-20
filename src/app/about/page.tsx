@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import Navbar from '@/components/Navbar';
 import { LinkedinLogo, XLogo, ReadCvLogo } from '@phosphor-icons/react';
 import React from 'react';
 import VerticalCarousel from '@/components/VerticalCarousel';
@@ -312,10 +311,7 @@ export default function Home() {
           </div>
 
         </div>
-        
-        <div className="fixed flex items-center justify-center left-0 right-0 bottom-8 z-10">
-          <Navbar />
-        </div>
+       
 
         
       </main>

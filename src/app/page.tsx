@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import Navbar from '@/components/Navbar';
 import { ArrowSquareOut, XLogo, LinkedinLogo } from '@phosphor-icons/react';
 import React, { useState, useEffect } from 'react';
 import Footer from '@/components/Footer';
@@ -86,6 +85,19 @@ export default function Home() {
               {/* bottom */}
               <div className='flex flex-col gap-3 items-start'>
 
+                <div className='relative isolate flex items-center justify-center gap-2'>
+
+                  <div className='absolute isolate left-0 flex items-center justify-center size-2 bg-radial-[at_50%_75%] from-green-500 via-green-600 to-green-700 rounded-full -z-10 animate-[ping_3s_ease-in-out_infinite]'></div>
+
+                  <div className='relative isolate flex items-center justify-center size-2 bg-radial-[at_50%_75%] from-green-500 via-green-600 to-green-700 rounded-full'>
+                    <div className='absolute inset-[1px] top-[0.5px] h-1/2 bg-gradient-to-b from-white/70 to-white/20 rounded-t-[24px] rounded-b-[6px]'></div>
+                  </div>
+                  <p className="text-base text-slate-300 font-medium">
+                    Looking for new opportunities!
+                  </p>
+
+                </div>
+
                 <div className="flex items-center justify-center gap-3">
         
                   <a 
@@ -116,20 +128,6 @@ export default function Home() {
                   </a>
                 </div>
 
-                <div className='relative isolate flex items-center justify-center gap-2'>
-
-                  <div className='absolute isolate left-0 flex items-center justify-center size-2 bg-radial-[at_50%_75%] from-green-500 via-green-600 to-green-700 rounded-full -z-10 animate-[ping_3s_ease-in-out_infinite]'></div>
-
-                  <div className='relative isolate flex items-center justify-center size-2 bg-radial-[at_50%_75%] from-green-500 via-green-600 to-green-700 rounded-full'>
-                    <div className='absolute inset-[1px] top-[0.5px] h-1/2 bg-gradient-to-b from-white/70 to-white/20 rounded-t-[24px] rounded-b-[6px]'></div>
-                  </div>
-                  <p className="text-base text-slate-300 font-medium">
-                    Looking for new opportunities!
-                  </p>
-
-                </div>
-
-                
               </div>
 
             </div>
@@ -424,10 +422,6 @@ export default function Home() {
             
         </div>
         
-        
-        <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-8 z-10">
-          <Navbar />
-        </div>
         
         
         
