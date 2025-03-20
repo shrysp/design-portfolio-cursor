@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
+import { ArrowLeft } from '@phosphor-icons/react';
 import EmailCopyButton from '@/components/EmailCopyButton';
 import { LinkedinLogo, XLogo } from '@phosphor-icons/react';
 import Image from 'next/image';
@@ -16,7 +16,7 @@ export default function FractionsProject() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   
   // Get the Fractions project data
-  const project = projectsData[3]; // Fractions is the fourth project in the array
+  const project = projectsData[4]; // Fractions is the fourth project in the array
 
   return (
     <div className="min-h-screen flex justify-center bg-gradient-to-b from-slate-50 to-white">
@@ -29,14 +29,14 @@ export default function FractionsProject() {
             transition={{ duration: 0.3 }}
             className="flex w-full items-center gap-4 border-b border-slate-200 pb-4"
           >
-            <motion.div
+            <button
               onClick={() => router.push('/projects')}
-              className={`group relative flex items-center justify-center text-white/80 size-[32px] border border-blue-700 bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] rounded-full cursor-pointer
-                active:bg-radial-[at_50%_75%] active:from-blue-300 active:via-blue-500 active:to-blue-700 active:border-blue-700 active:text-white/80 active:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset]`}
+              className="group relative rounded-full p-1 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-amber-900 transition-colors cursor-pointer active:scale-95 hover:bg-[radial-gradient(at_50%_75%,theme(colors.amber.300),theme(colors.amber.500),theme(colors.amber.400))] active:scale-95 transition-all duration-300 hover:shadow-[0px_2px_2px_-1px_rgba(193,0,7,0.25),0px_4px_8px_1px_rgba(193,0,7,0.25)_inset,0px_-2px_2px_0px_rgba(193,0,7,0.25)_inset] hover:border-amber-700 transition-all duration-300"
+              aria-label="Back"
             >
-              <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
+              <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[3px] top-0.5 h-1/2 transition-all duration-300"></div>
               <ArrowLeft size={20} weight="bold" />
-            </motion.div>
+            </button>
             <h1 className="text-[24px] font-bold text-slate-800">
               {project.title}
             </h1>
@@ -263,7 +263,7 @@ export default function FractionsProject() {
               <div className='flex items-center gap-2'>
               <button
                       key="back-button"
-                      onClick={() => router.push('/projects/itinerai')}
+                      onClick={() => router.push('/projects/shoedog')}
                       
                       className="group relative rounded-full p-0.5 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-white cursor-pointer hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.400))] active:scale-95 hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:border-blue-700 transition-all duration-300"
                       aria-label="Previous Project"
@@ -271,23 +271,11 @@ export default function FractionsProject() {
                       <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[3px] top-0.5 h-1/2 transition-all duration-300"></div>
                       <ArrowLeft size={14} weight="bold" />
               </button>
-                <div className='text-xl font-medium'>Itinerai</div>
+                <div className='text-xl font-medium'>Shoedog</div>
               </div>
 
 
-              <div className='flex items-center gap-2'>
-                <div className='text-slate-500 text-xl'>Weatherwise</div>
-                <button
-                      key="back-button"
-                      onClick={() => router.push('/projects/weatherwise')}
-                      
-                      className="group relative rounded-full p-0.5 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-white cursor-pointer hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.400))] active:scale-95 hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:border-blue-700 transition-all duration-300"
-                      aria-label="Previous Project"
-                    >
-                      <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[3px] top-0.5 h-1/2 transition-all duration-300"></div>
-                      <ArrowRight size={14} weight="bold" />
-              </button>
-              </div>
+              
 
               
 

@@ -31,23 +31,15 @@ export default function WeatherWiseProject() {
           >
             
 
-            <motion.button
+            <button
                       key="back-button"
-                      layoutId="back-button"
-                      layout="position"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{
-                        duration: 0.3
-                      }}
                       onClick={() => router.push('/projects')}
-                      
                       className="group relative rounded-full p-1 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-amber-900 transition-colors cursor-pointer active:scale-95 hover:bg-[radial-gradient(at_50%_75%,theme(colors.amber.300),theme(colors.amber.500),theme(colors.amber.400))] active:scale-95 transition-all duration-300 hover:shadow-[0px_2px_2px_-1px_rgba(193,0,7,0.25),0px_4px_8px_1px_rgba(193,0,7,0.25)_inset,0px_-2px_2px_0px_rgba(193,0,7,0.25)_inset] hover:border-amber-700 transition-all duration-300"
                       aria-label="Back"
                     >
                       <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[3px] top-0.5 h-1/2 transition-all duration-300"></div>
                       <ArrowLeft size={20} weight="bold" />
-                    </motion.button>
+            </button>
 
             <h1 className="text-[24px] font-bold text-slate-800">
               {project.title}
@@ -101,18 +93,7 @@ export default function WeatherWiseProject() {
               ))}
             </motion.div>
 
-            {/* Project Header */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.3 }}
-              className=""
-            >
-              <div className="">
-                <h2 className="text-[40px] font-bold text-slate-800 pb-4">WeatherWise</h2>
-                <p className="text-xl text-slate-600 pb-2">Weather-Aware Routing for Safer Travels</p>
-              </div>
-            </motion.div>
+            
 
             {/* Challenge Section */}
             <motion.div
@@ -329,7 +310,7 @@ export default function WeatherWiseProject() {
               <div className='flex items-center gap-2'>
               <button
                       key="back-button"
-                      onClick={() => router.push('/projects/itinerai')}
+                      onClick={() => router.push('/projects/weatherwise')}
                       
                       className="group relative rounded-full p-0.5 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-white cursor-pointer hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.400))] active:scale-95 hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:border-blue-700 transition-all duration-300"
                       aria-label="Previous Project"
@@ -337,15 +318,15 @@ export default function WeatherWiseProject() {
                       <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[3px] top-0.5 h-1/2 transition-all duration-300"></div>
                       <ArrowLeft size={14} weight="bold" />
               </button>
-                <div className='text-xl font-medium'>Itinerai</div>
+                <div className='text-xl font-medium'>Weatherwise</div>
               </div>
 
 
               <div className='flex items-center gap-2'>
-                <div className='text-slate-500 text-xl'>Weatherwise</div>
+                <div className='text-slate-500 text-xl'>Fractions</div>
                 <button
                       key="back-button"
-                      onClick={() => router.push('/projects/weatherwise')}
+                      onClick={() => router.push('/projects/fractions')}
                       
                       className="group relative rounded-full p-0.5 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-white cursor-pointer hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.400))] active:scale-95 hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:border-blue-700 transition-all duration-300"
                       aria-label="Previous Project"
