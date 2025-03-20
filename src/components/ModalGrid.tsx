@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowSquareOut, Code, Play, PencilLine, X, Info, Lightning, CaretDown, Copy } from '@phosphor-icons/react';
+import { Code, Play, PencilLine, X, Info, Lightning, CaretDown, Copy } from '@phosphor-icons/react';
 import Image from 'next/image';
 
 // Tab data structure

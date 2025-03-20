@@ -3,9 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, GithubLogo, Globe, SplitHorizontal } from '@phosphor-icons/react';
+import { ArrowLeft, SplitHorizontal } from '@phosphor-icons/react';
 import Navbar from '@/components/Navbar';
-import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 
 // Import the project data
