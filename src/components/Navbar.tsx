@@ -47,7 +47,7 @@ export default function Navbar() {
             <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b ${isActive ? 'from-white  to-white/20' : 'from-slate-100 via-slate-100/50 to-slate-100/10'} rounded-t-[60px] rounded-b-[12px] z-10 group-active:bg-gradient-to-b group-active:from-white/40 group-active:via-white/20 group-active:to-white/0`}></div>
             <Icon size={24} weight="fill" />
             {/* Navbar tooltip */}
-            <div className={`absolute -top-[36px] opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transform transition-all duration-300 px-2 py-1 
+            <div className={`absolute -top-[40px] opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transform transition-all duration-300 px-2 py-1 
               ${isActive 
                 ? 'bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 border-blue-700 text-white/80' 
                 : 'bg-radial-[at_50%_75%] from-slate-100 via-slate-200 to-slate-300 border-slate-400 text-slate-500'} 

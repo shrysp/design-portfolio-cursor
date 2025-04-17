@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import EmailCopyButton from '@/components/EmailCopyButton';
 import router from 'next/router';
 import ModalGrid from '@/components/ModalGrid';
+import Image from 'next/image';
 
 function BayAreaTimeDisplay() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -29,7 +30,7 @@ function BayAreaTimeDisplay() {
 
   const timeString = new Intl.DateTimeFormat('en-US', options).format(currentTime);
 
-  return <div className='w-full flex justify-end text-slate-100 font-mono font-medium'>{timeString}</div>;
+  return <div className='w-full flex md:justify-end justify-start text-slate-100 font-mono font-medium'>{timeString}</div>;
 }
 
 const gridVariants = {
@@ -54,30 +55,30 @@ export default function Home() {
     <div className="min-h-screen flex justify-center">
       <main className="relative w-full md:max-w-[800px] max-w-[361px]">
 
-        <div className="relative flex flex-col gap-6 items-start border-x border-slate-200 md:p-8 p-4 md:pb-24 pb-24 h-[100vh] overflow-y-auto scrollbar-hide">
+        <div className="relative flex flex-col gap-6 items-start border-x border-slate-200 md:p-8 p-4 md:pb-24 pb-24 overflow-y-auto scrollbar-hide">
         {/* Hero section */}
           {/* Page header */}
          <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="isolate relative min-h-[276px] flex w-full bg-slate-800 border-3 border-slate-800 rounded-3xl items-center gap-4 overflow-hidden shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_2px_0px_0px_rgba(0,0,0,0.15),0px_1px_1px_0px_rgba(255,255,255,0.07)_inset]"
+          className="isolate relative md:min-h-[276px] min-h-[360px] flex w-full bg-slate-800 border-3 border-slate-800 rounded-3xl items-center gap-4 overflow-hidden shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_2px_0px_0px_rgba(0,0,0,0.15),0px_1px_1px_0px_rgba(255,255,255,0.07)_inset]"
         
         >
 
           <div className="absolute inset-x-[2px] top-0.5 h-1/3 bg-gradient-to-b from-slate-50/20 to-slate-50/0 rounded-t-[21px] rounded-b-[6px] z-10 pointer-events-none"></div>
           <div className="absolute inset-x-[2px] bottom-0.5 h-1/4 bg-gradient-to-t from-slate-50/10 to-slate-50/0 rounded-t-[6px] rounded-b-[21px] z-10 pointer-events-none"></div>
-          <div className="items-center w-full h-full grid grid-cols-5">
+          <div className="items-center w-full min-h-[276px] md:grid md:grid-cols-5 flex flex-col-reverse">
 
             {/* Left side */}
-            <div className='flex flex-col h-full items-start justify-between gap-0.5 p-6 col-span-2'>
+            <div className='flex flex-col w-full md:h-full h-[180px] items-start justify-between gap-0.5 p-4 md:p-6 col-span-2'>
               {/* top */}
               <div className='flex flex-col gap-0'>
-                <h1 className="text-[24px] font-bold text-slate-50 w-full ">
+                <h1 className="md:text-[24px] text-[20px] font-bold text-slate-50 w-full ">
                   Shreyas Patil
                 </h1>
 
-                <p className="text-[16px] text-slate-300 font-medium">
+                <p className="md:text-[16px] text-[14px] text-slate-300 font-medium">
                   Product Designer
                 </p>
               </div>
@@ -92,7 +93,7 @@ export default function Home() {
                   <div className='relative isolate flex items-center justify-center size-2 bg-radial-[at_50%_75%] from-green-500 via-green-600 to-green-700 rounded-full'>
                     <div className='absolute inset-[1px] top-[0.5px] h-1/2 bg-gradient-to-b from-white/70 to-white/20 rounded-t-[24px] rounded-b-[6px]'></div>
                   </div>
-                  <p className="text-base text-slate-300 font-medium">
+                  <p className="md:text-base text-sm text-slate-300 font-medium">
                     Looking for new opportunities!
                   </p>
 
@@ -133,12 +134,12 @@ export default function Home() {
             </div>
 
             {/* Right side */}
-            <div className='isolate relative w-full h-full col-span-3 justify-between'>
-              <div className='relative w-full h-full p-6 flex flex-col justify-between z-10'>
+            <div className='isolate relative flex w-full h-[180px] md:h-full col-span-3 justify-between'>
+              <div className='relative w-full h-full p-4 md:p-6 flex md:flex-col justify-between z-10'>
                 <BayAreaTimeDisplay />
                 <div className='w-full flex justify-end text-slate-200 font-mono font-medium'>Bay Area, CA</div>
               </div>
-              <div className="absolute inset-0  w-full h-full bg-[url('/images/About/About-1.jpeg')] bg-cover bg-[50%_60%] [mask-image:radial-gradient(50%_400%_at_0%_50%,transparent_10%,rgba(0,0,0,0.7)_100%)] [mask-type:alpha]"></div>
+              <div className="absolute inset-0  w-full h-full bg-[url('/images/About/About-1.jpeg')] bg-cover bg-[50%_60%] md:[mask-image:radial-gradient(50%_400%_at_0%_50%,transparent_10%,rgba(0,0,0,0.7)_100%)] [mask-image:radial-gradient(200%_250%_at_50%_0%,rgba(0,0,0,0.8)_0%,transparent_50%)] [mask-type:alpha]"></div>
             </div>
           </div>
           
@@ -154,70 +155,127 @@ export default function Home() {
 
             
             {/* What I Do Best section */}
-            <motion.div className="isolate flex flex-col md:col-span-6 col-span-1 gap-6 bg-slate-50 rounded-3xl md:p-6 p-4 items-center justify-top border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
+            <motion.div className="isolate flex flex-col md:col-span-6 col-span-1 gap-8 bg-slate-50 rounded-3xl md:p-6 p-4 items-center justify-top border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
               variants={gridVariants}>
                 
               {/* Prototyping section */}
-              <div className='flex flex-col w-full gap-2 items-start'>
-
-                <div className="w-full text-[24px] font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
-                  What I Do Best
-                </div>
-
-                <div className="w-full text-base font-semibold text-slate-600 mt-8"> 
-                  Turning Ideas into Interactive Prototypes
-
-                </div>
-                <div className="text-sm leading-6 font-light text-slate-600">I quickly translate concepts into prototypes to test usability early and refine experiences.</div>
+              <div className="w-full text-[24px] items-start font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
+                What I Do Best
               </div>
 
-              <div className="relative w-full h-fit  grid grid-cols-4 gap-4 gap-x-6">
-                
-                    <div className='col-span-4 h-fit  space-y-1 row-start-2 sticky top-0'>
-                      <div className="w-full text-sm font-semibold text-slate-600"> ItinerAI</div>
-                      <div className="text-sm leading-6 font-light text-slate-600">My capstone project, where I designed the full experience and built an interactive prototype using Play. Later, I developed an MVP in SwiftUI using Cursor to test feasibility.</div>
-                    </div>
-                    <div  className="relative w-full col-span-2 aspect-3/4 border border-slate-200  bg-white  rounded-2xl overflow-hidden">
-                        
-                        <div className="relative h-full w-full overflow-hidden">
-                          <video src="/videos/Walk-Through-Video.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>   
-                        </div>                 
-                    </div>
-                    <div  className="relative h-full col-span-2  aspect-3/4 border border-slate-200  bg-white  rounded-2xl overflow-hidden">
-                        
-                        <div className="relative h-full w-full overflow-hidden">
-                          <video src="/videos/ItinerAIbuild-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-xl bg-white"></video>                    
-                        </div>
-                    </div>   
-                
-              </div>
+              <div className='w-full grid md:grid-cols-2 grid-cols-1 gap-6'>
 
-              <div className="relative w-full h-fit  grid grid-cols-4 gap-4 gap-x-6">
-                
-                    <div className='col-span-4 h-fit flex flex-col gap-2 sticky top-0'>
-                      <div className="w-full text-sm font-semibold text-slate-600"> Mindlab</div>
-                      <div className="text-sm leading-6 font-light text-slate-600">A way to train your thinking muscle with Perplexity.
-                        Perplexity makes knowledge accessible, but it&apos;s easy to offload thinking to LLMs. I challenged this by building Mindlab using V0, a prototype that guides thinking instead of spoon-feeding answers, helping users arrive at insights without losing context.</div>
-                     </div>
-                     <div  className="relative h-full aspect-16/9 col-span-4 row-start-1 border border-slate-200  bg-white  rounded-2xl overflow-hidden">
-                     <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="relative w-full h-full object-cover rounded-xl bg-white"></video>                    
-                    </div>
+                <div className="w-full col-span-1 flex flex-col gap-3 items-start">
+                  <div className="w-full text-base font-semibold text-slate-600"> Turning Ideas into Interactive Prototypes</div>
+                  <div className="text-sm leading-6 font-light text-slate-600">I quickly translate concepts into prototypes to test usability early and refine experiences.</div>
+                </div>
 
+                {/* ItinerAI Prototypes */}
+                <div className="relative w-full h-fit md:col-span-2 col-span-1 grid md:grid-cols-4 grid-cols-1 gap-4 gap-x-6">
+                  
                       
-                
-              </div>
+                      <div  className="isolate relative flex flex-col w-full md:col-span-2 col-span-1 aspect-3/4 border border-slate-200  bg-slate-100  rounded-2xl overflow-hidden">
+                          
+                          <div className="relative flex flex-col h-full w-full overflow-hidden pb-1 bg-slate-100">
+                            <video src="/videos/Walk-Through-Video.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-2xl bg-white border border-slate-200"></video>   
+                          </div>
+
+                          <div className='w-full flex items-center justify-between px-4 py-2'>
+                              <div className="relative pr-3 text-slate-600 text-sm font-medium"> Early ItinerAI Prototype built with Play</div>
+                              <div className="relative size-6 rounded-md flex items-center justify-center">
+                                <Image src="/logos/Create with Play Logo.png" alt="Create with Play Logo" width={20} height={20} className="object-contain" />
+                              </div>
+                            </div>                 
+                      </div>
+                      <div  className="isolate flex flex-col relative h-full md:col-span-2 col-span-1 aspect-3/4 border border-slate-200  bg-slate-100  rounded-2xl overflow-hidden">
+                          
+                          <div className="relative flex flex-col h-full w-full overflow-hidden pb-1 bg-slate-100">
+                            <video src="/videos/ItinerAIbuild-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-2xl bg-white border border-slate-200"></video>   
+                            
+                          </div>
+                          <div className='w-full flex items-center justify-between px-4 py-2'>
+                            <div className="relative pr-3 text-slate-600 text-sm font-medium"> Sorting shared posts with AI - SwiftUI</div>
+                            <div className="relative size-6 rounded-md flex items-center justify-center">
+                              <Image src="/logos/Swift Icon.svg" alt="Swift Icon" width={20} height={20} className="object-contain" />
+                            </div>
+                          </div>
+                         
+                      </div>   
+
+                      <div className='md:col-span-2 md:col-start-3 col-span-1 md:row-start-2 row-start-1 h-fit space-y-1 sticky top-0'>
+                        <div className="w-full text-sm font-semibold text-slate-600"> ItinerAI</div>
+                        <div className="text-sm leading-6 font-light text-slate-600">My capstone project, where I designed the full experience and built an interactive prototype using Play. Later, I developed an MVP in SwiftUI using Cursor to test feasibility.</div>
+                      </div>
+                  
+                </div>
+
+                {/* Mindlab section */}
+                <div className="relative w-full h-fit md:col-span-2 col-span-1 grid md:grid-cols-4 grid-cols-1 gap-4 gap-x-6">
+                  
+                      
+                      <div className="isolate flex flex-col relative h-full md:col-span-4 col-span-1 border border-slate-200  bg-slate-100  rounded-2xl overflow-hidden">
+                        <div  className="relative h-full aspect-16/9 border border-slate-200  bg-white  rounded-2xl overflow-hidden">
+                          <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="relative w-full h-full object-cover rounded-xl bg-white"></video>                    
+                        </div>
+                        <div className='w-full flex items-center justify-between px-4 py-2'>
+                            <div className="relative pr-3 text-slate-600 text-sm font-medium"> Guided thinking with AI - V0 prototype</div>
+                            <div className="relative h-6 rounded-md flex items-center justify-center">
+                              <Image src="/logos/V0-logo.svg" alt="V0 Logo" width={20} height={20} className="object-contain" />
+                              <span className="text-slate-600 text-sm font-medium px-2">+</span>
+                              <Image src="/images/About/Cursor-Icon.png" alt="Cursor Icon" width={16} height={16} className="object-contain" />
+                            </div>
+                          </div>
+                      </div>
+
+                      <div className='md:col-span-2 md:col-start-3 col-span-1 md:row-start-2 row-start-1 h-fit flex flex-col gap-2 sticky top-0'>
+                        <div className="w-full text-sm font-semibold text-slate-600"> Mindlab</div>
+                        <div className="text-sm leading-6 font-light text-slate-600">A way to train your thinking muscle with Perplexity.
+                          Perplexity makes knowledge accessible, but it&apos;s easy to offload thinking to LLMs. I challenged this by building Mindlab using V0, a prototype that guides thinking instead of spoon-feeding answers, helping users arrive at insights without losing context.</div>
+                      </div>
+                        
+                  
+                </div>
+
+                {/* ItinerAI Prototypes */}
+                <div className="relative w-full h-fit md:col-span-2 col-span-1 grid md:grid-cols-4 grid-cols-1 gap-4 gap-x-6">
+                  
+                      <div  className="isolate flex flex-col relative h-full md:col-span-2 md:col-start-3 col-span-1 aspect-3/4 border border-slate-200  bg-slate-100  rounded-2xl overflow-hidden">
+                          
+                          <div className="relative flex flex-col h-full w-full overflow-hidden pb-1 bg-slate-100">
+                            <video src="/videos/aero_recording.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-2xl bg-white border border-slate-200"></video>   
+                            
+                          </div>
+                          <div className='w-full flex items-center justify-between px-4 py-2'>
+                            <div className="relative pr-3 text-slate-600 text-sm font-medium">AR prototype used to study indoor navigation challenges</div>
+                            <div className="relative size-8 rounded-md flex items-center justify-center">
+                              <Image src="/logos/Adobe Aero SVG Icon.svg" alt="Adobe Aero Icon" width={24} height={24} className="object-contain" />
+                            </div>
+                          </div>
+                         
+                      </div>   
+
+                      <div className='md:col-span-2 md:col-start-3 md:row-start-2 col-span-1 row-start-1 h-fit space-y-1 sticky top-0'>
+                        <div className="w-full text-sm font-semibold text-slate-600"> Indoor AR navigation prototype</div>
+                        <div className="text-sm leading-6 font-light text-slate-600">Built in under 3 hours for a user research study exploring the challenges of indoor navigation and how AR wayfinding can support spatial memory.</div>
+                      </div>
+                  
+                </div>
 
 
-              {/* Design System section */}
-              <div className='flex flex-col gap-2 mt-8'>
-                  <div className="w-full text-base font-semibold text-slate-600"> 
-                    Building Scalable Design Systems
+                {/* Design System section */}
+                <div className='flex flex-col col-span-1 gap-2 mt-8'>
+                    <div className="w-full text-base font-semibold text-slate-600"> 
+                      Building Scalable Design Systems
+                    </div>
+                    <div className="text-sm leading-6 font-light text-slate-600">At Dashworks, I built a design system that balances flexibility and usability for various workflows. To demonstrate my ability to bring designs to life with precision, I developed select modals using Tailwind below.</div>
+                </div>
+
+                <div className="relative w-full md:col-span-2 col-span-1 rounded-2xl overflow-hidden border border-slate-200">
+                  <div className="hidden md:block">
+                    <ModalGrid />
                   </div>
-                  <div className="text-sm leading-6 font-light text-slate-600">At Dashworks, I built a design system that balances flexibility and usability for various workflows. To demonstrate my ability to bring designs to life with precision, I developed select modals using Tailwind below.</div>
-              </div>
-
-              <div className="relative w-full  rounded-2xl overflow-hidden border border-slate-200">
-                <ModalGrid />
+                  <div className="md:hidden w-full h-full aspect-4/3 bg-[url('/images/projects/Dashworks/Dashworks-Design-System.png')] bg-cover bg-center"></div>
+                </div>
               </div>
 
             </motion.div>

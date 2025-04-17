@@ -39,7 +39,7 @@ export default function Home() {
     <div className="min-h-screen flex justify-center bg-gradient-to-b from-slate-50 to-white">
       <main className="w-full md:max-w-[800px] max-w-[361px] flex flex-col gap-12">
 
-        <div className="flex flex-col gap-6 items-start border border-slate-200 md:p-8 p-4 md:pb-24 pb-24 h-[100vh] overflow-y-auto scrollbar-hide">
+        <div className="flex flex-col gap-6 items-start border-x border-slate-200 md:p-8 p-4 md:pb-24 pb-24 overflow-y-auto scrollbar-hide">
           {/* Page header */}
          <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -51,7 +51,7 @@ export default function Home() {
 
           <div className="absolute inset-x-1 top-0.5 h-1/2 bg-gradient-to-b from-slate-50/40 to-slate-50/5 rounded-t-[24px] rounded-b-[6px] z-10"></div>
           <div className="flex items-center w-full h-full">
-            <h1 className="text-[24px] font-bold text-slate-50 w-full px-6 py-2">
+            <h1 className="md:text-[24px] text-[16px] font-bold text-slate-50 w-full px-6 py-2">
             More about me
            </h1>
            <div className="flex w-full h-full bg-[url('/images/About/About-5.jpeg')] bg-cover bg-center [mask-image:radial-gradient(50%_400%_at_0%_50%,transparent_10%,black_100%)] [mask-type:alpha]">

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, SplitHorizontal, ArrowRight } from '@phosphor-icons/react';
+import { ArrowLeft, SplitHorizontal, ArrowRight, ImageSquare } from '@phosphor-icons/react';
 import Image from 'next/image';
 import EmailCopyButton from '@/components/EmailCopyButton';
 import { LinkedinLogo, XLogo } from '@phosphor-icons/react';
@@ -78,7 +78,7 @@ export default function DashworksProject() {
   return (
     <div className="min-h-screen flex justify-center bg-gradient-to-b from-slate-50 to-white">
       <main className="w-full max-w-[800px] flex flex-col gap-12">
-        <div className="flex flex-col gap-8 items-start border border-slate-200 md:p-8 p-4 md:pb-24 pb-24 h-[100vh] overflow-y-auto scrollbar-hide">
+        <div className="flex flex-col gap-8 items-start border-x border-slate-200 md:p-8 p-4 md:pb-24 pb-24 overflow-y-auto scrollbar-hide">
           {/* Back button and header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -121,9 +121,6 @@ export default function DashworksProject() {
                 height={800}
                 priority={selectedImageIndex === 0}
               />
-
-              
-
             </motion.div>
 
             {/* Image thumbnails */}
@@ -131,13 +128,13 @@ export default function DashworksProject() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
-              className="flex flex-wrap gap-4 mb-6 overflow-x-auto p-2"
+              className="flex flex-wrap md:gap-4 gap-3 mb-6 overflow-x-auto p-2"
             >
               {project.images.slice(1).map((image, index) => (
                 <div
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`w-20 h-20 rounded-lg bg-slate-100 overflow-hidden cursor-pointer transition-all duration-200 ${
+                  className={`md:w-20 md:h-20 w-12 h-12 rounded-lg bg-slate-100 overflow-hidden cursor-pointer transition-all duration-200 ${
                     selectedImageIndex === index
                       ? 'ring-2 ring-blue-500 ring-offset-2'
                       : 'opacity-70 hover:opacity-100 border border-slate-200'
@@ -164,7 +161,7 @@ export default function DashworksProject() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <h2 className="text-base font-semibold text-slate-800 mb-1">My Role</h2>
-                  <p className="text-slate-600 leading-relaxed">Product Designer Intern</p>
+                  <p className="text-slate-600 leading-relaxed">Product Design Intern</p>
                 </div>
                 <div>
                   <h2 className="text-base font-semibold text-slate-800 mb-1">Timeline</h2>
@@ -225,8 +222,28 @@ export default function DashworksProject() {
                 <h2 className="text-base font-semibold text-slate-800 mb-2">Gaining technical knowledge to drive impactful design decisions</h2>
                 <div className='flex flex-col gap-2'>
                     <div className='text-base text-slate-600 leading-7'>Designing for complex enterprise tools requires a deep understanding of both the product and its technical foundation. During my internship at Dashworks, I conducted a comprehensive product audit, analyzing its entire ecosystem to identify areas for improvement. This process helped bridge the gap between design and engineering, ensuring that our solutions were both user-friendly and technically feasible.</div>
-                    <div className='aspect-4/3 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/Audit.png")] bg-cover bg-center overflow-hidden mt-8'></div>
-                    <div className='aspect-4/3 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/How-Dashworks-works.png")] bg-cover bg-center overflow-hidden mt-8'></div>
+                    <div className='isolate relative rounded-xl p-8 bg-slate-100 overflow-hidden mt-8 border border-slate-200'>
+                      <div className='w-full h-full aspect-4/3 bg-white bg-[url("/images/projects/Dashworks/Audit.png")] bg-cover bg-center'></div>
+                      <div className='absolute top-[1px] left-[1px] flex items-center justify-center size-7 text-white rounded-tl-[10px] rounded-sm bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] border border-blue-500'>
+                        <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-tl-[8px] rounded-[2px] z-10`}></div>
+                        <ImageSquare size={16} weight="fill" className='text-white mt-[1px] mx-1' />
+                      </div>
+                      <div className='absolute inset-x-0 top-8 border-dashed border-b border-slate-200'></div>
+                      <div className='absolute inset-y-0 left-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-y-0 right-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-x-0 bottom-8 border-dashed border-b border-slate-200'></div>
+                    </div>
+                    <div className='isolate relative rounded-xl p-8 bg-slate-100 overflow-hidden mt-8 border border-slate-200'>
+                      <div className='w-full h-full aspect-4/3 bg-white bg-[url("/images/projects/Dashworks/How-Dashworks-works.png")] bg-cover bg-center'></div>
+                      <div className='absolute top-[1px] left-[1px] flex items-center justify-center size-7 text-white rounded-tl-[10px] rounded-sm bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] border border-blue-500'>
+                        <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-tl-[8px] rounded-[2px] z-10`}></div>
+                        <ImageSquare size={16} weight="fill" className='text-white mt-[1px] mx-1' />
+                      </div>
+                      <div className='absolute inset-x-0 top-8 border-dashed border-b border-slate-200'></div>
+                      <div className='absolute inset-y-0 left-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-y-0 right-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-x-0 bottom-8 border-dashed border-b border-slate-200'></div>
+                    </div>
                 </div>
             </motion.div>
 
@@ -240,20 +257,32 @@ export default function DashworksProject() {
                 <h2 className="text-base font-semibold text-slate-800 mb-2">Design System</h2>
                 <div className='flex flex-col gap-2'>
                     <div className='text-base text-slate-600 leading-7'>Our team set a goal to deliver our product faster to meet customer demands and stand out in a competitive market. To reach this goal, we needed a design system for better quality and speed.</div>
-                    <div className='aspect-4/3 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/Dashworks-Design-System.png")] bg-cover bg-center overflow-hidden mt-8'></div>
+                    <div className='isolate relative rounded-xl p-8 bg-slate-100 overflow-hidden mt-8 border border-slate-200'>
+                      <div className='w-full h-full aspect-4/3 bg-white bg-[url("/images/projects/Dashworks/Dashworks-Design-System.png")] bg-cover bg-center'></div>
+                      <div className='absolute top-[1px] left-[1px] flex items-center justify-center size-7 text-white rounded-tl-[10px] rounded-sm bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] border border-blue-500'>
+                        <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-tl-[8px] rounded-[2px] z-10`}></div>
+                        <ImageSquare size={16} weight="fill" className='text-white mt-[1px] mx-1' />
+                      </div>
+                      <div className='absolute inset-x-0 top-8 border-dashed border-b border-slate-200'></div>
+                      <div className='absolute inset-y-0 left-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-y-0 right-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-x-0 bottom-8 border-dashed border-b border-slate-200'></div>
+                    </div>
 
                     
                     
                     {/* Image comparison slider - React implementation */}
                     <div 
-                        className='relative rounded-3xl overflow-hidden mt-8 aspect-4/3' 
+                        className='isolate relative rounded-xl overflow-hidden mt-8 p-8 bg-slate-100 border border-slate-200' 
                         ref={containerRef}
                     >
-                        {/* Light image (background) */}
-                        <div className='absolute inset-0 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/Light.png")] bg-cover bg-center'></div>
+
+                        <div className='relative w-full h-full bg-white  aspect-4/3'>
+                          {/* Light image (background) */}
+                          <div className='absolute inset-0 rounded-3xl bg-clear bg-[url("/images/projects/Dashworks/Light.png")] bg-cover bg-center'></div>
                         
-                        {/* Dark image (overlay) */}
-                        <div 
+                          {/* Dark image (overlay) */}
+                          <div 
                             className='absolute inset-0 overflow-hidden rounded-3xl'
                             ref={overlayRef}
                             style={{
@@ -267,10 +296,10 @@ export default function DashworksProject() {
                                     height: '100%'
                                 }}
                             ></div>
-                        </div>
+                          </div>
                         
-                        {/* Slider handle */}
-                        <div 
+                          {/* Slider handle */}
+                          <div 
                             className='absolute top-0 bottom-0 w-[2px] bg-linear-to-r from-slate-800/50 to-slate-100/50 cursor-ew-resize flex items-center justify-center z-10'
                             ref={sliderRef}
                             style={{
@@ -286,10 +315,24 @@ export default function DashworksProject() {
                                     <SplitHorizontal size={16} weight="bold" />
                                 </div>
                             </div>
+                          </div>
                         </div>
+
+                        
+                        {/* Image icon in top-left corner */}
+                        <div className='absolute top-[1px] left-[1px] flex items-center justify-center size-7 text-white rounded-tl-[10px] rounded-sm bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] border border-blue-500'>
+                            <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-tl-[8px] rounded-[2px] z-10`}></div>
+                            <SplitHorizontal size={16} weight="fill" className='text-white mt-[1px] mx-1' />
+                        </div>
+                        
+                        {/* Dashed borders */}
+                        <div className='absolute inset-x-0 top-8 border-dashed border-b border-slate-200'></div>
+                        <div className='absolute inset-y-0 left-8 border-dashed border-l border-slate-200'></div>
+                        <div className='absolute inset-y-0 right-8 border-dashed border-l border-slate-200'></div>
+                        <div className='absolute inset-x-0 bottom-8 border-dashed border-b border-slate-200'></div>
                     </div>
 
-                    <div className="relative w-full mt-8 rounded-3xl overflow-hidden border border-slate-100">
+                    <div className="relative w-full mt-8 rounded-3xl overflow-hidden border border-slate-100 md:block hidden">
                       <ModalGrid />
                     </div>
 
@@ -306,9 +349,39 @@ export default function DashworksProject() {
                 <h2 className="text-base font-semibold text-slate-800 mb-2">New Website</h2>
                 <div className='flex flex-col gap-2'>
                     <div className='text-base text-slate-600 leading-7'>I led a comprehensive redesign of our website and social media presence. Managing a team of freelance developers and designers, we crafted a fresh look with branded graphics and collateral. This effort resulted in a substantial increase in website traffic, reaching a significantly larger audience.</div>
-                    <div className='aspect-4/3 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/Dashworks-Website-1.png")] bg-cover bg-center overflow-hidden mt-8'></div>
-                    <div className='aspect-4/3 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/Dashworks-Website-2.png")] bg-cover bg-center overflow-hidden mt-8'></div>
-                    <div className='aspect-4/3 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/Dashworks-Website-3.png")] bg-cover bg-center overflow-hidden mt-8'></div>
+                    <div className='isolate relative rounded-xl p-8 bg-slate-100 overflow-hidden mt-8 border border-slate-200'>
+                      <div className='w-full h-full aspect-4/3 bg-white bg-[url("/images/projects/Dashworks/Dashworks-Website-1.png")] bg-cover bg-center'></div>
+                      <div className='absolute top-[1px] left-[1px] flex items-center justify-center size-7 text-white rounded-tl-[10px] rounded-sm bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] border border-blue-500'>
+                        <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-tl-[8px] rounded-[2px] z-10`}></div>
+                        <ImageSquare size={16} weight="fill" className='text-white mt-[1px] mx-1' />
+                      </div>
+                      <div className='absolute inset-x-0 top-8 border-dashed border-b border-slate-200'></div>
+                      <div className='absolute inset-y-0 left-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-y-0 right-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-x-0 bottom-8 border-dashed border-b border-slate-200'></div>
+                    </div>
+                    <div className='isolate relative rounded-xl p-8 bg-slate-100 overflow-hidden mt-8 border border-slate-200'>
+                      <div className='w-full h-full aspect-4/3 bg-white bg-[url("/images/projects/Dashworks/Dashworks-Website-2.png")] bg-cover bg-center'></div>
+                      <div className='absolute top-[1px] left-[1px] flex items-center justify-center size-7 text-white rounded-tl-[10px] rounded-sm bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] border border-blue-500'>
+                        <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-tl-[8px] rounded-[2px] z-10`}></div>
+                        <ImageSquare size={16} weight="fill" className='text-white mt-[1px] mx-1' />
+                      </div>
+                      <div className='absolute inset-x-0 top-8 border-dashed border-b border-slate-200'></div>
+                      <div className='absolute inset-y-0 left-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-y-0 right-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-x-0 bottom-8 border-dashed border-b border-slate-200'></div>
+                    </div>
+                    <div className='isolate relative rounded-xl p-8 bg-slate-100 overflow-hidden mt-8 border border-slate-200'>
+                      <div className='w-full h-full aspect-4/3 bg-white bg-[url("/images/projects/Dashworks/Dashworks-Website-3.png")] bg-cover bg-center'></div>
+                      <div className='absolute top-[1px] left-[1px] flex items-center justify-center size-7 text-white rounded-tl-[10px] rounded-sm bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] border border-blue-500'>
+                        <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-tl-[8px] rounded-[2px] z-10`}></div>
+                        <ImageSquare size={16} weight="fill" className='text-white mt-[1px] mx-1' />
+                      </div>
+                      <div className='absolute inset-x-0 top-8 border-dashed border-b border-slate-200'></div>
+                      <div className='absolute inset-y-0 left-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-y-0 right-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-x-0 bottom-8 border-dashed border-b border-slate-200'></div>
+                    </div>
                 </div>
             </motion.div>
 
@@ -322,8 +395,28 @@ export default function DashworksProject() {
                 <h2 className="text-base font-semibold text-slate-800 mb-2">Onboarding</h2>
                 <div className='flex flex-col gap-2'>
                     <div className='text-base text-slate-600 leading-7'>Redesigning onboarding to minimize setup time and help teams quickly grasp and benefit from the product.</div>
-                    <div className='aspect-4/3 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/Dashworks-Onboarding-1.png")] bg-cover bg-center overflow-hidden mt-8'></div>
-                    <div className='aspect-4/3 rounded-3xl bg-slate-100 bg-[url("/images/projects/Dashworks/Dashworks-Onboarding-2.png")] bg-cover bg-center overflow-hidden mt-8'></div>
+                    <div className='isolate relative rounded-xl p-8 bg-slate-100 overflow-hidden mt-8 border border-slate-200'>
+                      <div className='w-full h-full aspect-4/3 bg-white bg-[url("/images/projects/Dashworks/Dashworks-Onboarding-1.png")] bg-cover bg-center'></div>
+                      <div className='absolute top-[1px] left-[1px] flex items-center justify-center size-7 text-white rounded-tl-[10px] rounded-sm bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] border border-blue-500'>
+                        <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-tl-[8px] rounded-[2px] z-10`}></div>
+                        <ImageSquare size={16} weight="fill" className='text-white mt-[1px] mx-1' />
+                      </div>
+                      <div className='absolute inset-x-0 top-8 border-dashed border-b border-slate-200'></div>
+                      <div className='absolute inset-y-0 left-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-y-0 right-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-x-0 bottom-8 border-dashed border-b border-slate-200'></div>
+                    </div>
+                    <div className='isolate relative rounded-xl p-8 bg-slate-100 overflow-hidden mt-8 border border-slate-200'>
+                      <div className='w-full h-full aspect-4/3 bg-white bg-[url("/images/projects/Dashworks/Dashworks-Onboarding-2.png")] bg-cover bg-center'></div>
+                      <div className='absolute top-[1px] left-[1px] flex items-center justify-center size-7 text-white rounded-tl-[10px] rounded-sm bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] border border-blue-500'>
+                        <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-tl-[8px] rounded-[2px] z-10`}></div>
+                        <ImageSquare size={16} weight="fill" className='text-white mt-[1px] mx-1' />
+                      </div>
+                      <div className='absolute inset-x-0 top-8 border-dashed border-b border-slate-200'></div>
+                      <div className='absolute inset-y-0 left-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-y-0 right-8 border-dashed border-l border-slate-200'></div>
+                      <div className='absolute inset-x-0 bottom-8 border-dashed border-b border-slate-200'></div>
+                    </div>
                 </div>
             </motion.div>
 
@@ -332,9 +425,9 @@ export default function DashworksProject() {
 
           {/* Footer */}
           <div className="isolate relative flex flex-col-reverse w-full md:col-span-7 col-span-1 h-fit border border-slate-200 rounded-2xl md:p-6 p-4 items-center justify-center gap-2.5">
-            <div className='flex w-full items-center gap-2 justify-between'>
-        <p className='text-slate-500 text-sm'>© 2025 Shreyas Patil</p>
-        <div className='text font-medium text-slate-500 flex items-center'>Made with &nbsp; <span className='text-xs'> ❤️ </span> &nbsp; and &nbsp; <Image src="/images/About/Cursor-Icon.png" alt="Cursor" width={20} height={20} className="h-5 inline-block" /> </div>
+            <div className='flex flex-col md:flex-row w-full items-start md:items-center gap-3 md:gap-2 md:justify-between'>
+              <p className='text-slate-500 text-sm'>© 2025 Shreyas Patil</p>
+              <div className='text font-medium text-slate-500 flex items-center'>Made with &nbsp; <span className='text-xs'> ❤️ </span> &nbsp; and &nbsp; <Image src="/images/About/Cursor-Icon.png" alt="Cursor" width={20} height={20} className="h-5 inline-block" /> </div>
             </div>
       
 

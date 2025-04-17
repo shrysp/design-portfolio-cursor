@@ -88,6 +88,10 @@ export const projectsData = [
     ],
     images: [
       "/images/projects/thumbnails/WeatherWise-Thumbnail.webp",
+      "/images/projects/Weatherwise/Weather-Wise-Warning.png",
+      "/images/projects/Weatherwise/WeatherWise-Planning.png",
+      "/images/projects/Weatherwise/Weather-Wise-Safer-Route.png",
+      
     ],
     technologies: ["Adobe XD", "Sketch", "Principle"],
     github: "https://github.com/username/weatherwise",
