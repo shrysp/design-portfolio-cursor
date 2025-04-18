@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Design Portfolio | Shreyas Patil",
+  title: "Shreyas Patil | Product Designer",
   description: "Shreyas is a product designer with a passion for creating user-friendly and intuitive designs.",
   keywords: ["portfolio", "design", "Shreyas Patil", "Product Designer", "next.js", "tailwind css", "framer motion", "web development"],
   authors: [{ name: "Shreyas Patil" }],
@@ -22,6 +22,26 @@ export const metadata: Metadata = {
   icons: {
     icon: "/Favicon.png",
   },
+  openGraph: {
+    title: "Shreyas Patil | Product Designer",
+    description: "Shreyas is a product designer with a passion for creating user-friendly and intuitive designs.",
+    type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Shreyas Patil - Product Designer Portfolio"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Shreyas Patil | Product Designer",
+    description: "Shreyas is a product designer with a passion for creating user-friendly and intuitive designs.",
+    images: ["/og-image.png"],
+    creator: "@ShreyasPatil_"
+  }
 };
 
 export default function RootLayout({
@@ -37,8 +57,8 @@ export default function RootLayout({
         {children}
         {/* Navigation */}
         <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-8 z-10">
-            <Navbar />
-          </div>  
+          <Navbar />
+        </div>
       </body>
     </html>
   );
