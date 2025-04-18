@@ -3,12 +3,13 @@ export const projectsData = [
   {
     title: "ItinerAI",
     description: [
-      "A travel companion that learns and evolves with every user interaction.",
+      "What if planning a trip felt less like searching and more like having a team of helpful friends?",
       "Implemented consistent UI components across web and mobile platforms",
       "Improved design-to-development handoff efficiency by 40%"
     ],
     images: [
-      "/images/projects/thumbnails/ItinerAI-Thumbnail.png"
+      "/images/projects/ItinerAI/ItinerAI-Thumbnail.png",
+      "/images/projects/ItinerAI/ItinerAI-Chat-3-Hand.png"
     ],
     // Additional information specific to this project
     role: "Lead UI/UX Designer",
@@ -46,7 +47,7 @@ export const projectsData = [
     description: ["AI-powered knowledge assistant helping companies centralize scattered information."],
     
     images: [
-      "/images/projects/thumbnails/Dashworks-Thumbnail.webp",
+      "/images/projects/Dashworks/Dashworks-Website-1.png",
       "/images/projects/Dashworks/Dashworks-Onboarding-1.png",
       "/images/projects/Dashworks/Dashworks-Onboarding-2.png",
       "/images/projects/Dashworks/Dashworks-Website-1.png",
@@ -87,8 +88,10 @@ export const projectsData = [
      
     ],
     images: [
-      "/images/projects/thumbnails/WeatherWise-Thumbnail.webp",
+      
       "/images/projects/Weatherwise/Weather-Wise-Warning.png",
+      "/images/projects/Weatherwise/Weather-Wise-Warning.png",
+      "/images/projects/Weatherwise/In-Car-Notification-mockup.webp",
       "/images/projects/Weatherwise/WeatherWise-Planning.png",
       "/images/projects/Weatherwise/Weather-Wise-Safer-Route.png",
       
@@ -125,7 +128,10 @@ export const projectsData = [
       
     ],
     images: [
-      "/images/projects/thumbnails/Shoedog-Thumbnail.webp"
+      "/images/projects/ShoeDog/WallMockup.webp",
+      "/images/projects/ShoeDog/ShoeDog-Mockup.webp",
+      "/images/projects/ShoeDog/WallMockup.webp"
+      
     ],
     technologies: ["Figma", "Protopie", "After Effects"],
     github: "https://github.com/username/shoedog",
@@ -163,9 +169,12 @@ export const projectsData = [
       
     ],
     images: [
-      "/images/projects/thumbnails/Fractions-Thumbnail.webp",
+      "/images/projects/Fraction/Fractions-Thumbnail.png",
+      "/images/projects/Fraction/Fractions-Cover.png",
+       "/images/projects/Fraction/Fractions-Thumbnail.png"
     ],
     technologies: ["Illustrator", "Photoshop", "InDesign"],
+    
     github: "https://github.com/username/fractions",
     live: "https://fractions-demo.vercel.app",
     // Different structure with focus on branding

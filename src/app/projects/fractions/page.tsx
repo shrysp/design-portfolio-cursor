@@ -53,47 +53,47 @@ export default function FractionsProject() {
             <div className="w-full flex flex-col gap-2">
               {/* Main image display */}
               <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-              className="w-full h-[400px] rounded-3xl overflow-hidden mb-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12)]"
-            >
-              <Image
-                src={project.images[selectedImageIndex]}
-                alt={`${project.title} - main image`}
-                className="w-full h-full object-cover"
-                width={1200}
-                height={800}
-                priority={selectedImageIndex === 0}
-              />
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+                className="w-full aspect-[4/3] rounded-3xl border border-slate-200 overflow-hidden mb-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12)]"
+              >
+                <Image
+                  src={project.images[selectedImageIndex + 1]}
+                  alt={`${project.title} - main image`}
+                  className="w-full h-full object-cover bg-slate-100"
+                  width={1200}
+                  height={800}
+                  priority={selectedImageIndex === 0}
+                />
               </motion.div>
 
               {/* Image thumbnails */}
               <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
-              className="flex flex-wrap gap-4 mb-6 overflow-x-auto p-2"
-            >
-              {project.images.map((image, index) => (
-                <div
-                  key={index}
-                  onClick={() => setSelectedImageIndex(index)}
-                  className={`md:w-20 md:h-20 w-12 h-12 rounded-lg bg-slate-100 overflow-hidden cursor-pointer transition-all duration-200 ${
-                    selectedImageIndex === index
-                      ? 'ring-2 ring-blue-500 ring-offset-2'
-                      : 'opacity-70 hover:opacity-100 border border-slate-200'
-                  }`}
-                >
-                  <Image
-                    src={image}
-                    alt={`${project.title} - thumbnail ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    width={80}
-                    height={80}
-                  />
-                </div>
-              ))}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+                className="flex flex-wrap gap-4 mb-6 overflow-x-auto p-2"
+              >
+                {project.images.slice(1).map((image, index) => (
+                  <div
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`md:w-20 md:h-20 w-12 h-12 rounded-lg bg-slate-100 overflow-hidden cursor-pointer transition-all duration-200 ${
+                      selectedImageIndex === index
+                        ? 'ring-2 ring-blue-500 ring-offset-2'
+                        : 'opacity-70 hover:opacity-100 border border-slate-200'
+                    }`}
+                  >
+                    <Image
+                      src={image}
+                      alt={`${project.title} - thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      width={80}
+                      height={80}
+                    />
+                  </div>
+                ))}
               </motion.div>
             </div>
 

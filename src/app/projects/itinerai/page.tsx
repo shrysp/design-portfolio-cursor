@@ -3,8 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, GithubLogo, Globe, XLogo, LinkedinLogo } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
+import { ArrowLeft, ArrowRight, XLogo, LinkedinLogo, SpinnerGap } from '@phosphor-icons/react';
 import EmailCopyButton from '@/components/EmailCopyButton';
 import Image from 'next/image';
 
@@ -46,16 +45,17 @@ export default function ItinerAIProject() {
           {/* Project content */}
           <div className="w-full">
             {/* Main image display */}
+            <div className="w-full flex flex-col gap-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
-              className="w-full h-[400px] rounded-3xl overflow-hidden mb-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12)]"
+              className="w-full aspect-[4/3] rounded-3xl border border-slate-200 overflow-hidden mb-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12)]"
             >
               <Image
                 src={project.images[selectedImageIndex]}
                 alt={`${project.title} - main image`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover bg-slate-100"
                 width={1200}
                 height={800}
                 priority={selectedImageIndex === 0}
@@ -67,16 +67,16 @@ export default function ItinerAIProject() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
-              className="flex gap-2 mb-6 overflow-x-auto pb-2"
+              className="flex flex-wrap gap-4 mb-6 overflow-x-auto p-2"
             >
               {project.images.map((image, index) => (
                 <div
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`w-20 h-20 rounded-lg overflow-hidden cursor-pointer transition-all duration-200 ${
+                  className={`md:w-20 md:h-20 w-12 h-12 rounded-lg bg-slate-100 overflow-hidden cursor-pointer transition-all duration-200 ${
                     selectedImageIndex === index
                       ? 'ring-2 ring-blue-500 ring-offset-2'
-                      : 'opacity-70 hover:opacity-100'
+                      : 'opacity-70 hover:opacity-100 border border-slate-200'
                   }`}
                 >
                   <Image
@@ -89,158 +89,54 @@ export default function ItinerAIProject() {
                 </div>
               ))}
             </motion.div>
+            </div>
 
-            {/* Project overview */}
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.3 }}
-              className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
+              className=""
             >
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold text-slate-800 mb-4">Overview</h2>
-                <ul className="space-y-2">
-                  {project.description?.map((desc, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mt-2 mr-2"></span>
-                      <p className="text-slate-700">{desc}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Role and Timeline */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-2">My Role</h3>
-                  <p className="text-slate-700">{project.role}</p>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-2">Timeline</h3>
-                  <p className="text-slate-700">{project.timeline}</p>
-                </div>
+              <div className="">
+                <h2 className="text-base font-semibold text-slate-800 mb-2">ItinerAI: A Smarter, More Human Travel Companion</h2>
+                <p className="text-slate-600 leading-7">ItinerAI is an experimental travel assistant where multiple AI agents, each with a distinct personality and focus area, collaborate to help you plan and coordinate trips effortlessly. From surfacing the best flight options to optimizing your itinerary around your schedule, these agents communicate with each other and with you, just like a well-aligned team.</p>
+                <p className="text-slate-600 leading-7">In this prototype, I&apos;m exploring what it looks like when agents aren&apos;t just tools, but task owners with roles, opinions, and shared context. They discuss, divide responsibilities, and guide you through the planning process in a way that feels natural, helpful, and even delightful.</p>
               </div>
             </motion.div>
 
-            {/* Challenge and Solution */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.4 }}
-              className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
-            >
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Challenge</h3>
-                <p className="text-slate-700">{project.challenge}</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Solution</h3>
-                <p className="text-slate-700">{project.solution}</p>
-              </div>
-            </motion.div>
 
-            {/* Process */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.45 }}
-              className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
-            >
-              <h2 className="text-xl font-semibold text-slate-800 mb-4">Process</h2>
-              <ol className="space-y-4">
-                {project.process.map((step, index) => (
-                  <li key={index} className="flex">
-                    <div className="flex-shrink-0 mr-3">
-                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 text-white text-sm font-medium">
-                        {index + 1}
+            {/* Quote */}
+            <div className='relative col-span-2 w-full rounded-xl border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset] mt-8'>
+                      
+                      <div className=' flex items-center justify-start p-[1px] pb-0.5 border-dashed border-b border-slate-200'>
+                        <div className='relative flex items-center justify-center size-7 text-white rounded-tl-[10px] rounded-sm bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700  shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset]  border border-blue-500'>
+                        <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60  to-white/10 rounded-tl-[8px] rounded-[2px] z-10`}></div>
+                        <SpinnerGap size={16} weight="bold" className='text-white mt-[1px] mx-1' />
+                        </div>
+                        <div className='absolute inset-y-0 left-[31px] border-dashed border-l border-slate-200'></div>
+                        <div className='absolute inset-y-0 right-[31px] border-dashed border-l border-slate-200'></div>
                       </div>
-                    </div>
-                    <p className="text-slate-700">{step}</p>
-                  </li>
-                ))}
-              </ol>
-            </motion.div>
 
-            {/* Outcome */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.5 }}
-              className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
-            >
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">Outcome</h3>
-              <p className="text-slate-700">{project.outcome}</p>
-            </motion.div>
-
-            {/* Team */}
-            {project.team && (
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold text-slate-800 mb-4">Team</h2>
-                <div className="flex flex-wrap gap-2">
-                  {project.team?.map((member, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
-                      <div className="w-6 h-6 rounded-full bg-blue-200 flex items-center justify-center text-blue-800 text-xs font-bold">
-                        {member.split(' ').map((n) => n[0]).join('')}
+                      <div className='flex flex-col gap-2 px-11 pb-11 pt-5 items-center justify-center'>
+                        <p className='text-slate-600 font-serif italic text-2xl'>Case Study Coming Soon</p>
+                        
+                        <div className='absolute inset-x-0 bottom-8 border-dashed border-b border-slate-200'></div>
                       </div>
-                      <span className="text-blue-800">{member}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Testimonial */}
-            {project.testimonial && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.6 }}
-                className="bg-white rounded-3xl p-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),inset_0px_1px_2px_0px_rgba(255,255,255,1.00),inset_0px_-1px_1px_0px_rgba(0,0,0,0.12)] border border-slate-200 mb-6"
-              >
-                <div className="relative">
-                  <div className="text-blue-500 text-4xl absolute -top-2 -left-1">&quot;</div>
-                  <blockquote className="pl-6 italic text-slate-700">
-                    Great work on the ItinerAI project! The AI-powered travel planning tool is impressive.
-                  </blockquote>
-                  <div className="mt-4 pl-6">
-                    <p className="font-semibold text-slate-800">John Doe</p>
-                    <p className="text-sm text-slate-600">Project Manager</p>
                   </div>
-                </div>
-              </motion.div>
-            )}
 
             
 
-            {/* Links */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.7 }}
-              className="flex flex-col sm:flex-row gap-4 mt-6"
-            >
-              <Button
-                className="group text-white font-semibold w-full md:w-[240px] h-[36px] bg-gradient-to-b from-slate-700 via-slate-500 to-slate-300 border border-slate-500 rounded-full shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_8px_8px_-4px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:border-slate-700 active:shadow-[0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_8px_8px_-4px_rgba(0,0,0,0.0),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] transition-all duration-300 relative overflow-hidden active:bg-gradient-to-b active:from-slate-800 active:via-slate-600 active:to-slate-400 cursor-pointer flex items-center justify-center gap-2"
-                onClick={() => window.open(project.github, '_blank')}
-              >
-                <GithubLogo size={20} weight="fill" />
-                GitHub Repository
-                <div className="absolute inset-2 top-0.5 h-1/2 rounded-t-[12px] rounded-b-[4px] bg-gradient-to-b from-white/70 group-active:from-white/30" />
-              </Button>
-              <Button
-                className="group text-white font-semibold w-full md:w-[240px] h-[36px] bg-gradient-to-b from-blue-700 via-blue-500 to-blue-300 border border-blue-500 rounded-full shadow-[0px_2px_2px_-1px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.0),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:shadow-[0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:border-blue-700 active:shadow-[0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.0),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] transition-all duration-300 relative overflow-hidden active:bg-gradient-to-b active:from-blue-800 active:via-blue-600 active:to-blue-400 cursor-pointer flex items-center justify-center gap-2"
-                onClick={() => window.open(project.live, '_blank')}
-              >
-                <Globe size={20} weight="fill" />
-                Live Demo
-                <div className="absolute inset-2 top-0.5 h-1/2 rounded-t-[12px] rounded-b-[4px] bg-gradient-to-b from-white/70 group-active:from-white/30" />
-              </Button>
-            </motion.div>
+            
+
+            
+
+            
           </div>
 
            {/* Footer */}
            <div className="isolate relative flex flex-col-reverse w-full md:col-span-7 col-span-1 h-fit border border-slate-200 rounded-2xl md:p-6 p-4 items-center justify-center gap-2.5">
-            <div className='flex w-full items-center gap-2 justify-between'>
+           <div className='flex flex-col md:flex-row w-full items-start md:items-center gap-3 md:gap-2 md:justify-between'>
         <p className='text-slate-500 text-sm'>© 2025 Shreyas Patil</p>
         <div className='text font-medium text-slate-500 flex items-center'>Made with &nbsp; <span className='text-xs'> ❤️ </span> &nbsp; and &nbsp; <Image src="/images/About/Cursor-Icon.png" alt="Cursor" width={20} height={20} className="h-5 inline-block" /> </div>
             </div>

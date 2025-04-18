@@ -38,12 +38,12 @@ export function ProjectCard({
     <div className="w-full">
       {/* Card container */}
       <div 
-        className="w-full max-w-full relative bg-gradient-to-br from-slate-800 to-slate-950 rounded-3xl shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),0px_2px_0px_0px_rgba(0,0,0,0.12)] border-3 border-slate-800 overflow-hidden">
+        className="w-full max-w-full relative bg-gradient-to-br from-white to-slate-50 rounded-3xl shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),0px_2px_0px_0px_rgba(0,0,0,0.12)] border-3 border-slate-200 overflow-hidden">
         {/* Content container */}
           <div className="flex flex-col justify-top items-start">
           
           {/* Main content area */}
-          <div className="relative w-full h-full md:min-h-[504px] min-h-[280px] bg-slate-950 rounded-2xl flex flex-col justify-top items-start overflow-hidden [mask-image:radial-gradient(120%_70%_at_50%_37%,black_60%,rgba(0,0,0,0.4)_80%,transparent_90%)] [mask-type:alpha]">
+          <div className="relative w-full h-full md:min-h-[504px] min-h-[280px] bg-white rounded-sm flex flex-col justify-top items-start overflow-hidden ">
             {/* Only show first image as thumbnail */}
             {images.length > 0 && (
               <div className="absolute inset-0 w-full h-full">
@@ -62,27 +62,27 @@ export function ProjectCard({
 
             {/* Fallback background when no images */}
             {!images.length && (
-              <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-slate-100 rounded-xl" />
+              <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-white/10 rounded-xl" />
             )}
             
           </div>
 
           {/* Bottom controls */}
-          <div className="self-stretch h-[160px] flex flex-col justify-between items-end text-slate-50 md:p-6 md:pt-2 p-4">
+          <div className="self-stretch h-[160px] flex flex-col bg-white justify-between items-end text-slate-950 md:p-6 p-4">
 
             {/* Title section */}
             <div className=" flex flex-col items-start gap-2 self-stretch">
-              <div className="text-slate-50 md:text-2xl text-xl font-semibold">
+              <div className="text-slate-950 md:text-2xl text-xl font-semibold">
                 {title}
               </div>
-              <div className="text-slate-50/70 md:text-base text-xs">
+              <div className="text-slate-950/70 md:text-base text-xs">
                 {description[0]}
               </div>
             </div>
             
             {/* Read More button */}
             <Button 
-              className="isolate group relative text-slate-800 font-semibold md:w-[240px] w-fit h-[36px] md:px-6 px-6 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] hover:bg-[radial-gradient(at_50%_75%,theme(colors.slate.200),theme(colors.slate.300),theme(colors.slate.400))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.25)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.25)_inset] border border-slate-500 rounded-full hover:shadow-[0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_8px_8px_-4px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.25)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.25)_inset] active:shadow-[0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_8px_8px_-4px_rgba(0,0,0,0.0),0px_4px_8px_1px_rgba(0,0,0,0.25)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.25)_inset] active:bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] cursor-pointer  transition-all duration-300 overflow-hidden "
+              className="isolate group relative text-white font-semibold md:w-[240px] w-fit h-[36px] md:px-6 px-6 bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.600))] hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.400),theme(colors.blue.600),theme(colors.blue.700))] shadow-[0px_2px_2px_-1px_rgba(28,57,142,0.25),0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] border border-blue-600 rounded-full hover:shadow-[0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] active:shadow-[0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.0),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] active:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.600))] cursor-pointer  transition-all duration-300 overflow-hidden "
               onClick={navigateToProjectDetail}
             >
                 Read More
