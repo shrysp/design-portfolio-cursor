@@ -14,11 +14,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Design Portfolio | Next.js, Tailwind CSS v4, Framer Motion",
-  description: "A modern design portfolio showcasing projects built with Next.js, Tailwind CSS v4, and Framer Motion",
-  keywords: ["portfolio", "design", "next.js", "tailwind css", "framer motion", "web development"],
-  authors: [{ name: "Your Name" }],
-  creator: "Your Name",
+  title: "Design Portfolio | Shreyas Patil",
+  description: "Shreyas is a product designer with a passion for creating user-friendly and intuitive designs.",
+  keywords: ["portfolio", "design", "Shreyas Patil", "Product Designer", "next.js", "tailwind css", "framer motion", "web development"],
+  authors: [{ name: "Shreyas Patil" }],
+  creator: "Shreyas Patil",
+  icons: {
+    icon: "/Favicon.png",
+  },
 };
 
 export default function RootLayout({
