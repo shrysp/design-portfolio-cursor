@@ -33,7 +33,7 @@ const sectionVariants = {
     filter: "blur(0px)",
     transition: { 
       duration: 0.4,
-      ease: "easeOut"
+      ease: "easeOut" as const
     }
   }
 };
@@ -61,7 +61,7 @@ const imageVariants = {
     filter: "blur(0px)",
     transition: { 
       duration: 0.5,
-      ease: "easeOut"
+      ease: "easeOut" as const
     }
   }
 };

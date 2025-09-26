@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Transition, type Variants } from 'framer-motion';
 import { Code, Play, PencilLine, X, Info, Lightning, CaretDown, Copy } from '@phosphor-icons/react';
 import Image from 'next/image';
 
@@ -11,6 +11,8 @@ interface TabData {
   label: string;
   icon: React.ReactNode;
 }
+
+const animationEase = [0.9, -0.5, 0.64, 1] as const;
 
 const tabs: TabData[] = [
   {
@@ -84,10 +86,10 @@ export default function ModalGrid() {
     })
   };
 
-  const transition = {
+  const transition: Transition = {
     delay: 0.1,
     duration: 0.5,
-    ease: [0.9, -0.5, 0.64, 1], // Custom cubic-bezier for smoother end
+    ease: animationEase, // Custom cubic-bezier for smoother end
   };
 
   const renderContent = (tabId: string) => {
@@ -157,7 +159,7 @@ export default function ModalGrid() {
 
 // Tab content components
 function NewWorkflowTab() {
-  const gridVariants = {
+  const gridVariants: Variants = {
     hidden: { },
     visible: {
       transition: {
@@ -165,7 +167,7 @@ function NewWorkflowTab() {
         delayChildren: 0.05,
         delay: 0.1,
         duration: 0.3,
-        ease: [0.9, -0.5, 0.64, 1],
+        ease: animationEase,
       },
     },
     exit: {
@@ -174,7 +176,7 @@ function NewWorkflowTab() {
         staggerDirection: -1,
         delay: 0.1,
         duration: 0.3,
-        ease: [0.9, -0.5, 0.64, 1],
+        ease: animationEase,
       },
     },
   };
@@ -290,7 +292,7 @@ function NewWorkflowTab() {
 }
 
 function PreviewTab() {
-  const contentVariants = {
+  const contentVariants: Variants = {
     hidden: { },
     visible: {
       transition: {
@@ -298,7 +300,7 @@ function PreviewTab() {
         delayChildren: 0.05,
         delay: 0.1,
         duration: 0.3,
-        ease: [0.9, -0.5, 0.64, 1],
+        ease: animationEase,
       },
     },
     exit: {
@@ -307,7 +309,7 @@ function PreviewTab() {
         staggerDirection: -1,
         delay: 0.1,
         duration: 0.3,
-        ease: [0.9, -0.5, 0.64, 1],
+        ease: animationEase,
       },
     },
   };
@@ -451,7 +453,7 @@ function PreviewTab() {
 }
 
 function ApiTab() {
-  const contentVariants = {
+  const contentVariants: Variants = {
     hidden: { },
     visible: {
       transition: {
@@ -459,7 +461,7 @@ function ApiTab() {
         delayChildren: 0.05,
         delay: 0.1,
         duration: 0.3,
-        ease: [0.9, -0.5, 0.64, 1],
+        ease: animationEase,
       },
     },
     exit: {
@@ -468,7 +470,7 @@ function ApiTab() {
         staggerDirection: -1,
         delay: 0.1,
         duration: 0.3,
-        ease: [0.9, -0.5, 0.64, 1],
+        ease: animationEase,
       },
     },
   };
