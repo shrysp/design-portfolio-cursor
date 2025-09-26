@@ -115,7 +115,7 @@ export default function QuinnProject() {
                   caption='Natural language relationship queries: "founders in SF who raised Series A" '
                   className=""
                   mediaType="image"
-                  src='/images/projects/Quinn/groups.jpg'
+                  src='/images/projects/Quinn/Groups.jpg'
                   aspectClass="aspect-4/3"
                 />
               </div>
