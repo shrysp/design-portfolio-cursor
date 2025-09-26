@@ -22,6 +22,7 @@ export function ProjectCard({
   const navigateToProjectDetail = () => {
     // Map project titles to their dedicated page routes
     const projectRoutes: Record<string, string> = {
+      'Quinn': '/projects/quinn',
       'ItinerAI': '/projects/itinerai',
       'DashWorks': '/projects/dashworks',
       'WeatherWise': '/projects/weatherwise',
@@ -38,25 +39,25 @@ export function ProjectCard({
     <div className="w-full">
       {/* Card container */}
       <div 
-        className="w-full max-w-full relative bg-gradient-to-br from-white to-slate-50 rounded-3xl shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12),0px_2px_0px_0px_rgba(0,0,0,0.12)] border-3 border-slate-200 overflow-hidden">
+        className="w-full max-w-full relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] overflow-hidden">
         {/* Content container */}
           <div className="flex flex-col justify-top items-start">
           
           {/* Main content area */}
-          <div className="relative w-full h-full md:min-h-[504px] min-h-[280px] bg-white rounded-sm flex flex-col justify-top items-start overflow-hidden ">
+          <div className="relative w-full h-full md:min-h-[524px] min-h-[280px] bg-transparent rounded-sm flex flex-col justify-top items-start overflow-hidden ">
             {/* Only show first image as thumbnail */}
             {images.length > 0 && (
               <div className="absolute inset-0 w-full h-full">
                 <Image 
                   src={images[0]} 
                   alt={`${title} thumbnail`} 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover aspect-[3/4]"
                   width={600}
                   height={400}
                   priority
                 />
                 {/* Overlay gradient for better text readability */}
-                <div className="absolute inset-0 h-1/3 rounded-t-2xl bg-gradient-to-b from-white/70 via-transparent to-transparent"></div>
+               
               </div>
             )}
 
@@ -68,26 +69,26 @@ export function ProjectCard({
           </div>
 
           {/* Bottom controls */}
-          <div className="self-stretch h-[160px] flex flex-col bg-white justify-between items-end text-slate-950 md:p-6 p-4">
+          <div className="flex w-full bg-transparent justify-between gap-12 items-end text-slate-950 md:p-6 p-4">
 
             {/* Title section */}
-            <div className=" flex flex-col items-start gap-2 self-stretch">
+            <div className=" flex flex-col items-start gap-2 md:w-3/4 ">
               <div className="text-slate-950 md:text-2xl text-xl font-semibold">
                 {title}
               </div>
-              <div className="text-slate-950/70 md:text-base text-xs">
+              <div className="text-slate-950/70 md:text-base text-xs text-pretty  ">
                 {description[0]}
               </div>
             </div>
             
             {/* Read More button */}
             <Button 
-              className="isolate group relative text-white font-semibold md:w-[240px] w-fit h-[36px] md:px-6 px-6 bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.600))] hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.400),theme(colors.blue.600),theme(colors.blue.700))] shadow-[0px_2px_2px_-1px_rgba(28,57,142,0.25),0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] border border-blue-600 rounded-full hover:shadow-[0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] active:shadow-[0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.0),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] active:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.600))] cursor-pointer  transition-all duration-300 overflow-hidden "
+              variant="primary"
+              size="project"
+              showHighlight={true}
               onClick={navigateToProjectDetail}
             >
-                Read More
-              
-              <div className="absolute inset-2 top-0.5 h-1/2 rounded-t-[12px] rounded-b-[4px] bg-gradient-to-b from-white/70 to-white/20 group-active:from-white/50 z-10" />
+              Read More
             </Button> 
           </div>
         </div>

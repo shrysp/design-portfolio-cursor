@@ -1,21 +1,56 @@
 @import "tailwindcss";
+@plugin "tailwindcss-animate";
 
 :root {
-  --background: #ffffff;
+  --background: #F9FAFB;
   --foreground: #171717;
+  
+  /* Brand Gradients */
+  --gradient-primary: linear-gradient(180deg, #2B7FFF 0%, #155DFC 100%);
+  --gradient-secondary: linear-gradient(180deg, #57534D 0%, #44403B 100%);
+  --gradient-accent: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+@layer base {
+  html {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-kerning: normal;
+    font-variant-ligatures: common-ligatures contextual;
+    font-optical-sizing: auto; /* helpful for Lora */
+    /* Optional for variable fonts: tweak axes if needed */
+    /* font-variation-settings: "opsz" 16; */
+  }
+
+  body {
+    letter-spacing: -0.01em; /* global tracking for body text */
+    line-height: 1.7;        /* global leading */
+  }
+
+  h1,h2,h3,h4,h5,h6 { font-family: var(--font-serif);
+    letter-spacing: 0.01em;
+  }
+}
+  
+@layer base {
+  html {
+    font-size: 15px;
+  }
 }
 
 /* Hide scrollbar but keep functionality */
@@ -27,6 +62,75 @@ body {
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;             /* Chrome, Safari and Opera */
+  }
+
+  /* Gradient Text Utilities */
+  .text-gradient-primary {
+    background: var(--gradient-primary);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-gradient-secondary {
+    background: var(--gradient-secondary);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-gradient-accent {
+    background: var(--gradient-accent);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Typography Classes */
+  .text-page-header {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 32px;
+  }
+
+  .text-header {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 28px;
+  }
+
+  .text-important {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-weight: 450;
+    line-height: 28px;
+    color: theme('colors.stone.700');
+  }
+
+  .text-subheader {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 20px;
+    color: theme('colors.stone.700');
+  }
+
+  .text-caption {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-style: italic;
+    line-height: 20px;
+    color: theme('colors.stone.500');
+  }
+
+  .text-body {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 25px;
+    color: theme('colors.stone.500');
   }
 }
 

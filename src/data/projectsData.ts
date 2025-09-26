@@ -1,6 +1,37 @@
 // Project data with different information structures for each project
 export const projectsData = [
   {
+    title: "Quinn",
+    description: [
+      "AI-native relationship intelligence platform that transforms how executives and business leaders manage their professional networks.",
+      
+    ],
+    images: [
+      "/images/projects/Quinn/thumbnail.png",
+      "/images/projects/Quinn/Masterlist.jpg"
+      
+      
+    ],
+    // Additional information specific to this project
+    role: "Product Designer",
+    timeline: "May 2025 - July 2025 (3 months)",
+    challenge: "Creating a comprehensive design system that scales across multiple platforms while maintaining consistency and usability for diverse user needs.",
+    solution: "Developed a modular component library with clear documentation, flexible theming capabilities, and comprehensive accessibility features.",
+    outcome: [
+      "Efficiency: Reduced design-to-development handoff time by 50%",
+      "Consistency: Achieved unified design language across all platforms",
+      "Scalability: Enabled rapid feature development with reusable components"
+    ],
+    process: [
+      "Research: Conducted comprehensive audit of existing design patterns",
+      "Strategy: Defined design principles and component architecture",
+      "Design: Created comprehensive component library and documentation",
+      "Testing: Validated components through user testing and feedback",
+      "Implementation: Collaborated with engineering for seamless integration"
+    ],
+    
+  },
+  {
     title: "ItinerAI",
     description: [
       "What if planning a trip felt less like searching and more like having a team of helpful friends?",

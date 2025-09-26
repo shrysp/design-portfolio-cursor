@@ -104,7 +104,7 @@ export default function ModalGrid() {
   };
 
   return (
-    <div className="flex flex-col gap-4 w-full h-full p-4 bg-slate-100 rounded-2xl text-[#111827]">
+    <div className="flex flex-col gap-4 w-full h-full p-4 bg-white rounded-2xl text-[#111827] shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)]">
       {/* Tabs Navigation */}
       <div className="relative w-fit flex rounded-full bg-white">
           <MovingBackground selectedButton={selectedButton} />

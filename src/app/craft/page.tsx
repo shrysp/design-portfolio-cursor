@@ -2,19 +2,21 @@
 
 import { motion } from 'framer-motion';
 import Footer from '@/components/Footer';
-import { useRouter } from 'next/navigation';
+import { ImageSquare, PlayCircle } from '@phosphor-icons/react';
+// import Image from 'next/image';
+// import ModalGrid from '@/components/ModalGrid';
+// import MediaCard from '@/components/MediaCard';
 
 export default function Craft() {
-  // Using underscore prefix to indicate it's intentionally unused but kept for future use
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _router = useRouter();
 
   const gridVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 20, filter: "blur(4px)", scale: 0.95 },
     visible: { 
       opacity: 1, 
       y: 0,
-      transition: { duration: 0.5 }
+      filter: "blur(0px)",
+      scale: 1,
+      transition: { duration: 0.4 }
     }
   };
 
@@ -31,79 +33,163 @@ export default function Craft() {
   return (
     <div className="min-h-screen flex justify-center">
       <main className="w-full md:max-w-[800px] max-w-[361px] flex flex-col gap-12">
+        <div className="flex flex-col gap-12 items-start md:pt-16 pt-8 md:px-0 px-4 md:pb-24 pb-24">
+         
+          <motion.div
+            initial={{ opacity: 0, y: 20, filter: "blur(4px)", scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="isolate relative min-h-14 flex w-full bg-slate-800 border-3 border-slate-800 rounded-full items-center gap-4 overflow-hidden"
+          >
+            <div className="absolute inset-x-1 top-0.5 h-1/2 bg-gradient-to-b from-slate-50/40 to-slate-50/5 rounded-t-[24px] rounded-b-[6px] z-10"></div>
+            <div className="flex items-center w-full h-full">
+              <h1 className="md:text-[24px] text-[16px] font-bold text-slate-50 w-full px-6 py-2">
+                Craft
+              </h1>
+              
+              <div className="flex w-full h-full bg-[url('/images/Banners/Banner-Craft.png')] bg-cover bg-[50%_61%] [mask-image:radial-gradient(50%_400%_at_0%_50%,transparent_10%,rgba(0,0,0,0.7)_100%)] [mask-type:alpha]"></div>
+            </div>
+          </motion.div>
 
-        <div className="flex flex-col gap-6 items-start border-x border-slate-200 md:p-8 p-4 md:pb-24 pb-24 overflow-y-auto scrollbar-hide">
-          {/* Page header */}
-         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="isolate relative min-h-14 flex w-full bg-slate-800 border-3 border-slate-800 rounded-full items-center gap-4 overflow-hidden"
-        
-        >
 
-          <div className="absolute inset-x-1 top-0.5 h-1/2 bg-gradient-to-b from-slate-50/40 to-slate-50/5 rounded-t-[24px] rounded-b-[6px] z-10"></div>
-          <div className="flex items-center w-full h-full">
-            <h1 className="md:text-[24px] text-[16px] font-bold text-slate-50 w-full px-6 py-2">
-            Craft
-           </h1>
-           <div className="flex w-full h-full bg-[url('/images/Banners/Banner-Craft.png')] bg-cover bg-[50%_61%] [mask-image:radial-gradient(50%_400%_at_0%_50%,transparent_10%,rgba(0,0,0,0.7)_100%)] [mask-type:alpha]">
+          {/* Craft sections */}
+          <motion.div 
+            className="grid md:grid-cols-2 grid-cols-1 gap-6 h-auto w-full"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
             
-           </div>
-          </div>
-          
-         </motion.div>
-        
-        {/* Craft sections */}
-        <motion.div className="grid md:grid-cols-2 grid-cols-1 gap-6 h-auto w-full"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible">
-          
-            <motion.div className="relative col-span-1 row-span-4 aspect-[3/4] w-full h-full rounded-3xl border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
-              variants={gridVariants}>
-                <video src="/videos/ItinerAIbuild-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-3xl -z-10'></video>
+            <motion.div 
+              className="isolate relative w-full h-full aspect-[3/4] bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-4"
+              variants={gridVariants}
+            >
+              <video src="/videos/ItinerAIbuild-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
+                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
+                  <PlayCircle size={14} weight="fill" className='text-white' />
+                </div>
             </motion.div>
-            <motion.div className="relative col-span-1 row-span-2 aspect-4/3 w-full h-full rounded-3xl border border-slate-200 bg-[url('/images/Craft/BuiLD09.png')] bg-cover bg-center shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
-              variants={gridVariants}>
-            </motion.div>
-            
-            <motion.div className="relative col-span-1 row-span-2 aspect-4/3 w-full h-full rounded-3xl border border-slate-200 bg-[url('/images/Craft/BuiLD11.png')] bg-cover bg-center shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
-              variants={gridVariants}>
-            </motion.div>
-            <motion.div className="relative col-span-1 row-span-2 aspect-square w-full h-full rounded-3xl border border-slate-200 bg-[url('/images/Craft/BuiLD08.png')] bg-cover bg-center shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
-              variants={gridVariants}>
-            </motion.div>
-          
 
-          
-            <motion.div className="relative col-span-1 row-span-1 aspect-16/9 w-full h-full rounded-3xl border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
-              variants={gridVariants}>
-              <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-3xl -z-10'></video>
-            </motion.div>
-            <motion.div className="relative col-span-1 row-span-2 aspect-4/3 w-full h-full rounded-3xl border border-slate-200 bg-[url('/images/Craft/BuiLD04.png')] bg-cover bg-center shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
-              variants={gridVariants}>
-            </motion.div>
-            <motion.div className="relative col-span-1 row-span-2 aspect-4/3 w-full h-full rounded-3xl border border-slate-200 bg-[url('/images/Craft/BuiLD10.png')] bg-cover bg-center shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
-              variants={gridVariants}>
-            </motion.div>
-            <motion.div className="relative col-span-1 row-span-1 aspect-16/9 w-full h-full rounded-3xl border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
-              variants={gridVariants}>
-                <video src="/images/Craft/Modals.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-3xl -z-10'></video>
-            </motion.div>
-            <motion.div className="relative col-span-1 row-span-2 aspect-square w-full h-full rounded-3xl border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
-              variants={gridVariants}>
-                <video src="/images/Craft/Whop-Modal.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-3xl -z-10'></video>
+            <motion.div 
+              className="isolate relative w-full h-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
+              variants={gridVariants}
+            >
+              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
+                <div className="w-full h-full aspect-4/3 relative bg-white bg-[url('/images/Craft/BuiLD09.png')] bg-cover bg-center">
+                </div>
+                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
+                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
+                  <ImageSquare size={14} weight="fill" className='text-white mt-[1px]' />
+                </div>
+              </div>
             </motion.div>
             
+            <motion.div 
+              className="isolate relative w-full h-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
+              variants={gridVariants}
+            >
+              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
+                <div className="w-full h-full aspect-4/3 relative bg-white bg-[url('/images/Craft/BuiLD11.png')] bg-cover bg-center">
+                </div>
+                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
+                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
+                  <ImageSquare size={14} weight="fill" className='text-white mt-[1px]' />
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              className="isolate relative w-full h-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
+              variants={gridVariants}
+            >
+              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
+                <div className="w-full h-full aspect-square relative bg-white bg-[url('/images/Craft/BuiLD08.png')] bg-cover bg-center">
+                </div>
+                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
+                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
+                  <ImageSquare size={14} weight="fill" className='text-white mt-[1px]' />
+                </div>
+              </div>
+            </motion.div>
           
-        </motion.div>
+            <motion.div 
+              className="isolate relative w-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-2xl col-span-1 row-span-1"
+              variants={gridVariants}
+            >
+              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
+                <div className="w-full h-full aspect-16/9 relative bg-black">
+                  <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='w-full h-full object-cover'></video>
+                </div>
+                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
+                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
+                  <PlayCircle size={14} weight="fill" className='text-white' />
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              className="isolate relative w-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-2xl col-span-1 row-span-2"
+              variants={gridVariants}
+            >
+              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
+                <div className="w-full h-full aspect-4/3 relative bg-white bg-[url('/images/Craft/BuiLD04.png')] bg-cover bg-center">
+                </div>
+                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
+                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
+                  <ImageSquare size={14} weight="fill" className='text-white mt-[1px]' />
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              className="isolate relative w-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-2xl col-span-1 row-span-2"
+              variants={gridVariants}
+            >
+              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
+                <div className="w-full h-full aspect-4/3 relative bg-white bg-[url('/images/Craft/BuiLD10.png')] bg-cover bg-center">
+                </div>
+                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
+                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
+                  <ImageSquare size={14} weight="fill" className='text-white mt-[1px]' />
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              className="isolate relative w-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-2xl col-span-1 row-span-1"
+              variants={gridVariants}
+            >
+              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
+                <div className="w-full h-full aspect-16/9 relative bg-black">
+                  <video src="/images/Craft/Modals.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='w-full h-full object-cover'></video>
+                </div>
+                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
+                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
+                  <PlayCircle size={14} weight="fill" className='text-white' />
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              className="isolate relative w-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-2xl col-span-1 row-span-2"
+              variants={gridVariants}
+            >
+              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
+                <div className="w-full h-full aspect-square relative bg-black">
+                  <video src="/images/Craft/Whop-Modal.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='w-full h-full object-cover'></video>
+                </div>
+                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
+                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
+                  <PlayCircle size={14} weight="fill" className='text-white' />
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
 
           <div className="w-full">
             <Footer />
           </div>
-        
-        
         </div>
       </main>
     </div>

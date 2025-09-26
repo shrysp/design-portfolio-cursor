@@ -1,490 +1,306 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import { ArrowSquareOut, XLogo, LinkedinLogo } from '@phosphor-icons/react';
-import React, { useState, useEffect } from 'react';
 import Footer from '@/components/Footer';
-import EmailCopyButton from '@/components/EmailCopyButton';
-import router from 'next/router';
 import ModalGrid from '@/components/ModalGrid';
 import Image from 'next/image';
+import MediaCard from '@/components/MediaCard';
 
-function BayAreaTimeDisplay() {
-  const [currentTime, setCurrentTime] = useState(new Date());
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000);
 
-    return () => clearInterval(timer);
-  }, []);
 
-  const options = {
-    timeZone: 'America/Los_Angeles',
-    hour: '2-digit' as const,
-    minute: '2-digit' as const,
-    
-    hour12: true,
-  };
-
-  const timeString = new Intl.DateTimeFormat('en-US', options).format(currentTime);
-
-  return <div className='w-full flex md:justify-end justify-start text-slate-100 font-mono font-medium'>{timeString}</div>;
-}
-
-const gridVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-};
-
-const containerVariants = {
+// Main page container variants for staggered loading
+const pageContainerVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.2,
-      delayChildren: 0.4
+      staggerChildren: 0.3,
+      delayChildren: 0.2
+    }
+  }
+};
+
+// Individual section variants with blur
+const sectionVariants = {
+  hidden: { 
+    opacity: 0, 
+    y: 30,
+    filter: "blur(4px)"
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    filter: "blur(0px)",
+    transition: { 
+      duration: 0.4,
+      ease: "easeOut"
+    }
+  }
+};
+
+// Three images stagger variants
+const imagesContainerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.1
+    }
+  }
+};
+
+const imageVariants = {
+  hidden: { 
+    opacity: 0, 
+    scale: 0.9,
+    filter: "blur(4px)"
+  },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    filter: "blur(0px)",
+    transition: { 
+      duration: 0.5,
+      ease: "easeOut"
     }
   }
 };
 
 export default function Home() {
 
-
   return (
     <div className="min-h-screen flex justify-center">
       <main className="relative w-full md:max-w-[800px] max-w-[361px]">
 
-        <div className="relative flex flex-col gap-6 items-start border-x border-slate-200 md:p-8 p-4 md:pb-24 pb-24 overflow-y-auto scrollbar-hide">
-        {/* Hero section */}
-          {/* Page header */}
-         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="isolate relative md:min-h-[276px] min-h-[360px] flex w-full bg-slate-800 border-3 border-slate-800 rounded-3xl items-center gap-4 overflow-hidden shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_2px_0px_0px_rgba(0,0,0,0.15),0px_1px_1px_0px_rgba(255,255,255,0.07)_inset]"
-        
+        <motion.div 
+          className="relative flex flex-col gap-16 items-start md:pt-16 pt-8 md:px-0 px-4 md:pb-24 pb-24"
+          variants={pageContainerVariants}
+          initial="hidden"
+          animate="visible"
         >
-
-          <div className="absolute inset-x-[2px] top-0.5 h-1/3 bg-gradient-to-b from-slate-50/20 to-slate-50/0 rounded-t-[21px] rounded-b-[6px] z-10 pointer-events-none"></div>
-          <div className="absolute inset-x-[2px] bottom-0.5 h-1/4 bg-gradient-to-t from-slate-50/10 to-slate-50/0 rounded-t-[6px] rounded-b-[21px] z-10 pointer-events-none"></div>
-          <div className="items-center w-full min-h-[276px] md:grid md:grid-cols-5 flex flex-col-reverse">
-
-            {/* Left side */}
-            <div className='flex flex-col w-full md:h-full h-[180px] items-start justify-between gap-0.5 p-4 md:p-6 col-span-2'>
-              {/* top */}
-              <div className='flex flex-col gap-0'>
-                <h1 className="md:text-[24px] text-[20px] font-bold text-slate-50 w-full ">
-                  Shreyas Patil
-                </h1>
-
-                <p className="md:text-[16px] text-[14px] text-slate-300 font-medium">
-                  Product Designer
-                </p>
-              </div>
-
-              {/* bottom */}
-              <div className='flex flex-col gap-3 items-start'>
-
-                <div className='relative isolate flex items-center justify-center gap-2'>
-
-                  <div className='absolute isolate left-0 flex items-center justify-center size-2 bg-radial-[at_50%_75%] from-green-500 via-green-600 to-green-700 rounded-full -z-10 animate-[ping_3s_ease-in-out_infinite]'></div>
-
-                  <div className='relative isolate flex items-center justify-center size-2 bg-radial-[at_50%_75%] from-green-500 via-green-600 to-green-700 rounded-full'>
-                    <div className='absolute inset-[1px] top-[0.5px] h-1/2 bg-gradient-to-b from-white/70 to-white/20 rounded-t-[24px] rounded-b-[6px]'></div>
-                  </div>
-                  <p className="md:text-base text-sm text-slate-300 font-medium">
-                    Looking for new opportunities!
-                  </p>
-
-                </div>
-
-                <div className="flex items-center justify-center gap-3">
-        
-                  <a 
-                    href="https://x.com/ShreyasPatil_" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-slate-400 via-slate-600 to-slate-800 hover:from-slate-500 hover:via-slate-700 hover:to-slate-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset]  cursor-pointer transition-all duration-300'
-                  >                  
-                    <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-                    <XLogo size={18} weight="fill" />
-                  </a>
-
-        
-
-                  <button className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-red-400 via-red-600 to-red-800 hover:from-red-500 hover:via-red-700 hover:to-red-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] cursor-pointer transition-all duration-300'>                  
-                    <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10 pointer-events-none`}></div>
-                    <EmailCopyButton />
-                  </button>
-
-                  <a 
-                    href="https://www.linkedin.com/in/shreyastpatil/" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 hover:from-blue-400 hover:via-blue-600 hover:to-blue-800 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] cursor-pointer transition-all duration-300'
-                   >                  
-                    <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-                    <LinkedinLogo size={18} weight="fill" />
-                  </a>
-                </div>
-
-              </div>
-
-            </div>
-
-            {/* Right side */}
-            <div className='isolate relative flex w-full h-[180px] md:h-full col-span-3 justify-between'>
-              <div className='relative w-full h-full p-4 md:p-6 flex md:flex-col justify-between z-10'>
-                <BayAreaTimeDisplay />
-                <div className='w-full flex justify-end text-slate-200 font-mono font-medium'>Bay Area, CA</div>
-              </div>
-              <div className="absolute inset-0  w-full h-full bg-[url('/images/About/About-1.jpeg')] bg-cover bg-[50%_60%] md:[mask-image:radial-gradient(50%_400%_at_0%_50%,transparent_10%,rgba(0,0,0,0.7)_100%)] [mask-image:radial-gradient(200%_250%_at_50%_0%,rgba(0,0,0,0.8)_0%,transparent_50%)] [mask-type:alpha]"></div>
-            </div>
-          </div>
           
-         </motion.div>
+          <motion.div
+            variants={sectionVariants}
+            className=""
+          >
+            {/* top */}
+            <div className='flex flex-col gap-4 text-gray-800'>
+                  <div className="space-y-0">
+                    <span className="text-page-header text-gradient-primary ">Shreyas Patil</span>
+                    <div className="text-caption">Product Designer</div>
+                  </div>
+
+                  <p className="text-important">Exploring how humans and computers connect and building the interfaces in between. Based in the Bay Area</p>
+
+                  <motion.div 
+                    className='w-full grid grid-cols-3 gap-4'
+                    variants={imagesContainerVariants}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    <motion.div variants={imageVariants}>
+                      <MediaCard
+                        mediaType="image"
+                        src="/images/About/About-1.jpeg"
+                        aspectClass="aspect-square"
+                        rightIcon={<Image src="/logos/Create with Play Logo.png" alt="Create with Play Logo" width={20} height={20} className="object-contain" />}
+                      />  
+                    </motion.div>
+
+                    <motion.div variants={imageVariants}>
+                      <MediaCard
+                        mediaType="image"
+                        src="/images/About/About-2.jpeg"
+                        aspectClass="aspect-square"
+                        rightIcon={<Image src="/logos/Swift Icon.svg" alt="Swift Icon" width={20} height={20} className="object-contain" />}
+                      />
+                    </motion.div>
+
+                    <motion.div variants={imageVariants} className="">
+                      <MediaCard
+                        mediaType="image"
+                        src="/images/About/About-3.jpeg"
+                        aspectClass="aspect-square"
+                        rightIcon={<Image src="/logos/Create with Play Logo.png" alt="Create with Play Logo" width={20} height={20} className="object-contain " />}
+                      />
+                    </motion.div>
+
+                  </motion.div>
+                  
+                
+            </div>        
+          </motion.div>
 
           {/* Main section */}
-          <motion.div className="grid md:grid-cols-6 grid-cols-1 auto-rows-auto pb-1.5 pt-2 md:gap-x-6 md:gap-y-12 gap-y-6 w-full"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible">
+          <motion.div 
+            className="flex flex-col gap-4 w-full"
+            variants={sectionVariants}
+          >
 
-            
-
-            
-            {/* What I Do Best section */}
-            <motion.div className="isolate flex flex-col md:col-span-6 col-span-1 gap-8 bg-slate-50 rounded-3xl md:p-6 p-4 items-center justify-top border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
-              variants={gridVariants}>
-                
-              {/* Prototyping section */}
-              <div className="w-full text-[24px] items-start font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
+              {/* Section heading */}
+              <h1 className="text-subheader "> 
                 What I Do Best
-              </div>
+              </h1>
+              
 
-              <div className='w-full grid md:grid-cols-2 grid-cols-1 gap-6'>
-
-                <div className="w-full col-span-1 flex flex-col gap-3 items-start">
-                  <div className="w-full text-base font-semibold text-slate-600"> Turning Ideas into Interactive Prototypes</div>
-                  <div className="text-sm leading-6 font-light text-slate-600">I quickly translate concepts into prototypes to test usability early and refine experiences.</div>
-                </div>
-
-                {/* ItinerAI Prototypes */}
-                <div className="relative w-full h-fit md:col-span-2 col-span-1 grid md:grid-cols-4 grid-cols-1 gap-4 gap-x-6">
+              {/* Content grid */}
+              <div className='w-full flex flex-col gap-4'>
+                  <div className="w-full flex flex-col gap-1 items-start">
+                    <h2 className="text-header text-gradient-primary ">Turning Ideas into Interactive Prototypes</h2>
+                    <div className="text-body text-pretty">I quickly translate concepts into prototypes to test usability early and refine experiences.</div>
+                  </div>
                   
-                      
-                      <div  className="isolate relative flex flex-col w-full md:col-span-2 col-span-1 aspect-3/4 border border-slate-200  bg-slate-100  rounded-2xl overflow-hidden">
-                          
-                          <div className="relative flex flex-col h-full w-full overflow-hidden pb-1 bg-slate-100">
-                            <video src="/videos/Walk-Through-Video.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-2xl bg-white border border-slate-200"></video>   
-                          </div>
+                  {/* Prototyping section */}
+                  <div className="w-full flex flex-col gap-16">
+                    
 
-                          <div className='w-full flex items-center justify-between px-4 py-2'>
-                              <div className="relative pr-3 text-slate-600 text-sm font-medium"> Early ItinerAI Prototype built with Play</div>
-                              <div className="relative size-6 rounded-md flex items-center justify-center">
-                                <Image src="/logos/Create with Play Logo.png" alt="Create with Play Logo" width={20} height={20} className="object-contain" />
-                              </div>
-                            </div>                 
-                      </div>
-                      <div  className="isolate flex flex-col relative h-full md:col-span-2 col-span-1 aspect-3/4 border border-slate-200  bg-slate-100  rounded-2xl overflow-hidden">
-                          
-                          <div className="relative flex flex-col h-full w-full overflow-hidden pb-1 bg-slate-100">
-                            <video src="/videos/ItinerAIbuild-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-2xl bg-white border border-slate-200"></video>   
-                            
-                          </div>
-                          <div className='w-full flex items-center justify-between px-4 py-2'>
-                            <div className="relative pr-3 text-slate-600 text-sm font-medium"> Sorting shared posts with AI - SwiftUI</div>
-                            <div className="relative size-6 rounded-md flex items-center justify-center">
-                              <Image src="/logos/Swift Icon.svg" alt="Swift Icon" width={20} height={20} className="object-contain" />
-                            </div>
-                          </div>
-                         
-                      </div>   
-
-                      <div className='md:col-span-2 md:col-start-3 col-span-1 md:row-start-2 row-start-1 h-fit space-y-1 sticky top-0'>
-                        <div className="w-full text-sm font-semibold text-slate-600"> ItinerAI</div>
-                        <div className="text-sm leading-6 font-light text-slate-600">My capstone project, where I designed the full experience and built an interactive prototype using Play. Later, I developed an MVP in SwiftUI using Cursor to test feasibility.</div>
-                      </div>
-                  
-                </div>
-
-                {/* Mindlab section */}
-                <div className="relative w-full h-fit md:col-span-2 col-span-1 grid md:grid-cols-4 grid-cols-1 gap-4 gap-x-6">
-                  
-                      
-                      <div className="isolate flex flex-col relative h-full md:col-span-4 col-span-1 border border-slate-200  bg-slate-100  rounded-2xl overflow-hidden">
-                        <div  className="relative h-full aspect-16/9 border border-slate-200  bg-white  rounded-2xl overflow-hidden">
-                          <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="relative w-full h-full object-cover rounded-xl bg-white"></video>                    
-                        </div>
-                        <div className='w-full flex items-center justify-between px-4 py-2'>
-                            <div className="relative pr-3 text-slate-600 text-sm font-medium"> Guided thinking with AI - V0 prototype</div>
-                            <div className="relative h-6 rounded-md flex items-center justify-center">
-                              <Image src="/logos/V0-logo.svg" alt="V0 Logo" width={20} height={20} className="object-contain" />
-                              <span className="text-slate-600 text-sm font-medium px-2">+</span>
-                              <Image src="/images/About/Cursor-Icon.png" alt="Cursor Icon" width={16} height={16} className="object-contain" />
-                            </div>
-                          </div>
-                      </div>
-
-                      <div className='md:col-span-2 md:col-start-3 col-span-1 md:row-start-2 row-start-1 h-fit flex flex-col gap-2 sticky top-0'>
-                        <div className="w-full text-sm font-semibold text-slate-600"> Mindlab</div>
-                        <div className="text-sm leading-6 font-light text-slate-600">A way to train your thinking muscle with Perplexity.
-                          Perplexity makes knowledge accessible, but it&apos;s easy to offload thinking to LLMs. I challenged this by building Mindlab using V0, a prototype that guides thinking instead of spoon-feeding answers, helping users arrive at insights without losing context.</div>
-                      </div>
+                    {/* ItinerAI Prototypes */}
+                    <div className="relative w-full h-fit flex flex-col gap-1">
+                      <div className='w-full h-fit space-y-1'>
+                        <h2 className="w-full text-important">ItinerAI</h2>
                         
-                  
-                </div>
-
-                {/* ItinerAI Prototypes */}
-                <div className="relative w-full h-fit md:col-span-2 col-span-1 grid md:grid-cols-4 grid-cols-1 gap-4 gap-x-6">
-                  
-                      <div  className="isolate flex flex-col relative h-full md:col-span-2 md:col-start-3 col-span-1 aspect-3/4 border border-slate-200  bg-slate-100  rounded-2xl overflow-hidden">
-                          
-                          <div className="relative flex flex-col h-full w-full overflow-hidden pb-1 bg-slate-100">
-                            <video src="/videos/aero_recording.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className="w-full h-full object-cover rounded-2xl bg-white border border-slate-200"></video>   
-                            
-                          </div>
-                          <div className='w-full flex items-center justify-between px-4 py-2'>
-                            <div className="relative pr-3 text-slate-600 text-sm font-medium">AR prototype used to study indoor navigation challenges</div>
-                            <div className="relative size-8 rounded-md flex items-center justify-center">
-                              <Image src="/logos/Adobe Aero SVG Icon.svg" alt="Adobe Aero Icon" width={24} height={24} className="object-contain" />
-                            </div>
-                          </div>
-                         
-                      </div>   
-
-                      <div className='md:col-span-2 md:col-start-3 md:row-start-2 col-span-1 row-start-1 h-fit space-y-1 sticky top-0'>
-                        <div className="w-full text-sm font-semibold text-slate-600"> Indoor AR navigation prototype</div>
-                        <div className="text-sm leading-6 font-light text-slate-600">Built in under 3 hours for a user research study exploring the challenges of indoor navigation and how AR wayfinding can support spatial memory.</div>
                       </div>
-                  
-                </div>
+                      
+                      <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+                        <MediaCard
+                          mediaType="video"
+                          src="/videos/Walk-Through-Video.mp4"
+                          aspectClass="aspect-3/4"
+                          caption="Early ItinerAI Prototype built with Play"
+                          rightIcon={<Image src="/logos/Create with Play Logo.png" alt="Create with Play Logo" width={20} height={20} className="object-contain" />}
+                          className="w-full"
+                          videoAttributes={{ autoPlay: true, muted: true, loop: true, playsInline: true, disablePictureInPicture: true, controlsList: 'nodownload nofullscreen noremoteplayback' }}
+                        />
 
-
-                {/* Design System section */}
-                <div className='flex flex-col col-span-1 gap-2 mt-8'>
-                    <div className="w-full text-base font-semibold text-slate-600"> 
-                      Building Scalable Design Systems
+                        <MediaCard
+                          mediaType="video"
+                          src="/videos/ItinerAIbuild-1.mp4"
+                          aspectClass="aspect-3/4"
+                          caption="Sorting shared posts with AI - SwiftUI"
+                          rightIcon={<Image src="/logos/Swift Icon.svg" alt="Swift Icon" width={20} height={20} className="object-contain" />}
+                          className="w-full"
+                          videoAttributes={{ autoPlay: true, muted: true, loop: true, playsInline: true, disablePictureInPicture: true, controlsList: 'nodownload nofullscreen noremoteplayback' }}
+                        />
+                      </div>
+                      <div className="text-body text-pretty">My capstone project, where I designed the full experience and built an interactive prototype using Play. Later, I developed an MVP in SwiftUI using Cursor to test feasibility.</div>
                     </div>
-                    <div className="text-sm leading-6 font-light text-slate-600">At Dashworks, I built a design system that balances flexibility and usability for various workflows. To demonstrate my ability to bring designs to life with precision, I developed select modals using Tailwind below.</div>
-                </div>
 
-                <div className="relative w-full md:col-span-2 col-span-1 rounded-2xl overflow-hidden border border-slate-200">
-                  <div className="hidden md:block">
-                    <ModalGrid />
+                    {/* Mindlab section */}
+                    <div className="relative w-full h-fit flex flex-col gap-1">
+                      <div className='w-full h-fit flex flex-col gap-1'>
+                        <h2 className="w-full text-important">Mindlab</h2>
+                        
+                      </div>
+                      
+                      <MediaCard
+                        mediaType="video"
+                        src="/images/Craft/pplx-mindlab-1.mp4"
+                        aspectClass="aspect-16/9"
+                        caption="Guided thinking with AI - V0 prototype"
+                        rightIcon={
+                          <div className="relative h-6 rounded-md flex items-center justify-center">
+                            <Image src="/logos/V0-logo.svg" alt="V0 Logo" width={20} height={20} className="object-contain" />
+                            <span className="text-gray-600 text-sm font-medium px-2">+</span>
+                            <Image src="/images/About/Cursor-Icon.png" alt="Cursor Icon" width={16} height={16} className="object-contain" />
+                          </div>
+                        }
+                        className="w-full"
+                        videoAttributes={{ autoPlay: true, muted: true, loop: true, playsInline: true, disablePictureInPicture: true, controlsList: 'nodownload nofullscreen noremoteplayback' }}
+                      />
+                      <div className="text-body">A way to train your thinking muscle with Perplexity. Perplexity makes knowledge accessible, but it&apos;s easy to offload thinking to LLMs. I challenged this by building Mindlab using V0, a prototype that guides thinking instead of spoon-feeding answers, helping users arrive at insights without losing context.</div>
+                    </div>
+
+                    {/* AR Navigation section */}
+                    <div className="relative w-full h-fit flex flex-col gap-1">
+                      <div className='w-full h-fit space-y-1'>
+                        <h2 className="w-full text-important">Indoor AR navigation prototype</h2>
+                        
+                      </div>
+                      
+                      <div className="w-full md:w-3/4">
+                        <MediaCard
+                          mediaType="video"
+                          src="/videos/aero_recording.mp4"
+                          aspectClass="aspect-square"
+                          caption="AR prototype used to study indoor navigation challenges"
+                          rightIcon={<Image src="/logos/Adobe Aero SVG Icon.svg" alt="Adobe Aero Icon" width={24} height={24} className="object-contain" />}
+                          className="w-full"
+                          videoAttributes={{ autoPlay: true, muted: true, loop: true, playsInline: true, disablePictureInPicture: true, controlsList: 'nodownload nofullscreen noremoteplayback' }}
+                        />
+                      </div>
+
+                      <div className="md:w-3/4 text-body text-pretty">Built in under 3 hours for a user research study exploring the challenges of indoor navigation and how AR wayfinding can support spatial memory.</div>
+                    </div>
+
+
+                    {/* Image Answer Engine section */}
+                    <div className="relative w-full h-fit flex flex-col gap-1">
+                      <div className='w-full h-fit space-y-1'>
+                        <h2 className="w-full text-important">Image Answer Engine Prototype</h2>
+                        
+                      </div>
+                      
+                      <div className="w-full ">
+                        <MediaCard
+                          mediaType="video"
+                          src="/videos/Image-Answer-Engine-Prototype.mp4"
+                          aspectClass="aspect-video"
+                          caption="Takes a question, finds relevant images, and answers with voice + images."
+                          rightIcon={
+                            <Image
+                              src="/images/About/Cursor-Icon.png"
+                              alt="Cursor Icon"
+                              width={16}
+                              height={16}
+                              className="object-contain"
+                            />
+                          }
+                          className="w-full"
+                          videoAttributes={{
+                            autoPlay: true,
+                            muted: true,
+                            loop: true,
+                            playsInline: true,
+                            disablePictureInPicture: true,
+                            controlsList: 'nodownload nofullscreen noremoteplayback'
+                          }}
+                        />
+                      </div>
+
+                      <div className=" text-body text-pretty">Inspired by Wall-E&apos;s interface and the voice bot showcased in @sbgriffi’s portfolio. The experience focuses on translating user queries into relevant image-based answers with an orchestrated workflow. This initial version tackles core challenges in answer quality, multi-step orchestration, and interface responsiveness.</div>
+                    </div>
                   </div>
-                  <div className="md:hidden w-full h-full aspect-4/3 bg-[url('/images/projects/Dashworks/Dashworks-Design-System.png')] bg-cover bg-center"></div>
-                </div>
+
+                  
+
               </div>
 
-            </motion.div>
-
-            
-            
-
-
-            {/* Projects section */}
-            <motion.div className="flex flex-col md:col-span-3 col-span-1 row-span-2 bg-slate-50 rounded-3xl md:p-6 p-4 items-center justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
-              variants={gridVariants}>
-              <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200">Projects</div>
-              <div className='flex flex-col w-full h-max max-h-[448px] overflow-y-auto scrollbar-hide gap-4 rounded-md'>
-                  
-                  <div className='flex flex-col-reverse gap-2 bg-white p-1 pb-2 rounded-lg border border-slate-200 '>
-                    <div className='relative w-full flex items-center justify-between p-2 px-2.5 gap-3 h-8 text-slate-500'>
-                 
-                    <div className='font-medium'>ItinerAI</div>
-
-                    <button
-                      onClick={() => router.push('/projects')}
-                      
-                      className="group relative rounded-full p-1 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-blue-50 cursor-pointer hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] active:scale-95 hover:shadow-[0px_2px_2px_-1px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:border-blue-700 transition-all duration-300"
-                      aria-label="Open Project"
-                    >
-                      <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[2px] top-0.5 h-1/2 transition-all duration-300"></div>
-                      <ArrowSquareOut size={14} weight="fill" />
-                    </button>
-                    
+              {/* Design System section */}
+              <div className="relative w-full h-fit flex flex-col gap-4 mt-20">
+                    <div className='w-full flex flex-col gap-1'>
+                      <h2 className="w-full text-header text-gradient-primary ">Building Scalable Design Systems</h2>
                       
                     </div>
-                    <div className='w-full h-full bg-slate-200 bg-[url("/images/projects/thumbnails/ItinerAI-Thumbnail.png")] bg-cover bg-center aspect-4/3 rounded-md [mask-image:radial-gradient(120%_70%_at_50%_37%,black_60%,rgba(0,0,0,0.4)_80%,transparent_90%)] [mask-type:alpha]'></div>
-                  </div>
-
-                  <div className='flex flex-col-reverse gap-2 bg-white p-1 rounded-lg border border-slate-200'>
-                    <div className='relative w-full flex items-center justify-between p-2 px-2.5 gap-3 h-8 text-slate-500 '>
-                 
-                    <div className='font-medium'>Dashworks</div>
-
-                    <button
-                      onClick={() => router.push('/projects')}
-                      
-                      className="group relative rounded-full p-1 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-blue-50 cursor-pointer hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] active:scale-95 hover:shadow-[0px_2px_2px_-1px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:border-blue-700 transition-all duration-300"
-                      aria-label="Open Project"
-                    >
-                      <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[2px] top-0.5 h-1/2 transition-all duration-300"></div>
-                      <ArrowSquareOut size={14} weight="fill" />
-                    </button>
                     
-                      
+                    <div className="relative w-full rounded-2xl overflow-hidden border border-slate-200">
+                      <div className="hidden md:block">
+                        <ModalGrid />
+                      </div>
+                      <div className="md:hidden w-full h-full aspect-4/3 bg-[url('/images/projects/Dashworks/Dashworks-Design-System.png')] bg-cover bg-center"></div>
                     </div>
-                    <div className='w-full h-full bg-slate-200 bg-[url("/images/projects/thumbnails/Dashworks-Thumbnail.webp")] bg-cover bg-center aspect-4/3 rounded-md [mask-image:radial-gradient(120%_70%_at_50%_37%,black_60%,rgba(0,0,0,0.4)_80%,transparent_90%)] [mask-type:alpha]'></div>
                   </div>
-
-                  <div className='flex flex-col-reverse gap-2 bg-white p-1 rounded-lg border border-slate-200'>
-                    <div className='relative w-full flex items-center justify-between p-2 px-2.5 gap-3 h-8 text-slate-500 '>
-                 
-                    <div className='font-medium'>WeatherWise</div>
-
-                    <button
-                      onClick={() => router.push('/projects')}
-                      
-                      className="group relative rounded-full p-1 text-slate-500 border border-slate-400 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:text-blue-50 cursor-pointer hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.700))] active:scale-95 hover:shadow-[0px_2px_2px_-1px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:border-blue-700 transition-all duration-300"
-                      aria-label="Open Project"
-                    >
-                      <div className="absolute bg-gradient-to-b from-white/90 to-white/5 rounded-b-[4px] rounded-t-[12px] group-hover:from-slate-100/70 group-hover:to-slate-100/20 inset-x-[2px] top-0.5 h-1/2 transition-all duration-300"></div>
-                      <ArrowSquareOut size={14} weight="fill" />
-                    </button>
-                    
-                      
-                    </div>
-                    <div className='w-full h-full bg-slate-200 bg-[url("/images/projects/thumbnails/WeatherWise-Thumbnail.webp")] bg-cover bg-center aspect-4/3 rounded-md [mask-image:radial-gradient(120%_70%_at_50%_37%,black_60%,rgba(0,0,0,0.7)_70%,transparent_90%)] [mask-type:alpha]'></div>
-                  </div>
-
-                  
-
-                  
-
-                 
-
-                  
-                  
-                </div>
-            </motion.div>
-            
-
-
-
-            <motion.div className="flex flex-col md:col-span-3 md:row-span-2 col-span-1 bg-slate-50 rounded-3xl md:p-6 p-4 items-start justify-top gap-4 border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]"
-              variants={gridVariants}>
-              <div className="w-full font-semibold text-slate-800 pb-2 border-b border-slate-200"> 
-                Journey
-              </div>
-              
-              <div className='w-full h-full flex gap-4'>
-                <div className='h-full border-r border-slate-200'></div>
-                <div className='w-full flex flex-col gap-6'>
-
-                  <div className="w-full relative bg-radial-[at_50%_75%] from-emerald-50 via-emerald-50 to-emerald-100 border border-emerald-200 rounded-md p-2 flex flex-col shadow-[0px_2px_2px_-1px_rgba(0,96,69,0.25),0px_4px_8px_1px_rgba(0,96,69,0.12)_inset,0px_-2px_2px_0px_rgba(0,96,69,0.12)_inset]">
-                    <div className="absolute inset-0.5 h-1/2 bg-gradient-to-b from-emerald-50/50 via-white/20 to-white/30 rounded"></div>
-                    <div className="text-sm font-semibold text-emerald-900">Moved to Bay Area</div>
-                    <div className="text-sm leading-6 font-medium text-emerald-800">Looking for new opportunities in Product Design!</div>
-                    
-                    <div className='absolute size-[9px] bg-radial-[at_50%_75%] from-emerald-300 via-emerald-500 to-emerald-700 rounded-full -left-[22px] top-1/2 -translate-y-1/2 shadow-[0px_2px_2px_-1px_rgba(0,96,69,0.25),0px_4px_8px_1px_rgba(0,96,69,0.12)_inset,0px_-2px_2px_0px_rgba(0,96,69,0.12)_inset]'>
-                      <div className='absolute size-[7px] left-1/2 -translate-x-1/2 top-[1px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/0 to-70% rounded-full'></div>
-                    </div>
-                    
-                  </div>
-
-
-                  <div className="relative w-full flex flex-col px-2">
-                    <div className="w-full flex items-center justify-between gap-2">
-                      <div className="text-sm font-semibold text-slate-800">Graduated from RIT</div>
-                      {/* <div className="text-sm font-light text-slate-600">Dec 2024</div> */}
-                    </div>
-                    <div className='absolute size-[9px] bg-radial-[at_50%_75%] from-emerald-300 via-emerald-500 to-emerald-700 rounded-full -left-[21px] top-2 shadow-[0px_2px_2px_-1px_rgba(0,96,69,0.25),0px_4px_8px_1px_rgba(0,96,69,0.12)_inset,0px_-2px_2px_0px_rgba(0,96,69,0.12)_inset]'>
-                      <div className='absolute size-[7px] left-1/2 -translate-x-1/2 top-[1px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/0 to-70% rounded-full'></div>
-                    </div>
-
-                    <div className="text-sm font-light text-slate-600">MS - Human Computer Interaction</div>
-                    
-                  </div>
-
-                  <div className="relative w-full flex flex-col px-2">
-                    <div className="w-full flex items-center justify-between gap-2">
-                      <div className="text-sm font-semibold text-slate-800">Interned at Dashworks</div>
-                      {/* <div className="text-sm font-light text-slate-600">Jan - Apr 2024</div> */}
-                    </div>
-                    <div className='absolute size-[9px] bg-radial-[at_50%_75%] from-emerald-300 via-emerald-500 to-emerald-700 rounded-full -left-[21px] top-2 shadow-[0px_2px_2px_-1px_rgba(0,96,69,0.25),0px_4px_8px_1px_rgba(0,96,69,0.12)_inset,0px_-2px_2px_0px_rgba(0,96,69,0.12)_inset]'>
-                      <div className='absolute size-[7px] left-1/2 -translate-x-1/2 top-[1px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/0 to-70% rounded-full'></div>
-                    </div>
-                    <div className="text-sm font-light text-slate-600">Product Design Intern</div>
-                  </div>
-
-                  <div className="relative w-full flex flex-col px-2">
-                    <div className="w-full flex items-center justify-between gap-2">
-                      <div className="text-sm font-semibold text-slate-800">Moved to USA</div>
-                      {/* <div className="text-sm font-light text-slate-600">Jan - Apr 2024</div> */}
-                    </div>
-                    <div className='absolute size-[9px] bg-radial-[at_50%_75%] from-emerald-300 via-emerald-500 to-emerald-700 rounded-full -left-[21px] top-2 shadow-[0px_2px_2px_-1px_rgba(0,96,69,0.25),0px_4px_8px_1px_rgba(0,96,69,0.12)_inset,0px_-2px_2px_0px_rgba(0,96,69,0.12)_inset]'>
-                      <div className='absolute size-[7px] left-1/2 -translate-x-1/2 top-[1px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/0 to-70% rounded-full'></div>
-                    </div>
-
-                    <div className="text-sm font-light text-slate-600">Started my Masters</div>
-                  </div>
-
-                  <div className="relative w-full flex flex-col px-2">
-                    <div className="w-full flex items-center justify-between gap-2">
-                      <div className="text-sm font-semibold text-slate-800">Graduated</div>
-                      {/* <div className="text-sm font-light text-slate-600">Jan - Apr 2024</div> */}
-                    </div>
-                    <div className='absolute size-[9px] bg-radial-[at_50%_75%] from-emerald-300 via-emerald-500 to-emerald-700 rounded-full -left-[21px] top-2 shadow-[0px_2px_2px_-1px_rgba(0,96,69,0.25),0px_4px_8px_1px_rgba(0,96,69,0.12)_inset,0px_-2px_2px_0px_rgba(0,96,69,0.12)_inset]'>
-                      <div className='absolute size-[7px] left-1/2 -translate-x-1/2 top-[1px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/0 to-70% rounded-full'></div>
-                    </div>
-
-                    <div className="text-sm font-light text-slate-600">Electronics Engineering | Minor in Machine Learning</div>
-                  </div>
-
-                  <div className="relative w-full flex flex-col px-2">
-                    <div className="w-full flex items-center justify-between gap-2">
-                      <div className="text-sm font-semibold text-slate-800">AI Research Intern</div>
-                      {/* <div className="text-sm font-light text-slate-600">Jan - Apr 2024</div> */}
-                    </div>
-                    <div className='absolute size-[9px] bg-radial-[at_50%_75%] from-emerald-300 via-emerald-500 to-emerald-700 rounded-full -left-[21px] top-2 shadow-[0px_2px_2px_-1px_rgba(0,96,69,0.25),0px_4px_8px_1px_rgba(0,96,69,0.12)_inset,0px_-2px_2px_0px_rgba(0,96,69,0.12)_inset]'>
-                      <div className='absolute size-[7px] left-1/2 -translate-x-1/2 top-[1px] bg-gradient-to-b from-emerald-300/50 via-white/20 to-white/0 to-70% rounded-full'></div>
-                    </div>
-
-                    <div className="text-sm font-light text-slate-600">building auto-encoders to turn 2D images into 3D models and exploring generative AI.</div>
-                  </div>
-
-                  {/* <div className="w-full relative bg-slate-100 border border-dashed border-slate-300 rounded-lg p-2 flex flex-col">
-                    
-                    <div className="text-xs leading-5 font-light text-slate-600">Before design, I worked on AI research, building auto-encoders to turn 2D images into 3D models and exploring generative AI.</div>
-                  </div> */}
-
-                </div>
-              </div>
-
-              
-            </motion.div>
-
-
-            {/* Based out of Bay Area
-            <TimeDisplay /> */}
-
-
-
-            
-
-            
-            
+                  <div className=" text-body text-pretty">At Dashworks, I built a design system that balances flexibility and usability for various workflows. To demonstrate my ability to bring designs to life with precision, I developed select modals using Tailwind below.</div>
 
           </motion.div>
 
-          
-
-          <div className="w-full">
+          <motion.div 
+            className="w-full"
+            variants={sectionVariants}
+          >
             <Footer />
-          </div>
+          </motion.div>
 
-
-            
-        </div>
-        
-        
-        
-        
-        
-        
+        </motion.div>
       </main>
     </div>
   );

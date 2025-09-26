@@ -9,14 +9,14 @@ import { projectsData } from '@/data/projectsData';
 
 export default function Projects() {
   return (
-    <div className="min-h-screen flex justify-center bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen flex justify-center bg-gray-50">
       <main className="w-full md:max-w-[800px] max-w-[361px] flex flex-col gap-12">
-        <div className="flex flex-col gap-6 items-start border-x border-slate-200 md:p-8 p-4 md:pb-24 pb-24 overflow-y-auto scrollbar-hide">
+        <div className="flex flex-col gap-12 items-start  md:pt-16 pt-8 md:px-0 p-4 md:pb-24 pb-24 ">
         {/* Page header */}
          <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0, y: 20, filter: "blur(4px)", scale: 0.95 }}
+          animate={{ opacity: 1, y: 0 , filter: "blur(0px)", scale: 1 }}
+          transition={{ duration: 0.4 }}
           className="isolate relative min-h-14 flex w-full bg-slate-800 border-3 border-slate-800 rounded-full items-center gap-4 overflow-hidden"
         
         >
@@ -34,13 +34,13 @@ export default function Projects() {
          </motion.div>
         
         {/* Project grid */}
-            <div className="grid grid-cols-1 gap-6.5 w-full">
+            <div className="grid grid-cols-1 gap-10 w-full">
           {projectsData.map((project, index) => (
             <motion.div 
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + index * 0.2, duration: 0.5 }}
+              initial={{ opacity: 0, y: 20, filter: "blur(4px)", scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
+              transition={{ delay: 0.2 + index * 0.2, duration: 0.4 }}
             >
               <ProjectCard 
                 title={project.title}
