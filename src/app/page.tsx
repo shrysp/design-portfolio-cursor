@@ -8,7 +8,7 @@ import MediaCard from '@/components/MediaCard';
 
 
 
-
+//adding a comment
 // Main page container variants for staggered loading
 const pageContainerVariants = {
   hidden: {},
