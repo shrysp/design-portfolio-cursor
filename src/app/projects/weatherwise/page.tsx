@@ -6,8 +6,6 @@ import { Quotes, ChartBar, ImageSquare, RedditLogo } from '@phosphor-icons/react
 import Image from 'next/image';
 import MediaCard from '@/components/MediaCard';
 import ProjectHeader from '@/components/ProjectHeader';
-import Footer from '@/components/Footer';
-
 // Import the project data
 import { projectsData } from '@/data/projectsData';
 
@@ -18,7 +16,7 @@ export default function WeatherWiseProject() {
   const project = projectsData[3]; // WeatherWise is now the fourth project in the array
 
   return (
-    <div className="min-h-screen flex justify-center bg-gray-50">
+    <div className="min-h-screen flex justify-center bg-stone-100">
       <main className="w-full max-w-[800px] flex flex-col gap-12">
         <div className="flex flex-col gap-12 items-start md:pt-24 pt-8 md:px-0 p-4 md:pb-24 pb-24">
           {/* Back button and header */}
@@ -519,22 +517,6 @@ export default function WeatherWiseProject() {
             
           </div>
 
-          
-
-           {/* Footer */}
-           <Footer 
-            variant="project"
-            projectNavigation={{
-              previousProject: {
-                name: "Dashworks",
-                slug: "dashworks"
-              },
-              nextProject: {
-                name: "Shoedog", 
-                slug: "shoedog"
-              }
-            }}
-          />
           
 
         </div>

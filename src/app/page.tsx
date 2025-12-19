@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Footer from '@/components/Footer';
 import Image from 'next/image';
 import ProjectThumbnailHeader from '@/components/ProjectThumbnailHeader';
 import { CraftContent } from '@/components/CraftContent';
@@ -200,10 +199,7 @@ export default function Home() {
                 variants={sectionVariants}
               >
 
-                  {/* Section heading */}
-                  <h1 className="text-subheader "> 
-                    Projects
-                  </h1>
+                  
                   
 
                   <div className="w-full flex flex-col gap-16 items-start">
@@ -239,12 +235,6 @@ export default function Home() {
 
               </motion.div>
 
-              <motion.div 
-                className="w-full"
-                variants={sectionVariants}
-              >
-                <Footer />
-              </motion.div>
             </>
           )}
 

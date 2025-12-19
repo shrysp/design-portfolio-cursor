@@ -8,8 +8,6 @@ import {
 import Image from 'next/image';
 import MediaCard from '@/components/MediaCard';
 import ProjectHeader from '@/components/ProjectHeader';
-import Footer from '@/components/Footer';
-
 // Import the project data
 import { projectsData } from '@/data/projectsData';
 
@@ -354,22 +352,6 @@ export default function ShoedogProject() {
               </Button>
             </motion.div> */}
           </div>
-
-           {/* Footer */}
-           <Footer 
-            variant="project"
-            projectNavigation={{
-              previousProject: {
-                name: "WeatherWise",
-                slug: "weatherwise"
-              },
-              nextProject: {
-                name: "Fractions", 
-                slug: "fractions"
-              }
-            }}
-          />
-          
 
         </div>
 

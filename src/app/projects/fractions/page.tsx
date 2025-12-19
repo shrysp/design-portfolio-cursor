@@ -6,8 +6,6 @@ import { ImageSquare } from '@phosphor-icons/react';
 import Image from 'next/image';
 import MediaCard from '@/components/MediaCard';
 import ProjectHeader from '@/components/ProjectHeader';
-import Footer from '@/components/Footer';
-
 // Import the project data
 import { projectsData } from '@/data/projectsData';
 
@@ -314,18 +312,6 @@ export default function FractionsProject() {
               </Button>
             </motion.div> */}
           </div>
-
-           {/* Footer */}
-           <Footer 
-            variant="project"
-            projectNavigation={{
-              previousProject: {
-                name: "Shoedog",
-                slug: "shoedog"
-              }
-            }}
-          />
-          
 
         </div>
 

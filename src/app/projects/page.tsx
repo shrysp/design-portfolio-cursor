@@ -2,8 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { ProjectCard } from '@/components/ProjectCard';
-import Footer from '@/components/Footer';
-
 // Import project data from separate file
 import { projectsData } from '@/data/projectsData';
 
@@ -53,10 +51,6 @@ export default function Projects() {
 
             </div>
 
-            <div className="w-full">
-            <Footer />
-          </div>
-        
         </div>
         
           

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, GithubLogo, Globe } from '@phosphor-icons/react';
-import Footer from '@/components/Footer';
 import Image from 'next/image';
 
 // Import the project data from the separate file
@@ -314,9 +313,6 @@ export default function ProjectDetail() {
           {renderProjectContent()}
         </div>
 
-        <div className="mt-6">
-          <Footer />
-        </div>
       </main>
     </div>
   );

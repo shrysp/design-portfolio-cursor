@@ -6,8 +6,6 @@ import { SplitHorizontal } from '@phosphor-icons/react';
 import Image from 'next/image';
 import MediaCard from '@/components/MediaCard';
 import ProjectHeader from '@/components/ProjectHeader';
-import Footer from '@/components/Footer';
-
 // Import the project data
 import { projectsData } from '@/data/projectsData';
 import ModalGrid from '@/components/ModalGrid';
@@ -75,7 +73,7 @@ export default function DashworksProject() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center bg-stone-50">
+    <div className="min-h-screen flex justify-center bg-stone-100">
       <main className="w-full max-w-[800px] flex flex-col gap-12">
         <div className="flex flex-col gap-12 items-start  md:pt-24 pt-8 md:px-0 p-4 md:pb-24 pb-24 ">
           {/* Back button and header */}
@@ -379,22 +377,6 @@ export default function DashworksProject() {
             
           </div>
 
-          {/* Footer */}
-          <Footer 
-            variant="project"
-            projectNavigation={{
-              previousProject: {
-                name: "ItinerAI",
-                slug: "itinerai"
-              },
-              nextProject: {
-                name: "WeatherWise", 
-                slug: "weatherwise"
-              }
-            }}
-          />
-
-          
         </div>
 
         

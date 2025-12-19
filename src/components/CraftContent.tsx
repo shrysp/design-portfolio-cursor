@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import Footer from '@/components/Footer';
 
 interface CraftContentProps {
   hideHeader?: boolean;
@@ -162,9 +161,6 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
             </motion.div>
           </motion.div>
 
-          <div className="w-full">
-            <Footer />
-          </div>
         </div>
       </main>
     </div>

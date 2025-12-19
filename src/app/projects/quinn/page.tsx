@@ -4,7 +4,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import ProjectHeader from '@/components/ProjectHeader';
-import Footer from '@/components/Footer';
 // import MediaCard from '@/components/MediaCard';
 
 // Import the project data
@@ -18,7 +17,7 @@ export default function QuinnProject() {
   const project = projectsData[0]; // Quinn will be the first project in the array
 
   return (
-    <div className="min-h-screen flex justify-center bg-gray-50">
+    <div className="min-h-screen flex justify-center bg-stone-100">
       <main className="w-full max-w-[800px] flex flex-col gap-12">
         <div className="flex flex-col gap-16 items-start md:pt-24 pt-8 md:px-0 p-4 md:pb-24 pb-24">
           {/* Back button and header */}
@@ -391,16 +390,6 @@ export default function QuinnProject() {
 
           </div>
 
-          {/* Footer */}
-          <Footer 
-            variant="project"
-            projectNavigation={{
-              nextProject: {
-                name: "ItinerAI",
-                slug: "itinerai"
-              }
-            }}
-          />
         </div>
       </main>
     </div>

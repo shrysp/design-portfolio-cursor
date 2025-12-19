@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { LinkedinLogo, XLogo, ReadCvLogo } from '@phosphor-icons/react';
 import React from 'react';
 import VerticalCarousel from '@/components/VerticalCarousel';
-import Footer from '@/components/Footer';
 import EmailCopyButton from '@/components/EmailCopyButton';
 import { Journal } from '@/components/journal/Journal';
 
@@ -313,9 +312,6 @@ export default function About() {
             
 
           </motion.div>
-          <div className="w-full">
-            <Footer />
-          </div>
 
         </div>
        
