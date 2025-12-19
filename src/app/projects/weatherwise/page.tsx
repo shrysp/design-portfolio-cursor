@@ -205,7 +205,7 @@ export default function WeatherWiseProject() {
                 </div>
               </div>
 
-              {/* Problem Statement */}
+              {/* Problem-Statement */}
               <div className="flex flex-col gap-4">
                 <h2 className="text-header-2 pt-4">Problem Statement</h2>
                 <p className="text-body text-pretty">Despite technological advancements, unpredictable weather still surprises us on the road, creating a clear disconnect.</p>
