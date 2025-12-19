@@ -3,11 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Footer from '@/components/Footer';
-import ModalGrid from '@/components/ModalGrid';
 import Image from 'next/image';
-import MediaCard from '@/components/MediaCard';
 import ProjectThumbnailHeader from '@/components/ProjectThumbnailHeader';
-import About from './about/page';
 import Craft from './craft/page';
 import { Journal } from '@/components/journal/Journal';
 
@@ -43,33 +40,6 @@ const sectionVariants = {
   }
 };
 
-// Three images stagger variants
-const imagesContainerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.1
-    }
-  }
-};
-
-const imageVariants = {
-  hidden: { 
-    opacity: 0, 
-    scale: 0.9,
-    filter: "blur(4px)"
-  },
-  visible: { 
-    opacity: 1, 
-    scale: 1,
-    filter: "blur(0px)",
-    transition: { 
-      duration: 0.5,
-      ease: "easeOut" as const
-    }
-  }
-};
 
 // Moving Background for tabs (mirrors ModalGrid)
 const MovingBackground = ({ selectedButton }: { selectedButton: HTMLButtonElement | null }) => (
@@ -89,17 +59,17 @@ const MovingBackground = ({ selectedButton }: { selectedButton: HTMLButtonElemen
   </motion.div>
 );
 
+const tabs = [
+  { id: "work" as const, label: "Work" },
+  { id: "about" as const, label: "About" },
+  { id: "craft" as const, label: "Craft" },
+];
+
 export default function Home() {
 
   const [activeTab, setActiveTab] = useState<"work" | "about" | "craft">("work");
   const [selectedButton, setSelectedButton] = useState<HTMLButtonElement | null>(null);
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
-
-  const tabs = [
-    { id: "work" as const, label: "Work" },
-    { id: "about" as const, label: "About" },
-    { id: "craft" as const, label: "Craft" },
-  ];
 
   useEffect(() => {
     const index = tabs.findIndex((tab) => tab.id === activeTab);
@@ -152,7 +122,7 @@ export default function Home() {
                     Shreyas Patil
                   </div>
 
-                  <p className="text-important ">I'm a product designer exploring how humans and computers connect and building the interfaces in between. Based in the Bay Area.</p>
+                  <p className="text-important ">I&apos;m a product designer exploring how humans and computers connect and building the interfaces in between. Based in the Bay Area.</p>
 
                   {/* <motion.div 
                     className='w-full grid grid-cols-3 gap-4'
@@ -255,7 +225,7 @@ export default function Home() {
 
                     <div className="w-full flex flex-col gap-4">
                           <ProjectThumbnailHeader name="Dashworks" link="/projects/dashworks" />
-                          <div className="text-body text-pretty">Dashworks is an AI-powered knowledge assistant that helps companies centralize their knowledge scattered across various apps. It provides accurate answers to employee questions by searching across the company's connected applications.</div>
+                          <div className="text-body text-pretty">Dashworks is an AI-powered knowledge assistant that helps companies centralize their knowledge scattered across various apps. It provides accurate answers to employee questions by searching across the company&apos;s connected applications.</div>
                           <div className="w-full aspect-4/3 my-4 bg-white rounded-2xl "></div>
                     </div>
 

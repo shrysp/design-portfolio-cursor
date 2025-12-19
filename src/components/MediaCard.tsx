@@ -1,5 +1,4 @@
 import React from 'react';
-import { ImageSquare, PlayCircle } from '@phosphor-icons/react';
 import Image from 'next/image';
 
 interface MediaCardProps {
@@ -28,13 +27,6 @@ export default function MediaCard({
   posterSrc,
   videoAttributes
 }: MediaCardProps) {
-  const renderBadgeIcon = () => {
-    if (badgeIcon) return badgeIcon;
-    if (mediaType === 'video') {
-      return <PlayCircle size={14} weight="fill" className='text-white ' />;
-    }
-    return <ImageSquare size={14} weight="fill" className='text-white mt-[1px]' />;
-  };
 
 
   return (

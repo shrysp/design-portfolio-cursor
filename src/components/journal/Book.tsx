@@ -33,7 +33,6 @@ export default function Book({
 
   
   const total = pages.length;
-  const isCover = currentPage === 0 || currentPage === total;
 
   // Derive container width based on open/closed state
   const containerWidth = pageWidth;

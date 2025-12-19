@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { LinkedinLogo, XLogo, ReadCvLogo, ArrowUp } from '@phosphor-icons/react';
 import EmailCopyButton from './EmailCopyButton';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Tooltip,
   TooltipContent,

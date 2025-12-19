@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import Footer from '@/components/Footer';
-import { ImageSquare, PlayCircle } from '@phosphor-icons/react';
 // import Image from 'next/image';
 // import ModalGrid from '@/components/ModalGrid';
 // import MediaCard from '@/components/MediaCard';
