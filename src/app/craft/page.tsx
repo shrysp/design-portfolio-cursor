@@ -7,7 +7,7 @@ import { ImageSquare, PlayCircle } from '@phosphor-icons/react';
 // import ModalGrid from '@/components/ModalGrid';
 // import MediaCard from '@/components/MediaCard';
 
-export default function Craft() {
+export default function Craft({ hideHeader = false, hideBackground = false }: { hideHeader?: boolean; hideBackground?: boolean }) {
 
   const gridVariants = {
     hidden: { opacity: 0, y: 20, filter: "blur(4px)", scale: 0.95 },
@@ -31,10 +31,11 @@ export default function Craft() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center">
+    <div className={`min-h-screen flex justify-center ${hideBackground ? '' : ''}`}>
       <main className="w-full md:max-w-[800px] max-w-[361px] flex flex-col gap-12">
-        <div className="flex flex-col gap-12 items-start md:pt-16 pt-8 md:px-0 px-4 md:pb-24 pb-24">
+        <div className="flex flex-col gap-12 items-start  md:px-0 px-4">
          
+          {!hideHeader && (
           <motion.div
             initial={{ opacity: 0, y: 20, filter: "blur(4px)", scale: 0.95 }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
@@ -50,6 +51,7 @@ export default function Craft() {
               <div className="flex w-full h-full bg-[url('/images/Banners/Banner-Craft.png')] bg-cover bg-[50%_61%] [mask-image:radial-gradient(50%_400%_at_0%_50%,transparent_10%,rgba(0,0,0,0.7)_100%)] [mask-type:alpha]"></div>
             </div>
           </motion.div>
+          )}
 
 
           {/* Craft sections */}
@@ -65,10 +67,7 @@ export default function Craft() {
               variants={gridVariants}
             >
               <video src="/videos/ItinerAIbuild-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
-              <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
-                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
-                  <PlayCircle size={14} weight="fill" className='text-white' />
-                </div>
+              
             </motion.div>
 
             <motion.div 
@@ -78,10 +77,7 @@ export default function Craft() {
               <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
                 <div className="w-full h-full aspect-4/3 relative bg-white bg-[url('/images/Craft/BuiLD09.png')] bg-cover bg-center">
                 </div>
-                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
-                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
-                  <ImageSquare size={14} weight="fill" className='text-white mt-[1px]' />
-                </div>
+                
               </div>
             </motion.div>
             
@@ -92,10 +88,7 @@ export default function Craft() {
               <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
                 <div className="w-full h-full aspect-4/3 relative bg-white bg-[url('/images/Craft/BuiLD11.png')] bg-cover bg-center">
                 </div>
-                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
-                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
-                  <ImageSquare size={14} weight="fill" className='text-white mt-[1px]' />
-                </div>
+                
               </div>
             </motion.div>
 
@@ -106,10 +99,7 @@ export default function Craft() {
               <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
                 <div className="w-full h-full aspect-square relative bg-white bg-[url('/images/Craft/BuiLD08.png')] bg-cover bg-center">
                 </div>
-                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
-                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
-                  <ImageSquare size={14} weight="fill" className='text-white mt-[1px]' />
-                </div>
+                
               </div>
             </motion.div>
           
@@ -121,10 +111,7 @@ export default function Craft() {
                 <div className="w-full h-full aspect-16/9 relative bg-black">
                   <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='w-full h-full object-cover'></video>
                 </div>
-                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
-                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
-                  <PlayCircle size={14} weight="fill" className='text-white' />
-                </div>
+                
               </div>
             </motion.div>
 
@@ -135,10 +122,7 @@ export default function Craft() {
               <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
                 <div className="w-full h-full aspect-4/3 relative bg-white bg-[url('/images/Craft/BuiLD04.png')] bg-cover bg-center">
                 </div>
-                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
-                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
-                  <ImageSquare size={14} weight="fill" className='text-white mt-[1px]' />
-                </div>
+               
               </div>
             </motion.div>
 
@@ -149,10 +133,7 @@ export default function Craft() {
               <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
                 <div className="w-full h-full aspect-4/3 relative bg-white bg-[url('/images/Craft/BuiLD10.png')] bg-cover bg-center">
                 </div>
-                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
-                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
-                  <ImageSquare size={14} weight="fill" className='text-white mt-[1px]' />
-                </div>
+                
               </div>
             </motion.div>
 
@@ -164,10 +145,7 @@ export default function Craft() {
                 <div className="w-full h-full aspect-16/9 relative bg-black">
                   <video src="/images/Craft/Modals.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='w-full h-full object-cover'></video>
                 </div>
-                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
-                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
-                  <PlayCircle size={14} weight="fill" className='text-white' />
-                </div>
+                
               </div>
             </motion.div>
 
@@ -179,10 +157,7 @@ export default function Craft() {
                 <div className="w-full h-full aspect-square relative bg-black">
                   <video src="/images/Craft/Whop-Modal.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='w-full h-full object-cover'></video>
                 </div>
-                <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
-                  <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
-                  <PlayCircle size={14} weight="fill" className='text-white' />
-                </div>
+                
               </div>
             </motion.div>
           </motion.div>

@@ -63,10 +63,7 @@ export default function MediaCard({
           </div>
         )}
 
-        <div className='absolute top-[2px] left-[2px] flex items-center justify-center size-6 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] outline-1 outline-blue-500/15'>
-          <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-t-[18px] rounded-b-[3px] z-10`}></div>
-          {renderBadgeIcon()}
-        </div>
+       
       </div>
 
       {typeof caption === 'string' && caption.length > 0 && (

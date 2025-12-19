@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { LinkedinLogo, XLogo, ArrowLeft, ArrowRight } from '@phosphor-icons/react';
+import { LinkedinLogo, XLogo, ArrowLeft, ArrowRight, ReadCvLogo } from '@phosphor-icons/react';
 import EmailCopyButton from './EmailCopyButton';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -75,6 +75,17 @@ export default function Footer({ variant = 'default', projectNavigation }: Foote
         >                  
           <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
           <LinkedinLogo size={18} weight="fill" />
+        </a>
+
+        <a 
+          href="/document/Shreyas-Patil-Resume-2025.pdf" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          download
+          className='relative flex items-center justify-center size-8 text-stone-500 rounded-full bg-radial-[at_50%_75%] from-stone-100 via-stone-200 to-stone-300 hover:from-stone-200 hover:via-stone-300 hover:to-stone-400 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-stone-400 cursor-pointer transition-all duration-300'
+        >                  
+          <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white/70  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
+          <ReadCvLogo size={18} weight="fill" />
         </a>
       </div>
 

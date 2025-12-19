@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, GithubLogo, Globe } from '@phosphor-icons/react';
-import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import Image from 'next/image';
 
@@ -54,14 +53,14 @@ export default function ProjectDetail() {
     if (foundProject) {
       setProject(foundProject);
     } else {
-      // If no project is found, redirect to the projects page
-      router.push('/projects');
+      // If no project is found, redirect to the home page
+      router.push('/');
     }
   }, [slug, router]);
 
-  // Function to handle going back to the projects page
+  // Function to handle going back to the home page
   const handleBack = () => {
-    router.push('/projects');
+    router.push('/');
   };
 
   if (!project) {
@@ -313,11 +312,6 @@ export default function ProjectDetail() {
 
           {/* Project content */}
           {renderProjectContent()}
-
-          {/* Navigation */}
-          <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-10 z-10 pointer-events-none">
-            <Navigation />
-          </div>
         </div>
 
         <div className="mt-6">

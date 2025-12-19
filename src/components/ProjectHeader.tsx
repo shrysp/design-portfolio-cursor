@@ -29,13 +29,13 @@ export default function ProjectHeader({
         variant="back"
         size="iconSm"
         showHighlight={true}
-        onClick={() => router.push('/projects')}
+        onClick={() => router.push('/')}
         aria-label="Back"
       >
         <ArrowLeft size={16} weight="bold" />
       </Button>
 
-      <h1 className={`text-page-header text-stone-700 ${titleClassName}`}>
+      <h1 className={`text-header text-stone-700 ${titleClassName}`}>
         {title}
       </h1>
     </motion.div>

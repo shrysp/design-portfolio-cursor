@@ -164,9 +164,9 @@ export default function DashworksProject() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.3 }}
-              className=" flex flex-col gap-6"
+              className=" flex flex-col gap-4"
             >
-              <div className=" space-y-1">
+              <div className="flex flex-col gap-4">
                 <h2 className="text-header text-gradient-primary">What is Dashworks?</h2>
                 <p className="text-body">Dashworks is an AI-powered knowledge assistant that helps companies centralize their knowledge scattered across various apps. It provides accurate answers to employee questions by searching across the company&apos;s connected applications.</p>
                 <p className="text-body">Dashworks integrates with over 50 apps, including Slack, Jira, Confluence, and Google Drive, to create a unified knowledge base.</p>
@@ -181,15 +181,15 @@ export default function DashworksProject() {
               transition={{ duration: 0.3, delay: 0.4 }}
               className=" flex flex-col gap-6"
             >
-              <div className="space-y-2">
+              <div className="flex flex-col gap-4">
                 
                   <h3 className="text-header text-gradient-primary">Challenges</h3>
-                  <ul className="text-body list-none space-y-2">
+                  <ul className="text-body list-disc list-outside space-y-2 pl-4">
                     <li>
-                      <span className="font-medium">Speeding Up Product Development:</span> Improving processes and design velocity to improve the frequency and impact of product updates.
+                      <span className="font-semibold">Speeding Up Product Development:</span> Improving processes and design velocity to improve the frequency and impact of product updates.
                     </li>
                     <li>
-                      <span className="font-medium">Simplifying Onboarding for Quick Value:</span> Redesigning onboarding to minimize setup time and help teams quickly grasp and benefit from the product.
+                      <span className="font-semibold">Simplifying Onboarding for Quick Value:</span> Redesigning onboarding to minimize setup time and help teams quickly grasp and benefit from the product.
                     </li>
                   </ul>
                 
@@ -202,16 +202,16 @@ export default function DashworksProject() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.45 }}
-              className="flex flex-col gap-2"
+              className="flex flex-col gap-4"
             >
                 
                 <h2 className="text-header text-gradient-primary">Gaining technical knowledge to drive impactful design decisions</h2>
-                <div className='text-body'>Designing for complex enterprise tools requires a deep understanding of both the product and its technical foundation. During my internship at Dashworks, I conducted a comprehensive product audit, analyzing its entire ecosystem to identify areas for improvement. This process helped bridge the gap between design and engineering, ensuring that our solutions were both user-friendly and technically feasible.</div>
+                <div className='text-body text-pretty'>Designing for complex enterprise tools requires a deep understanding of both the product and its technical foundation. During my internship at Dashworks, I conducted a comprehensive product audit, analyzing its entire ecosystem to identify areas for improvement. This process helped bridge the gap between design and engineering, ensuring that our solutions were both user-friendly and technically feasible.</div>
                 <MediaCard 
                   mediaType='image'
                   src='/images/projects/Dashworks/Audit.png'
                   aspectClass='aspect-4/3'
-                  
+                  className='my-4'
                   
                   rightIcon={<Image src="/logos/Create with Play Logo.png" alt="Create with Play Logo" width={20} height={20} className="object-contain" />}
                 />
@@ -219,7 +219,7 @@ export default function DashworksProject() {
                   mediaType='image'
                   src='/images/projects/Dashworks/How-Dashworks-works.png'
                   aspectClass='aspect-4/3'
-                  
+                  className='my-4'
                 />
             </motion.div>
 
@@ -227,22 +227,22 @@ export default function DashworksProject() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.45 }}
-              className="flex flex-col gap-2"
+              className="flex flex-col gap-4"
             >
                 
                 <h2 className="text-header text-gradient-primary">Design System</h2>
-                <div className='flex flex-col gap-2'>
-                    <div className='text-body'>Our team set a goal to deliver our product faster to meet customer demands and stand out in a competitive market. To reach this goal, we needed a design system for better quality and speed.</div>
+                <div className='flex flex-col gap-4'>
+                    <div className='text-body text-pretty'>Our team set a goal to deliver our product faster to meet customer demands and stand out in a competitive market. To reach this goal, we needed a design system for better quality and speed.</div>
                     <MediaCard 
                       mediaType='image'
                       src='/images/projects/Dashworks/Dashworks-Design-System.png'
                       aspectClass='aspect-4/3'
-                      className=''
+                      className='my-4'
                     />
   
                     {/* Image comparison slider - React implementation */}
                     <div 
-                        className='isolate relative rounded-2xl overflow-hidden shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] bg-stone-100 my-3' 
+                        className='isolate relative rounded-2xl overflow-hidden shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] bg-stone-100 my-4' 
                         ref={containerRef}
                     >
 
@@ -317,7 +317,7 @@ export default function DashworksProject() {
                        
                     </div>
 
-                    <div className="relative w-full my-3 rounded-2xl   md:block hidden">
+                    <div className="relative w-full my-4 rounded-2xl   md:block hidden">
                       <ModalGrid />
                     </div>
 
@@ -328,7 +328,7 @@ export default function DashworksProject() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.45 }}
-              className="flex flex-col gap-2"
+              className="flex flex-col gap-4"
             >
                 
               <h2 className="text-header text-gradient-primary">New Website</h2>
@@ -337,19 +337,19 @@ export default function DashworksProject() {
                 mediaType='image'
                 src='/images/projects/Dashworks/Dashworks-Website-1.png'
                 aspectClass='aspect-4/3'
-                className=''
+                className='my-4'
               />
               <MediaCard 
                 mediaType='image'
                 src='/images/projects/Dashworks/Dashworks-Website-2.png'
                 aspectClass='aspect-4/3'
-                className=''
+                className='my-4'
               />
               <MediaCard 
                 mediaType='image'
                 src='/images/projects/Dashworks/Dashworks-Website-3.png'
                 aspectClass='aspect-4/3'
-                className=''
+                className='my-4'
               />
             </motion.div>
 
@@ -357,22 +357,22 @@ export default function DashworksProject() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.45 }}
-              className="flex flex-col gap-2"
+              className="flex flex-col gap-4"
             >
                 
                 <h2 className="text-header text-gradient-primary">Onboarding</h2>
-                <div className='text-body'>Redesigning onboarding to minimize setup time and help teams quickly grasp and benefit from the product.</div>
+                <div className='text-body text-pretty'>Redesigning onboarding to minimize setup time and help teams quickly grasp and benefit from the product.</div>
                 <MediaCard 
                   mediaType='image'
                   src='/images/projects/Dashworks/Dashworks-Onboarding-1.png'
                   aspectClass='aspect-4/3'
-                  className=''
+                  className='my-4'
                 />
                 <MediaCard 
                   mediaType='image'
                   src='/images/projects/Dashworks/Dashworks-Onboarding-2.png'
                   aspectClass='aspect-4/3'
-                  className=''
+                  className='my-4'
                 />
             </motion.div>
 

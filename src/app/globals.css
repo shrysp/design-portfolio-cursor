@@ -2,11 +2,12 @@
 @plugin "tailwindcss-animate";
 
 :root {
-  --background: #F9FAFB;
+  --background: var(--color-stone-100);
   --foreground: #171717;
+  --padding-pageMargin: 1rem; /* 16px default, adjust as needed */
   
   /* Brand Gradients */
-  --gradient-primary: linear-gradient(180deg, #2B7FFF 0%, #155DFC 100%);
+  --gradient-primary: linear-gradient(180deg, var(--color-stone-800) 0%, var(--color-stone-900) 100%);
   --gradient-secondary: linear-gradient(180deg, #57534D 0%, #44403B 100%);
   --gradient-accent: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%);
 }
@@ -88,50 +89,108 @@ body {
 
   /* Typography Classes */
   .text-page-header {
-    font-family: var(--font-serif);
-    font-size: 28px;
-    font-weight: 600;
-    line-height: 32px;
+    font-family: var(--font-sans);
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 56px;
+    letter-spacing: -0.033em;
+    
   }
 
   .text-header {
-    font-family: var(--font-serif);
-    font-size: 22px;
+    font-family: var(--font-sans);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 40px;
+    color: var(--color-stone-600);
+    letter-spacing: -0.0128em;
+  }
+
+  .text-header-2 {
+    font-family: var(--font-sans);
+    font-size: 20px;
     font-weight: 600;
     line-height: 28px;
+    color: var(--color-stone-600);
+    letter-spacing: -0.004em;
   }
 
   .text-important {
-    font-family: var(--font-serif);
-    font-size: 18px;
-    font-weight: 450;
-    line-height: 28px;
-    color: theme('colors.stone.700');
+    font-family: var(--font-sans);
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 36px;
+    color: var(--color-stone-700);
+    
   }
 
   .text-subheader {
-    font-family: var(--font-serif);
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 20px;
-    color: theme('colors.stone.700');
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 24px;
+    color: var(--color-stone-600);
+    text-transform: uppercase;
+    letter-spacing: -0.009em;
   }
 
   .text-caption {
-    font-family: var(--font-serif);
-    font-size: 15px;
+    font-family: var(--font-sans);
+    font-size: 14px;
     font-style: italic;
-    line-height: 20px;
-    color: theme('colors.stone.500');
+    line-height: 22px;
+    color: var(--color-stone-500);
   }
 
   .text-body {
     font-family: var(--font-sans);
-    font-size: 15px;
+    font-size: 18px;
     font-weight: 400;
-    line-height: 25px;
-    color: theme('colors.stone.500');
+    line-height: 28px;
+    color: var(--color-stone-600);
+    
+  
   }
+}
+
+
+/* Paper grid styles (for GridBackground component) */
+.paper-grid {
+  --grid-rows: 32;
+  --grid-columns: 32;
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  grid-template-columns: repeat(var(--grid-columns), 1fr);
+  grid-template-rows: repeat(var(--grid-rows), 1fr);
+  pointer-events: none;
+}
+
+.paper-grid-guides {
+  display: contents;
+}
+
+.paper-grid-guide {
+  position: absolute;
+  inset: 0;
+  grid-column-start: var(--grid-x);
+  grid-column-end: span 1;
+  grid-row-start: var(--grid-y);
+  grid-row-end: span 1;
+  border: 1px solid var(--grid-color, rgba(0, 0, 0, 0.18));
+  border-left: none;
+  border-top: none;
+  mix-blend-mode: normal;
+}
+
+/* 3D Transform utilities */
+.transform-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
 }
 
 /* Hide video controls */

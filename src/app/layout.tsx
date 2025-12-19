@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, Source_Serif_4, Geist_Mono } from "next/font/google";
+import { Geist, Source_Serif_4, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navigation from "@/components/Navigation";
+import StickyFooter from "@/components/StickyFooter";
 
-const inter = Inter({
+const geist = Geist({
   variable: "--font-sans",
   subsets: ["latin"],
   display: "swap",
@@ -59,13 +59,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth overflow-x-clip">
       <body
-        className={`${inter.variable} ${geistMono.variable} ${sourceSerif4.variable} antialiased bg-stone-50 text-stone-900`}
+        className={`${geist.variable} ${geistMono.variable} ${sourceSerif4.variable} antialiased bg-stone-50 text-stone-900`}
       >
         {children}
-        {/* Navigation */}
-        <div className="fixed flex items-center justify-center mx-auto left-1/2 -translate-x-1/2 bottom-8 z-10">
-          <Navigation />
-        </div>
+        <StickyFooter />
       </body>
     </html>
   );

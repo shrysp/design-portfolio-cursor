@@ -108,11 +108,11 @@ export default function WeatherWiseProject() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.3 }}
-              className="flex flex-col gap-2"
+              className="flex flex-col gap-4"
             >
               
-              <h2 className="text-header text-gradient-primary text-pretty">Improving Navigational Safety with Weather-Adaptive Routing in Google Maps</h2>
-              <p className="text-body">Over a 24 hr period, I undertook a design exercise to integrate real-time weather data into Google Maps. This project was a straightforward attempt to enhance route planning by adding weather alerts and alternative route suggestions, aimed at subtly improving user safety.</p>
+              <h2 className="text-header text-gradient-primary">Improving Navigational Safety with Weather-Adaptive Routing in Google Maps</h2>
+              <p className="text-body text-pretty">Over a 24 hr period, I undertook a design exercise to integrate real-time weather data into Google Maps. This project was a straightforward attempt to enhance route planning by adding weather alerts and alternative route suggestions, aimed at subtly improving user safety.</p>
                 
             </motion.div>
 
@@ -121,16 +121,16 @@ export default function WeatherWiseProject() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.3 }}
-              className="flex flex-col gap-2"
+              className="flex flex-col gap-4"
             >
               <h2 className="text-header text-gradient-primary">A Personal Alarm and A Common Struggle</h2>
-              <div className='text-body'>The project kicked off because of an accident my friend had, which was a big wake-up call for me. But there was more to it. Imagine trying to drive in the Northeast during the cold months. The roads can be really unpredictable because of the weather - like sudden snow or ice. It&apos;s pretty stressful not knowing what you&apos;ll face. So, I thought, why not create something that helps drivers know the weather ahead of time? This way, they can be better prepared or choose a safer route.</div>
+              <div className='text-body text-pretty'>The project kicked off because of an accident my friend had, which was a big wake-up call for me. But there was more to it. Imagine trying to drive in the Northeast during the cold months. The roads can be really unpredictable because of the weather - like sudden snow or ice. It&apos;s pretty stressful not knowing what you&apos;ll face. So, I thought, why not create something that helps drivers know the weather ahead of time? This way, they can be better prepared or choose a safer route.</div>
               <MediaCard
                 mediaType="image"
                 src="/images/projects/Weatherwise/Car_accident.jpg"
                 aspectClass="aspect-4/3"
                 caption="The project kicked off because of an accident my friend had, which was a big wake-up call for me."
-                className=""
+                className="my-4"
               />
                
 
@@ -142,11 +142,11 @@ export default function WeatherWiseProject() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.3 }}
-              className="flex flex-col gap-6"
+              className="flex flex-col gap-4"
             >
               <h2 className="text-header text-gradient-primary">Quick Statistics</h2>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-4">
                 <div className='relative col-span-1 w-full my-3 bg-white rounded-xl outline outline-stone-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.07)]'>
                   <div className='flex items-center justify-start p-[1px] pb-0.5 border-dashed border-b border-stone-100 top-0 left-0 right-0'>
                     <div className='relative flex items-center justify-center size-7 text-white rounded-tl-[10px] rounded-sm bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] border border-blue-500'>
@@ -206,18 +206,18 @@ export default function WeatherWiseProject() {
               </div>
 
               {/* Problem Statement */}
-              <div className="flex flex-col gap-2">
-                <h2 className="text-important">Problem Statement</h2>
-                <p className="text-body">Despite technological advancements, unpredictable weather still surprises us on the road, creating a clear disconnect.</p>
+              <div className="flex flex-col gap-4">
+                <h2 className="text-header-2 pt-4">Problem Statement</h2>
+                <p className="text-body text-pretty">Despite technological advancements, unpredictable weather still surprises us on the road, creating a clear disconnect.</p>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <h2 className="text-header-2 pt-4">Key takeaway from Secondary Research</h2>
+                <p className="text-body text-pretty">Drivers often face sudden weather changes that turn routine trips into risky journeys, yet many Reddit users highlight the lack of real-time weather alerts in navigation apps, emphasizing the need for safer, weather-aware routing.</p>
               </div>
 
               <div className="flex flex-col gap-2">
-                <h2 className="text-important">Key takeaway from Secondary Research</h2>
-                <p className="text-body">Drivers often face sudden weather changes that turn routine trips into risky journeys, yet many Reddit users highlight the lack of real-time weather alerts in navigation apps, emphasizing the need for safer, weather-aware routing.</p>
-              </div>
-
-              <div className="flex flex-col gap-2">
-              <h2 className='text-important'>A Shared Concern of Unpredictable Weather on the Road on Reddit</h2>
+              <h2 className='text-header-2 pt-4'>A Shared Concern of Unpredictable Weather on the Road on Reddit</h2>
               <div className='md:grid md:grid-cols-2 flex flex-col gap-6 my-3'>
 
                 {/* reddit post 1 */}
@@ -281,10 +281,10 @@ export default function WeatherWiseProject() {
 
               </div>
 
-              <div className='flex flex-col gap-1'>
+              <div className='flex flex-col gap-4'>
 
-              <h2 className='text-important'>How People deal with this currently</h2>
-              <p className='text-body'>During my NYC trip, I utilized a weather app and maps to find safer routes, a simple yet effective approach. I noticed this pattern among other users as well. However, this method is not foolproof, as weather is not static but continually changes.  It&apos;s a band-aid solution that many have adopted, yet it&apos;s far from ideal.</p> 
+              <h2 className='text-header-2 pt-4'>How People deal with this currently</h2>
+              <p className='text-body text-pretty'>During my NYC trip, I utilized a weather app and maps to find safer routes, a simple yet effective approach. I noticed this pattern among other users as well. However, this method is not foolproof, as weather is not static but continually changes.  It&apos;s a band-aid solution that many have adopted, yet it&apos;s far from ideal.</p> 
               <div className='grid grid-cols-2 gap-6 my-3'>
                 {/* reddit post */}
                 <div className='relative col-span-2 w-full rounded-xl border border-stone-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.07),0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]'>
@@ -323,24 +323,24 @@ export default function WeatherWiseProject() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.3 }}
-              className="flex flex-col gap-6"
+              className="flex flex-col gap-4"
             >
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-4">
                 <h2 className="text-header text-gradient-primary">Crafting Intuitive Weather-Aware Routing</h2>
                 <p className="text-body">Throughout the development of this weather-informed routing feature, I engaged in a dynamic design process that unfolded across three pivotal stages. Each stage brought us closer to a design that not only delivers critical information but does so in a way that feels intuitive and reassuring to users.</p>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <h2 className="text-important">Weather Condition Alerts on Map</h2>
-                <div className='text-body'>Notifying users of any adverse weather conditions along their planned route. The map visually distinguishes these areas with clear highlighting and warning icons, ensuring that users are aware of potential risks before they encounter them.</div>
+              <div className="flex flex-col gap-4">
+                <h2 className="text-header-2 pt-4">Weather Condition Alerts on Map</h2>
+                <div className='text-body text-pretty'>Notifying users of any adverse weather conditions along their planned route. The map visually distinguishes these areas with clear highlighting and warning icons, ensuring that users are aware of potential risks before they encounter them.</div>
 
                 {/* Iteration 1 */}
-                <div className='flex flex-col gap-2 my-3'>
+                <div className='flex flex-col gap-4 pt-4'>
                   <h2 className="text-subheader">Iteration 1</h2>
-                  <h2 className="text-important">Navigating Visual Clutter</h2>
+                  <h2 className="text-header-2 ">Navigating Visual Clutter</h2>
                   <div className='text-body'>My first attempt was to signal weather conditions with a circular overlay. Though well-intentioned, this cluttered the interface, especially on smaller screens.</div>
-                  <div className='isolate relative flex rounded-xl bg-white overflow-hidden my-3 outline outline-stone-200'>
+                  <div className='isolate relative flex rounded-xl bg-white overflow-hidden outline outline-stone-200 my-4'>
                     <div className='w-full h-full aspect-square relative'>
                       <Image
                         src="/images/projects/Weatherwise/Circular-overlay-focused.png"
@@ -372,11 +372,11 @@ export default function WeatherWiseProject() {
                 </div>
 
                 {/* Iteration 2 */}
-                <div className='flex flex-col gap-2 my-3'>
+                <div className='flex flex-col gap-4 pt-4'>
                   <h2 className="text-subheader">Iteration 2</h2>
-                  <h2 className="text-important">Mixing Traffic and Weather Alerts Caused Confusion</h2>
+                  <h2 className="text-header-2 ">Mixing Traffic and Weather Alerts Caused Confusion</h2>
                   <div className='text-body'>Next, I tried color codes for traffic and badges for weather. This led to confusion, mixing up weather alerts with traffic info—a valuable lesson in the importance of clear visual language.</div>
-                  <div className='isolate relative flex rounded-xl bg-white overflow-hidden my-3 outline outline-stone-200'>
+                  <div className='isolate relative flex rounded-xl bg-white overflow-hidden outline outline-stone-200 my-4'>
                     <div className='w-full h-full aspect-square relative'>
                       <Image
                         src="/images/projects/Weatherwise/Same-line-traffic.png"
@@ -427,9 +427,9 @@ export default function WeatherWiseProject() {
                 </div>
 
                 {/* Iteration 3 */}
-                <div className='flex flex-col gap-2 my-3'>
+                <div className='flex flex-col gap-4 pt-4'>
                   <h2 className="text-subheader">Iteration 3</h2>
-                  <h2 className="text-important">Achieving Clarity Through Wrapping</h2>
+                  <h2 className="text-header-2 ">Achieving Clarity Through Wrapping</h2>
                   <div className='text-body'>The breakthrough came with a wrapping design for affected roads, clearly separating weather from traffic info. This balance of clarity and intuition was the key, making navigation safer and more straightforward.</div>
                   <div className='isolate relative flex rounded-xl bg-white overflow-hidden my-3 outline outline-stone-200'>
                     <div className='w-full h-full aspect-square relative'>
@@ -466,42 +466,42 @@ export default function WeatherWiseProject() {
               </div>
 
               {/* Trip Scheduling with Weather Forecasts */}
-            <div className="flex flex-col gap-2">
-              <h2 className="text-important">Trip Scheduling with Weather Forecasts</h2>
-              <p className="text-body">I introduced a proactive planning tool that integrates weather forecasts with trip scheduling. This feature empowers users to plan their journeys based on anticipated weather conditions, fostering a sense of confidence and control over their travel plans, ensuring they feel secure and comfortable.</p>
+            <div className="flex flex-col gap-4">
+              <h2 className="text-header-2 pt-4">Trip Scheduling with Weather Forecasts</h2>
+              <p className="text-body text-pretty">I introduced a proactive planning tool that integrates weather forecasts with trip scheduling. This feature empowers users to plan their journeys based on anticipated weather conditions, fostering a sense of confidence and control over their travel plans, ensuring they feel secure and comfortable.</p>
               <MediaCard
                 mediaType="image"
                 src="/images/projects/Weatherwise/WeatherWise-Planning.png"
                 aspectClass="aspect-4/3"
                 caption="Trip scheduling integrates weather forecasts, empowering users to plan journeys with confidence and comfort."
-                className="my-3"
+                className="my-4"
               />
             </div>
 
             {/* In-Car Weather Change Alerts */}
-            <div className="flex flex-col gap-2"
+            <div className="flex flex-col gap-4"
             >
-              <h2 className="text-important">In-Car Weather Change Alerts</h2>
-              <p className="text-body">This feature keeps drivers updated with real-time weather changes directly on their route, adapting quickly as conditions evolve. It&apos;s designed to enhance road safety, ensuring travelers are never caught off guard by sudden weather shifts.</p>
+              <h2 className="text-header-2 pt-4">In-Car Weather Change Alerts</h2>
+              <p className="text-body text-pretty">This feature keeps drivers updated with real-time weather changes directly on their route, adapting quickly as conditions evolve. It&apos;s designed to enhance road safety, ensuring travelers are never caught off guard by sudden weather shifts.</p>
               <MediaCard
                 mediaType="image"
                 src="/images/projects/Weatherwise/In-Car-Notification-mockup.webp"
                 aspectClass="aspect-3/2"
                 caption="In-car notifications keep drivers updated with real-time weather changes along their route."
-                className="my-3"
+                className="my-4"
               />
             </div>
 
             {/* Intuitive Route Option Badges */}
-            <div className="flex flex-col gap-2">
-              <h2 className="text-important">Intuitive Route Option Badges</h2>
-              <p className="text-body">The challenge was to present essential route information in a simplified manner. My solution—a system of easily distinguishable badges for the fastest, safest, and weather-impacted routes—balances clarity with subtlety. This approach enables users to make quick, informed choices without feeling overwhelmed by details. The badges, especially those indicating weather conditions, are designed to offer a quick grasp of how weather might affect each route, enhancing user decision-making with safety and ease at the forefront.</p>
+            <div className="flex flex-col gap-4">
+              <h2 className="text-header-2 pt-4">Intuitive Route Option Badges</h2>
+              <p className="text-body text-pretty">The challenge was to present essential route information in a simplified manner. My solution—a system of easily distinguishable badges for the fastest, safest, and weather-impacted routes—balances clarity with subtlety. This approach enables users to make quick, informed choices without feeling overwhelmed by details. The badges, especially those indicating weather conditions, are designed to offer a quick grasp of how weather might affect each route, enhancing user decision-making with safety and ease at the forefront.</p>
               <MediaCard
                 mediaType="image"
                 src="/images/projects/Weatherwise/Badge-System.png"
                 aspectClass="aspect-7/2"
                 caption="Route badges help users quickly identify the fastest, safest, and weather-impacted routes."
-                className="my-3"
+                className="my-4"
               />
                   
                   

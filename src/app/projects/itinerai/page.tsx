@@ -82,10 +82,10 @@ export default function ItinerAIProject() {
               transition={{ duration: 0.3, delay: 0.3 }}
               className=""
             >
-              <div className="">
-                <h2 className="text-header text-gradient-primary font-serif font-semibold text-slate-800 mb-4">ItinerAI: A Smarter, More Human Travel Companion</h2>
-                <p className="text-body leading-8">ItinerAI is an experimental travel assistant where multiple AI agents, each with a distinct personality and focus area, collaborate to help you plan and coordinate trips effortlessly. From surfacing the best flight options to optimizing your itinerary around your schedule, these agents communicate with each other and with you, just like a well-aligned team.</p>
-                <p className="text-body leading-8">In this prototype, I&apos;m exploring what it looks like when agents aren&apos;t just tools, but task owners with roles, opinions, and shared context. They discuss, divide responsibilities, and guide you through the planning process in a way that feels natural, helpful, and even delightful.</p>
+              <div className="flex flex-col gap-4">
+                <h2 className="text-header text-gradient-primary">ItinerAI: A Smarter, More Human Travel Companion</h2>
+                <p className="text-body">ItinerAI is an experimental travel assistant where multiple AI agents, each with a distinct personality and focus area, collaborate to help you plan and coordinate trips effortlessly. From surfacing the best flight options to optimizing your itinerary around your schedule, these agents communicate with each other and with you, just like a well-aligned team.</p>
+                <p className="text-body">In this prototype, I&apos;m exploring what it looks like when agents aren&apos;t just tools, but task owners with roles, opinions, and shared context. They discuss, divide responsibilities, and guide you through the planning process in a way that feels natural, helpful, and even delightful.</p>
               </div>
             </motion.div>
 
