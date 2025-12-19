@@ -26,7 +26,7 @@ const containerVariants = {
   }
 };
 
-export default function About({ hideHeader = false, hideBackground = false }: { hideHeader?: boolean; hideBackground?: boolean }) {
+export default function About() {
   // Define the images for the carousel
   const hobbyImages = [
     "/images/About/About-1.jpeg",
@@ -37,13 +37,12 @@ export default function About({ hideHeader = false, hideBackground = false }: { 
   ];
 
   return (
-    <div className={`min-h-screen flex justify-center ${hideBackground ? '' : 'bg-gray-50'}`}>
+    <div className="min-h-screen flex justify-center bg-gray-50">
       <main className="w-full md:max-w-[800px] max-w-[361px] flex flex-col gap-12">
 
         <div className="flex flex-col gap-12 items-start md:px-0 px-4 ">
           {/* Page header */}
-          {!hideHeader && (
-         <motion.div
+          <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
@@ -62,10 +61,9 @@ export default function About({ hideHeader = false, hideBackground = false }: { 
            >
             
            </div>
-          </div>
+           </div>
           
          </motion.div>
-          )}
 
           <motion.div className="grid md:grid-cols-7 grid-cols-1 auto-rows-auto md:gap-x-6 md:gap-y-6.5 gap-y-6 w-full"
             variants={containerVariants}

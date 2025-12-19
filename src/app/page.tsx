@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Footer from '@/components/Footer';
 import Image from 'next/image';
 import ProjectThumbnailHeader from '@/components/ProjectThumbnailHeader';
-import Craft from './craft/page';
+import { CraftContent } from '@/components/CraftContent';
 import { Journal } from '@/components/journal/Journal';
 
 
@@ -294,7 +294,7 @@ export default function Home() {
                 className="flex flex-col gap-6 w-full mt-16"
                 variants={sectionVariants}
               >
-                <Craft hideHeader hideBackground />
+                <CraftContent hideHeader hideBackground />
               </motion.div>
             </>
           )}
