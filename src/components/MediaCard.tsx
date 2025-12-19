@@ -7,7 +7,6 @@ interface MediaCardProps {
   aspectClass?: string; // e.g. 'aspect-4/3', 'aspect-[16/9]'
   caption?: string; // if provided, renders the caption bar
   rightIcon?: React.ReactNode; // optional right-side icon/content in caption bar
-  badgeIcon?: React.ReactNode; // optional override for the top-left badge icon
   className?: string; // optional extra classes for outer wrapper
   posterSrc?: string; // optional poster for video
   videoAttributes?: React.VideoHTMLAttributes<HTMLVideoElement> & {
@@ -22,7 +21,6 @@ export default function MediaCard({
   aspectClass = 'aspect-4/3',
   caption,
   rightIcon,
-  badgeIcon,
   className,
   posterSrc,
   videoAttributes
