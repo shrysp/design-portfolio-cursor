@@ -286,6 +286,7 @@ export default function WeatherWiseProject() {
               <h2 className='text-header-2 pt-4'>How People deal with this currently</h2>
               <p className='text-body text-pretty'>During my NYC trip, I utilized a weather app and maps to find safer routes, a simple yet effective approach. I noticed this pattern among other users as well. However, this method is not foolproof, as weather is not static but continually changes.  It&apos;s a band-aid solution that many have adopted, yet it&apos;s far from ideal.</p> 
               <div className='grid grid-cols-2 gap-6 my-3'>
+                
                 {/* reddit post */}
                 <div className='relative col-span-2 w-full rounded-xl border border-stone-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.07),0px_1px_1px_0px_rgba(255,255,255,0.15)_inset]'>
                   
