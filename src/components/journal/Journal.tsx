@@ -28,12 +28,21 @@ export function Journal() {
               <div className="absolute right-0 bottom-0 z-10 size-10 bg-linear-to-br from-transparent via-transparent via-50% to-white/20 blur-xs"></div>
               
               {/* Page Content */}
-              <div className="relative z-20 h-full flex flex-col p-4 font-black text-4xl items-center justify-center text-white/80">
-                <div className="z-10">Shreyas</div>
-                <div className="z-0 absolute inset-0">
-                  
-                </div>
+              <div className="relative z-20 h-full flex flex-col p-4 font-black text-4xl items-center justify-center text-white/80 ">
                 
+                <img 
+                  src="/images/About/Name-Sticker.webp" 
+                  alt="Hello, my name is Shreyas" 
+                  className="z-[1] size-60 absolute bottom-1/2 right-1/2 translate-x-1/2 translate-y-1/2 object-contain"
+                />
+
+                {/* <img 
+                  src="/images/About/Golden-Gate-Bridge-sticker.webp" 
+                  alt="Golden Gate Bridge sticker" 
+                  className="z-[2] size-32 absolute top-1/3 right-0 -translate-y-1/2 object-contain"
+                /> */}
+                
+                <div className="z-0 absolute inset-0"></div>
               </div>
 
               
@@ -43,6 +52,15 @@ export function Journal() {
             back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
               
               <div className="absolute inset-0">
+
+              <img 
+                    src="/images/About/Gojo-meme-sticker.webp"
+                    alt="Shreyas Patil"
+                   
+                    className=" z-[1]  absolute top-1/2 -translate-y-1/2 -right-1/2 object-cover"
+                  />
+                  
+
                 <GridBackground
                   rows={22}
                   columns={16}
@@ -50,12 +68,20 @@ export function Journal() {
                   className=""
                 />
               </div>
-              <div className="relative z-20 h-full flex items-center justify-center">Back Page</div>
+              
             </div>,
           },
           {
             front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden" >
               <div className="absolute inset-0">
+
+              <img 
+                    src="/images/About/Gojo-meme-sticker.webp"
+                    alt="Shreyas Patil"
+                   
+                    className=" z-[1]  absolute top-1/2 -translate-y-1/2 -left-1/2 object-cover"
+                  />
+
                 <GridBackground
                   rows={22}
                   columns={16}
