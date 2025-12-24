@@ -1,14 +1,13 @@
 "use client";
 
-import { GridBackground } from "./GridBackground";
 import Book from "./Book";
 
 
 export function Journal() {
   
   
-  const pageWidth = 24*16;
-  const pageHeight = 24*22;
+  const pageWidth = 420;
+  const pageHeight = 560;
 
   return (
     <div>
@@ -36,11 +35,7 @@ export function Journal() {
                   className="z-[1] size-60 absolute bottom-1/2 right-1/2 translate-x-1/2 translate-y-1/2 object-contain"
                 />
 
-                {/* <img 
-                  src="/images/About/Golden-Gate-Bridge-sticker.webp" 
-                  alt="Golden Gate Bridge sticker" 
-                  className="z-[2] size-32 absolute top-1/3 right-0 -translate-y-1/2 object-contain"
-                /> */}
+               
                 
                 <div className="z-0 absolute inset-0"></div>
               </div>
@@ -57,16 +52,11 @@ export function Journal() {
                     src="/images/About/Gojo-meme-sticker.webp"
                     alt="Shreyas Patil"
                    
-                    className=" z-[1]  absolute top-1/2 -translate-y-1/2 -right-1/2 object-cover"
+                    className=" z-[1]  absolute top-1/2 -translate-y-1/2 -right-1/2 object-contain"
                   />
                   
 
-                <GridBackground
-                  rows={22}
-                  columns={16}
-                  color="rgba(0, 0, 0, 0.05)"
-                  className=""
-                />
+                
               </div>
               
             </div>,
@@ -79,66 +69,610 @@ export function Journal() {
                     src="/images/About/Gojo-meme-sticker.webp"
                     alt="Shreyas Patil"
                    
-                    className=" z-[1]  absolute top-1/2 -translate-y-1/2 -left-1/2 object-cover"
+                    className=" z-[1]  absolute top-1/2 -translate-y-1/2 -left-1/2 object-contain"
                   />
 
-                <GridBackground
-                  rows={22}
-                  columns={16}
-                  color="rgba(0, 0, 0, 0.05)"
-                  className=""
-                />
+                 
               </div>
-              <div className="relative z-20 h-full flex items-center justify-center">Page 2 — Front</div>
+              
             </div>,
             back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
-              <div className="absolute inset-0">
-                <GridBackground
-                  rows={22}
-                  columns={16}
-                  color="rgba(0, 0, 0, 0.05)"
-                  className=""
-                />
+              <div className="absolute inset-0 p-6  flex items-center justify-center w-full h-full">
+
+                <div className="-space-y-20">
+
+                  <div className="">Standards were high on this team!</div>
+
+                  <img 
+                      src="/images/About/Team Sticker.webp"
+                      alt="Shreyas Patil"
+                    
+                      className=" z-[1] size-96 object-contain"
+                    />
+
+                </div>
+
+              
               </div>
-              <div className="relative z-20 h-full flex items-center justify-center">Page 2 — Back</div>
+              
             </div>,
           },
           {
             front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
-              <div className="absolute inset-0">
-                <GridBackground
-                  rows={22}
-                  columns={16}
-                  color="rgba(0, 0, 0, 0.05)"
-                  className=""
-                />
+              <div className="absolute inset-0 flex flex-col items-bottom justify-center ">
+                
+                <img 
+                    src="/images/About/Cricket Sticker.webp"
+                    alt="Shreyas Patil"
+                    className=" z-[1]  object-contain rotate-2"
+                  />
+                  <div className="-mt-10">I liked pushing myself here when no one was looking.</div>
+               
               </div>
-              <div className="relative z-20 h-full flex items-center justify-center">Page 3 — Front</div>
+              
             </div>,
             back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
-              <div className="absolute inset-0">
-                <GridBackground
-                  rows={22}
-                  columns={16}
-                  color="rgba(0, 0, 0, 0.05)"
-                  className=""
-                />
+              <div className="absolute inset-0 p-6">
+              <div className=" text-left  text-stone-500 underline underline-offset-4 decoration-stone-300 absolute top-10 left-1/4 -rotate-18">Iron Man 1</div>
+
+                <img
+                    src="/images/About/Jarvis Sticker.webp"
+                    alt="Shreyas Patil"
+                   
+                    className=" z-[1]  object-contain -rotate-2"
+                  />
+
+                  <div className=" text-left  text-stone-500  ">This was the first time I wondered what it might feel like to collaborate with a computer. </div>
+                
               </div>
-              <div className="relative z-20 h-full flex items-center justify-center">Page 3 — Back</div>
+              
             </div>,
           },
           {
             front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
-              <div className="absolute inset-0">
-                <GridBackground
-                  rows={22}
-                  columns={16}
-                  color="rgba(0, 0, 0, 0.05)"
-                  className=""
+              <div className="absolute inset-0 p-6 -space-y-10">
+
+                <div className=" text-left  text-stone-500 w-3/4">I studied engineering and machine learning to get closer to that future. </div>
+                <img
+                    src="/images/About/MLResearch Sticker.webp"
+                    alt="Shreyas Patil"
+                   
+                    className=" z-[1] w-90 object-contain -rotate-2 ml-20"
+                  />
+                  
+                  <div className=" text-stone-500 w-3/4 text-left ml-auto">I learned how systems worked.I wanted to shape how they felt.</div>
+                
+              </div>
+              
+            </div>,
+            back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+            <div className="absolute inset-0">
+
+              <div className="absolute w-75 top-8 flex items-center">
+
+                  <img
+                    src="/images/About/RIT Ritchie Sticker.webp"
+                    alt="Shreyas Patil"
+                  
+                    className=" z-[1]  object-contain -rotate-2"
+                  />
+                  <div className="absolute text-left  text-stone-500 w-1/3 -right-1/4 top-4 ">A reminder of where I was and what I was becoming</div>
+                </div>
+                <img
+                  src="/images/About/Flight Ticket Sticker.webp"
+                  alt="Shreyas Patil"
+                 
+                  className=" z-[1] absolute h-140 right-0 bottom-1/4 translate-y-1/2 object-contain -rotate-89"
+                />
+            </div>
+            
+          </div>,
+        },
+        {
+          front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
+            <div className="absolute inset-0">
+              
+              <div className="absolute right-5 top-5 flex items-center">
+                <div className="text-stone-500 text-left leading-6 p-4">studying Human–Computer Interaction to focus on how technology feels, not just how it works.</div>
+                <img
+                    src="/images/About/RIT ID Sticker.webp"
+                    alt="Shreyas Patil"
+                  
+                    className=" z-[1] w-50 object-contain -rotate-2"
+                  />
+                </div>
+
+                <div className="absolute -left-[242px] bottom-1/4 translate-y-1/2 flex items-center">
+                  <img
+                    src="/images/About/Flight Ticket Sticker.webp"
+                    alt="Shreyas Patil"
+                  
+                    className=" z-[1]  h-140  object-contain -rotate-89"
+                  />
+                  <div className="text-stone-500 text-left leading-6 p-4 ml-35 w-1/2">First time leaving home this far</div>
+                </div>
+              
+            </div>
+            
+          </div>,
+          back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+          <div className="absolute inset-0">
+
+              <div className="text-left text-2xl px-6 pt-6">I think best when my body is moving</div>
+
+              <div className="relative -space-y-2 mb-4">
+
+                <div className="relative flex">
+
+                  <div className="-space-y-10 items-center ml-3">
+                    <div className="text-sm text-stone-500  p-2">Mission Peak</div>
+                    <img
+                      src="/images/About/Mission Peak Sticker.webp"
+                      alt="Shreyas Patil"
+                    
+                      className=" z-[1]  w-50  object-contain -rotate-2"
+                    />
+
+                  </div>
+
+                  <div className=" items-center right-1/10 absolute">
+                    
+                    <img
+                    src="/images/About/Lechworth Sticker.webp"
+                    alt="Shreyas Patil"
+                  
+                    className=" z-[1]  w-40   object-contain -rotate-1"
+                  />
+                  <div className="text-sm text-stone-500  p-2">Lechworth State Park</div>
+
+
+                  </div>
+                </div>
+
+                <div className="text-stone-500">Long hikes is how I slowed my thoughts down.</div>
+              </div>
+
+              <div className="relative -space-y-2">
+
+                <div className="text-stone-500 text-left px-4">Forts in the Sahyadri mountains <br /> Growing up in Pune, surrounded by hills.</div>
+
+                <div className="relative flex gap-6">
+
+                  <div className="items-center ml-3">
+                    
+                    <img
+                      src="/images/About/Hike-2-Sticker.webp"
+                      alt="Shreyas Patil"
+                    
+                      className=" z-[1]  w-45  object-contain -rotate-2"
+                    />
+
+                  </div>
+
+                  <div className=" items-center">
+                    
+                    <img
+                    src="/images/About/Hike-1-Sticker.webp"
+                    alt="Shreyas Patil"
+                  
+                    className=" z-[1]  w-40   object-contain -rotate-1"
+                  />
+                  
+
+
+                  </div>
+                </div>
+
+                
+              </div>
+
+              
+             
+
+<img
+                src="/images/About/Scuba Sticker.webp"
+                alt="Shreyas Patil"
+               
+                className=" z-[1] absolute left-9/10 top-5 object-contain -rotate-2"
+              />
+            
+          </div>
+          
+        </div>,
+      },
+      {
+        front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
+          <div className="absolute inset-0">
+
+            <div className="text-stone-500 text-left absolute top-5/8 left-1/2 text-lg ">Different mediums. <br /> Same rhythm.</div>
+            <img
+                src="/images/About/Scuba Sticker.webp"
+                alt="Shreyas Patil"
+               
+                className=" z-[1] absolute right-1/10 top-5 object-contain -rotate-2"
+              />
+              <img
+                src="/images/About/Bike Sticker.webp"
+                alt="Shreyas Patil"
+               
+                className=" z-[2] absolute h-60  bottom-1/4 translate-y-1/2 object-contain "
+              />
+              <img
+                src="/images/About/Kayaking Stickers.webp"
+                alt="Shreyas Patil"
+               
+                className=" z-[1] absolute h-50 right-0  bottom-1/6 translate-y-1/2 object-contain "
+              />
+           
+          </div>
+          
+        </div>,
+        back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+        <div className="absolute inset-0 -space-y-6 p-4 ">
+          <div className="text-left mb-2 text-2xl p-2">None of them started as “the best.”</div>
+          <div className="flex items-center">
+
+            <div className=" w-40 relative">
+              <img
+                src="/images/About/CR7 Sticker.webp"
+                alt="Shreyas Patil"
+              
+                className=" z-[1]  size-50 top-0 right-0 object-cover"
+              />
+            </div>
+            <div className="text-left w-full text-stone-600">
+              <div className="text-left text-xl leading-8">Cristiano Ronaldo</div>
+              <div className="text-left text-xl leading-8">Relentless self-reinvention</div>
+              <div className="text-left text-sm leading-6 text-stone-500">When talent opened the door, discipline kept pushing the ceiling higher.</div>
+              <div className="text-left text-sm leading-6 text-stone-500">Showing up every day turned potential into dominance.</div>
+            </div>
+          </div>
+          
+          <div className="flex items-center">
+
+          <div className="text-left w-full text-stone-600 pl-2">
+              <div className="text-left text-xl leading-8">Virat Kohli</div>
+              <div className="text-left text-xl leading-8">Total commitment to improvement</div>
+              <div className="text-left text-sm leading-6 text-stone-500">When he decided to take the game seriously, everything else reorganized around that decision.</div>
+              <div className="text-left text-sm leading-6 text-stone-500">Greatness followed consistency, not hype.</div>
+            </div>
+
+            <div className=" w-40 relative overflow-visible">
+              <img
+                src="/images/About/Virat Kohli Sticker.webp"
+                alt="Shreyas Patil"
+                className=" z-[1] object-cover"
+              />
+            </div>
+            
+          </div>
+
+          <div className="flex items-center">
+
+            <div className="flex w-40">
+              <img
+                src="/images/About/Rahul Dravid Sticker.webp"
+                alt="Shreyas Patil"
+              
+                className=" z-[1] object-cover"
+              />
+            </div>
+            <div className="text-left w-full text-stone-600">
+              <div className="text-left text-xl leading-8">Rahul Dravid</div>
+              <div className="text-left text-xl leading-8">Reliability under pressure</div>
+              <div className="text-left text-sm text-stone-500">When the stakes were highest, he delivered the most consistent, unflappable performances.</div>
+              <div className="text-left text-sm text-stone-500">His calm demeanor and rock-solid technique never wavered, even in high-pressure moments.</div>
+            </div>
+          </div>
+
+
+         
+        </div>
+        
+      </div>,
+    },
+    {
+      front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
+        <div className="absolute inset-0 -space-y-6 p-4 ">
+          <div className="text-left mb-2 text-2xl p-2">None of them stopped at the interface.</div>
+          <div className="flex items-center gap-2">
+
+            <div className="-ml-10 w-80 relative">
+              <img
+                src="/images/About/Jordan Singer Sticker.webp"
+                alt="Shreyas Patil"
+              
+                className=" z-[1] top-0 right-0 object-cover"
+              />
+            </div>
+            <div className="text-left w-full text-stone-600">
+              <div className="text-left text-xl leading-8">Jordan Singer</div>
+              <div className="text-left text-xl leading-8">End-to-end ownership</div>
+              <div className="text-left text-sm leading-6 text-stone-500">Designing ideas and building them, refusing to separate Design from execution.</div>
+              <div className="text-left text-sm leading-6 text-stone-500">Craft doesn’t stop at the mockup.</div>
+            </div>
+          </div>
+          
+          <div className="flex items-center">
+
+          <div className="text-left w-full text-stone-600 pl-4">
+              <div className="text-left text-xl leading-8">Soleio</div>
+              <div className="text-left text-xl leading-8">Seeing farther than the interface</div>
+              <div className="text-left text-sm leading-6 text-stone-500">Thinking in systems, leverage, and second-order effects — not just screens.</div>
+              <div className="text-left text-sm leading-6 text-stone-500">Great products are worn, not just used.</div>
+            </div>
+
+            <div className=" w-40 relative overflow-visible">
+              <img
+                src="/images/About/Soleio Sticker.webp"
+                alt="Shreyas Patil"
+                className=" z-[1] object-cover"
+              />
+            </div>
+            
+          </div>
+
+        
+
+         
+        </div>
+        
+      </div>,
+              back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+              <div className="absolute inset-0 p-4 space-y-4 ">
+                <div className="text-left mb-2 text-2xl p-2">Readings that stayed with me</div>
+                <div className="flex items-center">
+      
+                  <div className="  relative">
+                    <img
+                      src="/images/About/Agent Cloud Sticker.webp"
+                      alt="Shreyas Patil"
+                    
+                      className=" z-[1] top-0 right-0 object-cover w-50"
+                    />
+                  </div>
+                  <div className="text-left w-full text-stone-600">
+                    <div className="text-left text-xl leading-8">Agent Cloud</div>
+                    <div className="text-left text-sm leading-6 text-stone-500">Made me rethink software as something you collaborate with — not something you operate.</div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center ml-2">
+      
+                <div className="text-left w-full text-stone-600">
+                    <div className="text-left text-xl leading-8">Invisible Details of Interaction Design — Rauno</div>
+                    <div className="text-left text-sm leading-6 text-stone-500">A reminder that the best interactions disappear because they respect the user&apos;s attention.</div>
+                  </div>
+      
+                  <div className=" w-40 relative overflow-visible">
+                    <img
+                      src="/images/About/Interaction Sticker.webp"
+                      alt="Shreyas Patil"
+                      className=" z-[1] object-cover"
+                    />
+                  </div>
+                  
+                </div>
+      
+                <div className="flex flex-col items-start">
+      
+                  <div className="flex h-44">
+                    <img
+                      src="/images/About/Apple Sticker.webp"
+                      alt="Shreyas Patil"
+                    
+                      className=" z-[1] object-cover h-44"
+                    />
+                  </div>
+                  <div className="text-left w-full text-stone-600 ml-2">
+                    <div className="text-left text-xl leading-8">Early Apple UI (Lisa / Apple II / Macintosh)</div>
+                    <div className="text-left text-sm leading-6 text-stone-500">Designing interactions before patterns existed — solving human problems, not UI problems.</div>
+                  </div>
+                </div>
+      
+      
+               
+              </div>
+              
+            </div>,
+          },
+          {
+            front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
+              <div className="absolute inset-0 px-4 ">
+                
+                <div className="flex items-center gap-2">
+      
+                  <div className="-ml-5 w-100 relative">
+                    <img
+                      src="/images/About/Spiderverse Sticker.webp"
+                      alt="Shreyas Patil"
+                    
+                      className=" z-[1] top-0 right-0 object-cover w-50"
+                    />
+                  </div>
+                  <div className="text-left w-full text-stone-600">
+                    <div className="text-left text-xl leading-8">Spider-Verse</div>
+                    <div className="text-left text-sm leading-6 text-stone-500">Reminded me that progress often starts before certainty — with a leap, not a plan.</div>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col items-start">
+      
+                  <div className="flex w-full">
+                    <img
+                      src="/images/About/Shoe Dog Sticker.webp"
+                      alt="Shreyas Patil"
+                    
+                      className=" z-[1] object-cover"
+                    />
+                  </div>
+                  <div className="text-left w-full text-stone-600 pl-4">
+                    <div className="text-left text-xl leading-8">Shoe Dog — Phil Knight</div>
+                    <div className="text-left text-sm leading-6 text-stone-500">Building something meaningful is messy, unglamorous, and worth doing anyway.</div>
+                  </div>
+                </div>
+              
+      
+               
+              </div>
+              
+            </div>,
+            back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+            <div className="absolute inset-0 p-4 ">
+            
+              <div className="text-left mb-2 text-2xl p-2">Things I remember cities by </div>
+
+
+                <div className=" absolute top-16 left-1/3 -translate-x-1/2">
+
+                  <div className="absolute text-left  text-stone-500 -right-8 top-6 rotate-15">SpicyMoon - New York</div>
+  
+                  <img
+                    src="/images/About/SpicyMoon Sticker.webp"
+                    alt="Shreyas Patil"
+                    className=" z-[1] w-50  object-contain rotate-90"
+                  />
+
+                </div>
+
+                <div className=" absolute bottom-4">
+
+                  <div className="absolute text-left  text-stone-500 -right-4 top-4 rotate-30">Feels Like Home</div>
+                  <div className="absolute text-left  text-stone-500 -right-4 bottom-5 -rotate-30">Surmai - Sunnyvale</div>
+
+                  <img
+                    src="/images/About/Surmai Sticker.webp"
+                    alt="Shreyas Patil"
+                  
+                    className=" z-[1] w-70  object-contain -rotate-2"
+                  />
+                </div>
+
+
+                <div className=" absolute w-60  left-3/4 top-2/3 -translate-y-1/2">
+
+                  <div className="absolute text-left  text-stone-500 left-0 top-0 -rotate-35">Shabree - Pune</div>
+  
+                  <img
+                    src="/images/About/Shabree Sticker.webp"
+                    alt="Shreyas Patil"
+                  
+                    className=" z-[1]  object-contain -rotate-2"
+                  />
+
+                </div>
+
+                <div className="absolute w-[448px] left-9/12 top-3">
+  
+                <img
+                  src="/images/About/Veniros Sticker.webp"
+                  alt="Shreyas Patil"
+                 
+                  className=" z-[1]  object-contain "
                 />
               </div>
-              <div className="relative z-20 h-full flex items-center justify-center">Page 4 — Front</div>
-            </div>,
+            </div>
+            
+          </div>,
+        },
+        {
+          front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
+            <div className="absolute inset-0">
+              
+              <div className="absolute w-120 right-2/12 top-3">
+              <img
+                  src="/images/About/Veniros Sticker.webp"
+                  alt="Shreyas Patil"
+                 
+                  className=" z-[1] "
+                />
+                <div className="absolute text-left  text-stone-500 -right-4 bottom-2 ">Veniros Cafe - New York</div>
+              </div>
+              <div className=" absolute w-60  -left-1/4 top-2/3 -translate-y-1/2">
+                <img
+                  src="/images/About/Shabree Sticker.webp"
+                  alt="Shreyas Patil"
+                 
+                  className="z-[1]  object-contain -rotate-2 "
+                />
+                <div className="absolute text-left  text-stone-500 -right-4 bottom-5 -rotate-30">Post Hike Rituals</div>
+              </div>
+
+              <div className=" absolute  w-70 -right-5  bottom-0">
+
+              <div className="absolute text-left  text-stone-500 right-8 top-4 rotate-30">Dumpling Story - SF</div>
+
+                <img
+                  src="/images/About/Dumpling Story Sticker.webp"
+                  alt="Shreyas Patil"
+                 
+                  className=" z-[1]  object-contain "
+                />
+              </div>
+              
+            </div>
+            
+          </div>,
+
+          back: <div className="relative text-center h-full w-full bg-linear-to-bl p-12 from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl ">
+            
+              <div className="p-12 bg-white w-[744px] h-full">
+                <div className="text-left mb-2 text-lg leading-9 font-handwriting">Making it feel right <br />
+                  I’ve always cared about how things feel, not just how they work. The products I admire most don’t demand attention — they earn it quietly, through rhythm, restraint, and care.
+                  For me, design is about showing up in the details. The moments most people don’t notice. The timing of an animation. The weight of a transition. The absence of friction.
+                  I believe great experiences come from deep understanding — of people, systems, and context — and from taking responsibility end-to-end, not stopping at the interface.
+                  I’m drawn to work that blends discipline with intuition, practicality with emotion. Work that feels inevitable once it exists.
+                  If something feels right, it’s usually because someone pushed themselves further than necessary — even when no one was watching.
+                </div>
+              </div>
+            
+          </div>,
+        },
+        {
+          front: <div className="relative text-center h-full w-full bg-linear-to-bl p-12  from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl">
+            <div className="relative h-full">
+              <div className="p-12 bg-white w-[744px] h-full right-1.5 absolute">
+                  <div className="text-left mb-2 text-lg leading-9 font-handwriting">Making it feel right <br />
+                    I’ve always cared about how things feel, not just how they work. The products I admire most don’t demand attention — they earn it quietly, through rhythm, restraint, and care.
+                    For me, design is about showing up in the details. The moments most people don’t notice. The timing of an animation. The weight of a transition. The absence of friction.
+                    I believe great experiences come from deep understanding — of people, systems, and context — and from taking responsibility end-to-end, not stopping at the interface.
+                    I’m drawn to work that blends discipline with intuition, practicality with emotion. Work that feels inevitable once it exists.
+                    If something feels right, it’s usually because someone pushed themselves further than necessary — even when no one was watching.
+                  </div>
+                </div>
+            </div>
+          </div>,
+
+          back: <div className="relative text-center h-full w-full bg-linear-to-bl p-12 from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+                      
+          <div className="">
+            <div className="text-left mb-2 font-handwriting">
+              <div className="text-left text-2xl text-stone-600 leading-loose">Say hi,</div>
+              <div className="text-left text-lg text-stone-600 leading-loose">I’m always happy to talk about design, and the small details that make things feel right.<br />I’m at a point where I’m excited to take on my next full-time product design role. If you think my approach could be useful, I’d love to talk.</div>
+            </div>
+
+            <div className="text-left text-stone-600 leading-loose mt-8">
+              <div>shreyaspatil.design@gmail.com</div>
+              <a 
+                href="https://x.com/ShreyasPatil_" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className=" hover:underline hover:underline-offset-6 text-stone-600 decoration-stone-400"
+              >
+                Twitter/X: @ShreyasPatil_
+              </a>
+              <div>LinkedIn</div>
+            </div>
+          </div>
+
+          </div>,
+          },
+          {
+              front: <div className="relative text-center h-full w-full bg-linear-to-bl p-12  from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
+
+              </div>,
+
+      
             back: <div className="relative isolate text-center h-full bg-linear-to-bl from-stone-700 to-stone-900 rounded-lg shadow-[inset_-2px_2px_4px_rgba(255,255,255,0.1)] overflow-hidden">
               
               <div className="absolute inset-0 z-10 bg-linear-to-bl from-white/0 from-0% via-white/10 via-30%  to-stone-900/20 rounded-lg opacity-50" ></div>

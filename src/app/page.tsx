@@ -208,7 +208,7 @@ export default function Home() {
                       
                           <ProjectThumbnailHeader name="Quinn" link="/projects/quinn" />
                           <div className="text-body text-pretty">Quinn is an AI-native relationship intelligence platform that transforms how executives and business leaders manage their professional networks. The product bridges the gap between traditional CRM systems and intelligent relationship management.</div>
-                          <div className="relative w-full aspect-4/3 my-4  bg-[url('/images/projects/thumbnails/Quinn-Thumbnail-Background.webp')] bg-cover bg-center rounded-2xl -z-10 shadow-[0_0_0_1px_rgba(0,0,0,0.07),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_4px_4px_-2px_rgba(0,0,0,0.08)] overflow-hidden">
+                          <div className="relative w-full aspect-4/3 my-4  bg-[url('/images/projects/thumbnails/Quinn-Thumbnail-Background.webp')] bg-cover bg-center rounded-2xl -z-10 border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">
                             <Image src="/images/projects/Dashworks/Dashworks-Onboarding-1.png" alt="Quinn" fill className="object-cover object-center" />
                           </div>
                     </div>
@@ -216,7 +216,7 @@ export default function Home() {
                     <div className="w-full flex flex-col gap-4">
                           <ProjectThumbnailHeader name="ItinerAI" link="/projects/itinerai" />
                           <div className="text-body text-pretty">ItinerAI is an experimental travel assistant where multiple AI agents, each with a distinct personality and focus area, collaborate to help you plan and coordinate trips effortlessly. From surfacing the best flight options to optimizing your itinerary around your schedule, these agents communicate with each other and with you, just like a well-aligned team.</div>
-                          <div className="relative w-full aspect-4/3 my-4  bg-[url('/images/projects/thumbnails/ItinearAI-Thumbnail-Background.webp')] bg-cover bg-center rounded-2xl -z-10 shadow-[0_0_0_1px_rgba(0,0,0,0.07),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_4px_4px_-2px_rgba(0,0,0,0.08)] overflow-hidden">
+                          <div className="relative w-full aspect-4/3 my-4  bg-[url('/images/projects/thumbnails/ItinearAI-Thumbnail-Background.webp')] bg-cover bg-center rounded-2xl -z-10 border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">
                             <Image src="/images/projects/ItinerAI/ItinerAI-Thumbnail.png" alt="ItinerAI" fill className="object-cover object-center" />
                           </div>
                     </div>
@@ -224,7 +224,7 @@ export default function Home() {
                     <div className="w-full flex flex-col gap-4">
                           <ProjectThumbnailHeader name="Dashworks" link="/projects/dashworks" />
                           <div className="text-body text-pretty">Dashworks is an AI-powered knowledge assistant that helps companies centralize their knowledge scattered across various apps. It provides accurate answers to employee questions by searching across the company&apos;s connected applications.</div>
-                          <div className="relative w-full aspect-4/3 my-4  bg-[url('/images/projects/thumbnails/Dashworks-Thumbnail-Background.webp')] bg-cover bg-center rounded-2xl -z-10 shadow-[0_0_0_1px_rgba(0,0,0,0.07),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_4px_4px_-2px_rgba(0,0,0,0.08)] overflow-hidden">
+                          <div className="relative w-full aspect-4/3 my-4  bg-[url('/images/projects/thumbnails/Dashworks-Thumbnail-Background.webp')] bg-cover bg-center rounded-2xl -z-10 border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">
                             <Image src="/images/projects/Dashworks/Dashworks-Onboarding-1.png" alt="Quinn" fill className="object-cover object-center" />
                           </div>
                     </div>
@@ -232,7 +232,7 @@ export default function Home() {
                     <div className="w-full flex flex-col gap-4">
                           <ProjectThumbnailHeader name="WeatherWise" link="/projects/weatherwise" />
                           <div className="text-body text-pretty">Improving Navigational Safety with Weather-Adaptive Routing in Google Maps.</div>
-                          <div className="relative w-full aspect-4/3 my-4  bg-[url('/images/projects/thumbnails/WeatherWise-Thumbnail-Background.webp')] bg-cover bg-center rounded-2xl -z-10 shadow-[0_0_0_1px_rgba(0,0,0,0.07),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_4px_4px_-2px_rgba(0,0,0,0.08)] overflow-hidden">
+                          <div className="relative w-full aspect-4/3 my-4  bg-[url('/images/projects/thumbnails/WeatherWise-Thumbnail-Background.webp')] bg-cover bg-center rounded-2xl -z-10 border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">
                             
                           </div>
                     </div>                  

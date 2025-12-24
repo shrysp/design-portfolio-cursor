@@ -58,6 +58,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth overflow-x-clip">
+      <head>
+        <link rel="stylesheet" href="https://use.typekit.net/uoh4dmf.css" />
+      </head>
       <body
         className={`${geist.variable} ${geistMono.variable} ${sourceSerif4.variable} antialiased bg-stone-50 text-stone-900`}
       >

@@ -19,8 +19,8 @@ interface BookProps {
 
 export default function Book({
   pages,
-  pageWidth = 300,
-  pageHeight = 400,
+  pageWidth = 360,
+  pageHeight = 480,
   isOpen = true,
 }: BookProps) {
   // currentPage = how many pages have been flipped (triggers rotation)
@@ -113,7 +113,7 @@ export default function Book({
         return (
           <motion.div
             key={index}
-            className="absolute top-0 left-0 w-full h-full cursor-pointer origin-left rounded-l-lg rounded-r-2xl shadow-lg"
+            className="absolute top-0 left-0 w-full h-full cursor-pointer origin-left rounded-l-lg rounded-r-2xl"
             style={{ 
               zIndex,
               transformStyle: 'preserve-3d'
@@ -163,7 +163,7 @@ export default function Book({
           >
             {/* FRONT (right side) */}
             <div 
-              className="absolute inset-0 rounded-l-lg rounded-r-2xl overflow-hidden shadow-xs"
+              className="absolute inset-0 rounded-l-lg rounded-r-2xl overflow-hidden shadow-md shadow-black/5 select-none font-handwriting"
               style={{
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
@@ -177,7 +177,7 @@ export default function Book({
 
             {/* BACK (left side) */}
             <div 
-              className="absolute inset-0 rounded-l-2xl rounded-r-lg overflow-hidden shadow-xs"
+              className="absolute inset-0 rounded-l-2xl rounded-r-lg overflow-hidden shadow-md shadow-black/[0.02] select-none font-handwriting"
               style={{
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
