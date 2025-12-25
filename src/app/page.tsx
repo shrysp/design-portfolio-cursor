@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import ProjectThumbnailHeader from '@/components/ProjectThumbnailHeader';
 import { CraftContent } from '@/components/CraftContent';
-import { Journal } from '@/components/journal/Journal';
+import { ExpandableJournal } from '@/components/journal/ExpandableJournal';
 
 
 
@@ -85,36 +85,13 @@ export default function Home() {
           initial="hidden"
           animate="visible"
         >
+
+          
           
           <motion.div
             variants={sectionVariants}
             className="flex relative mb-16"
           >
-            {/* top */}
-            <div className="absolute -translate-y-1/2 top-1/2 left-0 -translate-x-full -z-10 ">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab === "about" ? "gojo" : "portrait"}
-                  initial={{ scale: 0.95, filter: "blur(8px)", opacity: 0, rotate: -4 }}
-                  animate={{ scale: 1, filter: "blur(0px)", opacity: 1, rotate: 0 }}
-                  exit={{ scale: 0.95, filter: "blur(8px)", opacity: 0, rotate: 4 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 30,
-                    mass: 1
-                  }}
-                >
-                  <Image 
-                    src={activeTab === "about" ? "/images/About/Gojo-meme-sticker.webp" : "/images/About/Potrait-Sticker.webp"}
-                    alt="Shreyas Patil"
-                    width={240}
-                    height={240}
-                    className=" h-auto object-cover rotate-2"
-                  />
-                </motion.div>
-              </AnimatePresence>
-            </div>
             <div className='flex flex-col gap-4 text-gray-800'>
                   <div className=" text-page-header text-gradient-primary">
                    
@@ -158,7 +135,17 @@ export default function Home() {
                   </motion.div> */}
                   
                 
-            </div>        
+            </div> 
+            {/* Expandable Journal positioned to the left */}
+            <div className=" -z-10 group">
+              <ExpandableJournal 
+                collapsedWidth={150}
+                collapsedHeight={200}
+                expandedWidth={420}
+                expandedHeight={560}
+              />
+            </div>
+                   
           </motion.div>
 
           {/* Tabs below intro */}
@@ -248,36 +235,12 @@ export default function Home() {
             <>
               {/* About tab content */}
               <motion.div
-                className="group flex flex-col gap-6 w-full"
-                animate={{
-                  rotate: 0,
-                  y: 0,
-                  transition: {
-                    duration: 0.3,
-                    ease: "easeOut"
-                  }
-                }}
-                initial={{
-                  rotate: 4,
-                  y: 70,
-                  transition: {
-                    duration: 0.3,
-                    ease: "easeOut"
-                  }
-                }}
-                exit={{
-                  rotate: 4,
-                  y: 10,
-                  transition: {
-                    duration: 0.3,
-                    ease: "easeOut"
-                  }
-                }}
+                className="flex flex-col gap-6 w-full mt-16"
+                variants={sectionVariants}
               >
-                <div className="w-full h-full rotate-4 group-hover:rotate-0 transition-all duration-300 translate-y-10 group-hover:translate-y-0  p-12">
-                  
-                    <Journal />
-                  
+                <div className="text-body text-pretty">
+                  <p className="mb-4">Click the journal on the left to learn more about me. It contains my story, inspirations, and what drives me as a designer.</p>
+                  <p className="text-stone-500">The journal is interactive — you can flip through the pages to explore different aspects of my journey.</p>
                 </div>
               </motion.div>
             </>
