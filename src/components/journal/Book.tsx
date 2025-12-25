@@ -1,6 +1,6 @@
 "use client";
 
-import { easeInOut, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useState, useImperativeHandle, forwardRef, useCallback } from "react";
 
 
