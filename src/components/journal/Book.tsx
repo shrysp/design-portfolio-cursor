@@ -3,7 +3,22 @@
 import { motion } from "framer-motion";
 import { useEffect, useState, useImperativeHandle, forwardRef, useCallback } from "react";
 
-
+// Hook to detect if device supports hover (non-touch)
+function useCanHover() {
+  const [canHover, setCanHover] = useState(false);
+  
+  useEffect(() => {
+    // Check if the device supports hover (not a touch-only device)
+    const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
+    setCanHover(mediaQuery.matches);
+    
+    const handler = (e: MediaQueryListEvent) => setCanHover(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+  
+  return canHover;
+}
 
 type BookPage = {
     front: React.ReactNode;
@@ -42,6 +57,9 @@ const Book = forwardRef<BookHandle, BookProps>(function Book({
 
   // Track if we're currently resetting
   const [isResetting, setIsResetting] = useState(false);
+  
+  // Only enable hover effects on non-touch devices
+  const canHover = useCanHover();
 
   
   const total = pages.length;
@@ -135,7 +153,9 @@ const Book = forwardRef<BookHandle, BookProps>(function Book({
         width: containerWidth,
         perspective: '2000px',
         perspectiveOrigin: 'center center',
-        transformStyle: 'preserve-3d'
+        transformStyle: 'preserve-3d',
+        WebkitTransformStyle: 'preserve-3d',
+        touchAction: 'pan-y', // Allow vertical scroll but enable touch on pages
       }}
       animate={{
         width: containerWidth,
@@ -157,9 +177,12 @@ const Book = forwardRef<BookHandle, BookProps>(function Book({
 
         // ------- Z-INDEX based on hasSwapped (not isFlipped!) -------
         // Only move to left stack z-index after halfway point
+        // Use large offset to ensure proper stacking on mobile
+        // For LEFT stack (flipped): higher index = flipped more recently = should be on TOP
+        // For RIGHT stack (unflipped): lower index = top of stack
         const zIndex = hasSwapped
-          ? index               // left stack: low z -> high
-          : total - index;      // right stack: high z -> low
+          ? 1000 + index * 10     // left stack: 1000, 1010, 1020... (more recent = higher)
+          : 2000 + (total - index) * 10; // right stack: top of unflipped stack has highest z
 
         return (
           <motion.div
@@ -167,7 +190,10 @@ const Book = forwardRef<BookHandle, BookProps>(function Book({
             className="absolute top-0 left-0 w-full h-full cursor-pointer origin-left rounded-l-lg rounded-r-2xl"
             style={{ 
               zIndex,
-              transformStyle: 'preserve-3d'
+              transformStyle: 'preserve-3d',
+              WebkitTransformStyle: 'preserve-3d',
+              touchAction: 'manipulation', // Allow taps but prevent double-tap zoom
+              pointerEvents: 'auto',
             }}
             animate={{
               rotateY: isFlipped ? -180 : 0,
@@ -177,22 +203,21 @@ const Book = forwardRef<BookHandle, BookProps>(function Book({
                   : currentPage === total
                   ? pageWidth
                   : pageWidth / 2,
-                    transition: {
-                      duration: 0.4,
-                      ease: [0.645, 0.045, 0.355, 1],
-                    },
             }}
-            whileHover={isExpanded && !isResetting ? {
+            transition={{
+              duration: 0.4,
+              ease: [0.645, 0.045, 0.355, 1],
+            }}
+            whileHover={canHover && isExpanded && !isResetting ? {
               rotateY: isFlipped ? -160 : -20, // Peek lift in flip direction
               transition: { duration: 0.3, ease: "easeOut" },
-            } : {}}
-            onClick={() => {
+            } : undefined}
+            onClick={(e) => {
+              e.stopPropagation();
               if (!isOpen || !isExpanded || isResetting) return;
               if (isFlipped) {
-                // Flipped page clicked → flip it back
                 beginUnflip(index);
               } else {
-                // Unflipped page clicked → flip it forward
                 beginFlip(index);
               }
             }}
@@ -214,13 +239,14 @@ const Book = forwardRef<BookHandle, BookProps>(function Book({
           >
             {/* FRONT (right side) */}
             <div 
-              className="absolute inset-0 rounded-l-lg rounded-r-2xl overflow-hidden shadow-md shadow-black/5 select-none font-handwriting"
+              className="absolute inset-0 rounded-l-lg rounded-r-2xl overflow-hidden shadow-md shadow-black/5 select-none font-handwriting pointer-events-none"
               style={{
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
                 transform: 'rotateY(0deg) translateZ(0.1px)',
                 transformStyle: 'preserve-3d',
-                willChange: 'transform'
+                WebkitTransformStyle: 'preserve-3d',
+                willChange: 'transform',
               }}
             >
               {page.front}
@@ -228,13 +254,14 @@ const Book = forwardRef<BookHandle, BookProps>(function Book({
 
             {/* BACK (left side) */}
             <div 
-              className="absolute inset-0 rounded-l-2xl rounded-r-lg overflow-hidden shadow-md shadow-black/[0.02] select-none font-handwriting"
+              className="absolute inset-0 rounded-l-2xl rounded-r-lg overflow-hidden shadow-md shadow-black/[0.02] select-none font-handwriting pointer-events-none"
               style={{
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
                 transform: 'rotateY(180deg) translateZ(0.1px)',
                 transformStyle: 'preserve-3d',
-                willChange: 'transform'
+                WebkitTransformStyle: 'preserve-3d',
+                willChange: 'transform',
               }}
             >
               {page.back}

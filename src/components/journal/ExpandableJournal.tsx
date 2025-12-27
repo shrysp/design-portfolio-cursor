@@ -6,6 +6,61 @@ import { useOnClickOutside } from "usehooks-ts";
 import { motion, AnimatePresence } from "framer-motion";
 import Book, { BookHandle } from "./Book";
 
+// Hook to get responsive scale and center position
+// The book always renders at desktop dimensions, but scales down on mobile
+function useResponsiveJournalScale(
+  desktopWidth: number,
+  desktopHeight: number,
+  mobileMargin: number = 16
+) {
+  const [state, setState] = useState({ 
+    scale: 1,
+    centerX: 0,
+    centerY: 0,
+  });
+
+  useEffect(() => {
+    function calculate() {
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+      
+      // The spread (2 pages) width at full scale
+      const spreadWidth = desktopWidth * 2;
+      
+      // Calculate scale factor - scale down if spread doesn't fit
+      // Available width for spread = screen - margin
+      const availableWidth = screenWidth - mobileMargin;
+      const scale = Math.min(1, availableWidth / spreadWidth);
+      
+      // Also check height constraint
+      const availableHeight = screenHeight - mobileMargin;
+      const heightScale = Math.min(1, availableHeight / desktopHeight);
+      
+      // Use the smaller scale to ensure it fits both dimensions
+      const finalScale = Math.min(scale, heightScale);
+      
+      // Visual height after scaling (for vertical centering)
+      const visualHeight = desktopHeight * finalScale;
+      
+      // Center position - account for the fact that when open,
+      // the spread extends from -pageWidth/2 to +pageWidth*1.5 relative to origin
+      // So center of spread is at pageWidth/2 from container origin
+      // We want the spread center at screen center
+      const spreadCenterOffset = (desktopWidth / 2) * finalScale;
+      const centerX = (screenWidth / 2) - spreadCenterOffset;
+      const centerY = Math.max(mobileMargin / 2, (screenHeight - visualHeight) / 2);
+      
+      setState({ scale: finalScale, centerX, centerY });
+    }
+
+    calculate();
+    window.addEventListener('resize', calculate);
+    return () => window.removeEventListener('resize', calculate);
+  }, [desktopWidth, desktopHeight, mobileMargin]);
+
+  return state;
+}
+
 // Sticker slap animation - mimics real physics of slapping a sticker on a surface
 function SlapSticker() {
   const [isReady, setIsReady] = useState(false);
@@ -82,8 +137,8 @@ interface ExpandableJournalProps {
 export function ExpandableJournal({
   collapsedWidth = 180,
   collapsedHeight = 240,
-  expandedWidth = 420,
-  expandedHeight = 560,
+  expandedWidth: desktopExpandedWidth = 420,
+  expandedHeight: desktopExpandedHeight = 560,
 }: ExpandableJournalProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false); // Track exit animation
@@ -92,6 +147,17 @@ export function ExpandableJournal({
   const bookRef = useRef<BookHandle>(null);
   const expandedContainerRef = useRef<HTMLDivElement>(null);
   const collapsedRef = useRef<HTMLDivElement>(null);
+  
+  // Get responsive scale and center position
+  // Book always renders at desktop dimensions, but we scale the container on mobile
+  const { scale, centerX, centerY } = useResponsiveJournalScale(
+    desktopExpandedWidth,
+    desktopExpandedHeight
+  );
+  
+  // Book dimensions stay at desktop size - scaling handles responsive
+  const expandedWidth = desktopExpandedWidth;
+  const expandedHeight = desktopExpandedHeight;
 
   // The collapsed element should be hidden if expanded OR if exit animation is in progress
   const shouldHideCollapsed = isExpanded || isAnimatingOut;
@@ -626,10 +692,6 @@ export function ExpandableJournal({
     },
   ];
 
-  // Calculate center position
-  const centerX = typeof window !== 'undefined' ? window.innerWidth / 2 - expandedWidth / 2 : 0;
-  const centerY = typeof window !== 'undefined' ? window.innerHeight / 2 - expandedHeight / 2 : 0;
-
   // Calculate initial position from origin rect (FLIP animation)
   // Use originRect for POSITION only, use known props for SCALE to avoid measurement discrepancies
   const initialX = originRect ? originRect.left : centerX;
@@ -655,7 +717,7 @@ export function ExpandableJournal({
             onClick={handleClose}
           />
 
-          {/* Expanded state - animates from collapsed position to center */}
+          {/* Expanded state - animates from collapsed position to center, scales on mobile */}
           <motion.div
             key="expanded-journal"
             ref={expandedContainerRef}
@@ -675,8 +737,8 @@ export function ExpandableJournal({
             animate={{ 
               left: centerX,
               top: centerY,
-              scaleX: 1,
-              scaleY: 1,
+              scaleX: scale,
+              scaleY: scale,
               rotate: 0,
             }}
             exit={{ 
