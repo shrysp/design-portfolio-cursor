@@ -52,6 +52,13 @@ body {
   html {
     font-size: 15px;
   }
+  
+  /* Mobile typography adjustments */
+  @media (max-width: 767px) {
+    html {
+      font-size: 14px;
+    }
+  }
 }
 
 /* Hide scrollbar but keep functionality */
@@ -150,6 +157,34 @@ body {
     color: var(--color-stone-600);
     
   
+  }
+  
+  /* Mobile typography overrides - desktop sizes remain unchanged */
+  @media (max-width: 767px) {
+    .text-page-header {
+      font-size: 32px;
+      line-height: 36px;
+    }
+
+    .text-header {
+      font-size: 22px;
+      line-height: 32px;
+    }
+
+    .text-header-2 {
+      font-size: 18px;
+      line-height: 26px;
+    }
+
+    .text-important {
+      font-size: 20px;
+      line-height: 30px;
+    }
+
+    .text-body {
+      font-size: 16px;
+      line-height: 26px;
+    }
   }
 }
 

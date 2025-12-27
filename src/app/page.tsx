@@ -44,10 +44,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex justify-center">
-      <main className="relative w-full md:max-w-[800px] max-w-[361px]">
+      <main className="relative w-full md:max-w-[800px] max-w-[377px]">
 
         <motion.div 
-          className="relative flex flex-col gap-16 items-start md:pt-32 pt-8 md:px-0 px-4 md:pb-24 pb-24"
+          className="relative flex flex-col gap-16 items-start md:pt-32 pt-16 md:px-0 px-4 md:pb-24 pb-24"
           variants={pageContainerVariants}
           initial="hidden"
           animate="visible"
@@ -57,11 +57,22 @@ export default function Home() {
           
           <motion.div
             variants={sectionVariants}
-            className="flex w-full relative mb-0 gap-8 items-center"
+            // On desktop: flex-row with Journal left, text right. On mobile: flex-col, text first, Journal below.
+            className="w-full relative mb-0 md:gap-8 gap-12 items-center flex flex-col md:flex-row"
           >
-
-            {/* Expandable Journal positioned to the left */}
-            <div className=" z-10 group w-[30%] flex items-center justify-center">
+            {/* Header text: occupies full width on mobile, right side on desktop */}
+            <div className="flex flex-col gap-4 text-stone-600 w-full md:w-[70%]">
+              <div className="text-page-header text-gradient-primary">
+                Shreyas Patil
+              </div>
+              <p className="text-important text-pretty text-stone-600!">
+                I&apos;m a Product Designer based in the Bay Area, I think about interaction, systems, and the details people feel before they notice.
+              </p>
+              {/* You can uncomment the media grid if needed here */}
+            </div>
+            
+            {/* Expandable Journal: below text on mobile, left on desktop */}
+            <div className="z-10 group w-full md:w-[30%] flex items-center justify-center ">
               <ExpandableJournal 
                 collapsedWidth={180}
                 collapsedHeight={240}
@@ -69,52 +80,6 @@ export default function Home() {
                 expandedHeight={560}
               />
             </div>
-                   
-            <div className='flex flex-col gap-4 text-stone-600 w-[70%] '>
-              
-                  <div className=" text-page-header text-gradient-primary">
-                    Shreyas Patil
-                  </div>
-
-                  <p className="text-important text-pretty text-stone-600!">I&apos;m a Product Designer based in the Bay Area, I think about interaction, systems, and the details people feel before they notice.</p>
-
-                  {/* <motion.div 
-                    className='w-full grid grid-cols-3 gap-4'
-                    variants={imagesContainerVariants}
-                    initial="hidden"
-                    animate="visible"
-                  >
-                    <motion.div variants={imageVariants}>
-                      <MediaCard
-                        mediaType="image"
-                        src="/images/About/About-1.jpeg"
-                        aspectClass="aspect-square"
-                      />  
-                    </motion.div>
-
-                    <motion.div variants={imageVariants}>
-                      <MediaCard
-                        mediaType="image"
-                        src="/images/About/About-2.jpeg"
-                        aspectClass="aspect-square"
-                        rightIcon={<Image src="/logos/Swift Icon.svg" alt="Swift Icon" width={20} height={20} className="object-contain" />}
-                      />
-                    </motion.div>
-
-                    <motion.div variants={imageVariants} className="">
-                      <MediaCard
-                        mediaType="image"
-                        src="/images/About/About-3.jpeg"
-                        aspectClass="aspect-square"
-                        rightIcon={<Image src="/logos/Create with Play Logo.png" alt="Create with Play Logo" width={20} height={20} className="object-contain " />}
-                      />
-                    </motion.div>
-
-                  </motion.div> */}
-                  
-                
-            </div> 
-            
           </motion.div>
 
           {/* Projects section */}
