@@ -26,12 +26,12 @@ export default function ProjectHeader({
       className={`flex w-full items-center gap-4 ${className}`}
     >
       <Button
-        variant="back"
-        size="iconSm"
-        showHighlight={true}
+        variant="iconPrimary"
+        size="icon"
         onClick={() => router.push('/')}
-        aria-label="Back"
+        className="relative size-8 transition-all duration-200 group-hover:hover group-hover:text-white group-hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.400))] group-hover:border-blue-700 group-hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset]"
       >
+        <div className="absolute inset-1.5 top-0.5 h-1/2 rounded-t-[12px] rounded-b-[4px] bg-gradient-to-b from-white/70 to-white/20 z-10" />
         <ArrowLeft size={16} weight="bold" />
       </Button>
 

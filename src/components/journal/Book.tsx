@@ -183,7 +183,7 @@ const Book = forwardRef<BookHandle, BookProps>(function Book({
                     },
             }}
             whileHover={isExpanded && !isResetting ? {
-              rotateY: isFlipped ? -170 : -10, // Peek lift in flip direction
+              rotateY: isFlipped ? -160 : -20, // Peek lift in flip direction
               transition: { duration: 0.3, ease: "easeOut" },
             } : {}}
             onClick={() => {

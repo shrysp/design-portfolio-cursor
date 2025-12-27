@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { LinkedinLogo, XLogo, ReadCvLogo, ArrowUp, ArrowLeft, ArrowRight } from '@phosphor-icons/react';
+import { LinkedinLogo, XLogo, ReadCvLogo, ArrowUp } from '@phosphor-icons/react';
 import EmailCopyButton from './EmailCopyButton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
@@ -11,7 +11,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Button } from './ui/button';
 
 // Project navigation order - defines the sequence of projects
 const projectOrder = [
@@ -19,19 +18,8 @@ const projectOrder = [
   { slug: 'itinerai', name: 'ItinerAI' },
   { slug: 'dashworks', name: 'Dashworks' },
   { slug: 'weatherwise', name: 'WeatherWise' },
-  { slug: 'shoedog', name: 'ShoeDog' },
-  { slug: 'fractions', name: 'Fractions' },
-];
-
-function getProjectNavigation(currentSlug: string) {
-  const currentIndex = projectOrder.findIndex(p => p.slug === currentSlug);
-  if (currentIndex === -1) return null;
   
-  return {
-    previousProject: currentIndex > 0 ? projectOrder[currentIndex - 1] : undefined,
-    nextProject: currentIndex < projectOrder.length - 1 ? projectOrder[currentIndex + 1] : undefined,
-  };
-}
+];
 
 export default function StickyFooter() {
   const router = useRouter();
@@ -39,10 +27,9 @@ export default function StickyFooter() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isNearBottom, setIsNearBottom] = useState(false);
 
-  // Determine if we're on a project page and get navigation
+  // Determine if we're on a project page
   const isProjectPage = pathname?.startsWith('/projects/') && pathname !== '/projects';
   const currentSlug = isProjectPage ? pathname.split('/')[2] : null;
-  const projectNavigation = currentSlug ? getProjectNavigation(currentSlug) : null;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,96 +54,58 @@ export default function StickyFooter() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const showProjectNav = isProjectPage && projectNavigation && isNearBottom;
+  const showProjectNav = isProjectPage && isNearBottom;
 
   return (
     <TooltipProvider delayDuration={300}>
       <div className="sticky bottom-0 w-full flex flex-col bg-gradient-to-t from-background/100 from-20% to-background/0 pt-[calc(var(--padding-pageMargin)*1.5)] pb-4 z-50">
         <div className="w-full container mx-auto max-w-[800px] px-4 md:px-0 flex flex-col gap-8">
           
-          {/* Project Navigation Row - Only shows when at bottom on project pages */}
+          {/* Project Navigation Pills - Only shows when at bottom on project pages */}
           <AnimatePresence>
             {showProjectNav && (
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
+                exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className="flex items-center justify-between w-full"
+                className="flex items-center justify-center gap-2 flex-wrap w-full"
               >
-                {/* Previous Project */}
-                {projectNavigation?.previousProject ? (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                    className="flex items-center gap-3 cursor-pointer group/nav"
-                    onClick={() => router.push(`/projects/${projectNavigation.previousProject!.slug}`)}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Previous Project: ${projectNavigation.previousProject.name}`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        router.push(`/projects/${projectNavigation.previousProject!.slug}`);
-                      }
-                    }}
-                  >
-                    <Button
-                  variant="iconPrimary"
-                  size="iconXs"
-                  showHighlight={true}
-                  className="group-hover/nav:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.400))] group-hover/nav:text-white group-hover/nav:border-blue-700 group-active/nav:scale-95 transition-all duration-300 pointer-events-none"
-                  aria-hidden="true"
-                  tabIndex={-1}
-                >
-                  <ArrowLeft size={14} weight="bold" />
-                </Button>
-                    <span className="text-header font-medium text-stone-600 group-hover/nav:text-stone-800 transition-colors duration-300 hidden md:block">
-                      {projectNavigation.previousProject.name}
-                    </span>
-                  </motion.div>
-                ) : (
-                  <div className="w-8" />
-                )}
-
-                {/* Next Project */}
-                {projectNavigation?.nextProject ? (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                    className="flex items-center gap-3 cursor-pointer group/nav"
-                    onClick={() => router.push(`/projects/${projectNavigation.nextProject!.slug}`)}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Next Project: ${projectNavigation.nextProject.name}`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        router.push(`/projects/${projectNavigation.nextProject!.slug}`);
-                      }
-                    }}
-                  >
-                    <span className="text-header font-medium text-stone-600 group-hover/nav:text-stone-800 transition-colors duration-300 hidden md:block">
-                      {projectNavigation.nextProject.name}
-                    </span>
-                    <Button
-                  variant="iconPrimary"
-                  size="iconXs"
-                  showHighlight={true}
-                  className="group-hover/nav:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.400))] group-hover/nav:text-white group-hover/nav:border-blue-700 group-active/nav:scale-95 transition-all duration-300 pointer-events-none"
-                  aria-hidden="true"
-                  tabIndex={-1}
-                >
-                  <ArrowRight size={14} weight="bold" />
-                </Button>
-                  </motion.div>
-                ) : (
-                  <div className="w-8" />
-                )}
+                {projectOrder.map((project, index) => {
+                  const isCurrentProject = project.slug === currentSlug;
+                  return (
+                    <motion.button
+                      key={project.slug}
+                      initial={{ opacity: 0, y: 0 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 0 }}
+                      transition={{ 
+                        duration: 0.3, 
+                        ease: "easeOut",
+                        delay: index * 0.05
+                      }}
+                      onClick={() => {
+                        if (!isCurrentProject) {
+                          router.push(`/projects/${project.slug}`);
+                        }
+                      }}
+                      disabled={isCurrentProject}
+                      className={`
+                        group relative px-3 py-1.5 rounded-full text-sm font-medium
+                        transition-all duration-200
+                        ${isCurrentProject 
+                          ? 'bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.400))] text-white border border-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] cursor-default'
+                          : 'bg-[radial-gradient(at_50%_75%,theme(colors.stone.100),theme(colors.stone.200),theme(colors.stone.300))] text-stone-600 border border-stone-400 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.400))] hover:text-white hover:border-blue-700 hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] cursor-pointer active:scale-95'
+                        }
+                      `}
+                      aria-label={isCurrentProject ? `Current project: ${project.name}` : `Go to ${project.name}`}
+                    >
+                      {/* Highlight overlay */}
+                      <div className="absolute inset-[2px] top-[2px] h-1/2 rounded-t-full rounded-b-[4px] bg-gradient-to-b from-white/70 to-white/20 pointer-events-none" />
+                      <span className="relative z-10">{project.name}</span>
+                    </motion.button>
+                  );
+                })}
               </motion.div>
             )}
           </AnimatePresence>

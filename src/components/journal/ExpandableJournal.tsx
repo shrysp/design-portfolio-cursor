@@ -6,6 +6,70 @@ import { useOnClickOutside } from "usehooks-ts";
 import { motion, AnimatePresence } from "framer-motion";
 import Book, { BookHandle } from "./Book";
 
+// Sticker slap animation - mimics real physics of slapping a sticker on a surface
+function SlapSticker() {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // Wait for page to fully load before starting animation
+    const handleLoad = () => {
+      // Add small delay after load for smoother experience
+      setTimeout(() => setIsReady(true), 100);
+    };
+
+    if (document.readyState === 'complete') {
+      handleLoad();
+    } else {
+      window.addEventListener('load', handleLoad);
+      return () => window.removeEventListener('load', handleLoad);
+    }
+  }, []);
+
+  return (
+    <motion.div
+      className="z-[1] absolute bottom-1/2 right-1/2 translate-x-1/2 translate-y-1/2"
+      initial={{ 
+        scale: 1.8, 
+        rotate: -20,
+        opacity: 0,
+        y: -80,
+      }}
+      animate={isReady ? { 
+        scale: 1,
+        rotate: 3,
+        opacity: 1,
+        y: 0,
+      } : {}}
+      transition={{
+        type: "easeOut",
+        duration: 0.1,
+        delay: 0.3,
+      }}
+    >
+      {/* Impact shadow - grows quickly then settles */}
+      <motion.div
+        className="absolute inset-0 bg-black/25 rounded-full blur-sm scale-75 translate-y-3"
+        initial={{ opacity: 0, scale: 0.3 }}
+        animate={isReady ? { 
+          opacity: [0, 0.5, 0.35],
+          scale: [0.3, 0.9, 0.75],
+        } : {}}
+        transition={{
+          duration: 0.35,
+          delay: 0.15,
+          times: [0, 0.6, 1],
+          ease: "easeOut",
+        }}
+      />
+      <img 
+        src="/images/About/Name-Sticker.webp" 
+        alt="Hello, my name is Shreyas" 
+        className="size-60 object-contain relative z-10"
+      />
+    </motion.div>
+  );
+}
+
 interface ExpandableJournalProps {
   // Size when collapsed (in header)
   collapsedWidth?: number;
@@ -16,8 +80,8 @@ interface ExpandableJournalProps {
 }
 
 export function ExpandableJournal({
-  collapsedWidth = 150,
-  collapsedHeight = 200,
+  collapsedWidth = 180,
+  collapsedHeight = 240,
   expandedWidth = 420,
   expandedHeight = 560,
 }: ExpandableJournalProps) {
@@ -86,11 +150,11 @@ export function ExpandableJournal({
         <div className="absolute inset-y-0 z-10 w-0.5 bg-black/80 blur-[2px]"></div>
         <div className="absolute inset-y-0 z-10 left-1 w-0.5 bg-linear-to-l from-white/50 to-black blur-xs"></div>
         <div className="absolute right-0 bottom-0 z-10 size-10 bg-linear-to-br from-transparent via-transparent via-50% to-white/20 blur-xs"></div>
-        <div className="relative z-20 h-full flex flex-col p-4 font-black text-4xl items-center justify-center text-white/80 ">
+        <div className="relative z-20 h-full flex flex-col p-4 font-black text-4xl items-center justify-center text-white/80 rotate-3">
           <img 
             src="/images/About/Name-Sticker.webp" 
             alt="Hello, my name is Shreyas" 
-            className="z-[1] size-60 absolute bottom-1/2 right-1/2 translate-x-1/2 translate-y-1/2 object-contain"
+            className="z-[1] size-56 absolute bottom-1/2 right-1/2 translate-x-1/2 translate-y-1/2 object-contain"
           />
           <div className="z-0 absolute inset-0"></div>
         </div>
@@ -699,11 +763,7 @@ export function ExpandableJournal({
               <div className="absolute inset-y-0 z-10 left-1 w-0.5 bg-linear-to-l from-white/50 to-black blur-xs"></div>
               <div className="absolute right-0 bottom-0 z-10 size-10 bg-linear-to-br from-transparent via-transparent via-50% to-white/20 blur-xs"></div>
               <div className="relative z-20 h-full flex flex-col p-4 font-black text-4xl items-center justify-center text-white/80 ">
-                <img 
-                  src="/images/About/Name-Sticker.webp" 
-                  alt="Hello, my name is Shreyas" 
-                  className="z-[1] size-60 absolute bottom-1/2 right-1/2 translate-x-1/2 translate-y-1/2 object-contain"
-                />
+                <SlapSticker />
                 <div className="z-0 absolute inset-0"></div>
               </div>
             </div>
