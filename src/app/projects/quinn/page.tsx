@@ -17,7 +17,7 @@ export default function QuinnProject() {
   const project = projectsData[0]; // Quinn will be the first project in the array
 
   return (
-    <div className="min-h-screen flex justify-center bg-stone-100">
+    <div className="min-h-screen flex justify-center bg-stone-50">
       <main className="w-full max-w-[800px] flex flex-col gap-12">
         <div className="flex flex-col gap-16 items-start md:pt-24 pt-8 md:px-0 p-4 md:pb-24 pb-24">
           {/* Back button and header */}

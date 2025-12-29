@@ -15,7 +15,7 @@ export default function ItinerAIProject() {
   const project = projectsData[1]; // ItinerAI is now the second project in the array
 
   return (
-    <div className="min-h-screen flex justify-center bg-stone-100">
+    <div className="min-h-screen flex justify-center bg-stone-50">
       <main className="w-full max-w-[800px] flex flex-col gap-12">
         <div className="flex flex-col gap-12 items-start  md:pt-24 pt-8 md:px-0 p-4 md:pb-24 pb-24">
           {/* Back button and header */}

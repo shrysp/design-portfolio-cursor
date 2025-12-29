@@ -6,6 +6,7 @@ import Image from 'next/image';
 import ProjectThumbnailCard from '@/components/ProjectThumbnailCard';
 import { CraftContent } from '@/components/CraftContent';
 import { ExpandableJournal } from '@/components/journal/ExpandableJournal';
+import { IconArrowDown } from 'nucleo-micro-bold-essential';
 
 
 
@@ -58,12 +59,12 @@ export default function Home() {
           <motion.div
             variants={sectionVariants}
             // On desktop: flex-row with Journal left, text right. On mobile: flex-col, text first, Journal below.
-            className="w-full relative mb-0 md:gap-8 gap-12 items-center flex flex-col md:flex-row"
+            className="w-full relative mb-0 md:gap-8 gap-12 items-center flex flex-col "
           >
             {/* Header text: occupies full width on mobile, right side on desktop */}
-            <div className="flex flex-col gap-4 text-stone-600 w-full md:w-[70%]">
+            <div className="flex flex-col gap-4 text-stone-600 w-full">
               <div className="text-page-header text-gradient-primary">
-                Shreyas Patil
+                Hey, I'm Shreyas
               </div>
               <p className="text-important text-pretty text-stone-600!">
                 I&apos;m a Product Designer based in the Bay Area, I think about interaction, systems, and the details people feel before they notice.
@@ -72,7 +73,12 @@ export default function Home() {
             </div>
             
             {/* Expandable Journal: below text on mobile, left on desktop */}
-            <div className="z-10 group w-full md:w-[30%] flex items-center justify-center ">
+            <div className="relative z-10 group w-full h-80 flex items-center justify-center ">
+            <img 
+            src="/images/About/Golden-Gate-Bridge-sticker.webp" 
+            alt="Hello, my name is Shreyas" 
+            className="z-[1] size-32 absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 object-contain"
+          />
               <ExpandableJournal 
                 collapsedWidth={180}
                 collapsedHeight={240}
@@ -87,7 +93,7 @@ export default function Home() {
             className="flex flex-col gap-4 w-full mt-16"
             variants={sectionVariants}
           >
-            <div className="text-subheader text-pretty">Projects</div>
+            <div className="text-subheader text-pretty flex items-center gap-1 text-stone-400!"><span>Selected Work</span> <IconArrowDown size={14} /></div>
             <div className="w-full flex flex-col gap-20 items-start">
                   
               <ProjectThumbnailCard name="Quinn" link="/projects/quinn">
@@ -126,7 +132,7 @@ export default function Home() {
             className="flex flex-col gap-6 w-full mt-16"
             variants={sectionVariants}
           >
-            <div className="text-subheader text-pretty">Craft</div>
+            <div className="text-subheader text-pretty flex items-center gap-1 text-stone-400!"><span>Craft</span> <IconArrowDown size={14} /></div>
             <CraftContent hideHeader hideBackground />
           </motion.div>
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clipboard, At } from '@phosphor-icons/react';
+import { IconEnvelopeFilled, IconEnvelopeOpenHeart } from 'nucleo-micro-bold-essential';
 
 export default function EmailCopyButton() {
   const [copied, setCopied] = useState(false);
@@ -35,7 +35,7 @@ export default function EmailCopyButton() {
             exit={{ opacity: 0, scale: 0.5 }}
             transition={{ duration: 0.1 }}
           >
-            <Clipboard size={16} weight="fill" />
+            <IconEnvelopeOpenHeart size={18}/>
           </motion.span>
         ) : (
           <motion.span
@@ -43,9 +43,10 @@ export default function EmailCopyButton() {
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
           >
-            <At size={18} weight="fill" />
+            
+            <IconEnvelopeFilled size={18} />
           </motion.span>
         )}
       </AnimatePresence>

@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { LinkedinLogo, XLogo, ReadCvLogo, ArrowUp } from '@phosphor-icons/react';
+import { XLogo } from '@phosphor-icons/react';
+import { IconFileDownload, IconArrowUp } from 'nucleo-micro-bold-essential';
+import { IconLinkedin  } from 'nucleo-social-media';
 import EmailCopyButton from './EmailCopyButton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
@@ -58,7 +60,7 @@ export default function StickyFooter() {
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="sticky bottom-0 w-full flex flex-col bg-gradient-to-t from-background/100 from-20% to-background/0 pt-[calc(var(--padding-pageMargin)*1.5)] pb-4 z-50">
+      <div className="sticky bottom-0 w-full flex flex-col bg-gradient-to-t from-background from-20%  to-transparent pt-[calc(var(--padding-pageMargin)*1.5)] pb-4 z-50">
         <div className="w-full container mx-auto max-w-[800px] px-4 md:px-0 flex flex-col gap-8">
           
           {/* Project Navigation Pills - Only shows when at bottom on project pages */}
@@ -120,10 +122,10 @@ export default function StickyFooter() {
                     href="https://x.com/ShreyasPatil_" 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-slate-400 via-slate-600 to-slate-800 hover:from-slate-500 hover:via-slate-700 hover:to-slate-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-700 cursor-pointer transition-all duration-300'
+                    className='group flex items-center justify-center relative rounded-full size-8 text-stone-500 border border-stone-400 bg-[radial-gradient(at_50%_75%,theme(colors.stone.100),theme(colors.stone.200),theme(colors.stone.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:bg-[radial-gradient(at_50%_75%,theme(colors.stone.200),theme(colors.stone.300),theme(colors.stone.400))] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:border-stone-400 active:scale-95 transition-all duration-300 cursor-pointer'
                   >                  
-                    <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-                    <XLogo size={18} weight="fill" />
+                    <div className={`absolute items-center justify-center inset-x-[5px] top-0.5 h-1/2 rounded-t-[12px] rounded-b-[4px] bg-gradient-to-b from-white/70 to-white/20 z-10`}></div>
+                    <XLogo size={16} weight="fill" />
                   </a>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="bg-stone-800 text-white border-stone-700">
@@ -133,8 +135,8 @@ export default function StickyFooter() {
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-red-400 via-red-600 to-red-800 hover:from-red-500 hover:via-red-700 hover:to-red-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-red-700 cursor-pointer transition-all duration-300'>                  
-                    <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10 pointer-events-none`}></div>
+                  <button className='group relative rounded-full size-8 text-stone-500 border border-stone-400 bg-[radial-gradient(at_50%_75%,theme(colors.stone.100),theme(colors.stone.200),theme(colors.stone.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:bg-[radial-gradient(at_50%_75%,theme(colors.stone.200),theme(colors.stone.300),theme(colors.stone.400))] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:border-stone-400 active:scale-95 transition-all duration-300 cursor-pointer'>                  
+                    <div className={`absolute items-center justify-center inset-x-[5px] top-0.5 h-1/2 rounded-t-[12px] rounded-b-[4px] bg-gradient-to-b from-white/70 to-white/20 z-10 pointer-events-none`}></div>
                     <EmailCopyButton />
                   </button>
                 </TooltipTrigger>
@@ -149,10 +151,10 @@ export default function StickyFooter() {
                     href="https://www.linkedin.com/in/shreyastpatil/" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 hover:from-blue-400 hover:via-blue-600 hover:to-blue-800 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-blue-700 cursor-pointer transition-all duration-300'
+                    className='group flex items-center justify-center relative rounded-full size-8 text-stone-500 border border-stone-400 bg-[radial-gradient(at_50%_75%,theme(colors.stone.100),theme(colors.stone.200),theme(colors.stone.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:bg-[radial-gradient(at_50%_75%,theme(colors.stone.200),theme(colors.stone.300),theme(colors.stone.400))] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:border-stone-400 active:scale-95 transition-all duration-300 cursor-pointer'
                   >                  
-                    <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-                    <LinkedinLogo size={18} weight="fill" />
+                    <div className={`absolute items-center justify-center inset-x-[5px] top-0.5 h-1/2 rounded-t-[12px] rounded-b-[4px] bg-gradient-to-b from-white/70 to-white/20 z-10`}></div>
+                    <IconLinkedin size={16} />
                   </a>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="bg-stone-800 text-white border-stone-700">
@@ -172,10 +174,11 @@ export default function StickyFooter() {
                       target="_blank" 
                       rel="noopener noreferrer" 
                       download
-                      className='relative flex items-center justify-center size-8 text-stone-500 rounded-full bg-radial-[at_50%_75%] from-stone-100 via-stone-200 to-stone-300 hover:from-stone-200 hover:via-stone-300 hover:to-stone-400 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-stone-400 cursor-pointer transition-all duration-300'
+                      className='group flex items-center justify-center relative pl-2 pr-2.5 gap-1 h-8 rounded-full text-stone-500 border border-stone-400 bg-[radial-gradient(at_50%_75%,theme(colors.stone.100),theme(colors.stone.200),theme(colors.stone.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:bg-[radial-gradient(at_50%_75%,theme(colors.stone.200),theme(colors.stone.300),theme(colors.stone.400))] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:border-stone-400 active:scale-95 transition-all duration-300 cursor-pointer'
                     >                  
                       <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white/70  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-                      <ReadCvLogo size={18} weight="fill" />
+                      <IconFileDownload size={16} />
+                      <p className=" font-medium">Resume</p>
                     </a>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="bg-stone-800 text-white border-stone-700">
@@ -195,11 +198,11 @@ export default function StickyFooter() {
                     aria-label="Scroll to top"
                     onClick={scrollToTop}
                     title="Scroll to top"
-                    className='relative flex items-center justify-center gap-1 px-2.5 py-1 text-stone-500 rounded-full bg-radial-[at_50%_75%] from-stone-100 via-stone-200 to-stone-300 hover:from-stone-200 hover:via-stone-300 hover:to-stone-400 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-stone-400 cursor-pointer transition-all duration-300'
+                    className='group flex items-center justify-center relative pl-2 pr-2.5 gap-1 h-8 rounded-full text-stone-500 border border-stone-400 bg-[radial-gradient(at_50%_75%,theme(colors.stone.100),theme(colors.stone.200),theme(colors.stone.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:bg-[radial-gradient(at_50%_75%,theme(colors.stone.200),theme(colors.stone.300),theme(colors.stone.400))] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:border-stone-400 active:scale-95 transition-all duration-300 cursor-pointer'
                   >                  
                     <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white/70  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-                    <ArrowUp size={14} weight="bold" />
-                    <span className="text-sm font-medium">Top</span>
+                    <IconArrowUp size={16} />
+                    <span className="text-base font-medium">Top</span>
                   </motion.button>
                 )}
               
