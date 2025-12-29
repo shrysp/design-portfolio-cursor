@@ -64,7 +64,7 @@ export default function Home() {
             {/* Header text: occupies full width on mobile, right side on desktop */}
             <div className="flex flex-col gap-4 text-stone-600 w-full">
               <div className="text-page-header text-gradient-primary">
-                Hey, I'm Shreyas
+                Hey, I&apos;m Shreyas
               </div>
               <p className="text-important text-pretty text-stone-600!">
                 I&apos;m a Product Designer based in the Bay Area, I think about interaction, systems, and the details people feel before they notice.
