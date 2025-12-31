@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { XLogo } from '@phosphor-icons/react';
-import { IconFileDownload, IconArrowUp } from 'nucleo-micro-bold-essential';
+import { IconFile, IconArrowUp } from 'nucleo-micro-bold-essential';
 import { IconLinkedin  } from 'nucleo-social-media';
 import EmailCopyButton from './EmailCopyButton';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -177,7 +177,7 @@ export default function StickyFooter() {
                       className='group flex items-center justify-center relative pl-2 pr-2.5 gap-1 h-8 rounded-full text-stone-500 border border-stone-400 bg-[radial-gradient(at_50%_75%,theme(colors.stone.100),theme(colors.stone.200),theme(colors.stone.300))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:bg-[radial-gradient(at_50%_75%,theme(colors.stone.200),theme(colors.stone.300),theme(colors.stone.400))] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:border-stone-400 active:scale-95 transition-all duration-300 cursor-pointer'
                     >                  
                       <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white/70  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-                      <IconFileDownload size={16} />
+                      <IconFile size={16} />
                       <p className=" font-medium">Resume</p>
                     </a>
                   </TooltipTrigger>

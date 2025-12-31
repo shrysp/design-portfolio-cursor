@@ -135,8 +135,8 @@ interface ExpandableJournalProps {
 }
 
 export function ExpandableJournal({
-  collapsedWidth = 180,
-  collapsedHeight = 240,
+  collapsedWidth = 210,
+  collapsedHeight = 280,
   expandedWidth: desktopExpandedWidth = 420,
   expandedHeight: desktopExpandedHeight = 560,
 }: ExpandableJournalProps) {
@@ -213,6 +213,11 @@ export function ExpandableJournal({
   const pages = [
     {
       front: <div className="relative isolate text-center h-full bg-linear-to-bl from-stone-700 to-stone-900 rounded-lg shadow-[inset_-2px_2px_2px_rgba(255,255,255,0.1)] overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-y-0 z-10 w-0.5 bg-black/80 blur-[2px]"></div>
         <div className="absolute inset-y-0 z-10 left-1 w-0.5 bg-linear-to-l from-white/50 to-black blur-xs"></div>
         <div className="absolute right-0 bottom-0 z-10 size-10 bg-linear-to-br from-transparent via-transparent via-50% to-white/20 blur-xs"></div>
@@ -222,10 +227,16 @@ export function ExpandableJournal({
             alt="Hello, my name is Shreyas" 
             className="z-[1] size-56 absolute bottom-1/2 right-1/2 translate-x-1/2 translate-y-1/2 object-contain"
           />
+          <div className="text-white absolute top-2/3 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xl font-handwriting">Product Designer</div>
           <div className="z-0 absolute inset-0"></div>
         </div>
       </div>,
       back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0">
           <img 
             src="/images/About/Gojo-meme-sticker.webp"
@@ -237,6 +248,11 @@ export function ExpandableJournal({
     },
     {
       front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden" >
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0">
           <img 
             src="/images/About/Gojo-meme-sticker.webp"
@@ -246,6 +262,11 @@ export function ExpandableJournal({
         </div>
       </div>,
       back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0 p-6 flex items-center justify-center w-full h-full">
           <div className="-space-y-20">
             <div className="">Standards were high on this team!</div>
@@ -260,6 +281,11 @@ export function ExpandableJournal({
     },
     {
       front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0 flex flex-col items-bottom justify-center ">
           <img 
             src="/images/About/Cricket Sticker.webp"
@@ -270,6 +296,11 @@ export function ExpandableJournal({
         </div>
       </div>,
       back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0 p-6">
           <div className=" text-left  text-stone-500 underline underline-offset-4 decoration-stone-300 absolute top-10 left-1/4 -rotate-18">Iron Man 1</div>
           <img
@@ -283,6 +314,11 @@ export function ExpandableJournal({
     },
     {
       front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0 p-6 -space-y-10">
           <div className=" text-left  text-stone-500 w-3/4">I studied engineering and machine learning to get closer to that future. </div>
           <img
@@ -294,6 +330,11 @@ export function ExpandableJournal({
         </div>
       </div>,
       back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0">
           <div className="absolute w-75 top-8 flex items-center">
             <img
@@ -313,6 +354,11 @@ export function ExpandableJournal({
     },
     {
       front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0">
           <div className="absolute right-5 top-5 flex items-center">
             <div className="text-stone-500 text-left leading-6 p-4">studying Human–Computer Interaction to focus on how technology feels, not just how it works.</div>
@@ -333,6 +379,11 @@ export function ExpandableJournal({
         </div>
       </div>,
       back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0">
           <div className="text-left text-2xl px-6 pt-6">I think best when my body is moving</div>
           <div className="relative -space-y-2 mb-4">
@@ -385,6 +436,11 @@ export function ExpandableJournal({
     },
     {
       front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0">
           <div className="text-stone-500 text-left absolute top-5/8 left-1/2 text-lg ">Different mediums. <br /> Same rhythm.</div>
           <img
@@ -405,6 +461,11 @@ export function ExpandableJournal({
         </div>
       </div>,
       back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0 -space-y-6 p-4 ">
           <div className="text-left mb-2 text-2xl p-2">None of them started as &quot;the best.&quot;</div>
           <div className="flex items-center">
@@ -457,6 +518,11 @@ export function ExpandableJournal({
     },
     {
       front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0 -space-y-6 p-4 ">
           <div className="text-left mb-2 text-2xl p-2">None of them stopped at the interface.</div>
           <div className="flex items-center gap-2">
@@ -492,6 +558,11 @@ export function ExpandableJournal({
         </div>
       </div>,
       back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0 p-4 space-y-4 ">
           <div className="text-left mb-2 text-2xl p-2">Readings that stayed with me</div>
           <div className="flex items-center">
@@ -538,6 +609,11 @@ export function ExpandableJournal({
     },
     {
       front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0 px-4 ">
           <div className="flex items-center gap-2">
             <div className="-ml-5 w-100 relative">
@@ -568,6 +644,11 @@ export function ExpandableJournal({
         </div>
       </div>,
       back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0 p-4 ">
           <div className="text-left mb-2 text-2xl p-2">Things I remember cities by </div>
           <div className=" absolute top-16 left-1/3 -translate-x-1/2">
@@ -607,6 +688,11 @@ export function ExpandableJournal({
     },
     {
       front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0">
           <div className="absolute w-120 right-2/12 top-3">
             <img
@@ -635,6 +721,11 @@ export function ExpandableJournal({
         </div>
       </div>,
       back: <div className="relative text-center h-full w-full bg-linear-to-bl p-12 from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl ">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="p-12 bg-white w-[744px] h-full">
           <div className="text-left mb-2 text-lg leading-9 font-handwriting">Making it feel right <br />
             I&apos;ve always cared about how things feel, not just how they work. The products I admire most don&apos;t demand attention — they earn it quietly, through rhythm, restraint, and care.
@@ -648,6 +739,11 @@ export function ExpandableJournal({
     },
     {
       front: <div className="relative text-center h-full w-full bg-linear-to-bl p-12  from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="relative h-full">
           <div className="p-12 bg-white w-[744px] h-full right-1.5 absolute">
             <div className="text-left mb-2 text-lg leading-9 font-handwriting">Making it feel right <br />
@@ -661,6 +757,11 @@ export function ExpandableJournal({
         </div>
       </div>,
       back: <div className="relative text-center h-full w-full bg-linear-to-bl p-12 from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="">
           <div className="text-left mb-2 font-handwriting">
             <div className="text-left text-2xl text-stone-600 leading-loose">Say hi,</div>
@@ -683,8 +784,18 @@ export function ExpandableJournal({
     },
     {
       front: <div className="relative text-center h-full w-full bg-linear-to-bl p-12  from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
       </div>,
       back: <div className="relative isolate text-center h-full bg-linear-to-bl from-stone-700 to-stone-900 rounded-lg shadow-[inset_-2px_2px_4px_rgba(255,255,255,0.1)] overflow-hidden">
+        <img 
+          src="/images/About/Paper-Texture.webp" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
+        />
         <div className="absolute inset-0 z-10 bg-linear-to-bl from-white/0 from-0% via-white/10 via-30%  to-stone-900/20 rounded-lg opacity-50" ></div>
         <div className="absolute inset-y-0 z-10 w-0.5 bg-black/80 blur-[2px]"></div>
         <div className="absolute inset-y-0 z-10 left-1 w-0.5 bg-linear-to-l from-white/50 to-black blur-xs"></div>
@@ -801,12 +912,7 @@ export function ExpandableJournal({
           damping: 30,
         }}
       >
-        {/* Click to open hint */}
-        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-          <span className="text-xs text-stone-500 whitespace-nowrap bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm">
-            Click to open
-          </span>
-        </div>
+        
         
         {/* Collapsed cover - uses expanded content scaled down by same factor as animation */}
         <div className="w-full h-full rounded-lg overflow-hidden shadow-lg">
@@ -821,11 +927,17 @@ export function ExpandableJournal({
           >
             {/* Exact same content as expanded front cover */}
             <div className="relative isolate text-center h-full bg-linear-to-bl from-stone-700 to-stone-900 rounded-lg shadow-[inset_-2px_2px_2px_rgba(255,255,255,0.1)] overflow-hidden">
+              <img 
+                src="/images/About/Paper-Texture.webp" 
+                alt="" 
+                className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none"
+              />
               <div className="absolute inset-y-0 z-10 w-0.5 bg-black/80 blur-[2px]"></div>
               <div className="absolute inset-y-0 z-10 left-1 w-0.5 bg-linear-to-l from-white/50 to-black blur-xs"></div>
               <div className="absolute right-0 bottom-0 z-10 size-10 bg-linear-to-br from-transparent via-transparent via-50% to-white/20 blur-xs"></div>
               <div className="relative z-20 h-full flex flex-col p-4 font-black text-4xl items-center justify-center text-white/80 ">
                 <SlapSticker />
+                <div className="text-white absolute top-2/3 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xl font-handwriting">Product Designer</div>
                 <div className="z-0 absolute inset-0"></div>
               </div>
             </div>
