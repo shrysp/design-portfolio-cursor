@@ -227,7 +227,7 @@ export function ExpandableJournal({
             alt="Hello, my name is Shreyas" 
             className="z-[1] size-56 absolute bottom-1/2 right-1/2 translate-x-1/2 translate-y-1/2 object-contain"
           />
-          <div className="text-white absolute top-2/3 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xl font-handwriting">Product Designer</div>
+          <div className="text-white absolute top-5/7 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-handwriting">Product Designer</div>
           <div className="z-0 absolute inset-0"></div>
         </div>
       </div>,
@@ -915,7 +915,7 @@ export function ExpandableJournal({
         
         
         {/* Collapsed cover - uses expanded content scaled down by same factor as animation */}
-        <div className="w-full h-full rounded-lg overflow-hidden shadow-lg">
+        <div className="w-full h-full rounded-l-sm rounded-r-lg overflow-hidden shadow-lg -ml-2">
           {/* Inner wrapper at expanded dimensions, scaled down to match animation end state */}
           <div 
             className="origin-top-left"
@@ -933,11 +933,11 @@ export function ExpandableJournal({
                 className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none"
               />
               <div className="absolute inset-y-0 z-10 w-0.5 bg-black/80 blur-[2px]"></div>
-              <div className="absolute inset-y-0 z-10 left-1 w-0.5 bg-linear-to-l from-white/50 to-black blur-xs"></div>
+              <div className="absolute inset-y-0 z-10 left-2 w-0.5 bg-linear-to-l from-white/50 to-black blur-xs "></div>
               <div className="absolute right-0 bottom-0 z-10 size-10 bg-linear-to-br from-transparent via-transparent via-50% to-white/20 blur-xs"></div>
               <div className="relative z-20 h-full flex flex-col p-4 font-black text-4xl items-center justify-center text-white/80 ">
                 <SlapSticker />
-                <div className="text-white absolute top-2/3 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xl font-handwriting">Product Designer</div>
+                <div className="text-white absolute top-5/7 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-handwriting rotate-3 -ml-2">Product Designer</div>
                 <div className="z-0 absolute inset-0"></div>
               </div>
             </div>

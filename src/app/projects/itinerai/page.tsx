@@ -7,6 +7,7 @@ import Image from 'next/image';
 import ProjectHeader from '@/components/ProjectHeader';
 // Import the project data
 import { projectsData } from '@/data/projectsData';
+import MediaCard from '@/components/MediaCard';
 
 export default function ItinerAIProject() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -87,6 +88,34 @@ export default function ItinerAIProject() {
               </div>
             </motion.div>
 
+            <MediaCard
+                  caption='Early relationship graph capabilities'
+                  className="my-8"
+                  mediaType="video"
+                  src='/videos/Walk-Through-Video.mp4'
+                  aspectClass="aspect-4/3"
+                  videoAttributes={{
+                    autoPlay: true,
+                    muted: true,
+                    loop: true,
+                    playsInline: true
+                  }}
+                />
+
+                <MediaCard
+                  caption='Early relationship graph capabilities'
+                  className="my-8"
+                  mediaType="video"
+                  src='/videos/ItinerAIbuild-1.mp4'
+                  aspectClass="aspect-3/4"
+                  videoAttributes={{
+                    autoPlay: true,
+                    muted: true,
+                    loop: true,
+                    playsInline: true
+                  }}
+                />
+
 
             {/* Quote */}
             <div className='relative col-span-2 w-full rounded-xl border border-slate-200 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.17),0px_4px_4px_-2px_rgba(0,0,0,0.15),0px_-1px_0px_0px_rgba(0,0,0,0.15)_inset,0px_1px_1px_0px_rgba(255,255,255,0.15)_inset] mt-8'>
@@ -105,7 +134,7 @@ export default function ItinerAIProject() {
                         
                         <div className='absolute inset-x-0 bottom-8 border-dashed border-b border-slate-200'></div>
                       </div>
-                  </div>
+            </div>
 
             
 
