@@ -78,7 +78,7 @@ export default function Home() {
                 <img 
                     src="/images/About/Mission Peak Sticker.webp" 
                     alt="Hello, my name is Shreyas" 
-                    className="z-[0] size-100 object-contain mask-r-from-0% mask-r-to-100% opacity-70"
+                    className="z-[0] size-100 object-contain "
                   />
                   <div className="absolute text-stone-500 text-sm font-handwriting text-left left-1/5  top-20">Mission Peak</div>
                 </div>
@@ -88,7 +88,7 @@ export default function Home() {
                   <img 
                     src="/images/About/Golden-Gate-Bridge-sticker.webp" 
                     alt="Hello, my name is Shreyas" 
-                    className=" size-100 object-contain mask-r-from-0% mask-r-to-100% opacity-50"
+                    className=" size-100 object-contain "
                   />
                 </div>
               <ExpandableJournal 
@@ -110,13 +110,13 @@ export default function Home() {
                 <img 
                     src="/images/About/RIT Ritchie Sticker.webp" 
                     alt="Hello, my name is Shreyas" 
-                    className=" size-140 object-contain mask-l-from-0% opacity-50"
+                    className=" size-140 object-contain opacity-80"
                   />
                 </div>
                 <img 
                   src="/images/About/Cricket Sticker.webp" 
                   alt="Hello, my name is Shreyas" 
-                  className="hidden md:flex -z-[2] h-120 absolute top-1/2 -right-15 translate-x-1/2 -translate-y-1/2 object-contain mask-l-from-0% opacity-70"
+                  className="hidden md:flex -z-[2] h-120 absolute top-1/2 -right-15 translate-x-1/2 -translate-y-1/2 object-contain "
                 />
                 
             </div>
@@ -132,7 +132,7 @@ export default function Home() {
                   
               <ProjectThumbnailCard name="Quinn" link="/projects/quinn">
                 <div className="text-body text-pretty">AI-native relationship intelligence product focused on how executives manage and maintain their professional networks. I led the 10–12 month product vision, shaping the system&apos;s foundations, long-term evolution, and growth direction.</div>
-                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/Quinn-Thumbnail-Background.webp')] bg-cover bg-center rounded-2xl border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">
+                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/HalftoneDots.webp')] bg-cover bg-center rounded-2xl border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">
                   <Image src="/images/projects/Quinn/Masterlist.webp" alt="Quinn" fill className="object-cover object-center" />
                 </div>
               </ProjectThumbnailCard>
@@ -153,7 +153,7 @@ export default function Home() {
 
               <ProjectThumbnailCard name="WeatherWise" link="/projects/weatherwise">
                 <div className="text-body text-pretty">Improving Navigational Safety with Weather-Adaptive Routing in Google Maps.</div>
-                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/WeatherWise-Thumbnail-Background.webp')] bg-cover bg-center rounded-2xl border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">
+                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/WeatherWiseThumbnail-Background.webp')] bg-cover bg-center rounded-2xl border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">
                   <Image src="/images/projects/Weatherwise/WeatherWise-Thumbnail.webp" alt="WeatherWise" fill className="object-cover object-center" />
                 </div>
               </ProjectThumbnailCard>                  
