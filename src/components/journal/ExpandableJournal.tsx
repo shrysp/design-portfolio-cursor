@@ -144,6 +144,7 @@ export function ExpandableJournal({
   const [isAnimatingOut, setIsAnimatingOut] = useState(false); // Track exit animation
   const [isMounted, setIsMounted] = useState(false);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
+  const [isKeyboardNavigating, setIsKeyboardNavigating] = useState(false); // Track keyboard navigation mode
   const bookRef = useRef<BookHandle>(null);
   const expandedContainerRef = useRef<HTMLDivElement>(null);
   const collapsedRef = useRef<HTMLDivElement>(null);
@@ -189,17 +190,42 @@ export function ExpandableJournal({
   // Handle click outside when expanded
   useOnClickOutside(expandedContainerRef as React.RefObject<HTMLElement>, handleClose);
 
-  // Handle Escape key
+  // Handle keyboard navigation (Escape, Arrow keys)
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape" && isExpanded) {
+      if (!isExpanded) return;
+      
+      if (event.key === "Escape") {
         handleClose();
+        return;
+      }
+      
+      // Arrow key navigation
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setIsKeyboardNavigating(true);
+        bookRef.current?.flipNext();
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setIsKeyboardNavigating(true);
+        bookRef.current?.flipPrev();
+      }
+    }
+    
+    // Exit keyboard navigation mode when mouse moves
+    function onMouseMove() {
+      if (isKeyboardNavigating) {
+        setIsKeyboardNavigating(false);
       }
     }
 
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isExpanded, handleClose]);
+    window.addEventListener("mousemove", onMouseMove);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("mousemove", onMouseMove);
+    };
+  }, [isExpanded, handleClose, isKeyboardNavigating]);
 
   const handleExpand = () => {
     if (!isExpanded && collapsedRef.current) {
@@ -219,7 +245,7 @@ export function ExpandableJournal({
           className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
         />
         <div className="absolute inset-y-0 z-10 w-0.5 bg-black/80 blur-[2px]"></div>
-        <div className="absolute inset-y-0 z-10 left-1 w-0.5 bg-linear-to-l from-white/50 to-black blur-xs"></div>
+        <div className="absolute inset-y-0 z-10 left-2 w-2 bg-linear-to-l from-white/50 to-black blur-xs"></div>
         <div className="absolute right-0 bottom-0 z-10 size-10 bg-linear-to-br from-transparent via-transparent via-50% to-white/20 blur-xs"></div>
         <div className="relative z-20 h-full flex flex-col p-4 font-black text-4xl items-center justify-center text-white/80 rotate-3">
           <img 
@@ -241,7 +267,7 @@ export function ExpandableJournal({
           <img 
             src="/images/About/Gojo-meme-sticker.webp"
             alt="Shreyas Patil"
-            className=" z-[1]  absolute top-1/2 -translate-y-1/2 -right-1/2 object-contain"
+            className=" z-[1]  absolute top-1/2 -translate-y-1/2 left-0 object-contain"
           />
         </div>
       </div>,
@@ -253,11 +279,17 @@ export function ExpandableJournal({
           alt="" 
           className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
         />
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 p-6">
+        <div className=" text-left  text-stone-500 w-3/4">I grew up in Pune.
+<br />I live and work in the Bay Area now.<br />
+<br />I studied engineering.<br />Somewhere along the way, I started paying more attention to how things felt.<br />
+<br />Most of what I make lives
+between people and systems.
+</div>
           <img 
-            src="/images/About/Gojo-meme-sticker.webp"
+            src="/images/About/golden-gate-bridge-Portrait.webp"
             alt="Shreyas Patil"
-            className=" z-[1]  absolute top-1/2 -translate-y-1/2 -left-1/2 object-contain"
+            className=" z-[1]  absolute top-3/5 -translate-y-1/2 -right-8 object-contain"
           />
         </div>
       </div>,
@@ -828,6 +860,29 @@ export function ExpandableJournal({
             onClick={handleClose}
           />
 
+          {/* Keyboard navigation indicators */}
+          <motion.div
+            key="keyboard-hints"
+            className="fixed z-[9998] pointer-events-none flex items-center gap-3 -translate-x-1/2 left-1/2 top-10"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
+          >
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/10 shadow-lg">
+              <div className="flex items-center gap-1.5">
+                <kbd className="px-1.5 py-0.5 text-[10px] font-medium bg-white/15 rounded text-white/90 shadow-sm border border-white/10">←</kbd>
+                <kbd className="px-1.5 py-0.5 text-[10px] font-medium bg-white/15 rounded text-white/90 shadow-sm border border-white/10">→</kbd>
+                <span className="text-[11px] text-white/60 ml-1">flip</span>
+              </div>
+              <div className="w-px h-3 bg-white/20" />
+              <div className="flex items-center gap-1.5">
+                <kbd className="px-1.5 py-0.5 text-[10px] font-medium bg-white/15 rounded text-white/90 shadow-sm border border-white/10">esc</kbd>
+                <span className="text-[11px] text-white/60 ml-1">close</span>
+              </div>
+            </div>
+          </motion.div>
+
           {/* Expanded state - animates from collapsed position to center, scales on mobile */}
           <motion.div
             key="expanded-journal"
@@ -871,6 +926,7 @@ export function ExpandableJournal({
               pageHeight={expandedHeight}
               pages={pages}
               isExpanded={isExpanded}
+              disableHover={isKeyboardNavigating}
             />
           </motion.div>
         </>
@@ -886,7 +942,7 @@ export function ExpandableJournal({
       {/* Collapsed state - in header position */}
       <motion.div
         ref={collapsedRef}
-        className={`cursor-pointer relative group ${shouldHideCollapsed ? 'invisible' : ''}`}
+        className={`cursor-pointer relative group perspective-1000 ${shouldHideCollapsed ? 'invisible' : ''}`}
         role="button"
         aria-label="Open journal"
         tabIndex={shouldHideCollapsed ? -1 : 0}
@@ -915,7 +971,7 @@ export function ExpandableJournal({
         
         
         {/* Collapsed cover - uses expanded content scaled down by same factor as animation */}
-        <div className="w-full h-full rounded-l-sm rounded-r-lg overflow-hidden shadow-lg -ml-2">
+        <div className="w-full h-full rounded-l-sm rounded-r-lg overflow-hidden shadow-md -ml-2 ">
           {/* Inner wrapper at expanded dimensions, scaled down to match animation end state */}
           <div 
             className="origin-top-left"
@@ -926,14 +982,14 @@ export function ExpandableJournal({
             }}
           >
             {/* Exact same content as expanded front cover */}
-            <div className="relative isolate text-center h-full bg-linear-to-bl from-stone-700 to-stone-900 rounded-lg shadow-[inset_-2px_2px_2px_rgba(255,255,255,0.1)] overflow-hidden">
+            <div className="relative isolate text-center h-full bg-linear-to-bl from-stone-700 to-stone-900 rounded-lg shadow-[inset_-2px_2px_2px_rgba(255,255,255,0.1)] overflow-hidden ">
               <img 
                 src="/images/About/Paper-Texture.webp" 
                 alt="" 
                 className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none"
               />
               <div className="absolute inset-y-0 z-10 w-0.5 bg-black/80 blur-[2px]"></div>
-              <div className="absolute inset-y-0 z-10 left-2 w-0.5 bg-linear-to-l from-white/50 to-black blur-xs "></div>
+              <div className="absolute inset-y-0 z-10 left-2 w-2 bg-linear-to-l from-white/50 to-black blur-xs "></div>
               <div className="absolute right-0 bottom-0 z-10 size-10 bg-linear-to-br from-transparent via-transparent via-50% to-white/20 blur-xs"></div>
               <div className="relative z-20 h-full flex flex-col p-4 font-black text-4xl items-center justify-center text-white/80 ">
                 <SlapSticker />

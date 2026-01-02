@@ -89,7 +89,7 @@ export default function ItinerAIProject() {
             </motion.div>
 
             <MediaCard
-                  caption='Early relationship graph capabilities'
+                  caption='Early Prototype Created in Play to convey the concept of the product'
                   className="my-8"
                   mediaType="video"
                   src='/videos/Walk-Through-Video.mp4'
@@ -103,11 +103,11 @@ export default function ItinerAIProject() {
                 />
 
                 <MediaCard
-                  caption='Early relationship graph capabilities'
+                  caption='Testing the concept to see if models can categorize video based on the context of the video'
                   className="my-8"
                   mediaType="video"
-                  src='/videos/ItinerAIbuild-1.mp4'
-                  aspectClass="aspect-3/4"
+                  src='/videos/ItinerAIbuild-1-Horizontal.mp4'
+                  aspectClass="aspect-4/3"
                   videoAttributes={{
                     autoPlay: true,
                     muted: true,

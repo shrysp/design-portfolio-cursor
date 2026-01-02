@@ -69,6 +69,54 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
             </motion.div>
 
             <motion.div 
+              className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
+              variants={gridVariants}
+            >
+              <video src="/videos/Toolbar.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              
+            </motion.div>
+
+            <motion.div 
+              className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
+              variants={gridVariants}
+            >
+              <video src="/videos/Bento-Portfolio.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              
+            </motion.div>
+
+            <motion.div 
+              className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
+              variants={gridVariants}
+            >
+              <video src="/videos/Navbar-themes.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              
+            </motion.div>
+
+            <motion.div 
+              className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
+              variants={gridVariants}
+            >
+              <video src="/videos/Mobile-Navbar.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              
+            </motion.div>
+
+            <motion.div 
+              className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
+              variants={gridVariants}
+            >
+              <video src="/videos/iPadxFigma.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              
+            </motion.div>
+
+            <motion.div 
+              className="isolate relative w-full h-full aspect-video bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
+              variants={gridVariants}
+            >
+              <video src="/videos/Image-Answer-Engine-Prototype.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              
+            </motion.div>
+
+            <motion.div 
               className="isolate relative w-full h-full aspect-[3/4] bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-4"
               variants={gridVariants}
             >

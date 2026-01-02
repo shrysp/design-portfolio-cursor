@@ -28,6 +28,9 @@ type BookPage = {
 export interface BookHandle {
   resetTocover: () => Promise<void>;
   getCurrentPage: () => number;
+  getTotalPages: () => number;
+  flipNext: () => void;
+  flipPrev: () => void;
 }
 
 interface BookProps {
@@ -36,6 +39,7 @@ interface BookProps {
   pageHeight?: number;
   isOpen?: boolean;
   isExpanded?: boolean; // Controls whether page flipping is allowed
+  disableHover?: boolean; // Disable hover effects (e.g., during keyboard navigation)
   onPageChange?: (page: number) => void;
 }
 
@@ -45,6 +49,7 @@ const Book = forwardRef<BookHandle, BookProps>(function Book({
   pageHeight = 480,
   isOpen = true,
   isExpanded = true,
+  disableHover = false,
   onPageChange,
 }, ref) {
   // currentPage = how many pages have been flipped (triggers rotation)
@@ -100,12 +105,6 @@ const Book = forwardRef<BookHandle, BookProps>(function Book({
     });
   }, [currentPage]);
 
-  // Expose methods via ref
-  useImperativeHandle(ref, () => ({
-    resetTocover,
-    getCurrentPage: () => currentPage,
-  }), [resetTocover, currentPage]);
-
   // Whenever the book closes, reset flipped state so it returns to cover
   useEffect(() => {
     if (!isOpen) {
@@ -135,6 +134,27 @@ const Book = forwardRef<BookHandle, BookProps>(function Book({
       return copy;
     });
   };
+
+  // Keyboard navigation: flip to next page
+  const flipNext = useCallback(() => {
+    if (!isExpanded || isResetting || currentPage >= total) return;
+    beginFlip(currentPage);
+  }, [isExpanded, isResetting, currentPage, total]);
+
+  // Keyboard navigation: flip to previous page
+  const flipPrev = useCallback(() => {
+    if (!isExpanded || isResetting || currentPage <= 0) return;
+    beginUnflip(currentPage - 1);
+  }, [isExpanded, isResetting, currentPage]);
+
+  // Expose methods via ref
+  useImperativeHandle(ref, () => ({
+    resetTocover,
+    getCurrentPage: () => currentPage,
+    getTotalPages: () => total,
+    flipNext,
+    flipPrev,
+  }), [resetTocover, currentPage, total, flipNext, flipPrev]);
 
   const setSwapped = (index: number, value: boolean) => {
     setZIndexSwapped((prev) => {
@@ -208,7 +228,7 @@ const Book = forwardRef<BookHandle, BookProps>(function Book({
               duration: 0.4,
               ease: [0.645, 0.045, 0.355, 1],
             }}
-            whileHover={canHover && isExpanded && !isResetting ? {
+            whileHover={canHover && isExpanded && !isResetting && !disableHover ? {
               rotateY: isFlipped ? -165 : -15, // Peek lift in flip direction
               transition: { duration: 0.3, ease: "easeOut" },
             } : undefined}
