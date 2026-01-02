@@ -28,6 +28,7 @@ export default function StickyFooter() {
   const pathname = usePathname();
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isNearBottom, setIsNearBottom] = useState(false);
+  const [isOverlayVisible, setIsOverlayVisible] = useState(false);
 
   // Determine if we're on a project page
   const isProjectPage = pathname?.startsWith('/projects/') && pathname !== '/projects';
@@ -52,6 +53,54 @@ export default function StickyFooter() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Detect overlay visibility
+  useEffect(() => {
+    const checkOverlay = () => {
+      // Check for overlay element - look for fixed positioned elements with high z-index
+      // The ExpandableJournal overlay has: fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998]
+      const allElements = document.querySelectorAll('*');
+      let hasOverlay = false;
+      
+      for (const el of allElements) {
+        const computedStyle = window.getComputedStyle(el);
+        const zIndex = parseInt(computedStyle.zIndex);
+        const position = computedStyle.position;
+        
+        // Check if element is fixed/absolute with high z-index (overlay range)
+        if ((position === 'fixed' || position === 'absolute') && zIndex >= 9990) {
+          // Additional check: overlay typically covers full viewport
+          const rect = el.getBoundingClientRect();
+          if (rect.width >= window.innerWidth * 0.9 && rect.height >= window.innerHeight * 0.9) {
+            hasOverlay = true;
+            break;
+          }
+        }
+      }
+      
+      setIsOverlayVisible(hasOverlay);
+    };
+
+    // Initial check
+    checkOverlay();
+
+    // Use MutationObserver to watch for overlay changes
+    const observer = new MutationObserver(checkOverlay);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class'],
+    });
+
+    // Also check periodically as a fallback
+    const interval = setInterval(checkOverlay, 150);
+
+    return () => {
+      observer.disconnect();
+      clearInterval(interval);
+    };
+  }, []);
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -60,7 +109,17 @@ export default function StickyFooter() {
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="sticky bottom-0 w-full flex flex-col bg-gradient-to-t from-background from-20%  to-transparent pt-[calc(var(--padding-pageMargin)*1.5)] pb-4 z-50">
+      <motion.div
+        className="sticky bottom-0 w-full flex flex-col bg-gradient-to-t from-background from-20%  to-transparent pt-[calc(var(--padding-pageMargin)*1.5)] pb-4 z-50"
+        initial={{ y: 0 }}
+        animate={{ 
+          y: isOverlayVisible ? '100%' : 0,
+        }}
+        transition={{ 
+          duration: 0.3, 
+          ease: [0.4, 0, 0.2, 1] // Custom easing for smooth slide
+        }}
+      >
         <div className="w-full container mx-auto max-w-[800px] px-4 md:px-0 flex flex-col gap-8">
           
           {/* Project Navigation Pills - Only shows when at bottom on project pages */}
@@ -210,7 +269,7 @@ export default function StickyFooter() {
           </div>
 
         </div>
-      </div>
+      </motion.div>
     </TooltipProvider>
   );
 }

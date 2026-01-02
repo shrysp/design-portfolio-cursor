@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useOnClickOutside } from "usehooks-ts";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,7 +22,9 @@ function useResponsiveJournalScale(
   useEffect(() => {
     function calculate() {
       const screenWidth = window.innerWidth;
-      const screenHeight = window.innerHeight;
+      // Use visualViewport for accurate mobile height (accounts for dynamic address bar)
+      // Falls back to innerHeight for desktop browsers
+      const screenHeight = window.visualViewport?.height ?? window.innerHeight;
       
       // The spread (2 pages) width at full scale
       const spreadWidth = desktopWidth * 2;
@@ -55,7 +57,12 @@ function useResponsiveJournalScale(
 
     calculate();
     window.addEventListener('resize', calculate);
-    return () => window.removeEventListener('resize', calculate);
+    // Listen to visualViewport resize for mobile address bar changes
+    window.visualViewport?.addEventListener('resize', calculate);
+    return () => {
+      window.removeEventListener('resize', calculate);
+      window.visualViewport?.removeEventListener('resize', calculate);
+    };
   }, [desktopWidth, desktopHeight, mobileMargin]);
 
   return state;
@@ -167,6 +174,44 @@ export function ExpandableJournal({
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Prevent body scrolling when journal is expanded
+  useEffect(() => {
+    if (isExpanded || isAnimatingOut) {
+      // Save the current scroll position
+      const scrollY = window.scrollY;
+      // Prevent scrolling
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      // Prevent touch scrolling on mobile
+      document.body.style.touchAction = 'none';
+      document.documentElement.style.overflow = 'hidden';
+      
+      // Prevent touchmove on the document for mobile
+      const preventTouchMove = (e: TouchEvent) => {
+        e.preventDefault();
+      };
+      document.addEventListener('touchmove', preventTouchMove, { passive: false });
+      
+      return () => {
+        // Restore scrolling
+        const bodyTop = document.body.style.top;
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        document.body.style.touchAction = '';
+        document.documentElement.style.overflow = '';
+        document.removeEventListener('touchmove', preventTouchMove);
+        // Restore scroll position
+        if (bodyTop) {
+          window.scrollTo(0, parseInt(bodyTop || '0') * -1);
+        }
+      };
+    }
+  }, [isExpanded, isAnimatingOut]);
 
   // Close handler - defined first so it can be used in effects
   const handleClose = useCallback(async () => {
@@ -799,17 +844,55 @@ between people and systems.
             <div className="text-left text-2xl text-stone-600 leading-loose">Say hi,</div>
             <div className="text-left text-lg text-stone-600 leading-loose">I&apos;m always happy to talk about design, and the small details that make things feel right.<br />I&apos;m at a point where I&apos;m excited to take on my next full-time product design role. If you think my approach could be useful, I&apos;d love to talk.</div>
           </div>
-          <div className="text-left text-stone-600 leading-loose mt-8">
-            <div>shreyaspatil.design@gmail.com</div>
+          <div className="text-left text-stone-600 leading-loose mt-8 space-y-2">
+            {(() => {
+              const [copied, setCopied] = React.useState(false);
+
+              return (
+                <button
+                  type="button"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                      await navigator.clipboard.writeText('shreyaspatil.design@gmail.com');
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 1500);
+                    } catch (err) {
+                      // fallback if Clipboard API not available
+                    }
+                  }}
+                  className="relative block pointer-events-auto transition-all duration-200 hover:underline hover:underline-offset-6 hover:text-stone-700 text-stone-600 decoration-stone-400 cursor-pointer bg-transparent border-0 px-0 text-left"
+                >
+                  shreyaspatil.design@gmail.com
+                  <span
+                    className={`ml-2 transition-opacity duration-200 text-green-600 text-base font-semibold ${
+                      copied ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    aria-live="polite"
+                  >
+                    Copied!
+                  </span>
+                </button>
+              );
+            })()}
             <a 
               href="https://x.com/ShreyasPatil_" 
               target="_blank" 
               rel="noopener noreferrer"
-              className=" hover:underline hover:underline-offset-6 text-stone-600 decoration-stone-400"
+              onClick={(e) => e.stopPropagation()}
+              className="block pointer-events-auto transition-all duration-200 hover:underline hover:underline-offset-6 hover:text-stone-700 text-stone-600 decoration-stone-400 cursor-pointer"
             >
               Twitter/X: @ShreyasPatil_
             </a>
-            <div>LinkedIn</div>
+            <a 
+              href="https://www.linkedin.com/in/shreyastpatil/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="block pointer-events-auto transition-all duration-200 hover:underline hover:underline-offset-6 hover:text-stone-700 text-stone-600 decoration-stone-400 cursor-pointer"
+            >
+              LinkedIn: @shreyastpatil
+            </a>
           </div>
         </div>
       </div>,
@@ -856,14 +939,15 @@ between people and systems.
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998]"
+            className="fixed inset-0 w-full h-[100dvh] bg-black/60 backdrop-blur-sm z-[9998] overflow-hidden touch-none overscroll-none"
+            style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
             onClick={handleClose}
           />
 
           {/* Keyboard navigation indicators */}
           <motion.div
             key="keyboard-hints"
-            className="fixed z-[9998] pointer-events-none flex items-center gap-3 -translate-x-1/2 left-1/2 top-10"
+            className="fixed z-[9998] pointer-events-none flex items-center gap-3 -translate-x-1/2 left-1/2 top-10 hidden sm:flex"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
