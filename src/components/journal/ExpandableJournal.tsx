@@ -152,6 +152,7 @@ export function ExpandableJournal({
   const [isMounted, setIsMounted] = useState(false);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const [isKeyboardNavigating, setIsKeyboardNavigating] = useState(false); // Track keyboard navigation mode
+  const [copied, setCopied] = useState(false);
   const bookRef = useRef<BookHandle>(null);
   const expandedContainerRef = useRef<HTMLDivElement>(null);
   const collapsedRef = useRef<HTMLDivElement>(null);
@@ -845,36 +846,30 @@ between people and systems.
             <div className="text-left text-lg text-stone-600 leading-loose">I&apos;m always happy to talk about design, and the small details that make things feel right.<br />I&apos;m at a point where I&apos;m excited to take on my next full-time product design role. If you think my approach could be useful, I&apos;d love to talk.</div>
           </div>
           <div className="text-left text-stone-600 leading-loose mt-8 space-y-2">
-            {(() => {
-              const [copied, setCopied] = React.useState(false);
-
-              return (
-                <button
-                  type="button"
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    try {
-                      await navigator.clipboard.writeText('shreyaspatil.design@gmail.com');
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 1500);
-                    } catch (err) {
-                      // fallback if Clipboard API not available
-                    }
-                  }}
-                  className="relative block pointer-events-auto transition-all duration-200 hover:underline hover:underline-offset-6 hover:text-stone-700 text-stone-600 decoration-stone-400 cursor-pointer bg-transparent border-0 px-0 text-left"
-                >
-                  shreyaspatil.design@gmail.com
-                  <span
-                    className={`ml-2 transition-opacity duration-200 text-green-600 text-base font-semibold ${
-                      copied ? 'opacity-100' : 'opacity-0'
-                    }`}
-                    aria-live="polite"
-                  >
-                    Copied!
-                  </span>
-                </button>
-              );
-            })()}
+            <button
+              type="button"
+              onClick={async (e) => {
+                e.stopPropagation();
+                try {
+                  await navigator.clipboard.writeText('shreyaspatil.design@gmail.com');
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 1500);
+                } catch {
+                  // fallback if Clipboard API not available
+                }
+              }}
+              className="relative block pointer-events-auto transition-all duration-200 hover:underline hover:underline-offset-6 hover:text-stone-700 text-stone-600 decoration-stone-400 cursor-pointer bg-transparent border-0 px-0 text-left"
+            >
+              shreyaspatil.design@gmail.com
+              <span
+                className={`ml-2 transition-opacity duration-200 text-green-600 text-base font-semibold ${
+                  copied ? 'opacity-100' : 'opacity-0'
+                }`}
+                aria-live="polite"
+              >
+                Copied!
+              </span>
+            </button>
             <a 
               href="https://x.com/ShreyasPatil_" 
               target="_blank" 
