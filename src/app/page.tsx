@@ -11,50 +11,46 @@ import { IconArrowDown } from 'nucleo-micro-bold-essential';
 
 
 //adding a comment
-// Main page container variants for staggered loading
-const pageContainerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.1
-    }
-  }
-};
+// ── Animation timeline ──
+// Journal:    0ms       → 400ms  (fade in)
+// Stickers:   500ms     → ~900ms (5 stickers, 80ms stagger)
+// Hold:       900ms     → 1200ms
+// Name text:  1200ms    → 1600ms (fade in)
+// Content:    1500ms+   → stagger 150ms
 
-// Header container — staggers children in sequence
-const headerContainerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.05
-    }
-  }
-};
-
-// Header child — fade in without y shift
-const headerChildVariants = {
+const fadeIn = (delay: number) => ({
   hidden: { opacity: 0, filter: "blur(4px)" },
   visible: {
     opacity: 1,
     filter: "blur(0px)",
-    transition: { duration: 0.4, ease: "easeOut" as const }
+    transition: { duration: 0.4, delay, ease: "easeOut" as const }
   }
-};
+});
 
-// Sticker group — waits for journal to finish, then staggers children
+const slideIn = (delay: number) => ({
+  hidden: { opacity: 0, y: 30, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.4, delay, ease: "easeOut" as const }
+  }
+});
+
+// Journal — first thing to appear
+const journalVariants = fadeIn(0);
+
+// Sticker group — after journal finishes
 const stickerGroupVariants = {
   hidden: {},
   visible: {
     transition: {
       staggerChildren: 0.08,
-      delayChildren: 0.6
+      delayChildren: 0.5
     }
   }
 };
 
-// Individual sticker — fade + scale in
 const stickerVariants = {
   hidden: { opacity: 0, scale: 0.95 },
   visible: {
@@ -64,23 +60,12 @@ const stickerVariants = {
   }
 };
 
-// Individual section variants with blur
-const sectionVariants = {
-  hidden: { 
-    opacity: 0, 
-    y: 30,
-    filter: "blur(4px)"
-  },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    filter: "blur(0px)",
-    transition: { 
-      duration: 0.4,
-      ease: "easeOut" as const
-    }
-  }
-};
+// Name text — after stickers + 300ms hold
+const nameVariants = fadeIn(1.2);
+
+// Content sections — after name starts
+const selectedWorkVariants = slideIn(1.5);
+const craftVariants = slideIn(1.65);
 
 
 export default function Home() {
@@ -89,41 +74,28 @@ export default function Home() {
     <div className="min-h-screen flex justify-center">
       <main className="relative w-full md:max-w-[800px] max-w-[377px]">
 
-        <motion.div 
+        <motion.div
           className="relative flex flex-col gap-16 items-start md:pt-32 pt-16 md:px-0 px-4 md:pb-24 pb-24"
-          variants={pageContainerVariants}
           initial="hidden"
           animate="visible"
         >
 
-          
-          
-          <motion.div
-            variants={headerContainerVariants}
-            className="w-full relative mb-0 md:gap-8 gap-12 items-center flex flex-col"
-          >
-            {/* Header text: occupies full width on mobile, right side on desktop */}
-            <motion.div variants={headerChildVariants} className="md:hidden flex flex-col gap-4 text-stone-600 w-full">
-              <div className="text-page-header text-gradient-primary">
-                Hey, I&apos;m Shreyas
-              </div>
-              <p className="text-important text-pretty text-stone-600!">
-                I&apos;m a Product Designer based in the Bay Area, I think about interaction, systems, and the details people feel before they notice.
-              </p>
-            </motion.div>
+          <div className="w-full relative mb-0 md:gap-8 gap-12 items-center flex flex-col">
 
-            {/* Expandable Journal: below text on mobile, left on desktop */}
-            <motion.div variants={headerChildVariants} className="isolate relative z-10 group w-full h-80 flex items-center justify-center">
+            {/* Expandable Journal area */}
+            <div className="isolate relative z-10 group w-full h-80 flex items-center justify-center">
 
-              {/* Journal — animates with header stagger */}
-              <ExpandableJournal
-                collapsedWidth={240}
-                collapsedHeight={320}
-                expandedWidth={420}
-                expandedHeight={560}
-              />
+              {/* Journal — highest z-index, appears first */}
+              <motion.div variants={journalVariants} className="relative z-20">
+                <ExpandableJournal
+                  collapsedWidth={240}
+                  collapsedHeight={320}
+                  expandedWidth={420}
+                  expandedHeight={560}
+                />
+              </motion.div>
 
-              {/* Stickers — grouped so they all appear after journal finishes */}
+              {/* Stickers — appear after journal, stagger in */}
               <motion.div
                 variants={stickerGroupVariants}
                 initial="hidden"
@@ -173,13 +145,23 @@ export default function Home() {
                 />
               </motion.div>
 
+            </div>
+
+            {/* Name text — appears after stickers + 300ms hold */}
+            <motion.div variants={nameVariants} className="md:hidden flex flex-col gap-4 text-stone-600 w-full">
+              <div className="text-page-header text-gradient-primary">
+                Hey, I&apos;m Shreyas
+              </div>
+              <p className="text-important text-pretty text-stone-600!">
+                I&apos;m a Product Designer based in the Bay Area, I think about interaction, systems, and the details people feel before they notice.
+              </p>
             </motion.div>
-          </motion.div>
+          </div>
 
           {/* Projects section */}
-          <motion.div 
+          <motion.div
             className="flex flex-col gap-4 w-full mt-8"
-            variants={sectionVariants}
+            variants={selectedWorkVariants}
           >
             <div className="text-subheader text-pretty flex items-center gap-1 text-stone-400!"><span>Selected Work</span> <IconArrowDown size={14} /></div>
             <div className="w-full flex flex-col gap-20 items-start">
@@ -218,7 +200,7 @@ export default function Home() {
           {/* Craft section */}
           <motion.div
             className="flex flex-col gap-6 w-full mt-16"
-            variants={sectionVariants}
+            variants={craftVariants}
           >
             <div className="text-subheader text-pretty flex items-center gap-1 text-stone-400!"><span>Craft</span> <IconArrowDown size={14} /></div>
             <CraftContent hideHeader hideBackground />
