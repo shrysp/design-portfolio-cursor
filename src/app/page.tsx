@@ -13,10 +13,10 @@ import { IconArrowDown } from 'nucleo-micro-bold-essential';
 //adding a comment
 // ── Animation timeline ──
 // Stickers:   0ms       → ~620ms (5 stickers, 80ms stagger, 300ms each)
-// Journal:    700ms     → 1000ms (scale + opacity, same as stickers)
-// Hold:       1000ms    → 1300ms
-// Name text:  1300ms    → 1700ms
-// Content:    1600ms+   → stagger 150ms
+// Journal:    400ms     → 550ms  (scale + opacity, 150ms)
+// Hold:       620ms     → 920ms  (300ms after last sticker)
+// Name text:  920ms     → 1320ms
+// Content:    1220ms+   → stagger 150ms
 
 const slideIn = (delay: number) => ({
   hidden: { opacity: 0, y: 30, filter: "blur(4px)" },
@@ -48,29 +48,29 @@ const stickerVariants = {
   }
 };
 
-// Journal — after all stickers, same animation as stickers
+// Journal — starts at 400ms, 150ms duration (done at 550ms)
 const journalVariants = {
   hidden: { opacity: 0, scale: 0.95 },
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.3, delay: 0.7, ease: "easeOut" as const }
+    transition: { duration: 0.15, delay: 0.4, ease: "easeOut" as const }
   }
 };
 
-// Name text — after journal + 300ms hold
+// Name text — after stickers + 300ms hold
 const nameVariants = {
   hidden: { opacity: 0, filter: "blur(4px)" },
   visible: {
     opacity: 1,
     filter: "blur(0px)",
-    transition: { duration: 0.4, delay: 1.3, ease: "easeOut" as const }
+    transition: { duration: 0.4, delay: 0.92, ease: "easeOut" as const }
   }
 };
 
 // Content sections — after name starts
-const selectedWorkVariants = slideIn(1.6);
-const craftVariants = slideIn(1.75);
+const selectedWorkVariants = slideIn(1.22);
+const craftVariants = slideIn(1.37);
 
 
 export default function Home() {
