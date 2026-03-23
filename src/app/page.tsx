@@ -10,7 +10,6 @@ import { IconArrowDown } from 'nucleo-micro-bold-essential';
 
 
 
-//adding a comment
 // ── Animation timeline ──
 // Stickers:   0ms       → ~620ms (5 stickers, 80ms stagger, 300ms each)
 // Journal:    400ms     → 550ms  (scale + opacity, 150ms)
