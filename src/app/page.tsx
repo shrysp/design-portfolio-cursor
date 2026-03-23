@@ -12,20 +12,11 @@ import { IconArrowDown } from 'nucleo-micro-bold-essential';
 
 //adding a comment
 // ── Animation timeline ──
-// Journal:    0ms       → 400ms  (fade in)
-// Stickers:   500ms     → ~900ms (5 stickers, 80ms stagger)
-// Hold:       900ms     → 1200ms
-// Name text:  1200ms    → 1600ms (fade in)
-// Content:    1500ms+   → stagger 150ms
-
-const fadeIn = (delay: number) => ({
-  hidden: { opacity: 0, filter: "blur(4px)" },
-  visible: {
-    opacity: 1,
-    filter: "blur(0px)",
-    transition: { duration: 0.4, delay, ease: "easeOut" as const }
-  }
-});
+// Stickers:   0ms       → ~620ms (5 stickers, 80ms stagger, 300ms each)
+// Journal:    700ms     → 1000ms (scale + opacity, same as stickers)
+// Hold:       1000ms    → 1300ms
+// Name text:  1300ms    → 1700ms
+// Content:    1600ms+   → stagger 150ms
 
 const slideIn = (delay: number) => ({
   hidden: { opacity: 0, y: 30, filter: "blur(4px)" },
@@ -37,16 +28,13 @@ const slideIn = (delay: number) => ({
   }
 });
 
-// Journal — first thing to appear
-const journalVariants = fadeIn(0);
-
-// Sticker group — after journal finishes
+// Stickers — appear first, stagger in
 const stickerGroupVariants = {
   hidden: {},
   visible: {
     transition: {
       staggerChildren: 0.08,
-      delayChildren: 0.5
+      delayChildren: 0
     }
   }
 };
@@ -60,12 +48,29 @@ const stickerVariants = {
   }
 };
 
-// Name text — after stickers + 300ms hold
-const nameVariants = fadeIn(1.2);
+// Journal — after all stickers, same animation as stickers
+const journalVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.3, delay: 0.7, ease: "easeOut" as const }
+  }
+};
+
+// Name text — after journal + 300ms hold
+const nameVariants = {
+  hidden: { opacity: 0, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    filter: "blur(0px)",
+    transition: { duration: 0.4, delay: 1.3, ease: "easeOut" as const }
+  }
+};
 
 // Content sections — after name starts
-const selectedWorkVariants = slideIn(1.5);
-const craftVariants = slideIn(1.65);
+const selectedWorkVariants = slideIn(1.6);
+const craftVariants = slideIn(1.75);
 
 
 export default function Home() {
