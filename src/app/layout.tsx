@@ -3,7 +3,7 @@ import { Geist, Source_Serif_4, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import StickyFooter from "@/components/StickyFooter";
 import MotionProvider from "@/components/MotionProvider";
-import { Agentation } from "agentation";
+
 
 const geist = Geist({
   variable: "--font-sans",
@@ -70,7 +70,7 @@ export default function RootLayout({
           {children}
           <StickyFooter />
         </MotionProvider>
-        {process.env.NODE_ENV === "development" && <Agentation />}
+
       </body>
     </html>
   );

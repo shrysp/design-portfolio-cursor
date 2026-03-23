@@ -7,7 +7,6 @@ import ProjectThumbnailCard from '@/components/ProjectThumbnailCard';
 import { CraftContent } from '@/components/CraftContent';
 import { ExpandableJournal } from '@/components/journal/ExpandableJournal';
 import { IconArrowDown } from 'nucleo-micro-bold-essential';
-import GameBoy from '@/components/game/GameBoy';
 
 
 
@@ -171,24 +170,6 @@ export default function Home() {
             <CraftContent hideHeader hideBackground />
           </motion.div>
 
-          {/* Game Boy section */}
-          <motion.div
-            className="flex flex-col gap-6 w-full mt-16"
-            variants={sectionVariants}
-          >
-            <div className="text-subheader text-pretty flex items-center gap-1 text-stone-400!"><span>Game Boy</span> <IconArrowDown size={14} /></div>
-            <div className="w-full flex flex-col items-center gap-4">
-              <GameBoy />
-              <div className="text-sm text-stone-500 text-center">
-                <p className="mb-1">
-                  <strong>Controls:</strong> Arrow Keys / WASD to move
-                </p>
-                <p>
-                  <strong>Actions:</strong> X = Interact, C = Cancel
-                </p>
-              </div>
-            </div>
-          </motion.div>
 
         </motion.div>
 
