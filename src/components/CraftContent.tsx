@@ -23,8 +23,8 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.4
+        staggerChildren: 0.1,
+        delayChildren: 0.2
       }
     }
   };

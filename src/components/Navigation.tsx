@@ -45,8 +45,8 @@ export default function Navigation() {
                   (e.target as HTMLElement).blur();
                 }
               }}
-              className={`group relative flex items-center justify-center ${isActive ? 'text-white/80' : 'text-slate-400'} size-[36px] border ${isActive ? 'border-blue-700' : 'border-slate-400'} ${isActive ? 'bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700' : 'bg-radial-[at_50%_75%] from-slate-100 via-slate-200 to-slate-300'} shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] rounded-full pointer-cursor
-                                ${!isActive ? 'hover:bg-radial-[at_50%_75%] hover:from-slate-200 hover:via-slate-300 hover:to-slate-400 hover:border-slate-500 hover:text-slate-500 hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.17),0px_8px_8px_-4px_rgba(0,0,0,0.17),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset]' : 'hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.17),0px_8px_8px_-4px_rgba(0,0,0,0.17),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset]'} transition-all duration-300
+              className={`touch-hitbox group relative flex items-center justify-center ${isActive ? 'text-white/80' : 'text-slate-400'} size-[36px] border ${isActive ? 'border-blue-700' : 'border-slate-400'} ${isActive ? 'bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700' : 'bg-radial-[at_50%_75%] from-slate-100 via-slate-200 to-slate-300'} shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] rounded-full pointer-cursor
+                                ${!isActive ? 'hover:bg-radial-[at_50%_75%] hover:from-slate-200 hover:via-slate-300 hover:to-slate-400 hover:border-slate-500 hover:text-slate-500 hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.17),0px_8px_8px_-4px_rgba(0,0,0,0.17),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset]' : 'hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.17),0px_8px_8px_-4px_rgba(0,0,0,0.17),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset]'} transition-[color,border-color,box-shadow,transform] duration-300
                                 active:bg-radial-[at_50%_75%] active:from-blue-300 active:via-blue-500 active:to-blue-700 active:border-blue-700 active:text-white/80 active:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset]
                                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2`}
             >
@@ -55,11 +55,11 @@ export default function Navigation() {
               <Icon size={24} weight="fill" />
               
               {/* Custom tooltip matching Navbar.tsx styles */}
-              <div className={`absolute -top-[40px] opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100 transform transition-all duration-300 px-2 py-1 pointer-events-none
-                ${isActive 
-                  ? 'bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 border-blue-700 text-white/80' 
-                  : 'bg-radial-[at_50%_75%] from-slate-100 via-slate-200 to-slate-300 border-slate-400 text-slate-500'} 
-                text-xs font-semibold rounded-full border shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] transition-all duration-300 z-100`}>
+              <div className={`absolute -top-[40px] opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100 transform transition-[opacity,transform] duration-300 px-2 py-1 pointer-events-none
+                ${isActive
+                  ? 'bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 border-blue-700 text-white/80'
+                  : 'bg-radial-[at_50%_75%] from-slate-100 via-slate-200 to-slate-300 border-slate-400 text-slate-500'}
+                text-xs font-semibold rounded-full border shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] z-100`}>
                 {item.name}
                 <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white to-white/20 rounded-t-[60px] rounded-b-[12px] z-10 pointer-events-none`}></div>
               </div>

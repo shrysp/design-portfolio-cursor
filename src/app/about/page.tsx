@@ -9,7 +9,7 @@ import { Journal } from '@/components/journal/Journal';
 
 const gridVariants = {
   hidden: { opacity: 0, y: 20, scale: 0.95, filter: "blur(4px)" },
-  visible: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", transition: { duration: 0.5 } }
+  visible: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", transition: { duration: 0.3 } }
 };
 
 const containerVariants = {
@@ -107,7 +107,7 @@ export default function About() {
                     href="https://x.com/ShreyasPatil_" 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-slate-400 via-slate-600 to-slate-800 hover:from-slate-500 hover:via-slate-700 hover:to-slate-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-700 cursor-pointer transition-all duration-300'
+                    className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-slate-400 via-slate-600 to-slate-800 hover:from-slate-500 hover:via-slate-700 hover:to-slate-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-slate-700 cursor-pointer transition-[box-shadow,border-color,transform] duration-300'
                   >                  
                     <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
                     <XLogo size={18} weight="fill" />
@@ -121,7 +121,7 @@ export default function About() {
                 
 
                 <div className='flex w-full items-center justify-start gap-4 text-base font-semibold'>
-                <button className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-red-400 via-red-600 to-red-800 hover:from-red-500 hover:via-red-700 hover:to-red-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-red-700 cursor-pointer transition-all duration-300'>                  
+                <button className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-red-400 via-red-600 to-red-800 hover:from-red-500 hover:via-red-700 hover:to-red-900 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-red-700 cursor-pointer transition-[box-shadow,border-color] duration-300'>                  
                   <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10 pointer-events-none`}></div>
                   <EmailCopyButton />
                 </button>
@@ -136,7 +136,7 @@ export default function About() {
                   href="https://www.linkedin.com/in/shreyastpatil/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 hover:from-blue-400 hover:via-blue-600 hover:to-blue-800 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-blue-700 cursor-pointer transition-all duration-300'
+                  className='relative flex items-center justify-center size-8 text-white rounded-full bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 hover:from-blue-400 hover:via-blue-600 hover:to-blue-800 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-blue-700 cursor-pointer transition-[box-shadow,border-color] duration-300'
                 >                  
                   <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
                   <LinkedinLogo size={18} weight="fill" />
@@ -153,7 +153,7 @@ export default function About() {
                   target="_blank" 
                   rel="noopener noreferrer" 
                   download
-                  className='relative flex items-center justify-center size-8 text-stone-500 rounded-full bg-radial-[at_50%_75%] from-stone-100 via-stone-200 to-stone-300 hover:from-stone-200 hover:via-stone-300 hover:to-stone-400 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-stone-400 cursor-pointer transition-all duration-300'
+                  className='relative flex items-center justify-center size-8 text-stone-500 rounded-full bg-radial-[at_50%_75%] from-stone-100 via-stone-200 to-stone-300 hover:from-stone-200 hover:via-stone-300 hover:to-stone-400 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] border border-stone-400 cursor-pointer transition-[box-shadow,border-color] duration-300'
                 >                  
                   <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white/70  to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
                   <ReadCvLogo size={18} weight="fill" />
@@ -179,9 +179,9 @@ export default function About() {
                 href="https://publish.obsidian.md/philippepage/Work/Agent+Clouds" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className='group relative flex flex-col gap-1 w-full p-2 bg-stone-50 rounded-lg hover:rounded-tr-2xl border border-stone-200 overflow-hidden transition-all duration-300 cursor-pointer'
+                className='group relative flex flex-col gap-1 w-full p-2 bg-stone-50 rounded-lg hover:rounded-tr-2xl border border-stone-200 overflow-hidden transition-[border-radius] duration-300 cursor-pointer'
               >
-                <div className='absolute size-4 -top-4 -right-4 group-hover:-top-[1px] group-hover:-right-[1px] rounded-bl-lg rounded-tr-[26px] bg-stone-100 group-hover:bg-stone-50 border border-stone-200 shadow-sm transition-all duration-300'></div>
+                <div className='absolute size-4 -top-4 -right-4 group-hover:-top-[1px] group-hover:-right-[1px] rounded-bl-lg rounded-tr-[26px] bg-stone-100 group-hover:bg-stone-50 border border-stone-200 shadow-sm transition-[top,right,background-color] duration-300'></div>
                 
                   <div className="text-sm font-serif font-semibold text-stone-800 truncate pb-0.5 border-b border-stone-100">Agent Cloud</div>
                 <div className="text-xs font-light text-stone-600 pb-0.5 border-b border-stone-100">@Philippe Page</div>
@@ -191,9 +191,9 @@ export default function About() {
                 href="https://rauno.me/craft/interaction-design" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className='group relative flex flex-col gap-1 w-full p-2 bg-stone-50 rounded-lg hover:rounded-tr-2xl border border-stone-200 overflow-hidden transition-all duration-300 cursor-pointer'
+                className='group relative flex flex-col gap-1 w-full p-2 bg-stone-50 rounded-lg hover:rounded-tr-2xl border border-stone-200 overflow-hidden transition-[border-radius] duration-300 cursor-pointer'
               >
-                <div className='absolute size-4 -top-4 -right-4 group-hover:-top-[1px] group-hover:-right-[1px] rounded-bl-lg rounded-tr-[26px] bg-stone-100 group-hover:bg-stone-50 border border-stone-200 shadow-sm transition-all duration-300'></div>
+                <div className='absolute size-4 -top-4 -right-4 group-hover:-top-[1px] group-hover:-right-[1px] rounded-bl-lg rounded-tr-[26px] bg-stone-100 group-hover:bg-stone-50 border border-stone-200 shadow-sm transition-[top,right,background-color] duration-300'></div>
                 
                   <div className="text-sm font-serif font-semibold text-stone-800 truncate pb-0.5 border-b border-stone-100">Invisible Details of Interaction Design</div>
                 <div className="text-xs font-light text-stone-600 pb-0.5 border-b border-stone-100">@Rauno Freiberg</div>
@@ -203,9 +203,9 @@ export default function About() {
                 href="https://www.perplexity.ai/search/shoedog-phil-knight-zA.qaPNaSlGnPv8q1W3UvQ#0" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className='group relative flex flex-col gap-1 w-full p-2 bg-stone-50 rounded-lg hover:rounded-tr-2xl border border-stone-200 overflow-hidden transition-all duration-300 cursor-pointer'
+                className='group relative flex flex-col gap-1 w-full p-2 bg-stone-50 rounded-lg hover:rounded-tr-2xl border border-stone-200 overflow-hidden transition-[border-radius] duration-300 cursor-pointer'
               >
-                <div className='absolute size-4 -top-4 -right-4 group-hover:-top-[1px] group-hover:-right-[1px] rounded-bl-lg rounded-tr-[26px] bg-stone-100 group-hover:bg-stone-50 border border-stone-200 shadow-sm transition-all duration-300'></div>
+                <div className='absolute size-4 -top-4 -right-4 group-hover:-top-[1px] group-hover:-right-[1px] rounded-bl-lg rounded-tr-[26px] bg-stone-100 group-hover:bg-stone-50 border border-stone-200 shadow-sm transition-[top,right,background-color] duration-300'></div>
                 
                   <div className="text-sm font-serif font-semibold text-stone-800 truncate pb-0.5 border-b border-stone-100">Shoe Dog</div>
                 <div className="text-xs font-light text-stone-600 pb-0.5 border-b border-stone-100">@Phil Knight</div>

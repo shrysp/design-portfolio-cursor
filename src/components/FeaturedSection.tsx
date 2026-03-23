@@ -24,14 +24,14 @@ export default function FeaturedSection() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.7 }}
+        transition={{ duration: 0.3 }}
         className="max-w-[800px] mx-auto"
       >
         <div className="text-center mb-12">
           <motion.h2 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.3 }}
             className="text-3xl md:text-4xl font-bold mb-4"
           >
             Featured Projects
@@ -39,7 +39,7 @@ export default function FeaturedSection() {
           <motion.p
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
             className="text-zinc-600 max-w-2xl mx-auto"
           >
             Explore our latest work showcasing modern web development techniques with Next.js, Tailwind CSS, and Framer Motion.

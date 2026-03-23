@@ -109,7 +109,7 @@ export default function ProjectDetail() {
               <div 
                 key={index}
                 onClick={() => setSelectedImageIndex(index)}
-                className={`relative md:w-20 w-16 aspect-video rounded-md overflow-hidden cursor-pointer border-2 transition-all ${
+                className={`relative md:w-20 w-16 aspect-video rounded-md overflow-hidden cursor-pointer border-2 transition-[opacity,box-shadow,border-color] ${
                   selectedImageIndex === index 
                     ? 'border-blue-500 shadow-[0px_0px_0px_2px_rgba(59,130,246,0.5)]' 
                     : 'border-slate-200'

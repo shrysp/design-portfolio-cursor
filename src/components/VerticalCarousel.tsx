@@ -8,13 +8,23 @@ interface VerticalCarouselProps {
   autoScrollInterval?: number; // in milliseconds
 }
 
-export default function VerticalCarousel({ 
-  images, 
-  autoScrollInterval = 5000 
+export default function VerticalCarousel({
+  images,
+  autoScrollInterval = 5000
 }: VerticalCarouselProps) {
   const [position, setPosition] = useState(0);
   const [noTransition, setNoTransition] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Respect prefers-reduced-motion
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
   
   // Create a continuous array of images for seamless scrolling
   // We need enough copies to ensure we never see empty space
@@ -64,7 +74,7 @@ export default function VerticalCarousel({
         className="flex flex-col h-full"
         style={{ 
           transform: `translateY(-${position * 100}%)`,
-          transition: noTransition ? 'none' : 'transform 400ms ease-in-out'
+          transition: (noTransition || prefersReducedMotion) ? 'none' : 'transform 400ms ease-in-out'
         }}
       >
         {/* Render all images */}

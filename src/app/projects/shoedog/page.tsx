@@ -59,7 +59,7 @@ export default function ShoedogProject() {
                 <div
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`md:w-20 md:h-20 w-12 h-12 rounded-lg bg-gray-100 overflow-hidden cursor-pointer transition-all duration-200 ${
+                  className={`md:w-20 md:h-20 w-12 h-12 rounded-lg bg-gray-100 overflow-hidden cursor-pointer transition-[opacity,box-shadow,border-color] duration-200 ${
                     selectedImageIndex === index
                       ? 'ring-2 ring-blue-500 ring-offset-2'
                       : 'opacity-70 hover:opacity-100 border border-gray-200'

@@ -1,24 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useState, useImperativeHandle, forwardRef, useCallback } from "react";
-
-// Hook to detect if device supports hover (non-touch)
-function useCanHover() {
-  const [canHover, setCanHover] = useState(false);
-  
-  useEffect(() => {
-    // Check if the device supports hover (not a touch-only device)
-    const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
-    setCanHover(mediaQuery.matches);
-    
-    const handler = (e: MediaQueryListEvent) => setCanHover(e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, []);
-  
-  return canHover;
-}
+import { useState, useEffect, useImperativeHandle, forwardRef, useCallback } from "react";
+import { useCanHover } from "@/lib/useCanHover";
 
 type BookPage = {
     front: React.ReactNode;

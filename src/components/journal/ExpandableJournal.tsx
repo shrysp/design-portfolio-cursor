@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useOnClickOutside } from "usehooks-ts";
 import { motion, AnimatePresence } from "framer-motion";
 import Book, { BookHandle } from "./Book";
+import { useCanHover } from "@/lib/useCanHover";
 
 // Hook to get responsive scale and center position
 // The book always renders at desktop dimensions, but scales down on mobile
@@ -147,6 +148,7 @@ export function ExpandableJournal({
   expandedWidth: desktopExpandedWidth = 420,
   expandedHeight: desktopExpandedHeight = 560,
 }: ExpandableJournalProps) {
+  const canHover = useCanHover();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false); // Track exit animation
   const [isMounted, setIsMounted] = useState(false);
@@ -858,7 +860,7 @@ between people and systems.
                   // fallback if Clipboard API not available
                 }
               }}
-              className="relative block pointer-events-auto transition-all duration-200 hover:underline hover:underline-offset-6 hover:text-stone-700 text-stone-600 decoration-stone-400 cursor-pointer bg-transparent border-0 px-0 text-left"
+              className="relative block pointer-events-auto transition-colors duration-200 hover:underline hover:underline-offset-6 hover:text-stone-700 text-stone-600 decoration-stone-400 cursor-pointer bg-transparent border-0 px-0 text-left"
             >
               shreyaspatil.design@gmail.com
               <span
@@ -875,7 +877,7 @@ between people and systems.
               target="_blank" 
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="block pointer-events-auto transition-all duration-200 hover:underline hover:underline-offset-6 hover:text-stone-700 text-stone-600 decoration-stone-400 cursor-pointer"
+              className="block pointer-events-auto transition-colors duration-200 hover:underline hover:underline-offset-6 hover:text-stone-700 text-stone-600 decoration-stone-400 cursor-pointer"
             >
               Twitter/X: @ShreyasPatil_
             </a>
@@ -884,7 +886,7 @@ between people and systems.
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="block pointer-events-auto transition-all duration-200 hover:underline hover:underline-offset-6 hover:text-stone-700 text-stone-600 decoration-stone-400 cursor-pointer"
+              className="block pointer-events-auto transition-colors duration-200 hover:underline hover:underline-offset-6 hover:text-stone-700 text-stone-600 decoration-stone-400 cursor-pointer"
             >
               LinkedIn: @shreyastpatil
             </a>
@@ -1037,10 +1039,10 @@ between people and systems.
             handleExpand();
           }
         }}
-        whileHover={{ 
+        whileHover={canHover ? {
           rotate: -3,
           transition: { duration: 0.2 }
-        }}
+        } : undefined}
         transition={{
           type: "spring",
           stiffness: 300,
