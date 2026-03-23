@@ -22,6 +22,22 @@ const pageContainerVariants = {
   }
 };
 
+// Header variant — no y shift to avoid layout jump on load
+const headerVariants = {
+  hidden: {
+    opacity: 0,
+    filter: "blur(4px)"
+  },
+  visible: {
+    opacity: 1,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.4,
+      ease: "easeOut" as const
+    }
+  }
+};
+
 // Individual section variants with blur
 const sectionVariants = {
   hidden: { 
@@ -57,7 +73,7 @@ export default function Home() {
           
           
           <motion.div
-            variants={sectionVariants}
+            variants={headerVariants}
             // On desktop: flex-row with Journal left, text right. On mobile: flex-col, text first, Journal below.
             className="w-full relative mb-0 md:gap-8 gap-12 items-center flex flex-col "
           >
