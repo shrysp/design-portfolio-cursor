@@ -54,7 +54,7 @@ const journalVariants = {
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.15, delay: 0.4, ease: "easeOut" as const }
+    transition: { duration: 0.15, delay: 0.5, ease: "easeOut" as const }
   }
 };
 
@@ -64,7 +64,7 @@ const nameVariants = {
   visible: {
     opacity: 1,
     filter: "blur(0px)",
-    transition: { duration: 0.4, delay: 0.92, ease: "easeOut" as const }
+    transition: { duration: 0.4, delay: 1.02, ease: "easeOut" as const }
   }
 };
 
