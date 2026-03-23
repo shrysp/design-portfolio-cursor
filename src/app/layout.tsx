@@ -64,7 +64,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://use.typekit.net/uoh4dmf.css" />
       </head>
       <body
-        className={`${geist.variable} ${geistMono.variable} ${sourceSerif4.variable} antialiased bg-stone-50 text-stone-900`}
+        className={`${geist.variable} ${geistMono.variable} ${sourceSerif4.variable} antialiased bg-stone-50 text-stone-900 overflow-x-hidden`}
       >
         <MotionProvider>
           {children}

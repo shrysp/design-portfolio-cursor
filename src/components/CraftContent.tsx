@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from 'framer-motion';
+import LazyVideo from '@/components/LazyVideo';
 
 interface CraftContentProps {
   hideHeader?: boolean;
@@ -64,7 +65,7 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
               className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
               variants={gridVariants}
             >
-              <video src="/videos/Turf-Waitlist-animation.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              <LazyVideo src="/videos/Turf-Waitlist-animation.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
               
             </motion.div>
 
@@ -72,7 +73,7 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
               className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
               variants={gridVariants}
             >
-              <video src="/videos/Toolbar.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              <LazyVideo src="/videos/Toolbar.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
               
             </motion.div>
 
@@ -80,7 +81,7 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
               className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
               variants={gridVariants}
             >
-              <video src="/videos/Bento-Portfolio.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              <LazyVideo src="/videos/Bento-Portfolio.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
               
             </motion.div>
 
@@ -88,7 +89,7 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
               className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
               variants={gridVariants}
             >
-              <video src="/videos/Navbar-themes.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              <LazyVideo src="/videos/Navbar-themes.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
               
             </motion.div>
 
@@ -96,7 +97,7 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
               className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
               variants={gridVariants}
             >
-              <video src="/videos/Mobile-Navbar.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              <LazyVideo src="/videos/Mobile-Navbar.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
               
             </motion.div>
 
@@ -104,7 +105,7 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
               className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
               variants={gridVariants}
             >
-              <video src="/videos/iPadxFigma.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              <LazyVideo src="/videos/iPadxFigma.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
               
             </motion.div>
 
@@ -112,7 +113,7 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
               className="isolate relative w-full h-full aspect-video bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
               variants={gridVariants}
             >
-              <video src="/videos/Image-Answer-Engine-Prototype.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              <LazyVideo src="/videos/Image-Answer-Engine-Prototype.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
               
             </motion.div>
 
@@ -120,7 +121,7 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
               className="isolate relative w-full h-full aspect-[3/4] bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-4"
               variants={gridVariants}
             >
-              <video src="/videos/aero_recording.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              <LazyVideo src="/videos/aero_recording.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
               
             </motion.div>
 
@@ -128,7 +129,7 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
               className="isolate relative w-full h-full aspect-[3/4] bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-4"
               variants={gridVariants}
             >
-              <video src="/videos/ItinerAIbuild-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10'></video>
+              <LazyVideo src="/videos/ItinerAIbuild-1.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
               
             </motion.div>
 
@@ -171,7 +172,7 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
             >
               <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
                 <div className="w-full h-full aspect-16/9 relative bg-black">
-                  <video src="/images/Craft/pplx-mindlab-1.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='w-full h-full object-cover'></video>
+                  <LazyVideo src="/images/Craft/pplx-mindlab-1.mp4" className='w-full h-full object-cover' />
                 </div>
                 
               </div>
@@ -205,7 +206,7 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
             >
               <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
                 <div className="w-full h-full aspect-16/9 relative bg-black">
-                  <video src="/images/Craft/Modals.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='w-full h-full object-cover'></video>
+                  <LazyVideo src="/images/Craft/Modals.mp4" className='w-full h-full object-cover' />
                 </div>
                 
               </div>
@@ -217,7 +218,7 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
             >
               <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
                 <div className="w-full h-full aspect-square relative bg-black">
-                  <video src="/images/Craft/Whop-Modal.mp4" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" className='w-full h-full object-cover'></video>
+                  <LazyVideo src="/images/Craft/Whop-Modal.mp4" className='w-full h-full object-cover' />
                 </div>
                 
               </div>
