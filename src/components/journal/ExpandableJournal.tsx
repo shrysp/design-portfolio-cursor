@@ -91,29 +91,30 @@ function SlapSticker() {
   return (
     <motion.div
       className="z-[1] absolute bottom-1/2 right-1/2 translate-x-1/2 translate-y-1/2"
-      initial={{ 
-        scale: 1.8, 
+      initial={{
+        scale: 1.8,
         rotate: -20,
         opacity: 0,
         y: -80,
       }}
-      animate={isReady ? { 
+      animate={isReady ? {
         scale: 1,
         rotate: 3,
         opacity: 1,
         y: 0,
       } : {}}
       transition={{
-        type: "easeOut",
+        type: "tween",
+        ease: "easeOut",
         duration: 0.1,
-        delay: 0.3,
+        delay: 1,
       }}
     >
       {/* Impact shadow - grows quickly then settles */}
       <motion.div
         className="absolute inset-0 bg-black/25 rounded-full blur-sm scale-75 translate-y-3"
         initial={{ opacity: 0, scale: 0.3 }}
-        animate={isReady ? { 
+        animate={isReady ? {
           opacity: [0, 0.5, 0.35],
           scale: [0.3, 0.9, 0.75],
         } : {}}

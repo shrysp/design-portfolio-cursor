@@ -9,12 +9,11 @@ import { ExpandableJournal } from '@/components/journal/ExpandableJournal';
 import { IconArrowDown } from 'nucleo-micro-bold-essential';
 
 
-
 // ── Animation timeline ──
-// Stickers:   0ms       → ~620ms (5 stickers, 80ms stagger, 300ms each)
-// Journal:    400ms     → 550ms  (scale + opacity, 150ms)
-// Hold:       620ms     → 920ms  (300ms after last sticker)
-// Name text:  920ms     → 1320ms
+// Stickers:   0ms       → ~900ms (5 stickers, 150ms stagger, 300ms each)
+// Journal:    800ms     → 1000ms (scale + opacity, 200ms)
+// Hold:       ~1000ms   → 1020ms
+// Name text:  1020ms    → 1420ms
 // Content:    1220ms+   → stagger 150ms
 
 const slideIn = (delay: number) => ({
@@ -27,12 +26,11 @@ const slideIn = (delay: number) => ({
   }
 });
 
-// Stickers — appear first, stagger in
 const stickerGroupVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.08,
+      staggerChildren: 0.15,
       delayChildren: 0
     }
   }
@@ -47,17 +45,15 @@ const stickerVariants = {
   }
 };
 
-// Journal — starts at 400ms, 150ms duration (done at 550ms)
 const journalVariants = {
   hidden: { opacity: 0, scale: 0.95 },
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.15, delay: 0.5, ease: "easeOut" as const }
+    transition: { duration: 0.2, delay: 0.8, ease: "easeOut" as const }
   }
 };
 
-// Name text — after stickers + 300ms hold
 const nameVariants = {
   hidden: { opacity: 0, filter: "blur(4px)" },
   visible: {
@@ -67,7 +63,6 @@ const nameVariants = {
   }
 };
 
-// Content sections — after name starts
 const selectedWorkVariants = slideIn(1.22);
 const craftVariants = slideIn(1.37);
 

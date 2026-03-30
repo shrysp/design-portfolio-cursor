@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Source_Serif_4, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "dialkit/styles.css";
 import StickyFooter from "@/components/StickyFooter";
 import MotionProvider from "@/components/MotionProvider";
+import DevFeedback from "@/components/DevFeedback";
+import { DialRoot } from "dialkit";
 
 
 const geist = Geist({
@@ -66,10 +69,12 @@ export default function RootLayout({
       <body
         className={`${geist.variable} ${geistMono.variable} ${sourceSerif4.variable} antialiased bg-stone-50 text-stone-900 overflow-x-clip`}
       >
+        <DevFeedback />
         <MotionProvider>
           {children}
           <StickyFooter />
         </MotionProvider>
+        <DialRoot />
 
       </body>
     </html>
