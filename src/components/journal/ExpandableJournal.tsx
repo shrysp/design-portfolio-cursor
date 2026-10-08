@@ -2,76 +2,104 @@
 
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { useOnClickOutside } from "usehooks-ts";
-import { motion, AnimatePresence } from "framer-motion";
-import Book, { BookHandle } from "./Book";
+import dynamic from "next/dynamic";
+import { motion, AnimatePresence, animate, useMotionValue, useTransform, MotionValue } from "framer-motion";
+import { IconArrowLeft, IconArrowRight, IconXmark } from "nucleo-micro-bold-essential";
+import { Button } from "@/components/ui/button";
 import { useCanHover } from "@/lib/useCanHover";
+import { JournalCover, JOURNAL_EMAIL } from "./journalPages";
+import type { Journal3DHandle } from "./Journal3D";
+import type { JournalFallbackHandle } from "./JournalFallback";
+import type { JournalHotspot } from "./journalScene";
 
-// Hook to get responsive scale and center position
-// The book always renders at desktop dimensions, but scales down on mobile
-function useResponsiveJournalScale(
-  desktopWidth: number,
-  desktopHeight: number,
-  mobileMargin: number = 16
-) {
-  const [state, setState] = useState({ 
-    scale: 1,
-    centerX: 0,
-    centerY: 0,
-  });
+// three.js stays out of the page bundle; it loads once the page is idle.
+const Journal3D = dynamic(() => import("./Journal3D"), { ssr: false });
+const JournalFallback = dynamic(() => import("./JournalFallback"), { ssr: false });
 
-  useEffect(() => {
-    function calculate() {
-      const screenWidth = window.innerWidth;
-      // Use visualViewport for accurate mobile height (accounts for dynamic address bar)
-      // Falls back to innerHeight for desktop browsers
-      const screenHeight = window.visualViewport?.height ?? window.innerHeight;
-      
-      // The spread (2 pages) width at full scale
-      const spreadWidth = desktopWidth * 2;
-      
-      // Calculate scale factor - scale down if spread doesn't fit
-      // Available width for spread = screen - margin
-      const availableWidth = screenWidth - mobileMargin;
-      const scale = Math.min(1, availableWidth / spreadWidth);
-      
-      // Also check height constraint
-      const availableHeight = screenHeight - mobileMargin;
-      const heightScale = Math.min(1, availableHeight / desktopHeight);
-      
-      // Use the smaller scale to ensure it fits both dimensions
-      const finalScale = Math.min(scale, heightScale);
-      
-      // Visual height after scaling (for vertical centering)
-      const visualHeight = desktopHeight * finalScale;
-      
-      // Center position - account for the fact that when open,
-      // the spread extends from -pageWidth/2 to +pageWidth*1.5 relative to origin
-      // So center of spread is at pageWidth/2 from container origin
-      // We want the spread center at screen center
-      const spreadCenterOffset = (desktopWidth / 2) * finalScale;
-      const centerX = (screenWidth / 2) - spreadCenterOffset;
-      const centerY = Math.max(mobileMargin / 2, (screenHeight - visualHeight) / 2);
-      
-      setState({ scale: finalScale, centerX, centerY });
-    }
+// The cover sits this far left of its wrapper (the -ml-2 below).
+const COVER_NUDGE_PX = 8;
+// Room around the resting cover for the 3D book to tilt, lift and cast its shadow.
+const REST_MARGIN_PX = 72;
 
-    calculate();
-    window.addEventListener('resize', calculate);
-    // Listen to visualViewport resize for mobile address bar changes
-    window.visualViewport?.addEventListener('resize', calculate);
-    return () => {
-      window.removeEventListener('resize', calculate);
-      window.visualViewport?.removeEventListener('resize', calculate);
-    };
-  }, [desktopWidth, desktopHeight, mobileMargin]);
-
-  return state;
+// Checked up front so a browser without WebGL goes straight to the CSS journal.
+let webglSupport: boolean | null = null;
+function supportsWebGL() {
+  webglSupport ??= document.createElement("canvas").getContext("webgl2") !== null;
+  return webglSupport;
 }
 
-// Sticker slap animation - mimics real physics of slapping a sticker on a surface
-function SlapSticker() {
+// The name sticker being stuck onto the cover: its left edge goes down first
+// with the rest curled up off the surface, then it is pressed flat from left to right.
+const STICKER = {
+  src: "/images/About/Name-Sticker.webp",
+  // The image's own proportions
+  aspect: 1006 / 738,
+  // The sticker is cut into vertical strips hinged to one another, so it can curl
+  strips: 6,
+  // How far each strip bends up from the one before it, in degrees
+  curlPerStrip: 14,
+  delay: 1,
+  arrive: 0.16,
+  press: 0.6,
+};
+
+// How far strip `index` is still lifted (1) or pressed down (0). Strips go
+// down one after another, like a thumb running along the sticker.
+function stripLift(index: number, progress: number) {
+  return Math.min(Math.max(index + 1 - progress * (STICKER.strips + 1), 0), 1);
+}
+
+function StickerStrip({ index, progress }: { index: number; progress: MotionValue<number> }) {
+  const rotateY = useTransform(progress, (value) => -stripLift(index, value) * STICKER.curlPerStrip);
+  // A strip darkens the further it has curled away from the light
+  const filter = useTransform(progress, (value) => {
+    let curl = 0;
+    for (let strip = 0; strip <= index; strip++) curl += stripLift(strip, value) * STICKER.curlPerStrip;
+    return `brightness(${1 - 0.35 * Math.sin((Math.min(curl, 90) * Math.PI) / 180)})`;
+  });
+  const isLast = index === STICKER.strips - 1;
+
+  return (
+    <motion.div
+      className="absolute top-0 h-full"
+      style={{
+        // The first strip is a slice of the sticker; each later one matches the strip it hangs off
+        left: index === 0 ? 0 : "100%",
+        width: index === 0 ? `${100 / STICKER.strips}%` : "100%",
+        transformOrigin: "left center",
+        transformStyle: "preserve-3d",
+        rotateY,
+      }}
+    >
+      {/* The image is laid out against the strip itself, but painted a pixel
+          further into a transparent border so no gap shows before the next strip */}
+      <motion.div
+        className="absolute inset-y-0 left-0 box-border"
+        style={{
+          right: isLast ? 0 : -1,
+          borderRight: isLast ? undefined : "1px solid transparent",
+          backgroundImage: `url("${STICKER.src}")`,
+          backgroundSize: `${STICKER.strips * 100}% 100%`,
+          backgroundPosition: `${(index / (STICKER.strips - 1)) * 100}% 0`,
+          backgroundRepeat: "no-repeat",
+          backgroundOrigin: "content-box",
+          backgroundClip: "border-box",
+          filter,
+        }}
+      />
+      {!isLast && <StickerStrip index={index + 1} progress={progress} />}
+    </motion.div>
+  );
+}
+
+function SlapSticker({ onLanded }: { onLanded: () => void }) {
   const [isReady, setIsReady] = useState(false);
+  const [hasLanded, setHasLanded] = useState(false);
+  // 0 = held by its left edge with the rest curled up, 1 = pressed flat
+  const progress = useMotionValue(0);
+  const shadowOpacity = useTransform(progress, [0, 1], [0, 0.35]);
+  const onLandedRef = useRef(onLanded);
+  onLandedRef.current = onLanded;
 
   useEffect(() => {
     // Wait for page to fully load before starting animation
@@ -88,14 +116,34 @@ function SlapSticker() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!isReady) return;
+    const land = () => {
+      setHasLanded(true);
+      onLandedRef.current();
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      progress.set(1);
+      land();
+      return;
+    }
+    const controls = animate(progress, 1, {
+      duration: STICKER.press,
+      delay: STICKER.delay + STICKER.arrive * 0.5,
+      ease: [0.3, 0, 0.2, 1],
+      onComplete: land,
+    });
+    return () => controls.stop();
+  }, [isReady, progress]);
+
   return (
     <motion.div
       className="z-[1] absolute bottom-1/2 right-1/2 translate-x-1/2 translate-y-1/2"
       initial={{
-        scale: 1.8,
-        rotate: -20,
+        scale: 1.12,
+        rotate: -3,
         opacity: 0,
-        y: -80,
+        y: -14,
       }}
       animate={isReady ? {
         scale: 1,
@@ -106,30 +154,28 @@ function SlapSticker() {
       transition={{
         type: "tween",
         ease: "easeOut",
-        duration: 0.1,
-        delay: 1,
+        duration: STICKER.arrive,
+        delay: STICKER.delay,
       }}
     >
-      {/* Impact shadow - grows quickly then settles */}
+      {/* Shadow - deepens as the sticker is pressed down */}
       <motion.div
         className="absolute inset-0 bg-black/25 rounded-full blur-sm scale-75 translate-y-3"
-        initial={{ opacity: 0, scale: 0.3 }}
-        animate={isReady ? {
-          opacity: [0, 0.5, 0.35],
-          scale: [0.3, 0.9, 0.75],
-        } : {}}
-        transition={{
-          duration: 0.35,
-          delay: 0.15,
-          times: [0, 0.6, 1],
-          ease: "easeOut",
-        }}
+        style={{ transform: "scale(0.75)", opacity: shadowOpacity }}
       />
+      {/* Always present so the sticker keeps its size; hidden while the strips stand in for it */}
       <img 
-        src="/images/About/Name-Sticker.webp" 
+        src={STICKER.src}
         alt="Hello, my name is Shreyas" 
-        className="size-60 object-contain relative z-10"
+        className={`size-60 object-contain relative z-10 ${hasLanded ? '' : 'opacity-0'}`}
       />
+      {!hasLanded && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center" aria-hidden="true">
+          <div className="relative w-full max-h-full" style={{ aspectRatio: STICKER.aspect, perspective: 700 }}>
+            <StickerStrip index={0} progress={progress} />
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -146,42 +192,62 @@ interface ExpandableJournalProps {
 export function ExpandableJournal({
   collapsedWidth = 210,
   collapsedHeight = 280,
-  expandedWidth: desktopExpandedWidth = 420,
-  expandedHeight: desktopExpandedHeight = 560,
+  expandedWidth = 420,
+  expandedHeight = 560,
 }: ExpandableJournalProps) {
   const canHover = useCanHover();
+  const [isMounted, setIsMounted] = useState(false);
+  // The journal is 3D wherever WebGL works, and falls back to the CSS book where it doesn't
+  const [mode, setMode] = useState<"3d" | "css">("3d");
+  const [is3DMounted, setIs3DMounted] = useState(false);
+  const [is3DReady, setIs3DReady] = useState(false);
+  const [is3DActive, setIs3DActive] = useState(false); // Journal is open in 3D
+  const [hasStickerLanded, setHasStickerLanded] = useState(false);
+  const [wantsOpen, setWantsOpen] = useState(false); // Clicked before the journal finished loading
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false); // Track exit animation
-  const [isMounted, setIsMounted] = useState(false);
+  const [isCoverHidden, setIsCoverHidden] = useState(false);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const [isKeyboardNavigating, setIsKeyboardNavigating] = useState(false); // Track keyboard navigation mode
   const [copied, setCopied] = useState(false);
-  const bookRef = useRef<BookHandle>(null);
-  const expandedContainerRef = useRef<HTMLDivElement>(null);
+  const journal3DRef = useRef<Journal3DHandle | null>(null);
+  const fallbackRef = useRef<JournalFallbackHandle | null>(null);
   const collapsedRef = useRef<HTMLDivElement>(null);
-  
-  // Get responsive scale and center position
-  // Book always renders at desktop dimensions, but we scale the container on mobile
-  const { scale, centerX, centerY } = useResponsiveJournalScale(
-    desktopExpandedWidth,
-    desktopExpandedHeight
-  );
-  
-  // Book dimensions stay at desktop size - scaling handles responsive
-  const expandedWidth = desktopExpandedWidth;
-  const expandedHeight = desktopExpandedHeight;
+  const restHostRef = useRef<HTMLDivElement>(null);
+  const isClosingRef = useRef(false);
 
-  // The collapsed element should be hidden if expanded OR if exit animation is in progress
-  const shouldHideCollapsed = isExpanded || isAnimatingOut;
+  // Once the 3D journal is ready it replaces the cover below for good, which
+  // stays behind as the click target. The sticker gets to land first.
+  const is3DLive = mode === "3d" && is3DReady && hasStickerLanded;
+
+  const isOpen = isExpanded || isAnimatingOut || is3DActive;
 
   // For portal rendering - only after mount
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  // Build the 3D journal once the page has settled, so opening it is instant
+  const prepare3D = useCallback(() => {
+    if (supportsWebGL()) {
+      setIs3DMounted(true);
+    } else {
+      setMode("css");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (window.requestIdleCallback) {
+      const handle = window.requestIdleCallback(prepare3D, { timeout: 3000 });
+      return () => window.cancelIdleCallback(handle);
+    }
+    const timer = setTimeout(prepare3D, 1500);
+    return () => clearTimeout(timer);
+  }, [prepare3D]);
+
   // Prevent body scrolling when journal is expanded
   useEffect(() => {
-    if (isExpanded || isAnimatingOut) {
+    if (isOpen) {
       // Save the current scroll position
       const scrollY = window.scrollY;
       // Prevent scrolling
@@ -215,29 +281,97 @@ export function ExpandableJournal({
         }
       };
     }
-  }, [isExpanded, isAnimatingOut]);
+  }, [isOpen]);
+
+  const open = useCallback(() => {
+    const cover = collapsedRef.current;
+    if (!cover) return;
+    if (mode === "3d") {
+      // The book lifts off the page from where it rests
+      setHasStickerLanded(true);
+      journal3DRef.current?.open();
+      setIs3DActive(true);
+    } else {
+      // Capture the position of the collapsed element before expanding
+      setOriginRect(cover.getBoundingClientRect());
+      setIsCoverHidden(true);
+    }
+    setIsExpanded(true);
+  }, [mode]);
+
+  const handleExpand = () => {
+    if (isOpen) return;
+    if (mode === "3d" && !is3DReady) {
+      prepare3D();
+      setWantsOpen(true);
+      return;
+    }
+    open();
+  };
+
+  // Open as soon as whichever journal we ended up with is ready
+  useEffect(() => {
+    if (!wantsOpen || (mode === "3d" && !is3DReady)) return;
+    setWantsOpen(false);
+    open();
+  }, [wantsOpen, mode, is3DReady, open]);
 
   // Close handler - defined first so it can be used in effects
   const handleClose = useCallback(async () => {
-    if (!isExpanded) return;
-    
-    // First reset pages to cover if needed
-    if (bookRef.current && bookRef.current.getCurrentPage() > 0) {
-      await bookRef.current.resetTocover();
+    if (!isExpanded || isClosingRef.current) return;
+    isClosingRef.current = true;
+
+    if (mode === "3d" && journal3DRef.current) {
+      // The book shuts, then flies home while the overlay fades behind it
+      await journal3DRef.current.close(() => setIsExpanded(false));
+      setIs3DActive(false);
+    } else {
+      // First reset pages to cover if needed
+      await fallbackRef.current?.reset();
+      // Start exit animation - keep collapsed hidden during animation
+      setIsAnimatingOut(true);
     }
-    
-    // Start exit animation - keep collapsed hidden during animation
-    setIsAnimatingOut(true);
     setIsExpanded(false);
-  }, [isExpanded]);
+    isClosingRef.current = false;
+  }, [isExpanded, mode]);
 
   // Called when AnimatePresence exit animation completes
   const handleExitComplete = useCallback(() => {
     setIsAnimatingOut(false);
+    setIsCoverHidden(false);
   }, []);
 
-  // Handle click outside when expanded
-  useOnClickOutside(expandedContainerRef as React.RefObject<HTMLElement>, handleClose);
+  // Without WebGL (or if the textures fail to load) use the CSS journal instead
+  const handle3DError = useCallback(() => {
+    setMode("css");
+    setIs3DMounted(false);
+    setIs3DActive(false);
+  }, []);
+
+  const copyEmail = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(JOURNAL_EMAIL);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // fallback if Clipboard API not available
+    }
+  }, []);
+
+  // Links on a 3D page are part of its texture, so the scene reports clicks on them
+  const handleHotspot = useCallback((hotspot: JournalHotspot) => {
+    if (hotspot.action === "copy-email") {
+      copyEmail();
+    } else if (hotspot.href) {
+      window.open(hotspot.href, "_blank", "noopener,noreferrer");
+    }
+  }, [copyEmail]);
+
+  const flipJournal = useCallback((direction: 1 | -1) => {
+    const book = mode === "3d" ? journal3DRef.current : fallbackRef.current;
+    if (direction === 1) book?.flipNext();
+    else book?.flipPrev();
+  }, [mode]);
 
   // Handle keyboard navigation (Escape, Arrow keys)
   useEffect(() => {
@@ -248,16 +382,16 @@ export function ExpandableJournal({
         handleClose();
         return;
       }
-      
+
       // Arrow key navigation
       if (event.key === "ArrowRight") {
         event.preventDefault();
         setIsKeyboardNavigating(true);
-        bookRef.current?.flipNext();
+        flipJournal(1);
       } else if (event.key === "ArrowLeft") {
         event.preventDefault();
         setIsKeyboardNavigating(true);
-        bookRef.current?.flipPrev();
+        flipJournal(-1);
       }
     }
     
@@ -274,814 +408,199 @@ export function ExpandableJournal({
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("mousemove", onMouseMove);
     };
-  }, [isExpanded, handleClose, isKeyboardNavigating]);
-
-  const handleExpand = () => {
-    if (!isExpanded && collapsedRef.current) {
-      // Capture the position of the collapsed element before expanding
-      const rect = collapsedRef.current.getBoundingClientRect();
-      setOriginRect(rect);
-      setIsExpanded(true);
-    }
-  };
-
-  const pages = [
-    {
-      front: <div className="relative isolate text-center h-full bg-linear-to-bl from-stone-700 to-stone-900 rounded-lg shadow-[inset_-2px_2px_2px_rgba(255,255,255,0.1)] overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-y-0 z-10 w-0.5 bg-black/80 blur-[2px]"></div>
-        <div className="absolute inset-y-0 z-10 left-2 w-2 bg-linear-to-l from-white/50 to-black blur-xs"></div>
-        <div className="absolute right-0 bottom-0 z-10 size-10 bg-linear-to-br from-transparent via-transparent via-50% to-white/20 blur-xs"></div>
-        <div className="relative z-20 h-full flex flex-col p-4 font-black text-4xl items-center justify-center text-white/80 rotate-3">
-          <img 
-            src="/images/About/Name-Sticker.webp" 
-            alt="Hello, my name is Shreyas" 
-            className="z-[1] size-56 absolute bottom-1/2 right-1/2 translate-x-1/2 translate-y-1/2 object-contain"
-          />
-          <div className="text-white absolute top-5/7 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-handwriting">Product Designer</div>
-          <div className="z-0 absolute inset-0"></div>
-        </div>
-      </div>,
-      back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0">
-          <img 
-            src="/images/About/Gojo-meme-sticker.webp"
-            alt="Shreyas Patil"
-            className=" z-[1]  absolute top-1/2 -translate-y-1/2 left-0 object-contain"
-          />
-        </div>
-      </div>,
-    },
-    {
-      front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden" >
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0 p-6">
-        <div className=" text-left  text-stone-500 w-3/4">I grew up in Pune.
-<br />I live and work in the Bay Area now.<br />
-<br />I studied engineering.<br />Somewhere along the way, I started paying more attention to how things felt.<br />
-<br />Most of what I make lives
-between people and systems.
-</div>
-          <img 
-            src="/images/About/golden-gate-bridge-Portrait.webp"
-            alt="Shreyas Patil"
-            className=" z-[1]  absolute top-3/5 -translate-y-1/2 -right-8 object-contain"
-          />
-        </div>
-      </div>,
-      back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0 p-6 flex items-center justify-center w-full h-full">
-          <div className="-space-y-20">
-            <div className="">Standards were high on this team!</div>
-            <img 
-              src="/images/About/Team Sticker.webp"
-              alt="Shreyas Patil"
-              className=" z-[1] size-96 object-contain"
-            />
-          </div>
-        </div>
-      </div>,
-    },
-    {
-      front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0 flex flex-col items-bottom justify-center ">
-          <img 
-            src="/images/About/Cricket Sticker.webp"
-            alt="Shreyas Patil"
-            className=" z-[1]  object-contain rotate-2"
-          />
-          <div className="-mt-10">I liked pushing myself here when no one was looking.</div>
-        </div>
-      </div>,
-      back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0 p-6">
-          <div className=" text-left  text-stone-500 underline underline-offset-4 decoration-stone-300 absolute top-10 left-1/4 -rotate-18">Iron Man 1</div>
-          <img
-            src="/images/About/Jarvis Sticker.webp"
-            alt="Shreyas Patil"
-            className=" z-[1]  object-contain -rotate-2"
-          />
-          <div className=" text-left  text-stone-500  ">This was the first time I wondered what it might feel like to collaborate with a computer. </div>
-        </div>
-      </div>,
-    },
-    {
-      front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0 p-6 -space-y-10">
-          <div className=" text-left  text-stone-500 w-3/4">I studied engineering and machine learning to get closer to that future. </div>
-          <img
-            src="/images/About/MLResearch Sticker.webp"
-            alt="Shreyas Patil"
-            className=" z-[1] w-90 object-contain -rotate-2 ml-20"
-          />
-          <div className=" text-stone-500 w-3/4 text-left ml-auto">I learned how systems worked.I wanted to shape how they felt.</div>
-        </div>
-      </div>,
-      back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0">
-          <div className="absolute w-75 top-8 flex items-center">
-            <img
-              src="/images/About/RIT Ritchie Sticker.webp"
-              alt="Shreyas Patil"
-              className=" z-[1]  object-contain -rotate-2"
-            />
-            <div className="absolute text-left  text-stone-500 w-1/3 -right-1/4 top-4 ">A reminder of where I was and what I was becoming</div>
-          </div>
-          <img
-            src="/images/About/Flight Ticket Sticker.webp"
-            alt="Shreyas Patil"
-            className=" z-[1] absolute h-140 right-0 bottom-1/4 translate-y-1/2 object-contain -rotate-89"
-          />
-        </div>
-      </div>,
-    },
-    {
-      front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0">
-          <div className="absolute right-5 top-5 flex items-center">
-            <div className="text-stone-500 text-left leading-6 p-4">studying Human–Computer Interaction to focus on how technology feels, not just how it works.</div>
-            <img
-              src="/images/About/RIT ID Sticker.webp"
-              alt="Shreyas Patil"
-              className=" z-[1] w-50 object-contain -rotate-2"
-            />
-          </div>
-          <div className="absolute -left-[242px] bottom-1/4 translate-y-1/2 flex items-center">
-            <img
-              src="/images/About/Flight Ticket Sticker.webp"
-              alt="Shreyas Patil"
-              className=" z-[1]  h-140  object-contain -rotate-89"
-            />
-            <div className="text-stone-500 text-left leading-6 p-4 ml-35 w-1/2">First time leaving home this far</div>
-          </div>
-        </div>
-      </div>,
-      back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0">
-          <div className="text-left text-2xl px-6 pt-6">I think best when my body is moving</div>
-          <div className="relative -space-y-2 mb-4">
-            <div className="relative flex">
-              <div className="-space-y-10 items-center ml-3">
-                <div className="text-sm text-stone-500  p-2">Mission Peak</div>
-                <img
-                  src="/images/About/Mission Peak Sticker.webp"
-                  alt="Shreyas Patil"
-                  className=" z-[1]  w-50  object-contain -rotate-2"
-                />
-              </div>
-              <div className=" items-center right-1/10 absolute">
-                <img
-                  src="/images/About/Lechworth Sticker.webp"
-                  alt="Shreyas Patil"
-                  className=" z-[1]  w-40   object-contain -rotate-1"
-                />
-                <div className="text-sm text-stone-500  p-2">Lechworth State Park</div>
-              </div>
-            </div>
-            <div className="text-stone-500">Long hikes is how I slowed my thoughts down.</div>
-          </div>
-          <div className="relative -space-y-2">
-            <div className="text-stone-500 text-left px-4">Forts in the Sahyadri mountains <br /> Growing up in Pune, surrounded by hills.</div>
-            <div className="relative flex gap-6">
-              <div className="items-center ml-3">
-                <img
-                  src="/images/About/Hike-2-Sticker.webp"
-                  alt="Shreyas Patil"
-                  className=" z-[1]  w-45  object-contain -rotate-2"
-                />
-              </div>
-              <div className=" items-center">
-                <img
-                  src="/images/About/Hike-1-Sticker.webp"
-                  alt="Shreyas Patil"
-                  className=" z-[1]  w-40   object-contain -rotate-1"
-                />
-              </div>
-            </div>
-          </div>
-          <img
-            src="/images/About/Scuba Sticker.webp"
-            alt="Shreyas Patil"
-            className=" z-[1] absolute left-9/10 top-5 object-contain -rotate-2"
-          />
-        </div>
-      </div>,
-    },
-    {
-      front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0">
-          <div className="text-stone-500 text-left absolute top-5/8 left-1/2 text-lg ">Different mediums. <br /> Same rhythm.</div>
-          <img
-            src="/images/About/Scuba Sticker.webp"
-            alt="Shreyas Patil"
-            className=" z-[1] absolute right-1/10 top-5 object-contain -rotate-2"
-          />
-          <img
-            src="/images/About/Bike Sticker.webp"
-            alt="Shreyas Patil"
-            className=" z-[2] absolute h-60  bottom-1/4 translate-y-1/2 object-contain "
-          />
-          <img
-            src="/images/About/Kayaking Stickers.webp"
-            alt="Shreyas Patil"
-            className=" z-[1] absolute h-50 right-0  bottom-1/6 translate-y-1/2 object-contain "
-          />
-        </div>
-      </div>,
-      back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0 -space-y-6 p-4 ">
-          <div className="text-left mb-2 text-2xl p-2">None of them started as &quot;the best.&quot;</div>
-          <div className="flex items-center">
-            <div className=" w-40 relative">
-              <img
-                src="/images/About/CR7 Sticker.webp"
-                alt="Shreyas Patil"
-                className=" z-[1]  size-50 top-0 right-0 object-cover"
-              />
-            </div>
-            <div className="text-left w-full text-stone-600">
-              <div className="text-left text-xl leading-8">Cristiano Ronaldo</div>
-              <div className="text-left text-xl leading-8">Relentless self-reinvention</div>
-              <div className="text-left text-sm leading-6 text-stone-500">When talent opened the door, discipline kept pushing the ceiling higher.</div>
-              <div className="text-left text-sm leading-6 text-stone-500">Showing up every day turned potential into dominance.</div>
-            </div>
-          </div>
-          <div className="flex items-center">
-            <div className="text-left w-full text-stone-600 pl-2">
-              <div className="text-left text-xl leading-8">Virat Kohli</div>
-              <div className="text-left text-xl leading-8">Total commitment to improvement</div>
-              <div className="text-left text-sm leading-6 text-stone-500">When he decided to take the game seriously, everything else reorganized around that decision.</div>
-              <div className="text-left text-sm leading-6 text-stone-500">Greatness followed consistency, not hype.</div>
-            </div>
-            <div className=" w-40 relative overflow-visible">
-              <img
-                src="/images/About/Virat Kohli Sticker.webp"
-                alt="Shreyas Patil"
-                className=" z-[1] object-cover"
-              />
-            </div>
-          </div>
-          <div className="flex items-center">
-            <div className="flex w-40">
-              <img
-                src="/images/About/Rahul Dravid Sticker.webp"
-                alt="Shreyas Patil"
-                className=" z-[1] object-cover"
-              />
-            </div>
-            <div className="text-left w-full text-stone-600">
-              <div className="text-left text-xl leading-8">Rahul Dravid</div>
-              <div className="text-left text-xl leading-8">Reliability under pressure</div>
-              <div className="text-left text-sm text-stone-500">When the stakes were highest, he delivered the most consistent, unflappable performances.</div>
-              <div className="text-left text-sm text-stone-500">His calm demeanor and rock-solid technique never wavered, even in high-pressure moments.</div>
-            </div>
-          </div>
-        </div>
-      </div>,
-    },
-    {
-      front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0 -space-y-6 p-4 ">
-          <div className="text-left mb-2 text-2xl p-2">None of them stopped at the interface.</div>
-          <div className="flex items-center gap-2">
-            <div className="-ml-10 w-80 relative">
-              <img
-                src="/images/About/Jordan Singer Sticker.webp"
-                alt="Shreyas Patil"
-                className=" z-[1] top-0 right-0 object-cover"
-              />
-            </div>
-            <div className="text-left w-full text-stone-600">
-              <div className="text-left text-xl leading-8">Jordan Singer</div>
-              <div className="text-left text-xl leading-8">End-to-end ownership</div>
-              <div className="text-left text-sm leading-6 text-stone-500">Designing ideas and building them, refusing to separate Design from execution.</div>
-              <div className="text-left text-sm leading-6 text-stone-500">Craft doesn&apos;t stop at the mockup.</div>
-            </div>
-          </div>
-          <div className="flex items-center">
-            <div className="text-left w-full text-stone-600 pl-4">
-              <div className="text-left text-xl leading-8">Soleio</div>
-              <div className="text-left text-xl leading-8">Seeing farther than the interface</div>
-              <div className="text-left text-sm leading-6 text-stone-500">Thinking in systems, leverage, and second-order effects — not just screens.</div>
-              <div className="text-left text-sm leading-6 text-stone-500">Great products are worn, not just used.</div>
-            </div>
-            <div className=" w-40 relative overflow-visible">
-              <img
-                src="/images/About/Soleio Sticker.webp"
-                alt="Shreyas Patil"
-                className=" z-[1] object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </div>,
-      back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0 p-4 space-y-4 ">
-          <div className="text-left mb-2 text-2xl p-2">Readings that stayed with me</div>
-          <div className="flex items-center">
-            <div className="  relative">
-              <img
-                src="/images/About/Agent Cloud Sticker.webp"
-                alt="Shreyas Patil"
-                className=" z-[1] top-0 right-0 object-cover w-50"
-              />
-            </div>
-            <div className="text-left w-full text-stone-600">
-              <div className="text-left text-xl leading-8">Agent Cloud</div>
-              <div className="text-left text-sm leading-6 text-stone-500">Made me rethink software as something you collaborate with — not something you operate.</div>
-            </div>
-          </div>
-          <div className="flex items-center ml-2">
-            <div className="text-left w-full text-stone-600">
-              <div className="text-left text-xl leading-8">Invisible Details of Interaction Design — Rauno</div>
-              <div className="text-left text-sm leading-6 text-stone-500">A reminder that the best interactions disappear because they respect the user&apos;s attention.</div>
-            </div>
-            <div className=" w-40 relative overflow-visible">
-              <img
-                src="/images/About/Interaction Sticker.webp"
-                alt="Shreyas Patil"
-                className=" z-[1] object-cover"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col items-start">
-            <div className="flex h-44">
-              <img
-                src="/images/About/Apple Sticker.webp"
-                alt="Shreyas Patil"
-                className=" z-[1] object-cover h-44"
-              />
-            </div>
-            <div className="text-left w-full text-stone-600 ml-2">
-              <div className="text-left text-xl leading-8">Early Apple UI (Lisa / Apple II / Macintosh)</div>
-              <div className="text-left text-sm leading-6 text-stone-500">Designing interactions before patterns existed — solving human problems, not UI problems.</div>
-            </div>
-          </div>
-        </div>
-      </div>,
-    },
-    {
-      front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0 px-4 ">
-          <div className="flex items-center gap-2">
-            <div className="-ml-5 w-100 relative">
-              <img
-                src="/images/About/Spiderverse Sticker.webp"
-                alt="Shreyas Patil"
-                className=" z-[1] top-0 right-0 object-cover w-50"
-              />
-            </div>
-            <div className="text-left w-full text-stone-600">
-              <div className="text-left text-xl leading-8">Spider-Verse</div>
-              <div className="text-left text-sm leading-6 text-stone-500">Reminded me that progress often starts before certainty — with a leap, not a plan.</div>
-            </div>
-          </div>
-          <div className="flex flex-col items-start">
-            <div className="flex w-full">
-              <img
-                src="/images/About/Shoe Dog Sticker.webp"
-                alt="Shreyas Patil"
-                className=" z-[1] object-cover"
-              />
-            </div>
-            <div className="text-left w-full text-stone-600 pl-4">
-              <div className="text-left text-xl leading-8">Shoe Dog — Phil Knight</div>
-              <div className="text-left text-sm leading-6 text-stone-500">Building something meaningful is messy, unglamorous, and worth doing anyway.</div>
-            </div>
-          </div>
-        </div>
-      </div>,
-      back: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0 p-4 ">
-          <div className="text-left mb-2 text-2xl p-2">Things I remember cities by </div>
-          <div className=" absolute top-16 left-1/3 -translate-x-1/2">
-            <div className="absolute text-left  text-stone-500 -right-8 top-6 rotate-15">SpicyMoon - New York</div>
-            <img
-              src="/images/About/SpicyMoon Sticker.webp"
-              alt="Shreyas Patil"
-              className=" z-[1] w-50  object-contain rotate-90"
-            />
-          </div>
-          <div className=" absolute bottom-4">
-            <div className="absolute text-left  text-stone-500 -right-4 top-4 rotate-30">Feels Like Home</div>
-            <div className="absolute text-left  text-stone-500 -right-4 bottom-5 -rotate-30">Surmai - Sunnyvale</div>
-            <img
-              src="/images/About/Surmai Sticker.webp"
-              alt="Shreyas Patil"
-              className=" z-[1] w-70  object-contain -rotate-2"
-            />
-          </div>
-          <div className=" absolute w-60  left-3/4 top-2/3 -translate-y-1/2">
-            <div className="absolute text-left  text-stone-500 left-0 top-0 -rotate-35">Shabree - Pune</div>
-            <img
-              src="/images/About/Shabree Sticker.webp"
-              alt="Shreyas Patil"
-              className=" z-[1]  object-contain -rotate-2"
-            />
-          </div>
-          <div className="absolute w-[448px] left-9/12 top-3">
-            <img
-              src="/images/About/Veniros Sticker.webp"
-              alt="Shreyas Patil"
-              className=" z-[1]  object-contain "
-            />
-          </div>
-        </div>
-      </div>,
-    },
-    {
-      front: <div className="relative text-center h-full w-full bg-linear-to-bl from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0">
-          <div className="absolute w-120 right-2/12 top-3">
-            <img
-              src="/images/About/Veniros Sticker.webp"
-              alt="Shreyas Patil"
-              className=" z-[1] "
-            />
-            <div className="absolute text-left  text-stone-500 -right-4 bottom-2 ">Veniros Cafe - New York</div>
-          </div>
-          <div className=" absolute w-60  -left-1/4 top-2/3 -translate-y-1/2">
-            <img
-              src="/images/About/Shabree Sticker.webp"
-              alt="Shreyas Patil"
-              className="z-[1]  object-contain -rotate-2 "
-            />
-            <div className="absolute text-left  text-stone-500 -right-4 bottom-5 -rotate-30">Post Hike Rituals</div>
-          </div>
-          <div className=" absolute  w-70 -right-5  bottom-0">
-            <div className="absolute text-left  text-stone-500 right-8 top-4 rotate-30">Dumpling Story - SF</div>
-            <img
-              src="/images/About/Dumpling Story Sticker.webp"
-              alt="Shreyas Patil"
-              className=" z-[1]  object-contain "
-            />
-          </div>
-        </div>
-      </div>,
-      back: <div className="relative text-center h-full w-full bg-linear-to-bl p-12 from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl ">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="p-12 bg-white w-[744px] h-full">
-          <div className="text-left mb-2 text-lg leading-9 font-handwriting">Making it feel right <br />
-            I&apos;ve always cared about how things feel, not just how they work. The products I admire most don&apos;t demand attention — they earn it quietly, through rhythm, restraint, and care.
-            For me, design is about showing up in the details. The moments most people don&apos;t notice. The timing of an animation. The weight of a transition. The absence of friction.
-            I believe great experiences come from deep understanding — of people, systems, and context — and from taking responsibility end-to-end, not stopping at the interface.
-            I&apos;m drawn to work that blends discipline with intuition, practicality with emotion. Work that feels inevitable once it exists.
-            If something feels right, it&apos;s usually because someone pushed themselves further than necessary — even when no one was watching.
-          </div>
-        </div>
-      </div>,
-    },
-    {
-      front: <div className="relative text-center h-full w-full bg-linear-to-bl p-12  from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="relative h-full">
-          <div className="p-12 bg-white w-[744px] h-full right-1.5 absolute">
-            <div className="text-left mb-2 text-lg leading-9 font-handwriting">Making it feel right <br />
-              I&apos;ve always cared about how things feel, not just how they work. The products I admire most don&apos;t demand attention — they earn it quietly, through rhythm, restraint, and care.
-              For me, design is about showing up in the details. The moments most people don&apos;t notice. The timing of an animation. The weight of a transition. The absence of friction.
-              I believe great experiences come from deep understanding — of people, systems, and context — and from taking responsibility end-to-end, not stopping at the interface.
-              I&apos;m drawn to work that blends discipline with intuition, practicality with emotion. Work that feels inevitable once it exists.
-              If something feels right, it&apos;s usually because someone pushed themselves further than necessary — even when no one was watching.
-            </div>
-          </div>
-        </div>
-      </div>,
-      back: <div className="relative text-center h-full w-full bg-linear-to-bl p-12 from-stone-50 to-stone-200 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.3),inset_2px_2px_2px_rgba(255,255,255,1)] rounded-r-lg rounded-l-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="">
-          <div className="text-left mb-2 font-handwriting">
-            <div className="text-left text-2xl text-stone-600 leading-loose">Say hi,</div>
-            <div className="text-left text-lg text-stone-600 leading-loose">I&apos;m always happy to talk about design, and the small details that make things feel right.<br />I&apos;m at a point where I&apos;m excited to take on my next full-time product design role. If you think my approach could be useful, I&apos;d love to talk.</div>
-          </div>
-          <div className="text-left text-stone-600 leading-loose mt-8 space-y-2">
-            <button
-              type="button"
-              onClick={async (e) => {
-                e.stopPropagation();
-                try {
-                  await navigator.clipboard.writeText('shreyaspatil.design@gmail.com');
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 1500);
-                } catch {
-                  // fallback if Clipboard API not available
-                }
-              }}
-              className="relative block pointer-events-auto transition-colors duration-200 hover:underline hover:underline-offset-6 hover:text-stone-700 text-stone-600 decoration-stone-400 cursor-pointer bg-transparent border-0 px-0 text-left"
-            >
-              shreyaspatil.design@gmail.com
-              <span
-                className={`ml-2 transition-opacity duration-200 text-green-600 text-base font-semibold ${
-                  copied ? 'opacity-100' : 'opacity-0'
-                }`}
-                aria-live="polite"
-              >
-                Copied!
-              </span>
-            </button>
-            <a 
-              href="https://x.com/ShreyasPatil_" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="block pointer-events-auto transition-colors duration-200 hover:underline hover:underline-offset-6 hover:text-stone-700 text-stone-600 decoration-stone-400 cursor-pointer"
-            >
-              Twitter/X: @ShreyasPatil_
-            </a>
-            <a 
-              href="https://www.linkedin.com/in/shreyastpatil/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="block pointer-events-auto transition-colors duration-200 hover:underline hover:underline-offset-6 hover:text-stone-700 text-stone-600 decoration-stone-400 cursor-pointer"
-            >
-              LinkedIn: @shreyastpatil
-            </a>
-          </div>
-        </div>
-      </div>,
-    },
-    {
-      front: <div className="relative text-center h-full w-full bg-linear-to-bl p-12  from-stone-50 to-stone-100 shadow-[inset_-1px_-1px_2px_rgba(0,0,0,0.3),inset_-2px_2px_2px_rgba(255,255,255,1)] rounded-l-lg rounded-r-2xl overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-      </div>,
-      back: <div className="relative isolate text-center h-full bg-linear-to-bl from-stone-700 to-stone-900 rounded-lg shadow-[inset_-2px_2px_4px_rgba(255,255,255,0.1)] overflow-hidden">
-        <img 
-          src="/images/About/Paper-Texture.webp" 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none opacity-50"
-        />
-        <div className="absolute inset-0 z-10 bg-linear-to-bl from-white/0 from-0% via-white/10 via-30%  to-stone-900/20 rounded-lg opacity-50" ></div>
-        <div className="absolute inset-y-0 z-10 w-0.5 bg-black/80 blur-[2px]"></div>
-        <div className="absolute inset-y-0 z-10 left-1 w-0.5 bg-linear-to-l from-white/50 to-black blur-xs"></div>
-      </div>,
-    },
-  ];
-
-  // Calculate initial position from origin rect (FLIP animation)
-  // Use originRect for POSITION only, use known props for SCALE to avoid measurement discrepancies
-  const initialX = originRect ? originRect.left : centerX;
-  const initialY = originRect ? originRect.top : centerY;
-  // Use the prop values for scale to ensure exact match with collapsed element
-  const initialScaleX = collapsedWidth / expandedWidth;
-  const initialScaleY = collapsedHeight / expandedHeight;
+  }, [isExpanded, flipJournal, handleClose, isKeyboardNavigating]);
 
   // We need to render the AnimatePresence outside the portal conditional
   // to properly handle exit animations
   const portalWrapper = isMounted ? createPortal(
-    <AnimatePresence onExitComplete={handleExitComplete}>
-      {isExpanded && (
-        <>
-          {/* Overlay */}
-          <motion.div
-            key="overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 w-full h-[100dvh] bg-black/60 backdrop-blur-sm z-[9998] overflow-hidden touch-none overscroll-none"
-            style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
-            onClick={handleClose}
-          />
-
-          {/* Keyboard navigation indicators */}
-          <motion.div
-            key="keyboard-hints"
-            className="fixed z-[9998] pointer-events-none flex items-center gap-3 -translate-x-1/2 left-1/2 top-10 hidden sm:flex"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ delay: 0.3, duration: 0.3 }}
-          >
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/10 shadow-lg">
-              <div className="flex items-center gap-1.5">
-                <kbd className="px-1.5 py-0.5 text-[10px] font-medium bg-white/15 rounded text-white/90 shadow-sm border border-white/10">←</kbd>
-                <kbd className="px-1.5 py-0.5 text-[10px] font-medium bg-white/15 rounded text-white/90 shadow-sm border border-white/10">→</kbd>
-                <span className="text-[11px] text-white/60 ml-1">flip</span>
-              </div>
-              <div className="w-px h-3 bg-white/20" />
-              <div className="flex items-center gap-1.5">
-                <kbd className="px-1.5 py-0.5 text-[10px] font-medium bg-white/15 rounded text-white/90 shadow-sm border border-white/10">esc</kbd>
-                <span className="text-[11px] text-white/60 ml-1">close</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Expanded state - animates from collapsed position to center, scales on mobile */}
-          <motion.div
-            key="expanded-journal"
-            ref={expandedContainerRef}
-            className="fixed z-[9999] pointer-events-auto origin-top-left"
-            style={{
-              width: expandedWidth,
-              height: expandedHeight,
-              borderRadius: 12,
-            }}
-            initial={{ 
-              left: initialX,
-              top: initialY,
-              rotate: 3,
-              scaleX: initialScaleX,
-              scaleY: initialScaleY,
-            }}
-            animate={{ 
-              left: centerX,
-              top: centerY,
-              scaleX: scale,
-              scaleY: scale,
-              rotate: 0,
-            }}
-            exit={{ 
-              left: initialX + 9,
-              top: initialY - 1,
-              scaleX: initialScaleX,
-              scaleY: initialScaleY,
-              rotate: 3,
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 250,
-              damping: 30,
-            }}
-          >
-            <Book 
-              ref={bookRef}
-              pageWidth={expandedWidth}
-              pageHeight={expandedHeight}
-              pages={pages}
-              isExpanded={isExpanded}
-              disableHover={isKeyboardNavigating}
+    <>
+      <AnimatePresence onExitComplete={handleExitComplete}>
+        {isExpanded && (
+          <>
+            {/* Overlay */}
+            <motion.div
+              key="overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 w-full h-[100dvh] bg-black/60 backdrop-blur-sm z-[9998] overflow-hidden touch-none overscroll-none"
+              style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
+              onClick={handleClose}
             />
-          </motion.div>
-        </>
+
+            {/* Controls - flip and close, for anyone not using the keyboard or the page itself */}
+            <motion.div
+              key="journal-controls"
+              data-journal-controls=""
+              className="fixed z-[10000] flex items-center gap-3 -translate-x-1/2 left-1/2 top-6 sm:top-10"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ delay: 0.3, duration: 0.3 }}
+            >
+              <Button
+                type="button"
+                variant="iconPrimary"
+                size="icon"
+                showHighlight
+                aria-label="Previous page"
+                title="Previous page (←)"
+                onClick={() => flipJournal(-1)}
+                className="size-8"
+              >
+                <IconArrowLeft size={14} />
+              </Button>
+              <Button
+                type="button"
+                variant="iconPrimary"
+                size="icon"
+                showHighlight
+                aria-label="Next page"
+                title="Next page (→)"
+                onClick={() => flipJournal(1)}
+                className="size-8"
+              >
+                <IconArrowRight size={14} />
+              </Button>
+              <Button
+                type="button"
+                variant="back"
+                showHighlight
+                aria-label="Close journal"
+                title="Close (Esc)"
+                onClick={handleClose}
+                className="h-8 pl-2 pr-2.5 gap-1 text-sm"
+              >
+                <IconXmark size={14} />
+                Esc
+              </Button>
+            </motion.div>
+
+            {/* Confirms a copy made from a 3D page, which can't show its own "Copied!" */}
+            {mode === "3d" && copied && (
+              <motion.div
+                key="copied"
+                role="status"
+                className="fixed z-[10000] pointer-events-none -translate-x-1/2 left-1/2 bottom-10 px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/10 shadow-lg text-[11px] text-white/90"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.2 }}
+              >
+                Email copied
+              </motion.div>
+            )}
+
+            {/* CSS journal - animates from collapsed position to center, scales on mobile */}
+            {mode === "css" && (
+              <JournalFallback
+                key="expanded-journal"
+                apiRef={fallbackRef}
+                originRect={originRect}
+                collapsedWidth={collapsedWidth}
+                collapsedHeight={collapsedHeight}
+                expandedWidth={expandedWidth}
+                expandedHeight={expandedHeight}
+                disableHover={isKeyboardNavigating}
+                copied={copied}
+                onCopyEmail={copyEmail}
+                onDismiss={handleClose}
+              />
+            )}
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* 3D journal - rests in the header below and moves here while open */}
+      {mode === "3d" && is3DMounted && (
+        <Journal3D
+          apiRef={journal3DRef}
+          restHostRef={restHostRef}
+          restWidth={collapsedWidth}
+          active={is3DActive}
+          onReady={() => setIs3DReady(true)}
+          onError={handle3DError}
+          onDismiss={handleClose}
+          onHotspot={handleHotspot}
+        />
       )}
-    </AnimatePresence>,
+    </>,
     document.body
   ) : null;
+
+  const isCoverInvisible = is3DLive || isCoverHidden;
 
   return (
     <>
       {portalWrapper}
 
-      {/* Collapsed state - in header position */}
-      <motion.div
-        ref={collapsedRef}
-        className={`cursor-pointer relative group perspective-1000 ${shouldHideCollapsed ? 'invisible' : ''}`}
-        role="button"
-        aria-label="Open journal"
-        tabIndex={shouldHideCollapsed ? -1 : 0}
-        style={{ 
-          rotate: 3,
-          width: collapsedWidth,
-          height: collapsedHeight,
-          borderRadius: 12,
-        }}
-        onClick={handleExpand}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            handleExpand();
-          }
-        }}
-        whileHover={canHover ? {
-          rotate: -3,
-          transition: { duration: 0.2 }
-        } : undefined}
-        transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-        }}
-      >
-        
-        
-        {/* Collapsed cover - uses expanded content scaled down by same factor as animation */}
-        <div className="w-full h-full rounded-l-sm rounded-r-lg overflow-hidden shadow-md -ml-2 ">
-          {/* Inner wrapper at expanded dimensions, scaled down to match animation end state */}
-          <div 
-            className="origin-top-left"
-            style={{
-              width: expandedWidth,
-              height: expandedHeight,
-              transform: `scale(${collapsedWidth / expandedWidth}, ${collapsedHeight / expandedHeight})`,
-            }}
-          >
-            {/* Exact same content as expanded front cover */}
-            <div className="relative isolate text-center h-full bg-linear-to-bl from-stone-700 to-stone-900 rounded-lg shadow-[inset_-2px_2px_2px_rgba(255,255,255,0.1)] overflow-hidden ">
-              <img 
-                src="/images/About/Paper-Texture.webp" 
-                alt="" 
-                className="absolute inset-0 w-full h-full object-cover mix-blend-multiply pointer-events-none"
-              />
-              <div className="absolute inset-y-0 z-10 w-0.5 bg-black/80 blur-[2px]"></div>
-              <div className="absolute inset-y-0 z-10 left-2 w-2 bg-linear-to-l from-white/50 to-black blur-xs "></div>
-              <div className="absolute right-0 bottom-0 z-10 size-10 bg-linear-to-br from-transparent via-transparent via-50% to-white/20 blur-xs"></div>
-              <div className="relative z-20 h-full flex flex-col p-4 font-black text-4xl items-center justify-center text-white/80 ">
-                <SlapSticker />
-                <div className="text-white absolute top-5/7 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-handwriting rotate-3 -ml-2">Product Designer</div>
-                <div className="z-0 absolute inset-0"></div>
-              </div>
+      <div className="relative" style={{ width: collapsedWidth, height: collapsedHeight }}>
+        {/* Collapsed state - in header position. Stays as the click target once the 3D journal takes over */}
+        <motion.div
+          ref={collapsedRef}
+          className={`cursor-pointer relative group perspective-1000 ${isCoverInvisible ? 'opacity-0' : ''}`}
+          role="button"
+          aria-label="Open journal"
+          tabIndex={isOpen ? -1 : 0}
+          style={{ 
+            rotate: 3,
+            width: collapsedWidth,
+            height: collapsedHeight,
+            borderRadius: 12,
+          }}
+          onClick={handleExpand}
+          onPointerEnter={prepare3D}
+          onPointerMove={(e) => {
+            if (e.pointerType === "mouse") journal3DRef.current?.hover({ x: e.clientX, y: e.clientY });
+          }}
+          onPointerLeave={() => journal3DRef.current?.hover(null)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              handleExpand();
+            }
+          }}
+          whileHover={canHover ? {
+            rotate: -3,
+            transition: { duration: 0.2 }
+          } : undefined}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
+          }}
+        >
+          {/* Collapsed cover - uses expanded content scaled down by same factor as animation */}
+          <div className="w-full h-full rounded-l-sm rounded-r-lg overflow-hidden shadow-md -ml-2 ">
+            {/* Inner wrapper at expanded dimensions, scaled down to match animation end state */}
+            <div 
+              className="origin-top-left"
+              style={{
+                width: expandedWidth,
+                height: expandedHeight,
+                transform: `scale(${collapsedWidth / expandedWidth}, ${collapsedHeight / expandedHeight})`,
+              }}
+            >
+              {/* Exact same content as expanded front cover */}
+              <JournalCover sticker={<SlapSticker onLanded={() => setHasStickerLanded(true)} />} />
             </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+
+        {/* Where the 3D journal rests, centred on the cover */}
+        <div
+          ref={restHostRef}
+          aria-hidden="true"
+          className="absolute pointer-events-none"
+          style={{
+            top: -REST_MARGIN_PX,
+            bottom: -REST_MARGIN_PX,
+            left: -REST_MARGIN_PX - COVER_NUDGE_PX,
+            right: -REST_MARGIN_PX + COVER_NUDGE_PX,
+            visibility: is3DLive ? "visible" : "hidden",
+          }}
+        />
+      </div>
     </>
   );
 }

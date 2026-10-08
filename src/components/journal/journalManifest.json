@@ -1,0 +1,79 @@
+{
+  "pageWidth": 420,
+  "pageHeight": 560,
+  "glossAlpha": 160,
+  "version": "muzx1p9p",
+  "sides": [
+    "/images/journal/pages/00.webp",
+    "/images/journal/pages/01.webp",
+    "/images/journal/pages/02.webp",
+    "/images/journal/pages/03.webp",
+    "/images/journal/pages/04.webp",
+    "/images/journal/pages/05.webp",
+    "/images/journal/pages/06.webp",
+    "/images/journal/pages/07.webp",
+    "/images/journal/pages/08.webp",
+    "/images/journal/pages/09.webp",
+    "/images/journal/pages/10.webp",
+    "/images/journal/pages/11.webp",
+    "/images/journal/pages/12.webp",
+    "/images/journal/pages/13.webp",
+    "/images/journal/pages/14.webp",
+    "/images/journal/pages/15.webp",
+    "/images/journal/pages/16.webp",
+    "/images/journal/pages/17.webp",
+    "/images/journal/pages/18.webp",
+    "/images/journal/pages/19.webp",
+    "/images/journal/pages/20.webp",
+    "/images/journal/pages/21.webp"
+  ],
+  "singleSides": [
+    "/images/journal/pages/00.webp",
+    "/images/journal/pages/01.webp",
+    "/images/journal/pages/02.webp",
+    "/images/journal/pages/03.webp",
+    "/images/journal/pages/04.webp",
+    "/images/journal/pages/05.webp",
+    "/images/journal/pages/06.webp",
+    "/images/journal/pages/07.webp",
+    "/images/journal/pages/08.webp",
+    "/images/journal/pages/09.webp",
+    "/images/journal/pages/10.webp",
+    "/images/journal/pages/11.webp",
+    "/images/journal/pages/12.webp",
+    "/images/journal/pages/13.webp",
+    "/images/journal/pages/14.webp",
+    "/images/journal/pages/15.webp",
+    "/images/journal/pages/16.webp",
+    "/images/journal/pages/single-17.webp",
+    "/images/journal/pages/single-18.webp",
+    "/images/journal/pages/19.webp"
+  ],
+  "singleBackCover": "/images/journal/pages/21.webp",
+  "hotspots": [
+    {
+      "side": 19,
+      "x": 0.1,
+      "y": 0.48125,
+      "width": 0.5460565476190476,
+      "height": 0.05,
+      "action": "copy-email"
+    },
+    {
+      "side": 19,
+      "x": 0.1,
+      "y": 0.54375,
+      "width": 0.8,
+      "height": 0.05,
+      "href": "https://x.com/ShreyasPatil_"
+    },
+    {
+      "side": 19,
+      "x": 0.1,
+      "y": 0.60625,
+      "width": 0.8,
+      "height": 0.05,
+      "href": "https://www.linkedin.com/in/shreyastpatil/"
+    }
+  ]
+}

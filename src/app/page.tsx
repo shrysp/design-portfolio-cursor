@@ -94,12 +94,13 @@ export default function Home() {
                 />
               </motion.div>
 
-              {/* Stickers — appear after journal, stagger in */}
+              {/* Stickers — appear after journal, stagger in. They overhang the
+                  section below, so they must not swallow its hovers and clicks */}
               <motion.div
                 variants={stickerGroupVariants}
                 initial="hidden"
                 animate="visible"
-                className="contents"
+                className="contents pointer-events-none"
               >
                 <motion.div variants={stickerVariants} className="hidden md:flex absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 gap-2">
                   <img
