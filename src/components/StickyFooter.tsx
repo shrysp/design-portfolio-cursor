@@ -66,8 +66,10 @@ export default function StickyFooter() {
         const zIndex = parseInt(computedStyle.zIndex);
         const position = computedStyle.position;
         
-        // Check if element is fixed/absolute with high z-index (overlay range)
-        if ((position === 'fixed' || position === 'absolute') && zIndex >= 9990) {
+        // Check if element is fixed/absolute with high z-index (overlay range).
+        // Layers that are hidden, or that let clicks through, aren't covering the page.
+        const isCovering = computedStyle.visibility !== 'hidden' && computedStyle.pointerEvents !== 'none';
+        if ((position === 'fixed' || position === 'absolute') && zIndex >= 9990 && isCovering) {
           // Additional check: overlay typically covers full viewport
           const rect = el.getBoundingClientRect();
           if (rect.width >= window.innerWidth * 0.9 && rect.height >= window.innerHeight * 0.9) {

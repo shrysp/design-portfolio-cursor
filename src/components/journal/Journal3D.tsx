@@ -86,7 +86,9 @@ export default function Journal3D({ apiRef, restHostRef, restWidth, active, onRe
       aria-modal="true"
       aria-label="Journal"
       aria-hidden={!active}
-      className="fixed inset-0 z-[9999] h-[100dvh] w-full touch-none overscroll-none"
+      // Only raised above the page while open. The footer hides itself whenever it
+      // finds a full-screen layer with a high z-index, and this one is always mounted.
+      className={`fixed inset-0 h-[100dvh] w-full touch-none overscroll-none ${active ? "z-[9999]" : ""}`}
       style={{ visibility: active ? "visible" : "hidden", pointerEvents: active ? "auto" : "none" }}
     />
   );
