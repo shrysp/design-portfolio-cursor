@@ -30,6 +30,11 @@ export interface JournalSceneOptions {
   sides: string[];
   // Shown on the back of the last page in the single layout, so the final turn reveals a cover rather than blank paper.
   backCover?: string;
+  // The cover without its name sticker, and where the sticker belongs on it
+  // (centre and width as fractions of the page, rotation in CSS degrees).
+  // The sticker is stuck on by `stickOn` and then becomes part of the cover.
+  coverBare: string;
+  coverSticker: { src: string; x: number; y: number; width: number; aspect: number; rotation: number };
   hotspots: JournalHotspot[];
   pageWidth: number;
   pageHeight: number;
@@ -43,6 +48,8 @@ export interface JournalSceneOptions {
 }
 
 export interface JournalScene {
+  // Sticks the name sticker onto the cover: left edge first, then pressed flat.
+  stickOn: () => void;
   // Points the resting cover at the cursor (viewport coordinates), or lets it settle.
   hover: (point: { x: number; y: number } | null) => void;
   open: () => void;
@@ -141,7 +148,32 @@ const TEXTURES = { loadRadius: 2, keepRadius: 3, pinnedSheets: 2 };
 // Stickers catch the light: a soft sheen plus a tight glint. `dome` bows the
 // surface used for the reflection, so the glint is a spot that slides across
 // the stickers as the page turns or tilts, rather than the whole page flashing.
-const GLOSS = { sheen: 0.05, sheenPower: 14, glint: 0.2, glintPower: 45, dome: 0.9 };
+const GLOSS = { sheen: 0.05, sheenPower: 14, glint: 0.2, glintPower: 45, dome: 0.9, fadeInTime: 1.2 };
+
+// The name sticker going onto the cover. It arrives curled up off the surface,
+// held down at its bottom-left corner, and is pressed flat toward the top-right.
+const STICKER = {
+  columns: 28,
+  rows: 20,
+  // Samples along the diagonal used to work out the curl
+  samples: 56,
+  // Light catches the lifted part: a bright band where it bends through this
+  // angle, which travels across the sticker ahead of the press.
+  shineAngle: THREE.MathUtils.degToRad(30),
+  shinePower: 40,
+  shine: 0.4,
+  // How far the far end starts curled up, in degrees
+  curl: 84,
+  // The press runs along the sticker like a thumb; this is how much of its length is bending at once
+  band: 1 / 7,
+  arriveTime: 0.16,
+  pressTime: 0.6,
+  // Where it starts from before settling: a little big, turned, and above its place
+  startScale: 1.12,
+  startTurn: THREE.MathUtils.degToRad(6),
+  startRise: 14 / 420,
+  clearance: 0.002,
+};
 
 // Lit so that a flat sheet facing the camera shows its texture at exactly
 // full brightness, which keeps the 3D cover identical to the DOM one.
@@ -245,10 +277,18 @@ const SHEET_FRAGMENT_PRELUDE = /* glsl */ `
   uniform float uCornerRadius;
   uniform float uCrease;
   uniform float uGlossRange;
+  uniform float uGlossAmount;
   varying vec2 vSheetUv;
 `;
 
-function createSheetUniforms(paper: THREE.Texture, pageSize: THREE.Vector2, cornerRadius: number, glossRange: number) {
+function createSheetUniforms(
+  paper: THREE.Texture,
+  pageSize: THREE.Vector2,
+  cornerRadius: number,
+  glossRange: number,
+  // Shared by every sheet, so the shine can be faded in as one
+  glossAmount: { value: number }
+) {
   return {
     uBendAngle: { value: 0 },
     uFold: { value: new THREE.Vector2(1, 0) },
@@ -266,6 +306,7 @@ function createSheetUniforms(paper: THREE.Texture, pageSize: THREE.Vector2, corn
     uPageSize: { value: pageSize },
     uCornerRadius: { value: cornerRadius },
     uGlossRange: { value: glossRange },
+    uGlossAmount: glossAmount,
   };
 }
 
@@ -347,6 +388,10 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
   paper.colorSpace = THREE.SRGBColorSpace;
   paper.needsUpdate = true;
 
+  // The shine starts off, so the 3D cover matches the flat one it replaces, then eases in.
+  const glossAmount = { value: 0 };
+  let glossTarget = 0;
+
   const sheetGeometry = new THREE.PlaneGeometry(1, aspect, 64, 32);
   // The shader places vertices by uv alone. Bunch them toward the spine, where a
   // page rolls tightest, so a tight roll stays round instead of faceted and
@@ -360,7 +405,7 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
 
   function createSheet(index: number): Sheet {
     const isCover = index === 0 || (!single && index === sheetCount - 1);
-    const uniforms = createSheetUniforms(paper, pageSize, isCover ? COVER_CORNER_PX : PAGE_CORNER_PX, 1 - options.glossAlpha / 255);
+    const uniforms = createSheetUniforms(paper, pageSize, isCover ? COVER_CORNER_PX : PAGE_CORNER_PX, 1 - options.glossAlpha / 255, glossAmount);
 
     // Lambert has no specular term, which would otherwise wash out the dark cover.
     const material = new THREE.MeshLambertMaterial({ side: THREE.DoubleSide });
@@ -417,7 +462,7 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
               glossLit = receiveShadow ? getShadow(directionalShadowMap[0], glossShadow.shadowMapSize, glossShadow.shadowIntensity, glossShadow.shadowBias, glossShadow.shadowRadius, vDirectionalShadowCoord[0]) : 1.0;
             #endif
 
-            outgoingLight += sheetGloss * glossLit * (
+            outgoingLight += sheetGloss * uGlossAmount * glossLit * (
               ${GLOSS.sheen.toFixed(3)} * pow(glossFacing, ${GLOSS.sheenPower.toFixed(1)}) +
               ${GLOSS.glint.toFixed(3)} * pow(glossFacing, ${GLOSS.glintPower.toFixed(1)})
             );
@@ -466,6 +511,144 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
   }
 
   const sheets = Array.from({ length: sheetCount }, (_, index) => createSheet(index));
+
+  // ── Name sticker ──
+
+  // A separate strip of mesh while it is being stuck on. Once flat it is
+  // swapped for the cover texture that already has the sticker printed on it.
+  function createSticker() {
+    const { x, y, width, aspect: stickerAspect, rotation } = options.coverSticker;
+    const height = width / stickerAspect;
+    const geometry = new THREE.PlaneGeometry(width, height, STICKER.columns, STICKER.rows);
+    const flat = Float32Array.from(geometry.attributes.position.array);
+    const shineDirection = { value: new THREE.Vector3(0, 0, 1) };
+
+    const material = new THREE.MeshLambertMaterial({ side: THREE.DoubleSide, transparent: true, alphaTest: 0.01, opacity: 0 });
+    material.onBeforeCompile = (shader) => {
+      shader.uniforms.uShineDirection = shineDirection;
+      shader.fragmentShader = "uniform vec3 uShineDirection;\n" + shader.fragmentShader.replace("#include <opaque_fragment>", /* glsl */ `
+        float shine = pow(max(dot(normal, uShineDirection), 0.0), ${STICKER.shinePower.toFixed(1)});
+        outgoingLight += ${STICKER.shine.toFixed(3)} * shine * (gl_FrontFacing ? 1.0 : 0.0);
+        #include <opaque_fragment>
+      `);
+    };
+    const depthMaterial = new THREE.MeshDepthMaterial({ alphaTest: 0.5 });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.customDepthMaterial = depthMaterial;
+    mesh.castShadow = true;
+    mesh.visible = false;
+    mesh.renderOrder = 1;
+    const home = new THREE.Vector3(x, (0.5 - y) * aspect, STICKER.clearance);
+    const turn = -THREE.MathUtils.degToRad(rotation);
+    book.add(mesh);
+
+    // The press runs along the diagonal from the bottom-left corner to the top-right.
+    const diagonal = Math.hypot(width, height);
+    const along = new THREE.Vector2(width / diagonal, height / diagonal);
+    return { mesh, geometry, material, depthMaterial, home, turn, width, height, flat, diagonal, along, shineDirection };
+  }
+
+  const sticker = createSticker();
+  let stickerState: "waiting" | "sticking" | "done" = "waiting";
+  let stickerStart = 0;
+
+  // Lays the sticker out for `pressed` (0 = curled up off its bottom-left corner,
+  // 1 = flat). The bend is confined to a band that travels along the diagonal as
+  // the sticker is pressed down.
+  const curlProfile = new Float32Array((STICKER.samples + 1) * 2);
+  function curlSticker(pressed: number) {
+    // Where each point along the diagonal ends up: distance along it, and height off the cover.
+    const step = sticker.diagonal / STICKER.samples;
+    const totalCurl = THREE.MathUtils.degToRad(STICKER.curl);
+    let angle = 0;
+    let reach = 0;
+    let lift = 0;
+    for (let sample = 1; sample <= STICKER.samples; sample++) {
+      // How much of this stretch is still lifted, from 0 behind the press to 1 ahead of it
+      const position = (sample - 0.5) / STICKER.samples;
+      const lifted = clamp((position + STICKER.band - pressed * (1 + STICKER.band)) / STICKER.band, 0, 1);
+      angle += (totalCurl / STICKER.samples) * lifted;
+      reach += Math.cos(angle) * step;
+      lift += Math.sin(angle) * step;
+      curlProfile[sample * 2] = reach;
+      curlProfile[sample * 2 + 1] = lift;
+    }
+
+    const position = sticker.geometry.attributes.position;
+    const { flat, along } = sticker;
+    const cornerX = -sticker.width / 2;
+    const cornerY = -sticker.height / 2;
+    for (let vertex = 0; vertex < position.count; vertex++) {
+      const fromCornerX = flat[vertex * 3] - cornerX;
+      const fromCornerY = flat[vertex * 3 + 1] - cornerY;
+      const distance = fromCornerX * along.x + fromCornerY * along.y;
+      const across = -fromCornerX * along.y + fromCornerY * along.x;
+      const at = clamp(distance / step, 0, STICKER.samples);
+      const sample = Math.min(Math.floor(at), STICKER.samples - 1);
+      const blend = at - sample;
+      const curledDistance = lerp(curlProfile[sample * 2], curlProfile[sample * 2 + 2], blend);
+      const curledLift = lerp(curlProfile[sample * 2 + 1], curlProfile[sample * 2 + 3], blend);
+      position.setXYZ(
+        vertex,
+        cornerX + along.x * curledDistance - along.y * across,
+        cornerY + along.y * curledDistance + along.x * across,
+        curledLift
+      );
+    }
+    position.needsUpdate = true;
+    sticker.geometry.computeVertexNormals();
+  }
+
+  function finishSticker() {
+    if (stickerState === "done") return;
+    stickerState = "done";
+    sticker.mesh.visible = false;
+    if (textures[0]) sheets[0].uniforms.uFrontMap.value = textures[0];
+    // The stickers' shine eases in from here, rather than switching on.
+    glossTarget = 1;
+    invalidate();
+  }
+
+  function stickOn() {
+    if (stickerState !== "waiting") return;
+    if (reducedMotion) {
+      finishSticker();
+      return;
+    }
+    stickerState = "sticking";
+    stickerStart = performance.now();
+    invalidate();
+  }
+
+  const shineLean = new THREE.Vector3();
+
+  // Returns whether the sticker is still on its way down.
+  function updateSticker(now: number) {
+    if (stickerState !== "sticking") return false;
+    const elapsed = (now - stickerStart) / 1000;
+    const arrived = easeOut(clamp(elapsed / STICKER.arriveTime, 0, 1));
+    const pressed = easeInOut(clamp((elapsed - STICKER.arriveTime * 0.5) / STICKER.pressTime, 0, 1));
+    curlSticker(pressed);
+    sticker.mesh.visible = true;
+    sticker.material.opacity = arrived;
+    sticker.mesh.scale.setScalar(lerp(STICKER.startScale, 1, arrived));
+    sticker.mesh.rotation.z = sticker.turn + (1 - arrived) * STICKER.startTurn;
+    sticker.mesh.position.set(sticker.home.x, sticker.home.y + (1 - arrived) * STICKER.startRise, sticker.home.z);
+
+    // The lifted part leans back toward the corner it is stuck by. Aim the
+    // highlight at wherever it has bent through the shine angle.
+    sticker.mesh.updateWorldMatrix(true, false);
+    shineLean.set(-sticker.along.x, -sticker.along.y, 0).transformDirection(sticker.mesh.matrixWorld);
+    sticker.shineDirection.value
+      .set(0, 0, Math.cos(STICKER.shineAngle))
+      .addScaledVector(shineLean, Math.sin(STICKER.shineAngle))
+      .normalize();
+    if (pressed >= 1) {
+      finishSticker();
+      return false;
+    }
+    return true;
+  }
 
   // ── State ──
 
@@ -537,14 +720,9 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
         texture.anisotropy = maxAnisotropy;
         renderer.initTexture(texture);
         textures[side] = texture;
-        mapUniform(side).value = texture;
-        if (!ready && [0, 1, 2].every((first) => first >= sides.length || textures[first])) {
-          ready = true;
-          // Draw the resting cover, which also compiles the shaders ahead of the first open.
-          update(0, performance.now());
-          renderer.render(scene, camera);
-          options.onReady();
-        }
+        // The cover stays bare until its sticker has been stuck on.
+        if (side !== 0 || stickerState === "done") mapUniform(side).value = texture;
+        checkReady();
         invalidate();
       },
       undefined,
@@ -569,6 +747,50 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
       invalidate();
     });
   }
+
+  function checkReady() {
+    if (ready || !bareCoverTexture || !sticker.material.map) return;
+    if (![0, 1, 2].every((first) => first >= sides.length || textures[first])) return;
+    ready = true;
+    // Draw the resting cover, which also compiles the shaders ahead of the first open.
+    update(0, performance.now());
+    renderer.render(scene, camera);
+    options.onReady();
+  }
+
+  function loadExtra(src: string, onLoad: (texture: THREE.Texture) => void) {
+    loader.load(
+      src,
+      (texture) => {
+        if (disposed) {
+          texture.dispose();
+          return;
+        }
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.anisotropy = maxAnisotropy;
+        renderer.initTexture(texture);
+        onLoad(texture);
+        checkReady();
+        invalidate();
+      },
+      undefined,
+      (error) => {
+        if (!disposed) options.onError(error);
+      }
+    );
+  }
+
+  let bareCoverTexture: THREE.Texture | null = null;
+  loadExtra(options.coverBare, (texture) => {
+    bareCoverTexture = texture;
+    if (stickerState !== "done") sheets[0].uniforms.uFrontMap.value = texture;
+  });
+  loadExtra(options.coverSticker.src, (texture) => {
+    sticker.material.map = texture;
+    sticker.material.needsUpdate = true;
+    sticker.depthMaterial.map = texture;
+    sticker.depthMaterial.needsUpdate = true;
+  });
 
   function unloadSide(side: number) {
     if (!requested.delete(side)) return;
@@ -946,7 +1168,9 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
 
     // Everything else settles onto its stack; the page under the cursor lifts a little.
     const canPeek = hoverZone && (hoverZone.forward || !single);
-    const peek = hoverZone && canPeek && !hoverHotspot && !press && pointer.isMouse && !reducedMotion ? hoverZone : null;
+    // The cover doesn't lift under the cursor until its sticker is on, since the sticker couldn't follow it.
+    const settled = !resting || stickerState === "done";
+    const peek = hoverZone && canPeek && settled && !hoverHotspot && !press && pointer.isMouse && !reducedMotion ? hoverZone : null;
     const peekProgress = (resting ? REST.peekProgress : PEEK.progress) * (single ? FOLD.peekScale : 1);
     const restEase = 1 - Math.pow(0.001, dt / PEEK.smoothTime);
     sheets.forEach((sheet, index) => {
@@ -1003,6 +1227,12 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
     else groundFade = wantGround;
     groundMaterial.opacity = GROUND_SHADOW * groundFade;
     ground.visible = groundFade > 0;
+
+    if (updateSticker(now)) active = true;
+
+    glossAmount.value += (glossTarget - glossAmount.value) * (1 - Math.pow(0.001, dt / GLOSS.fadeInTime));
+    if (Math.abs(glossTarget - glossAmount.value) > 0.002) active = true;
+    else glossAmount.value = glossTarget;
 
     const hoverEase = 1 - Math.pow(0.001, dt / HOVER.smoothTime);
     const hoverY = hoverPoint ? clamp(hoverPoint.y / halfHeight, -1, 1) : 0;
@@ -1144,6 +1374,7 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
 
   function open() {
     if (phase !== "rest") return;
+    finishSticker();
     // Carry the cover across from where it rests to the same spot on the stage.
     const from = restHost.getBoundingClientRect();
     const stage = stageHost.getBoundingClientRect();
@@ -1215,6 +1446,11 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
       sheet.depthMaterial.dispose();
     }
     for (const texture of textures) texture?.dispose();
+    (bareCoverTexture as THREE.Texture | null)?.dispose();
+    sticker.material.map?.dispose();
+    sticker.material.dispose();
+    sticker.depthMaterial.dispose();
+    sticker.geometry.dispose();
     (backCoverTexture as THREE.Texture | null)?.dispose();
     paper.dispose();
     sheetGeometry.dispose();
@@ -1226,5 +1462,5 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
     resolveClose?.();
   }
 
-  return { hover, open, close, flipNext, flipPrev, dispose };
+  return { stickOn, hover, open, close, flipNext, flipPrev, dispose };
 }

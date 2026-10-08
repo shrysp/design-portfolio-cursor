@@ -54,6 +54,8 @@ export default function Journal3D({ apiRef, restHostRef, restWidth, active, onRe
         layout,
         sides: (layout === "single" ? manifest.singleSides : manifest.sides).map((src) => `${src}?v=${manifest.version}`),
         backCover: `${manifest.singleBackCover}?v=${manifest.version}`,
+        coverBare: `${manifest.coverBare}?v=${manifest.version}`,
+        coverSticker: manifest.coverSticker,
         hotspots: manifest.hotspots,
         pageWidth: manifest.pageWidth,
         pageHeight: manifest.pageHeight,

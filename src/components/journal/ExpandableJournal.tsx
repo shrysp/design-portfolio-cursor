@@ -18,6 +18,12 @@ const JournalFallback = dynamic(() => import("./JournalFallback"), { ssr: false 
 
 // The cover sits this far left of its wrapper (the -ml-2 below).
 const COVER_NUDGE_PX = 8;
+// If the 3D book still hasn't loaded after this long, give up on it and use the CSS journal
+const JOURNAL_3D_TIMEOUT_MS = 8000;
+// The name sticker goes on this long after the page has loaded, or this soon
+// after the journal appears if that happens later
+const STICK_ON_AFTER_LOAD_MS = 1100;
+const STICK_ON_AFTER_REVEAL_MS = 350;
 // Room around the resting cover for the 3D book to tilt, lift and cast its shadow.
 const REST_MARGIN_PX = 72;
 
@@ -92,20 +98,26 @@ function StickerStrip({ index, progress }: { index: number; progress: MotionValu
   );
 }
 
-function SlapSticker({ onLanded }: { onLanded: () => void }) {
+// The CSS version of the sticker going on, for when the 3D journal isn't
+// available. `canStart` holds it back until that is known.
+function SlapSticker({ canStart }: { canStart: boolean }) {
   const [isReady, setIsReady] = useState(false);
+  // Seconds to wait before sticking, set once the page has loaded and the journal is showing
+  const [startDelay, setStartDelay] = useState<number | null>(null);
+  const readyAt = useRef(0);
   const [hasLanded, setHasLanded] = useState(false);
   // 0 = held by its left edge with the rest curled up, 1 = pressed flat
   const progress = useMotionValue(0);
   const shadowOpacity = useTransform(progress, [0, 1], [0, 0.35]);
-  const onLandedRef = useRef(onLanded);
-  onLandedRef.current = onLanded;
 
   useEffect(() => {
     // Wait for page to fully load before starting animation
     const handleLoad = () => {
       // Add small delay after load for smoother experience
-      setTimeout(() => setIsReady(true), 100);
+      setTimeout(() => {
+        readyAt.current = performance.now();
+        setIsReady(true);
+      }, 100);
     };
 
     if (document.readyState === 'complete') {
@@ -116,12 +128,17 @@ function SlapSticker({ onLanded }: { onLanded: () => void }) {
     }
   }, []);
 
+  // Normally the sticker goes on a second after load. If the journal arrived
+  // late, it follows shortly after the journal instead.
   useEffect(() => {
-    if (!isReady) return;
-    const land = () => {
-      setHasLanded(true);
-      onLandedRef.current();
-    };
+    if (!isReady || !canStart) return;
+    const waited = (performance.now() - readyAt.current) / 1000;
+    setStartDelay((current) => current ?? Math.max(STICKER.delay - waited, 0.35));
+  }, [isReady, canStart]);
+
+  useEffect(() => {
+    if (startDelay === null) return;
+    const land = () => setHasLanded(true);
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       progress.set(1);
       land();
@@ -129,12 +146,12 @@ function SlapSticker({ onLanded }: { onLanded: () => void }) {
     }
     const controls = animate(progress, 1, {
       duration: STICKER.press,
-      delay: STICKER.delay + STICKER.arrive * 0.5,
+      delay: startDelay + STICKER.arrive * 0.5,
       ease: [0.3, 0, 0.2, 1],
       onComplete: land,
     });
     return () => controls.stop();
-  }, [isReady, progress]);
+  }, [startDelay, progress]);
 
   return (
     <motion.div
@@ -145,7 +162,7 @@ function SlapSticker({ onLanded }: { onLanded: () => void }) {
         opacity: 0,
         y: -14,
       }}
-      animate={isReady ? {
+      animate={startDelay !== null ? {
         scale: 1,
         rotate: 3,
         opacity: 1,
@@ -155,7 +172,7 @@ function SlapSticker({ onLanded }: { onLanded: () => void }) {
         type: "tween",
         ease: "easeOut",
         duration: STICKER.arrive,
-        delay: STICKER.delay,
+        delay: startDelay ?? 0,
       }}
     >
       {/* Shadow - deepens as the sticker is pressed down */}
@@ -202,7 +219,6 @@ export function ExpandableJournal({
   const [is3DMounted, setIs3DMounted] = useState(false);
   const [is3DReady, setIs3DReady] = useState(false);
   const [is3DActive, setIs3DActive] = useState(false); // Journal is open in 3D
-  const [hasStickerLanded, setHasStickerLanded] = useState(false);
   const [wantsOpen, setWantsOpen] = useState(false); // Clicked before the journal finished loading
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false); // Track exit animation
@@ -216,9 +232,9 @@ export function ExpandableJournal({
   const restHostRef = useRef<HTMLDivElement>(null);
   const isClosingRef = useRef(false);
 
-  // Once the 3D journal is ready it replaces the cover below for good, which
-  // stays behind as the click target. The sticker gets to land first.
-  const is3DLive = mode === "3d" && is3DReady && hasStickerLanded;
+  // In 3D the journal is only ever the 3D book: nothing is shown in its place
+  // while it loads. The cover below stays behind, unseen, as the click target.
+  const is3DLive = mode === "3d" && is3DReady;
 
   const isOpen = isExpanded || isAnimatingOut || is3DActive;
 
@@ -227,7 +243,7 @@ export function ExpandableJournal({
     setIsMounted(true);
   }, []);
 
-  // Build the 3D journal once the page has settled, so opening it is instant
+  // Build the 3D journal straight away; the journal is held back until it's ready
   const prepare3D = useCallback(() => {
     if (supportsWebGL()) {
       setIs3DMounted(true);
@@ -237,13 +253,34 @@ export function ExpandableJournal({
   }, []);
 
   useEffect(() => {
-    if (window.requestIdleCallback) {
-      const handle = window.requestIdleCallback(prepare3D, { timeout: 3000 });
-      return () => window.cancelIdleCallback(handle);
-    }
-    const timer = setTimeout(prepare3D, 1500);
-    return () => clearTimeout(timer);
+    prepare3D();
   }, [prepare3D]);
+
+  // Without WebGL (or if the textures fail to load) use the CSS journal instead
+  const handle3DError = useCallback(() => {
+    setMode("css");
+    setIs3DMounted(false);
+    setIs3DActive(false);
+  }, []);
+
+  useEffect(() => {
+    if (mode !== "3d" || is3DReady) return;
+    const timer = setTimeout(handle3DError, JOURNAL_3D_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [mode, is3DReady, handle3DError]);
+
+  // The journal is brought in once it's ready to show
+  const isRevealed = mode === "css" || is3DReady;
+
+  // Stick the name sticker on once the 3D book is showing and the page has settled
+  useEffect(() => {
+    if (!is3DLive) return;
+    const loadedAt = (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined)?.loadEventEnd || performance.now();
+    const wait = Math.max(loadedAt + STICK_ON_AFTER_LOAD_MS - performance.now(), STICK_ON_AFTER_REVEAL_MS);
+    const timer = setTimeout(() => journal3DRef.current?.stickOn(), wait);
+    return () => clearTimeout(timer);
+  }, [is3DLive]);
+
 
   // Prevent body scrolling when journal is expanded
   useEffect(() => {
@@ -288,7 +325,6 @@ export function ExpandableJournal({
     if (!cover) return;
     if (mode === "3d") {
       // The book lifts off the page from where it rests
-      setHasStickerLanded(true);
       journal3DRef.current?.open();
       setIs3DActive(true);
     } else {
@@ -339,13 +375,6 @@ export function ExpandableJournal({
   const handleExitComplete = useCallback(() => {
     setIsAnimatingOut(false);
     setIsCoverHidden(false);
-  }, []);
-
-  // Without WebGL (or if the textures fail to load) use the CSS journal instead
-  const handle3DError = useCallback(() => {
-    setMode("css");
-    setIs3DMounted(false);
-    setIs3DActive(false);
   }, []);
 
   const copyEmail = useCallback(async () => {
@@ -529,13 +558,19 @@ export function ExpandableJournal({
     document.body
   ) : null;
 
-  const isCoverInvisible = is3DLive || isCoverHidden;
+  const isCoverInvisible = mode === "3d" || isCoverHidden;
 
   return (
     <>
       {portalWrapper}
 
-      <div className="relative" style={{ width: collapsedWidth, height: collapsedHeight }}>
+      <motion.div
+        className="relative"
+        style={{ width: collapsedWidth, height: collapsedHeight }}
+        initial={false}
+        animate={{ opacity: isRevealed ? 1 : 0, scale: isRevealed ? 1 : 0.95 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+      >
         {/* Collapsed state - in header position. Stays as the click target once the 3D journal takes over */}
         <motion.div
           ref={collapsedRef}
@@ -582,7 +617,7 @@ export function ExpandableJournal({
               }}
             >
               {/* Exact same content as expanded front cover */}
-              <JournalCover sticker={<SlapSticker onLanded={() => setHasStickerLanded(true)} />} />
+              <JournalCover sticker={<SlapSticker canStart={mode === "css"} />} />
             </div>
           </div>
         </motion.div>
@@ -600,7 +635,7 @@ export function ExpandableJournal({
             visibility: is3DLive ? "visible" : "hidden",
           }}
         />
-      </div>
+      </motion.div>
     </>
   );
 }

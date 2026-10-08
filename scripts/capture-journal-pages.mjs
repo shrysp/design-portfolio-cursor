@@ -70,7 +70,9 @@ try {
   }
 
   async function openSide(side, single = false) {
-    await page.goto(`${ORIGIN}/journal-capture?side=${side}${single ? "&single=1" : ""}`, { waitUntil: "networkidle0" });
+    await page.goto(`${ORIGIN}/journal-capture?side=${side}${single ? "&single=1" : ""}`, { waitUntil: "load" });
+    // The route flags itself ready once its fonts and images are in. Waiting for
+    // the network to go idle would hang on the dev toolbar's open connection.
     return page.waitForSelector('[data-journal-capture][data-ready="true"]', { timeout: 30_000 });
   }
 
@@ -118,7 +120,30 @@ try {
 
   // Bust browser caches whenever the textures are regenerated.
   const version = Date.now().toString(36);
-  const manifest = { pageWidth: PAGE_WIDTH, pageHeight: PAGE_HEIGHT, glossAlpha: GLOSS_ALPHA, version, sides, singleSides, singleBackCover: sides[sides.length - 1], hotspots };
+  // The cover is also captured without its name sticker, which the 3D journal
+  // sticks on as it arrives. Record where the sticker goes so the two line up.
+  await openSide(0);
+  const coverSticker = await page.evaluate(() => {
+    const img = document.querySelector('[data-journal-page] img[src*="Name-Sticker"]');
+    const bounds = document.querySelector("[data-journal-page]").getBoundingClientRect();
+    const box = img.getBoundingClientRect();
+    const aspect = img.naturalWidth / img.naturalHeight;
+    const rotation = parseFloat(getComputedStyle(img.parentElement).rotate) || 0;
+    img.parentElement.style.visibility = "hidden";
+    return {
+      src: new URL(img.src).pathname,
+      // Centre of the sticker and its drawn width, as fractions of the page
+      x: (box.left + box.width / 2 - bounds.left) / bounds.width,
+      y: (box.top + box.height / 2 - bounds.top) / bounds.height,
+      width: Math.min(img.offsetWidth, img.offsetHeight * aspect) / bounds.width,
+      aspect,
+      rotation,
+    };
+  });
+  const coverBare = await writeTexture("cover-bare.webp");
+  console.log("captured cover without its sticker");
+
+  const manifest = { pageWidth: PAGE_WIDTH, pageHeight: PAGE_HEIGHT, glossAlpha: GLOSS_ALPHA, version, sides, singleSides, singleBackCover: sides[sides.length - 1], coverBare, coverSticker, hotspots };
   await writeFile(MANIFEST_PATH, JSON.stringify(manifest, null, 2) + "\n");
   console.log(`wrote ${path.relative(ROOT, MANIFEST_PATH)}`);
 } finally {

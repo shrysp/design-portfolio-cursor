@@ -2,7 +2,7 @@
   "pageWidth": 420,
   "pageHeight": 560,
   "glossAlpha": 160,
-  "version": "muzx1p9p",
+  "version": "mv01pcbx",
   "sides": [
     "/images/journal/pages/00.webp",
     "/images/journal/pages/01.webp",
@@ -50,6 +50,15 @@
     "/images/journal/pages/19.webp"
   ],
   "singleBackCover": "/images/journal/pages/21.webp",
+  "coverBare": "/images/journal/pages/cover-bare.webp",
+  "coverSticker": {
+    "src": "/images/About/Name-Sticker.webp",
+    "x": 0.5,
+    "y": 0.5,
+    "width": 0.5,
+    "aspect": 1.3631436314363143,
+    "rotation": 3
+  },
   "hotspots": [
     {
       "side": 19,
