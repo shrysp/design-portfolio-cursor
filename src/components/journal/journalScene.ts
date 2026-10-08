@@ -104,7 +104,7 @@ const HOVER = { lift: 0.07, bias: 0.9, smoothTime: 0.35 };
 // Pressing and holding a side keeps turning pages, faster the longer it's held.
 const HOLD = { delayMs: 350, firstGapMs: 300, fastestGapMs: 130, speedUpSheets: 8 };
 // Light catching the gutter side of the right-hand page.
-const CREASE = { glow: 0.45, glowWidth: 0.04, shade: 0.07, shadeCentre: 0.11, shadeWidth: 0.07 };
+const CREASE = { glow: 0.22, glowWidth: 0.09, shade: 0.04, shadeCentre: 0.2, shadeWidth: 0.12 };
 const CLOSE = { time: 0.5, staggerMs: 70, maxStaggerTotalMs: 600 };
 // In the single layout a turned page swings over to the left, then rolls round
 // the spine and under the book. The fold is deliberately loose: each page rolls
