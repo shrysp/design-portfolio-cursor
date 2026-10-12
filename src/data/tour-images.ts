@@ -84,6 +84,9 @@ export const TOUR_IMAGES: TourImage[] = [
  * Where in his life a photo belongs. The stage can lay the library out by
  * these instead of scattering it, so a visitor can see what there is to ask
  * about. Read off the ids rather than stored per photo: the ids already say it.
+ *
+ * The order here is the order the chapters arrive on stage: top left, top
+ * right, then down the two sides.
  */
 export const CHAPTERS = [
   { id: 'rit', label: 'RIT' },

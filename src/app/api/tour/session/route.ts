@@ -17,6 +17,7 @@ import { MIN_SESSION_SECONDS, endSession, refreshVisitor, startSession } from '@
 import { accessFrom } from '@/lib/tour/server/auth';
 import {
   backendInstructions,
+  TOUR_BACKEND_MODEL,
   TOUR_VOICE_INSTRUCTIONS,
   type Turn,
   greetingFor,
@@ -29,8 +30,6 @@ import { TOUR_IMAGES } from '@/data/tour-images';
 
 const LIVE_SESSIONS = 'https://api.openai.com/v1/live/sessions';
 const MODEL = 'gpt-live-1';
-/** The reasoning model behind the voice. See the delegation note below. */
-const BACKEND_MODEL = 'gpt-5.6-terra';
 
 /** How much of an earlier conversation a returning session is given. */
 const HISTORY_TURNS = 8;
@@ -122,7 +121,8 @@ export async function POST(request: Request) {
     delegation: {
       type: 'responses',
       responses: {
-        model: BACKEND_MODEL,
+        // The reasoning model behind the voice. See the delegation note above.
+        model: TOUR_BACKEND_MODEL,
         instructions: [backendInstructions(story), visitorContext(started.visitor.context), earlier]
           .filter(Boolean)
           .join('\n\n'),

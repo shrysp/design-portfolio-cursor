@@ -16,11 +16,21 @@ import { idleSecondsLeft } from '@/lib/tour/idle';
 import { type WakeMic, createWakeMic } from '@/lib/tour/wake-mic';
 import { createTourClassifier } from '@/lib/tour/tour-model';
 import { CHAPTERS, type ChapterId, TOUR_IMAGES, chapterOf } from '@/data/tour-images';
+import { SUGGESTIONS } from '@/lib/tour/suggestions';
 import { useDialKit } from 'dialkit';
 import { PHOTO_POP } from '@/lib/tour/tour-sounds';
 import { playRecipe } from '@shrysp/cameo/sound';
 import '@shrysp/cameo/styles.css';
 import './tour.css';
+import {
+  HANDOUT_LINKS,
+  HANDOUT_LOOKS,
+  HANDOUT_PROJECTS,
+  type Handout,
+  type HandoutLink,
+  type HandoutLook,
+  TourHandout,
+} from './TourHandout';
 
 /**
  * Tells the server the session is over, so the time it did not use goes back
@@ -423,7 +433,8 @@ type Placed = Photo & {
 /**
  * The whole library, placed. Arrives on the visitor's first click or
  * keypress (see `arrived` in Tour): each card pops in at centre, one after
- * another in `order`, then travels to its spot (see TourCard's entrance).
+ * another in `order` — chapter by chapter — then travels to its spot (see
+ * TourCard's entrance).
  *
  * Built on first call, which only ever happens in the browser, after that
  * first interaction: the spots are random, so a server render would never
@@ -436,12 +447,20 @@ function getCloud(): Placed[] {
     const spots = cloudPositions(TOUR_IMAGES.length);
     const byChapter = chapterSpots(TOUR_IMAGES.map((img) => img.id));
     const hex = hexSpots(TOUR_IMAGES.map((img) => img.id));
+    // One chapter at a time, in the order CHAPTERS lists them — top left, top
+    // right, then down the two sides — and within a chapter its centre piece
+    // first, so each cluster is seen to gather before the next one starts.
+    const entrance = new Map(
+      CHAPTERS.flatMap(({ id: chapter }) => TOUR_IMAGES.filter((img) => chapterOf(img.id) === chapter)).map(
+        (img, i) => [img.id, i] as const,
+      ),
+    );
     cloud = TOUR_IMAGES.map((img, i) => ({
       id: img.id,
       path: img.path,
       width: img.width,
       height: img.height,
-      order: i,
+      order: entrance.get(img.id) ?? i,
       pos: spots[i],
       cluster: byChapter.get(img.id) ?? { pos: spots[i], size: 1, rank: i },
       chapter: chapterOf(img.id),
@@ -704,6 +723,16 @@ function TourCard({
   );
 }
 
+/** How long PIP has to have stopped before a question picked on the way in is put to it. */
+const ASK_AFTER_HELLO_MS = 1800;
+/** How many are offered at once. */
+const CHIPS_SHOWN = 3;
+/** How long the conversation has to be silent before the chips come back. */
+const CHIPS_AFTER_MS = 4000;
+
+/** How long a card takes to leave — the length of its exit in tour.css. */
+const HANDOUT_OUT_MS = 180;
+
 /** How the stage looks. The dials in development start from this; a visitor gets exactly this. */
 const LOOK = { darkRoom: true, chapters: true, honeycomb: true, spacing: 0.7, lens: 0.7, photoGlow: 0.7, photoCrt: 0.7 };
 
@@ -789,6 +818,15 @@ export default function TourStage() {
   /** Whether the session now running is the last this code has time for. */
   const lastSession = useRef(false);
   const [copied, setCopied] = useState(false);
+  /** Nobody has said anything for a little while: the moment to offer something to ask. */
+  const [quiet, setQuiet] = useState(false);
+  /** Suggestions already taken, so the same three are not offered again. */
+  const [asked, setAsked] = useState<string[]>([]);
+  /** A suggestion picked before the tour was running: put to PIP once it has said hello. */
+  const pendingAsk = useRef<string | null>(null);
+  const askRef = useRef<(question: string) => void>(() => {});
+  /** PIP has said something in this session — its hello, when the session is new. */
+  const greeted = useRef(false);
   /** The builder's readouts and event log — see LAB_KEY. */
   const [lab, setLab] = useState(false);
   /**
@@ -811,12 +849,133 @@ export default function TourStage() {
   });
   // Visitors get the look as it was settled on; the panel is not there for them to change it.
   const look = process.env.NODE_ENV === 'production' ? LOOK : dial;
+
+  /**
+   * The card in the centre, if PIP has handed one over (see TourHandout). For
+   * now only the panel below can show one: the designs come first, and what
+   * in a conversation calls for a card comes after.
+   */
+  const [handout, setHandout] = useState<Handout | null>(null);
+  const [handoutLeaving, setHandoutLeaving] = useState(false);
+  const handoutTimer = useRef(0);
+  const showHandout = useCallback((next: Handout) => {
+    window.clearTimeout(handoutTimer.current);
+    setHandoutLeaving(false);
+    setHandout(next);
+  }, []);
+  const closeHandout = useCallback(() => {
+    setHandoutLeaving(true);
+    window.clearTimeout(handoutTimer.current);
+    handoutTimer.current = window.setTimeout(() => {
+      setHandout(null);
+      setHandoutLeaving(false);
+    }, HANDOUT_OUT_MS);
+  }, []);
+  const cards = useDialKit(
+    'Tour cards',
+    {
+      // Two ways a card can be a screen: led by its picture, or PIP's own green display.
+      style: { type: 'select', options: [...HANDOUT_LOOKS], default: 'photo' },
+      project: { type: 'select', options: HANDOUT_PROJECTS, default: HANDOUT_PROJECTS[0] },
+      showProject: { type: 'action', label: 'Show project card' },
+      showContact: { type: 'action', label: 'Show contact card' },
+      link: { type: 'select', options: Object.keys(HANDOUT_LINKS), default: 'cameo' },
+      showLink: { type: 'action', label: 'Show link card' },
+      putAway: { type: 'action', label: 'Put the card away' },
+      // How wide a card is, in pixels.
+      width: [400, 300, 560, 10],
+      // Where its middle sits, as a percentage of the stage's height. The photos come forward at 38.
+      top: [38, 20, 60, 1],
+      // How much of the tube shows over a card: 0 is clean; the photos are at 0.7.
+      crt: [0.7, 0, 1, 0.05],
+    },
+    {
+      onAction: (action) => {
+        // The panel reports an action by its key, possibly with the panel's path in front.
+        const name = action.split('.').pop();
+        const now = cardsRef.current;
+        if (name === 'showProject') showHandout({ kind: 'project', project: now.project });
+        else if (name === 'showContact') showHandout({ kind: 'contact' });
+        else if (name === 'showLink') showHandout({ kind: 'link', link: now.link as HandoutLink });
+        else if (name === 'putAway') closeHandout();
+      },
+    },
+  );
+  /**
+   * Asks PIP one of the suggestions, as if it had been said aloud. Before the
+   * tour is running that means starting it: PIP says hello first and the
+   * question follows (see the idle clock, which is what notices the hello is over).
+   */
+  const ask = useCallback(
+    (question: string) => {
+      setAsked((a) => (a.includes(question) ? a : [...a, question]));
+      setQuiet(false);
+      const s = session.current;
+      if (s?.state !== 'live') {
+        pendingAsk.current = question;
+        void connectRef.current();
+        return;
+      }
+      // Shown and remembered as theirs: it is their question, however it was put.
+      setLines((prev) => [...prev, { who: 'you', text: question }]);
+      heardVisitor.current = true;
+      lastQuestion.current = question;
+      userUtterance.current = '';
+      lastVoice.current = performance.now();
+      thinking.current ??= char.current?.hold('thinking', { key: 'tour' }) ?? null;
+      // The voice model answers a note like this by itself, from nothing, so
+      // the answer is written on the server from his story (see api/tour/ask)
+      // and PIP is given it to say.
+      void fetch('/api/tour/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ index: SUGGESTIONS.indexOf(question) }),
+      })
+        .then(async (res) => {
+          const { answer } = await res.json();
+          if (!res.ok || typeof answer !== 'string') throw new Error(`HTTP ${res.status}`);
+          return answer;
+        })
+        .then(
+          (answer) => {
+            // Ended, or replaced by a new session, while the answer was being written.
+            if (session.current !== s || s.state !== 'live') return;
+            lastVoice.current = performance.now();
+            s.speak(
+              `The visitor picked a question on screen instead of saying it aloud: "${question}" ` +
+                'The backend has answered it. Say this answer to them now, in your own voice. Keep every fact ' +
+                `in it and add none of your own:\n\n${answer}`,
+            );
+          },
+          () => {
+            release(thinking);
+            if (session.current !== s || s.state !== 'live') return;
+            s.speak(
+              'The visitor picked a question on screen, but it could not be looked up. Tell them so in one ' +
+                'short sentence, and ask them to say it aloud instead. Do not answer it yourself.',
+            );
+          },
+        );
+    },
+    [],
+  );
+  useEffect(() => {
+    askRef.current = ask;
+  }, [ask]);
+  const chips = SUGGESTIONS.filter((q) => !asked.includes(q)).slice(0, CHIPS_SHOWN);
+
+  const cardsRef = useRef(cards);
+  useEffect(() => {
+    cardsRef.current = cards;
+  }, [cards]);
   const glow = useRef<HTMLCanvasElement>(null);
   const captionText = useRef<HTMLParagraphElement>(null);
   const pipBody = useRef<HTMLDivElement>(null);
   /** Where PIP was the last time it was at rest — the start of its next trip. */
   const pipBox = useRef<DOMRect | null>(null);
   const historyRef = useRef(false);
+  const handoutRef = useRef(false);
+  const closeHandoutRef = useRef<() => void>(() => {});
 
   const audio = useRef<HTMLAudioElement>(null);
   const listening = useRef<(() => void) | null>(null);
@@ -1083,6 +1242,7 @@ export default function TourStage() {
           release(thinking);
           release(listening);
           appendLine('pip', intent.delta);
+          greeted.current = true;
           lastVoice.current = performance.now();
           if (point.current) point.current.answered = true;
 
@@ -1178,6 +1338,7 @@ export default function TourStage() {
     connecting.current = true;
     window.clearTimeout(dozeTimer.current);
     wokenByVoice.current = byVoice;
+    greeted.current = false;
     heardVisitor.current = false;
     setFault(null);
     startedAt.current = performance.now();
@@ -1360,7 +1521,9 @@ export default function TourStage() {
     linesRef.current = lines;
     dozingRef.current = dozing;
     dozeRef.current = doze;
-  }, [connect, disconnect, doze, state, history, lines, dozing]);
+    handoutRef.current = handout !== null;
+    closeHandoutRef.current = closeHandout;
+  }, [connect, disconnect, doze, state, history, lines, dozing, handout, closeHandout]);
 
   useEffect(() => {
     if (audio.current) audio.current.muted = silent;
@@ -1412,6 +1575,8 @@ export default function TourStage() {
         e.preventDefault(); // or the page scrolls out from under them
         if (stateRef.current === 'live') disconnectRef.current();
         else void connectRef.current();
+      } else if (e.key === 'Escape' && handoutRef.current) {
+        closeHandoutRef.current();
       } else if (e.key === 'Escape' && historyRef.current) {
         // The open transcript is the nearer thing to close.
         setHistory(false);
@@ -1447,6 +1612,16 @@ export default function TourStage() {
         }),
       );
       setIdleIn(left);
+      // Silence is read off the transcript: the voice model sends no reliable
+      // "finished speaking", but words stop arriving when it has.
+      const silentFor = performance.now() - lastVoice.current;
+      // A question picked before the tour started goes in once the hello is over.
+      if (pendingAsk.current && greeted.current && silentFor > ASK_AFTER_HELLO_MS) {
+        const question = pendingAsk.current;
+        pendingAsk.current = null;
+        askRef.current(question);
+      }
+      setQuiet(silentFor > CHIPS_AFTER_MS && !thinking.current && !pendingAsk.current);
       // The server charged this session for maxSeconds and no more; staying
       // connected past it would be time nobody budgeted for.
       const ranFor = (performance.now() - startedAt.current) / 1000;
@@ -1664,7 +1839,7 @@ export default function TourStage() {
    * the stage, above the words — and goes down to its place in the dock as
    * the tour starts.
    */
-  const intro = !paused && !live && !dozing && !focusId && state !== 'connecting';
+  const intro = !paused && !live && !dozing && !focusId && !handout && state !== 'connecting';
 
   /**
    * PIP's trip from the start card down to the dock, when `intro` ends.
@@ -1942,7 +2117,7 @@ export default function TourStage() {
        * is the time that has run out — so the stage says it, and hands the
        * conversation to the person it was about.
        */}
-      {over && !focusId && (
+      {over && !focusId && !handout && (
         <div className={`tour-start ${paused ? '' : 'tour-start--intro'}`}>
           <p className="tour-start-title">{paused ? 'That\u2019s the tour' : 'This tour has been taken'}</p>
           <p className="tour-start-body">
@@ -1974,21 +2149,56 @@ export default function TourStage() {
         </div>
       )}
 
-      {!over && !focusId && !live && !dozing && (paused || state !== 'connecting') && (
+      {!over && !focusId && !handout && !live && !dozing && (paused || state !== 'connecting') && (
         <div className={`tour-start ${paused ? '' : 'tour-start--intro'}`}>
           <p className="tour-start-title">{paused ? 'PIP is resting' : 'Meet PIP'}</p>
           <p className="tour-start-body">
             {paused
               ? 'The tour pauses when it goes quiet. PIP remembers what you were talking about.'
-              : 'This is a voice conversation. PIP talks about Shreyas and you ask whatever you like. It needs your microphone, and pauses by itself when it goes quiet.'}
+              : 'Shreyas\u2019s guide. Ask it about him out loud, and it answers with the photos around you.'}
           </p>
+          {!paused && chips.length > 0 && (
+            <div className="tour-chips">
+              <p className="tour-chips-label">Start with a question</p>
+              {chips.map((q) => (
+                <button
+                  key={q}
+                  className="tour-chip"
+                  onClick={() => ask(q)}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  disabled={state === 'connecting'}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          )}
           <button className="tour-btn tour-btn--primary tour-btn--large" onClick={() => void connect()} disabled={state === 'connecting'}>
             {state === 'connecting' ? 'Connecting…' : paused ? 'Carry on' : 'Start the tour'}
           </button>
           <p className="tour-start-hint">
             or press <kbd>Space</kbd>
+            {!paused && ' \u00b7 uses your microphone, and pauses when it goes quiet'}
           </p>
         </div>
+      )}
+
+      {handout && (
+        <TourHandout
+          // A different card is a new arrival, not the old one changing its mind.
+          key={handout.kind + ('project' in handout ? handout.project : 'link' in handout ? handout.link : '')}
+          handout={handout}
+          look={cards.style as HandoutLook}
+          leaving={handoutLeaving}
+          onClose={closeHandout}
+          style={
+            {
+              '--handout-w': `${cards.width}px`,
+              '--handout-top': `${cards.top}%`,
+              '--handout-crt': cards.crt,
+            } as React.CSSProperties
+          }
+        />
       )}
 
       {history && (
@@ -2012,6 +2222,16 @@ export default function TourStage() {
 
       {/* Bottom dock — PIP left, what is being said right; contain avoids layout spill. */}
       <div className={`tour-dock ${intro ? 'tour-dock--intro' : ''}`}>
+        {live && quiet && !handout && chips.length > 0 && (
+          <div className="tour-chips tour-chips--dock">
+            <p className="tour-chips-label">Or ask</p>
+            {chips.map((q) => (
+              <button key={q} className="tour-chip" onClick={() => ask(q)} onKeyDown={(e) => e.stopPropagation()}>
+                {q}
+              </button>
+            ))}
+          </div>
+        )}
         <div
           className="tour-pip relative shrink-0"
           style={{ width: charSize, height: charHeight, contain: 'layout size' }}
@@ -2057,7 +2277,9 @@ export default function TourStage() {
             <p className="tour-caption-text tour-caption-text--you">Connecting…</p>
           ) : (
             !paused &&
-            !over && (
+            !over &&
+            // Only a photo is something to ask about; a card in the centre speaks for itself.
+            !handout && (
               <p className="tour-caption-text tour-caption-text--you">
                 Press Space to start the tour and ask about this photo.
               </p>

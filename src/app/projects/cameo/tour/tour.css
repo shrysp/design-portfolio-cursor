@@ -1158,3 +1158,420 @@
   translate: calc(-50% + var(--fx, 0px)) calc(-50% + var(--fy, 0px));
   scale: var(--fs, 1);
 }
+
+/*
+ * Handouts — the cards PIP puts in the centre (TourHandout.tsx).
+ *
+ * A card is a screen, not a panel: built like the photo that comes forward —
+ * the same thin casing, the same tube over it, lit from inside and throwing
+ * its own colours onto the dark behind it. Two ways of being a screen:
+ *
+ *   photo   led by a picture, its colours tinting the glass and the glow
+ *   screen  PIP's own display: green phosphor, monospaced, one colour of light
+ *
+ * --handout-w, --handout-top and --handout-crt are the Tour cards dials.
+ */
+.tour-handout {
+  --handout-ink: #eef1f4;
+  --handout-soft: rgb(238 241 244 / 0.7);
+  --handout-faint: rgb(238 241 244 / 0.45);
+  --handout-line: rgb(255 255 255 / 0.16);
+  --handout-fill: rgb(255 255 255 / 0.07);
+  --handout-accent: var(--tour-teal);
+  --handout-on-accent: #06201d;
+  position: absolute;
+  left: 50%;
+  top: var(--handout-top, 38%);
+  z-index: 40;
+  width: min(88vw, var(--handout-w, 400px));
+  translate: -50% -50%;
+  color: var(--handout-ink);
+  animation: tour-handout-in 420ms cubic-bezier(0.2, 1.3, 0.4, 1) both;
+}
+.tour-handout--leaving {
+  pointer-events: none;
+  animation: tour-handout-out 180ms ease-in both;
+}
+@keyframes tour-handout-in {
+  from {
+    opacity: 0;
+    scale: 0.6;
+    rotate: -4deg;
+  }
+}
+@keyframes tour-handout-out {
+  to {
+    opacity: 0;
+    scale: 0.9;
+  }
+}
+
+/* The light a card throws: a blurred copy of what it shows, behind it. */
+.tour-handout-halo {
+  pointer-events: none;
+  position: absolute;
+  inset: 4%;
+  z-index: -1;
+  overflow: hidden;
+  border-radius: 40px;
+  opacity: 0.75;
+  filter: blur(46px) saturate(1.6);
+  background: radial-gradient(closest-side, var(--handout-accent), transparent);
+}
+.tour-handout-halo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tour-handout-screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 29px;
+  border: 3px solid var(--handout-accent);
+  background: #0b0d10;
+  box-shadow: 0 0 4px 4px var(--tour-teal-glow);
+}
+
+/* The tube: the photos' own scanlines, grain and falling-away corners. */
+.tour-handout-screen::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  opacity: var(--handout-crt, 0.7);
+  background:
+    linear-gradient(168deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 26%, transparent 46%),
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 40, 40, 0.07) 0 1px,
+      rgba(40, 255, 90, 0.05) 1px 2px,
+      rgba(60, 90, 255, 0.07) 2px 3px
+    ),
+    radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, 0.38) 100%);
+}
+/* Switched on: the slow band of light that rolls down the photo in the centre. */
+.tour-handout-screen::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 3;
+  height: 28%;
+  opacity: var(--handout-crt, 0.7);
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.09), transparent);
+  translate: 0 -100%;
+  animation: tour-crt-roll 7s linear infinite;
+}
+
+/* The picture again, out of focus, as the glass the words sit on. */
+.tour-handout-tint {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  scale: 1.4;
+  filter: blur(34px) saturate(1.5) brightness(0.42);
+}
+
+.tour-handout-shot {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #d7dbe0;
+}
+.tour-handout-shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--shot-at, center);
+  filter: saturate(1.1) contrast(1.04);
+}
+
+/* No picture to show: the name of the thing, on the tube. */
+.tour-handout-poster {
+  position: relative;
+  display: flex;
+  aspect-ratio: 16 / 8;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0 24px;
+  background: radial-gradient(120% 120% at 50% 0%, #1f5a1d 0%, #0e2c12 48%, #06130a 100%);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: #c9ffbf;
+  text-shadow: 0 0 10px rgba(120, 255, 110, 0.6);
+}
+.tour-handout-poster::before {
+  content: '>';
+  margin-right: 0.6em;
+  opacity: 0.6;
+}
+
+.tour-handout-close {
+  position: absolute;
+  right: 13px;
+  top: 13px;
+  z-index: 4;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.25);
+  background: rgb(11 13 16 / 0.6);
+  color: rgb(255 255 255 / 0.8);
+  backdrop-filter: blur(8px);
+  transition:
+    color 150ms ease-out,
+    border-color 150ms ease-out;
+}
+.tour-handout-close:hover {
+  border-color: var(--handout-accent);
+  color: #fff;
+}
+.tour-handout-close:focus-visible {
+  outline: 2px solid var(--handout-accent);
+  outline-offset: 2px;
+}
+
+.tour-handout-text {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 20px 24px 24px;
+}
+
+.tour-handout-eyebrow {
+  display: flex;
+  gap: 10px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--handout-accent);
+}
+.tour-handout-eyebrow span {
+  color: var(--handout-faint);
+}
+
+.tour-handout-title {
+  /* The site sets headings in its serif; the stage speaks in one face. */
+  font-family: inherit;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.tour-handout-body {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  font-size: 14px;
+  line-height: 1.5;
+  text-wrap: pretty;
+  color: var(--handout-soft);
+}
+
+.tour-handout-meta {
+  font-size: 12px;
+  color: var(--handout-faint);
+}
+
+/* Selectable, so it can be taken without the button. */
+.tour-handout-address {
+  overflow-wrap: anywhere;
+  border-radius: 12px;
+  border: 1px solid var(--handout-line);
+  background: var(--handout-fill);
+  padding: 10px 12px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 13px;
+  user-select: all;
+}
+
+.tour-handout-actions {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.tour-handout .tour-btn {
+  border-color: var(--handout-line);
+  background: var(--handout-fill);
+  color: var(--handout-soft);
+}
+.tour-handout .tour-btn:hover {
+  border-color: var(--handout-accent);
+  color: var(--handout-ink);
+}
+.tour-handout .tour-btn--primary,
+.tour-handout .tour-btn--primary:hover {
+  border-color: var(--handout-accent);
+  background: var(--handout-accent);
+  color: var(--handout-on-accent);
+}
+
+/*
+ * PIP's own display. One colour of light, like the face it comes from: the
+ * picture is shown in it too, and the letters glow a little into the glass.
+ */
+.tour-handout--screen {
+  --handout-ink: #d3ffca;
+  --handout-soft: rgb(190 255 178 / 0.78);
+  --handout-faint: rgb(190 255 178 / 0.5);
+  --handout-line: rgb(150 255 130 / 0.28);
+  --handout-fill: rgb(150 255 130 / 0.08);
+  --handout-accent: #8ff07c;
+  --handout-on-accent: #06200a;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  text-shadow: 0 0 9px rgba(120, 255, 110, 0.4);
+}
+.tour-handout--screen .tour-handout-screen {
+  background: radial-gradient(130% 100% at 50% 0%, #1b4d1a 0%, #0d2a11 46%, #06130a 100%);
+  box-shadow:
+    0 0 4px 4px rgba(120, 255, 110, 0.18),
+    inset 0 0 60px rgba(0, 0, 0, 0.5);
+}
+.tour-handout--screen .tour-handout-halo {
+  background: radial-gradient(closest-side, #4fd03c, transparent);
+}
+.tour-handout--screen .tour-handout-halo img,
+.tour-handout--screen .tour-handout-tint {
+  display: none;
+}
+.tour-handout--screen .tour-handout-shot {
+  background: #0d2a11;
+}
+.tour-handout--screen .tour-handout-shot img {
+  mix-blend-mode: screen;
+  filter: grayscale(1) contrast(1.25) brightness(0.9) sepia(1) hue-rotate(65deg) saturate(2.4);
+}
+.tour-handout--screen .tour-handout-title {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.tour-handout--screen .tour-handout-body {
+  font-size: 13px;
+}
+.tour-handout--screen .tour-btn {
+  text-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-handout,
+  .tour-handout--leaving {
+    animation-duration: 1ms;
+  }
+  .tour-handout-screen::before {
+    display: none;
+  }
+}
+
+/*
+ * Suggested questions: chips, not a card — small things to pick up, offered
+ * on the way in and whenever the conversation goes quiet.
+ */
+.tour-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.tour-chips-label {
+  width: 100%;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-ink);
+}
+.tour-chip {
+  display: inline-flex;
+  height: 36px;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--tour-teal-soft);
+  background: var(--tour-panel);
+  padding: 0 15px;
+  font-size: 13px;
+  color: var(--control-ink);
+  box-shadow: 0 0 0 0 var(--tour-teal-glow);
+  backdrop-filter: blur(10px);
+  transition:
+    border-color 180ms ease-out,
+    color 180ms ease-out,
+    box-shadow 180ms ease-out,
+    translate 180ms ease-out,
+    scale 120ms ease-out;
+}
+.tour-chip:hover {
+  border-color: var(--tour-teal);
+  color: var(--foreground);
+  box-shadow: 0 0 0 4px var(--tour-teal-glow);
+  translate: 0 -1px;
+}
+.tour-chip:active {
+  scale: 0.97;
+}
+.tour-chip:focus-visible {
+  outline: 2px solid var(--tour-teal);
+  outline-offset: 3px;
+}
+.tour-chip:disabled {
+  opacity: 0.5;
+}
+
+/* Above PIP and its caption, lined up with the dock's left edge. Each one rises in after the last. */
+.tour-chips--dock {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 18px);
+  width: max-content;
+  max-width: min(92vw, 760px);
+  justify-content: flex-start;
+}
+.tour-chips--dock .tour-chips-label {
+  width: auto;
+  margin-right: 4px;
+}
+.tour-chips--dock .tour-chip {
+  animation: tour-chip-in 360ms cubic-bezier(0.2, 1.2, 0.4, 1) both;
+}
+.tour-chips--dock .tour-chip:nth-of-type(2) {
+  animation-delay: 70ms;
+}
+.tour-chips--dock .tour-chip:nth-of-type(3) {
+  animation-delay: 140ms;
+}
+@keyframes tour-chip-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.94;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour-chip,
+  .tour-chips--dock .tour-chip {
+    animation: none;
+    transition: none;
+  }
+}

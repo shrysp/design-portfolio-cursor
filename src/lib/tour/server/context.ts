@@ -172,6 +172,9 @@ export const TOUR_BACKEND_BLOCKS = {
   guardrails: BACKEND_GUARDRAILS,
 };
 
+/** The reasoning model behind the voice: it writes every answer about Shreyas. */
+export const TOUR_BACKEND_MODEL = 'gpt-5.6-terra';
+
 export const TOUR_VOICE_INSTRUCTIONS = `${PERSONALITY_PROMPT}\n\n${VOICE_OPENER}\n\n${VOICE_HANDOVER}`;
 
 /**
