@@ -74,7 +74,7 @@ export default function RootLayout({
           {children}
           <StickyFooter />
         </MotionProvider>
-        <DialRoot />
+        {process.env.NODE_ENV !== 'production' && <DialRoot />}
 
       </body>
     </html>

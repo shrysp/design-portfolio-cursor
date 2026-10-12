@@ -20,6 +20,10 @@
   --gradient-primary: linear-gradient(180deg, var(--color-stone-800) 0%, var(--color-stone-900) 100%);
   --gradient-secondary: linear-gradient(180deg, #57534D 0%, #44403B 100%);
   --gradient-accent: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%);
+
+  /* Card surface: thumbnails, case study figures, craft tiles */
+  --surface-radius: 1rem;
+  --surface-shadow: 0 0 0 1px rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.08), 0 6px 16px -6px rgb(0 0 0 / 0.1);
 }
 
 @theme inline {
@@ -217,6 +221,144 @@ body {
   }
 }
 
+
+/* ── Surface ──
+   One frame for anything that holds media: a white rim, a hairline, a soft drop. */
+@utility surface {
+  border: 1px solid #fff;
+  border-radius: var(--surface-radius);
+  box-shadow: var(--surface-shadow);
+  overflow: clip;
+}
+
+/* ── Aqua pill ──
+   The gel button. `aqua` is the resting stone pill; a tone utility picks the
+   colour it lights up in, and `aqua-lit` holds it lit (group-hover:aqua-lit).
+   Every value is read through a fallback so the tone utilities never have to
+   win a cascade fight with `aqua` itself.
+   Both pseudo-elements are taken, so don't pair it with touch-hitbox: give the
+   pill an inset child for a bigger tap area instead. */
+@utility aqua {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--aqua-edge-now, var(--aqua-edge, var(--color-stone-400)));
+  border-radius: 9999px;
+  color: var(--aqua-ink-now, var(--aqua-ink, var(--color-stone-500)));
+  background: radial-gradient(at 50% 75%, var(--aqua-1, var(--color-stone-100)), var(--aqua-2, var(--color-stone-200)), var(--aqua-3, var(--color-stone-300)));
+  box-shadow: 0 2px 2px -1px rgb(0 0 0 / 0.25), inset 0 4px 8px 1px rgb(10 10 10 / 0.15), inset 0 -2px 2px 0 rgb(10 10 10 / 0.15);
+  cursor: pointer;
+  transition: color 200ms ease-out, border-color 200ms ease-out, scale 150ms ease-out;
+
+  /* The lit colour. A gradient can't be transitioned, so it fades in on its
+     own layer, in step with the ink and the edge. */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(at 50% 75%, var(--aqua-lit-1, var(--color-stone-200)), var(--aqua-lit-2, var(--color-stone-300)), var(--aqua-lit-3, var(--color-stone-400)));
+    opacity: var(--aqua-on, 0);
+    transition: opacity 200ms ease-out;
+  }
+
+  /* The gloss across the top half */
+  &::after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: var(--aqua-gloss-x, 2px);
+    right: var(--aqua-gloss-x, 2px);
+    height: 50%;
+    border-radius: 12px 12px 4px 4px;
+    background: linear-gradient(to bottom, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.2));
+    pointer-events: none;
+    transition: opacity 150ms ease-out;
+  }
+
+  @media (hover: hover) {
+    &:hover:not(:disabled) {
+      --aqua-on: 1;
+      --aqua-ink-now: var(--aqua-lit-ink, var(--color-stone-600));
+      --aqua-edge-now: var(--aqua-lit-edge, var(--color-stone-400));
+    }
+  }
+
+  &:active:not(:disabled) {
+    scale: 0.96;
+    &::after {
+      opacity: 0.75;
+    }
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+@utility aqua-lit {
+  --aqua-on: 1;
+  --aqua-ink-now: var(--aqua-lit-ink, var(--color-stone-600));
+  --aqua-edge-now: var(--aqua-lit-edge, var(--color-stone-400));
+}
+
+/* A circle needs a narrower gloss than a pill */
+@utility aqua-round {
+  --aqua-gloss-x: 5px;
+}
+
+/* Blue at rest */
+@utility aqua-blue {
+  --aqua-1: var(--color-blue-300);
+  --aqua-2: var(--color-blue-500);
+  --aqua-3: var(--color-blue-400);
+  --aqua-edge: var(--color-blue-700);
+  --aqua-ink: #fff;
+  --aqua-lit-1: var(--color-blue-400);
+  --aqua-lit-2: var(--color-blue-600);
+  --aqua-lit-3: var(--color-blue-500);
+  --aqua-lit-edge: var(--color-blue-800);
+  --aqua-lit-ink: #fff;
+}
+
+/* Stone at rest, lights up blue */
+@utility aqua-to-blue {
+  --aqua-lit-1: var(--color-blue-300);
+  --aqua-lit-2: var(--color-blue-500);
+  --aqua-lit-3: var(--color-blue-400);
+  --aqua-lit-edge: var(--color-blue-700);
+  --aqua-lit-ink: #fff;
+}
+
+/* Stone at rest, lights up amber */
+@utility aqua-to-amber {
+  --aqua-lit-1: var(--color-amber-300);
+  --aqua-lit-2: var(--color-amber-500);
+  --aqua-lit-3: var(--color-amber-400);
+  --aqua-lit-edge: var(--color-amber-700);
+  --aqua-lit-ink: var(--color-amber-900);
+}
+
+/* ── Glass ──
+   A clear capsule: the page blurs and bends behind it, with a bright rim on top.
+   --glass-refract is set by the Glass component where the browser can bend the backdrop. */
+@utility glass {
+  isolation: isolate;
+  border-radius: 9999px;
+  background: linear-gradient(to bottom, rgb(255 255 255 / var(--glass-tint, 0.5)), rgb(255 255 255 / calc(var(--glass-tint, 0.5) * 0.45)));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 10px)) saturate(var(--glass-saturate, 1.6));
+  backdrop-filter: var(--glass-refract,) blur(var(--glass-blur, 10px)) saturate(var(--glass-saturate, 1.6));
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.9),
+    inset 0 0 0 1px rgb(255 255 255 / 0.45),
+    inset 0 -6px 10px -6px rgb(0 0 0 / 0.1),
+    0 0 0 1px rgb(0 0 0 / 0.06),
+    0 1px 2px rgb(0 0 0 / 0.06),
+    0 10px 24px -10px rgb(0 0 0 / 0.22);
+}
 
 /* Paper grid styles (for GridBackground component) */
 .paper-grid {

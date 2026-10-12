@@ -168,28 +168,28 @@ export default function Home() {
                   
               <ProjectThumbnailCard name="Quinn" link="/projects/quinn">
                 <div className="text-body text-pretty">AI-native relationship intelligence product focused on how executives manage and maintain their professional networks. I led the 10–12 month product vision, shaping the system&apos;s foundations, long-term evolution, and growth direction.</div>
-                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/HalftoneDots.webp')] bg-cover bg-center rounded-2xl border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">
+                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/HalftoneDots.webp')] bg-cover bg-center surface">
                   <Image src="/images/projects/Quinn/Masterlist.webp" alt="Quinn" fill className="object-cover object-center" />
                 </div>
               </ProjectThumbnailCard>
 
               <ProjectThumbnailCard name="ItinerAI" link="/projects/itinerai">
                 <div className="text-body text-pretty">ItinerAI is an experimental travel assistant where multiple AI agents, each with a distinct personality and focus area, collaborate to help you plan and coordinate trips effortlessly. From surfacing the best flight options to optimizing your itinerary around your schedule, these agents communicate with each other and with you, just like a well-aligned team.</div>
-                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/ItinearAI-Thumbnail-Background.webp')] bg-cover bg-center rounded-2xl border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">
+                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/ItinearAI-Thumbnail-Background.webp')] bg-cover bg-center surface">
                   <Image src="/images/projects/ItinerAI/ItinerAI-Thumbnail.png" alt="ItinerAI" fill className="object-cover object-center" />
                 </div>
               </ProjectThumbnailCard>
 
               <ProjectThumbnailCard name="Dashworks" link="/projects/dashworks">
                 <div className="text-body text-pretty">Dashworks is an AI-powered knowledge assistant that helps companies centralize their knowledge scattered across various apps. It provides accurate answers to employee questions by searching across the company&apos;s connected applications.</div>
-                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/Dashworks-Thumbnail-Background.webp')] bg-cover bg-center rounded-2xl border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">
+                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/Dashworks-Thumbnail-Background.webp')] bg-cover bg-center surface">
                   <Image src="/images/projects/Dashworks/Dashworks-Onboarding-1.png" alt="Dashworks" fill className="object-cover object-center" />
                 </div>
               </ProjectThumbnailCard>
 
               <ProjectThumbnailCard name="WeatherWise" link="/projects/weatherwise">
                 <div className="text-body text-pretty">Improving Navigational Safety with Weather-Adaptive Routing in Google Maps.</div>
-                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/WeatherWiseThumbnail-Background.webp')] bg-cover bg-center rounded-2xl border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">
+                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/WeatherWiseThumbnail-Background.webp')] bg-cover bg-center surface">
                   <Image src="/images/projects/Weatherwise/WeatherWise-Thumbnail.webp" alt="WeatherWise" fill className="object-cover object-center" />
                 </div>
               </ProjectThumbnailCard>                  

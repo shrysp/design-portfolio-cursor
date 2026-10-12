@@ -34,7 +34,7 @@ export default function QuinnProject() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
-                className="w-full aspect-[4/3] rounded-3xl border border-slate-200 overflow-hidden mb-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12)]"
+                className="w-full aspect-[4/3] surface mb-6"
               >
                 <Image
                   src={project.images[selectedImageIndex + 1]}

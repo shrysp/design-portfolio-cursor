@@ -87,7 +87,7 @@ export default function DashworksProject() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
-              className="w-full aspect-[4/3] rounded-3xl border border-slate-200 overflow-hidden mb-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12)]"
+              className="w-full aspect-[4/3] surface mb-6"
             >
               <Image
                 src={project.images[selectedImageIndex + 1]}
@@ -240,7 +240,7 @@ export default function DashworksProject() {
   
                     {/* Image comparison slider - React implementation */}
                     <div 
-                        className='isolate relative rounded-2xl overflow-hidden shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] bg-stone-100 my-4' 
+                        className='isolate relative surface bg-stone-100 my-4' 
                         ref={containerRef}
                     >
 
@@ -296,8 +296,7 @@ export default function DashworksProject() {
                             onMouseDown={handleMouseDown}
                             onTouchStart={handleMouseDown}
                         >
-                            <div className='rounded-full md:w-[24px] flex items-center justify-center isolate group relative text-slate-500 hover:text-slate-600 md:px-3 px-2 bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] hover:bg-[radial-gradient(at_50%_75%,theme(colors.slate.200),theme(colors.slate.300),theme(colors.slate.400))] shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.25)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.25)_inset] border border-slate-500 hover:shadow-[0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_8px_8px_-4px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.25)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.25)_inset] active:shadow-[0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_8px_8px_-4px_rgba(0,0,0,0.0),0px_4px_8px_1px_rgba(0,0,0,0.25)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.25)_inset] active:bg-[radial-gradient(at_50%_75%,theme(colors.slate.100),theme(colors.slate.200),theme(colors.slate.300))] cursor-pointer  transition-[color,box-shadow,border-color] duration-300 overflow-hidden '>
-                                <div className="absolute inset-0.5 top-[1px] h-1/2 rounded-t-[16px] rounded-b-[4px] bg-gradient-to-b from-white/70 to-white/20 group-active:from-white/50 z-10" />
+                            <div className='aqua md:w-[24px] md:px-3 px-2'>
                                 <div className='size-6 flex items-center justify-center text-xs p-1'>
                                     <SplitHorizontal size={16} weight="bold" />
                                 </div>

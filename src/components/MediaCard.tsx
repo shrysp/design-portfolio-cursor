@@ -28,8 +28,8 @@ export default function MediaCard({
 
 
   return (
-    <div className={`isolate relative w-full bg-stone-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-2xl -space-y-2 my-3 ${className || ''}`}>
-      <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-stone-200'>
+    <div className={`isolate relative w-full surface bg-stone-100 -space-y-2 my-3 ${className || ''}`}>
+      <div className='isolate relative rounded-[calc(var(--surface-radius)-1px)] bg-white overflow-hidden outline outline-stone-200'>
         {mediaType === 'image' ? (
           <div className={`w-full h-full ${aspectClass} relative bg-white`}>
             <Image
@@ -57,7 +57,7 @@ export default function MediaCard({
       </div>
 
       {typeof caption === 'string' && caption.length > 0 && (
-        <div className='w-full flex items-center justify-between px-4 py-3  rounded-b-2xl pt-4'>
+        <div className='w-full flex items-center justify-between px-4 py-3  pt-4'>
           <div className="relative text-sm text-stone-600 mt-1 flex-1 pr-3">{caption}</div>
           {rightIcon && (
             <div className="relative flex items-center justify-center flex-shrink-0">

@@ -472,7 +472,6 @@ export function ExpandableJournal({
                 type="button"
                 variant="iconPrimary"
                 size="icon"
-                showHighlight
                 aria-label="Previous page"
                 title="Previous page (←)"
                 onClick={() => flipJournal(-1)}
@@ -484,7 +483,6 @@ export function ExpandableJournal({
                 type="button"
                 variant="iconPrimary"
                 size="icon"
-                showHighlight
                 aria-label="Next page"
                 title="Next page (→)"
                 onClick={() => flipJournal(1)}
@@ -495,7 +493,6 @@ export function ExpandableJournal({
               <Button
                 type="button"
                 variant="back"
-                showHighlight
                 aria-label="Close journal"
                 title="Close (Esc)"
                 onClick={handleClose}

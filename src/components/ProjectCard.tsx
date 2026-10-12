@@ -39,7 +39,7 @@ export function ProjectCard({
     <div className="w-full">
       {/* Card container */}
       <div 
-        className="w-full max-w-full relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] overflow-hidden">
+        className="w-full max-w-full relative surface bg-gradient-to-br from-white to-stone-50">
         {/* Content container */}
           <div className="flex flex-col justify-top items-start">
           
@@ -85,7 +85,6 @@ export function ProjectCard({
             <Button 
               variant="primary"
               size="project"
-              showHighlight={true}
               onClick={navigateToProjectDetail}
             >
               Read More
