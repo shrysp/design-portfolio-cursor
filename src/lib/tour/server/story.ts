@@ -1,10 +1,11 @@
 /**
- * What PIP knows about Shreyas, when it is written in Notion.
+ * What PIP knows about Shreyas, as he wrote it in Notion.
  *
- * His story used to live only in context.ts — BACKGROUND and MOMENTS — which
- * meant a new anecdote was a code change and a push, to a repository that is
- * public. With NOTION_STORY_PAGE set, the words on that page are the story
- * instead: everything on it is what PIP knows, and nothing else is.
+ * His story is not in the code: a new anecdote would be a change and a push,
+ * to a repository that is public. The words on the page NOTION_STORY_PAGE
+ * names are the story: everything on it is what PIP knows, and nothing else
+ * is. Without one the tour does not open (see api/tour/session) — a guide
+ * with nothing to go on is worse than no guide.
  *
  * As with visitors (access.ts), the tour runs on a copy kept in the store.
  * The copy is refreshed when someone opens the tour and it is more than a few
@@ -27,10 +28,11 @@ const SYNC_AFTER_MS = 5 * 60_000;
 const MIN_LENGTH = 400;
 /**
  * The whole story is sent with every answer, so its length is paid for each
- * time and a model reads a long brief less carefully than a short one. About
- * three times what the built-in story runs to.
+ * time and a model reads a long brief less carefully than a short one. Room
+ * for about five thousand tokens, nearly all of them cached after a session's
+ * first question. What does not fit is cut from the end of the page.
  */
-const MAX_LENGTH = 12_000;
+const MAX_LENGTH = 20_000;
 
 export async function refreshStory(timeoutMs?: number): Promise<void> {
   if (!storyConfigured()) return;
@@ -53,7 +55,7 @@ export async function refreshStory(timeoutMs?: number): Promise<void> {
   }
 }
 
-/** The story as last read from Notion, or nothing — in which case the built-in one is used. */
+/** The story as last read from Notion, or nothing — in which case there is no tour to give. */
 export async function currentStory(): Promise<string | undefined> {
   if (!storyConfigured()) return undefined;
   return toRecord(await getStore().cmd<string[]>('HGETALL', KEY)).text || undefined;

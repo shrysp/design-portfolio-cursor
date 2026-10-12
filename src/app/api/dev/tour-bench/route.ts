@@ -26,8 +26,12 @@ export async function GET() {
   if (!live) notFound();
   // The bench starts from what a visitor would get now — his story from Notion, if that is where it is.
   await refreshStory();
+  const story = await currentStory();
+  if (!story) {
+    return Response.json({ error: 'There is no story: set NOTION_STORY_PAGE in .env.local and write the page.' }, { status: 503 });
+  }
   return Response.json({
-    blocks: backendBlocks(await currentStory()),
+    blocks: backendBlocks(story),
     questions: BENCH_QUESTIONS,
     suggestions: BENCH_SUGGESTIONS,
   });

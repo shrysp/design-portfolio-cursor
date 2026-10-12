@@ -3,7 +3,7 @@
  * The Notion table of who may take the PIP tour.
  *
  *   npm run tour:notion -- setup <page>   make the table inside a Notion page (its link or id)
- *   npm run tour:notion -- story <page>   make the page PIP's story is written on, from what is in the code
+ *   npm run tour:notion -- story <page>   make the page PIP's story is written on, with its headings
  *   npm run tour:notion -- check          read the table the way the site does, and say what is wrong
  *
  * Needs NOTION_TOKEN (and, for check, NOTION_VISITORS_DB) in the environment
@@ -126,52 +126,35 @@ async function check() {
   console.log(`\n${results.length} rows, ${ready} ready to use.`);
 }
 
-/** A template literal out of context.ts, as the text it stands for. */
-function fromCode(name) {
-  const source = readFileSync('src/lib/tour/server/context.ts', 'utf8');
-  const match = source.match(new RegExp(`const ${name} = \`([\\s\\S]*?)\`\\.trim\\(\\)`));
-  if (!match) fail(`Could not find ${name} in context.ts.`);
-  return match[1].replace(/\\\n/g, '').trim();
-}
-
-const paragraph = (content) => ({ object: 'block', type: 'paragraph', paragraph: { rich_text: [{ text: { content } }] } });
 const heading = (content) => ({ object: 'block', type: 'heading_2', heading_2: { rich_text: [{ text: { content } }] } });
+// Callouts are notes to the writer: the site does not read them (see getStory in notion.ts).
+const note = (content) => ({ object: 'block', type: 'callout', callout: { rich_text: [{ text: { content } }], icon: { type: 'emoji', emoji: '✏️' } } });
+
+const SECTIONS = [
+  ['In one breath', 'Two or three sentences on who you are. This is the answer to "tell me about him."'],
+  ['The path', 'Short chapters in order, each with a place and rough years.'],
+  ['Work so far', 'Each role as plain facts: where, when, what you did, who you worked with.'],
+  ['Stories', 'One story per entry, six to ten in all: what happened in three to five sentences, then one line on what it shows.'],
+  ['How he works', 'Process, working with engineers, giving and taking feedback, tools. Point to a story where you can.'],
+  ['What he believes about design', 'Three to five opinions, each with one example.'],
+  ['Now and next', 'What you are looking for and what kind of team. Only what you are happy for PIP to say aloud.'],
+  ['Outside work', 'Sport, travel, places. Most of the photos belong here.'],
+  ['Quick facts', 'A list: where you live, education, years of experience, tools, languages. One fact in one place only.'],
+  ['Ask him directly', 'Topics PIP should hand to you. Salary, relocation, availability and visa status already are.'],
+];
 
 async function story(where) {
-  const parent = pageId(where);
-  // Start the page from the story the tour already tells, so nothing is lost in the move.
-  const background = fromCode('BACKGROUND').split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
-  const moments = fromCode('MOMENTS').replace(/^Concrete moments[^:]*:\s*/, '');
   const page = await notion('pages', 'POST', {
-    parent: { type: 'page_id', page_id: parent },
+    parent: { type: 'page_id', page_id: pageId(where) },
     properties: { title: { title: [{ text: { content: "PIP's story" } }] } },
     children: [
-      {
-        object: 'block',
-        type: 'callout',
-        callout: {
-          rich_text: [
-            {
-              text: {
-                content:
-                  'Everything on this page is what PIP knows about Shreyas, and nothing else is. Write it as plain paragraphs and lists under headings. Edits reach the tour within about five minutes. Images and tables are ignored.',
-              },
-            },
-          ],
-        },
-      },
-      heading('Background'),
-      ...background.map(paragraph),
-      heading('Moments'),
-      // One per line: a moment PIP can tell is easier to add, find and remove than a sentence in a paragraph.
-      ...moments
-        .split(/(?<=\.)\s+(?=[A-Z])/)
-        .map((m) => m.trim())
-        .filter(Boolean)
-        .map((m) => ({ object: 'block', type: 'bulleted_list_item', bulleted_list_item: { rich_text: [{ text: { content: m } }] } })),
+      note(
+        'Everything on this page is what PIP knows about Shreyas, and nothing else is. Boxes like this one are notes to yourself: PIP does not read them, and a heading with nothing under it is skipped. Write facts rather than praise. Edits reach the tour within about five minutes. Images and tables are ignored.',
+      ),
+      ...SECTIONS.flatMap(([name, prompt]) => [heading(name), note(prompt)]),
     ],
   });
-  console.log(`Made the page "PIP's story".\n\nAdd this to .env.local, and to the site's environment on Vercel:\n\n  NOTION_STORY_PAGE=${page.id}\n`);
+  console.log(`Made the page "PIP's story". The tour does not open until something is written on it.\n\nAdd this to .env.local, and to the site's environment on Vercel:\n\n  NOTION_STORY_PAGE=${page.id}\n`);
 }
 
 const [command, arg] = process.argv.slice(2);

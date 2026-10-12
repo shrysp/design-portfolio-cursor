@@ -24,7 +24,7 @@ import {
   visitorContext,
   visitorInstructions,
 } from '@/lib/tour/server/context';
-import { currentStory } from '@/lib/tour/server/story';
+import { currentStory, refreshStory } from '@/lib/tour/server/story';
 import { TOUR_IMAGES } from '@/data/tour-images';
 
 const LIVE_SESSIONS = 'https://api.openai.com/v1/live/sessions';
@@ -69,6 +69,25 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Missing SDP offer.' }, { status: 400 });
   }
 
+  // His story is the one thing PIP cannot do without, so it is looked for
+  // before any of this code's time is reserved. It is normally already in
+  // the store — the tour page reads it on the way in — and fetched here only
+  // if it is not.
+  let story: string | undefined;
+  try {
+    story = await currentStory();
+    if (!story) {
+      await refreshStory();
+      story = await currentStory();
+    }
+  } catch (err) {
+    console.error('[tour/session]', err);
+  }
+  if (!story) {
+    console.error('[tour/session] There is no story to tell: check NOTION_STORY_PAGE and the page it names.');
+    return Response.json({ error: 'The tour is not available right now.' }, { status: 503 });
+  }
+
   let started;
   try {
     started = await startSession(id);
@@ -87,7 +106,6 @@ export async function POST(request: Request) {
    * real backend that OpenAI runs for us. The backend carries the knowledge;
    * the voice layer carries only personality and pacing.
    */
-  const story = await currentStory().catch(() => undefined);
   // Both layers get it: the voice so it does not say hello twice, the backend
   // so "tell me more about that" has something to refer to.
   const earlier = historyInstructions(readHistory(history));
