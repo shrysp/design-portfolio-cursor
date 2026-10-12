@@ -13,7 +13,7 @@ export default function FractionsProject() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   
   // Get the Fractions project data
-  const project = projectsData[5]; // Fractions is now the sixth project in the array
+  const project = projectsData.find((p) => p.title === 'Fractions')!; // by title, so the list can be reordered
 
   return (
     <div className="min-h-screen flex justify-center bg-gray-50">

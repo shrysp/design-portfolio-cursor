@@ -1,0 +1,1142 @@
+/*
+ * The PIP tour's stage, brought over from the AI-Character lab.
+ *
+ * Everything is scoped to .tour-stage: the lab themed itself through :root and
+ * a [data-theme] switch on <html>, and neither may reach the rest of this site.
+ */
+.tour-stage {
+  --foreground: #1a1d23;
+  --hairline: rgb(12 20 40 / 0.12);
+  --control: rgb(12 20 40 / 0.04);
+  --control-ink: rgb(12 20 40 / 0.7);
+  --muted-ink: rgb(12 20 40 / 0.42);
+}
+
+/*
+ * Live transcript panel — Figma node 1190:10259
+ *
+ * The same tube as the character's face, not a tinted pane next to it.
+ *
+ * The colour was never the problem — the Figma fill is kept exactly. What was
+ * missing is that light only looks emitted when it is brighter than what
+ * surrounds it, and the text here was mid-blue on mid-blue glass, so every
+ * glow layer added just muddied the panel. The eyes solve this by being
+ * near-white cores carrying their colour entirely in the halo around them,
+ * and the text below is now built the same way.
+ */
+.live-display {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  /* Figma 1204:12281 — 16px, matching the reference frames. */
+  border-radius: 16px;
+
+  /*
+   * The Figma fill, kept: rgba(32, 99, 243, 0.2).
+   *
+   * It reads pale on the Figma canvas because the canvas behind it is light.
+   * Composited on this page's #0b0d10 it lands at #0f1e3d — hsl(220 60% 15%),
+   * which is the character's own screen hue at about twice its lightness. So
+   * the spec colour was already a tube colour; what it was missing was a
+   * centre to be lit from and an edge to fall away at. A single flat alpha is
+   * the one thing a curved glass face never looks like.
+   *
+   * Painted as overlays on the spec fill rather than replacing it, so the
+   * base value stays exactly what the design says it is.
+   */
+  background:
+    /* backlight pooling behind the middle of the glass */
+    radial-gradient(
+      ellipse 70% 62% at 50% 44%,
+      rgba(130, 186, 255, 0.11) 0%,
+      rgba(130, 186, 255, 0.03) 45%,
+      transparent 68%
+    ),
+    /* and turning away at the rim — still blue, never black */
+    radial-gradient(
+        ellipse 80% 74% at 50% 46%,
+        transparent 46%,
+        rgba(4, 14, 46, 0.36) 84%,
+        rgba(3, 10, 36, 0.62) 100%
+      ),
+    rgba(32, 99, 243, 0.2);
+  border: 1px solid rgba(20, 71, 230, 0.5);
+
+  /*
+   * A lit panel, not a rectangle with a border.
+   *
+   * The first outward ring is Figma's own 0 0 4px rgba(32,99,243,0.25); the
+   * two wider ones carry it further, because a phosphor glows brightest at its
+   * edge and falls off a long way, and a single shadow can only describe one
+   * of those. The inset pair is the backlight caught in the glass at the
+   * bezel — inset because overflow:hidden would clip any child drawn there.
+   *
+   * Deliberately kept under the character's own ambient bloom. The display is
+   * a surface the character lights; if it competes, they read as two objects
+   * rather than one system.
+   */
+  box-shadow:
+    inset 0 0 22px rgba(32, 99, 243, 0.3),
+    inset 0 0 3px rgba(142, 197, 255, 0.2),
+    0 0 4px rgba(32, 99, 243, 0.25),
+    0 0 26px rgba(32, 99, 243, 0.14),
+    0 0 62px rgba(32, 99, 243, 0.08);
+  transition: box-shadow 600ms ease-out;
+  animation: live-flicker 4.3s steps(1, end) infinite;
+}
+
+@keyframes live-scan-drift {
+  to {
+    background-position-y: 4px;
+  }
+}
+
+/*
+ * Mains hum, not a sine. Irregular steps of one or two percent: a smooth pulse
+ * reads as a breathing animation, an uneven one reads as an unstable supply,
+ * which is the thing being imitated. Kept small on purpose — the panel is a
+ * lit rectangle, so anything larger reads as the whole block changing value
+ * rather than as a supply wavering behind it.
+ */
+@keyframes live-flicker {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  8% {
+    filter: brightness(1.012);
+  }
+  14% {
+    filter: brightness(0.992);
+  }
+  37% {
+    filter: brightness(1.022);
+  }
+  52% {
+    filter: brightness(0.986);
+  }
+  63% {
+    filter: brightness(1.018);
+  }
+  81% {
+    filter: brightness(0.996);
+  }
+}
+
+/* Warms slightly while a session is open — a screen with something on it. */
+.live-display--live {
+  box-shadow:
+    inset 0 0 26px rgba(32, 99, 243, 0.4),
+    inset 0 0 4px rgba(142, 197, 255, 0.28),
+    0 0 6px rgba(32, 99, 243, 0.35),
+    0 0 36px rgba(32, 99, 243, 0.2),
+    0 0 84px rgba(32, 99, 243, 0.12);
+}
+
+.live-display-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /*
+   * Straight rules, at the character's own 1.5px-on / 4px period.
+   *
+   * These were arcs from a repeating-radial-gradient centred far below the
+   * panel, on the theory that a raster laid onto a convex tube bows. It does —
+   * but only if the centre is far enough out for the bands to read as one
+   * surface bending, and at this panel's aspect they closed into visible ovals
+   * instead. A ring is worse than a flat line, because a real tube never shows
+   * concentric ones. The curvature lives in the fill's lighting now, where it
+   * does not have that failure mode.
+   *
+   * The line is a deep blue rather than black. On a lit blue panel a black
+   * rule reads as ruled paper laid over the glass; a darker shade of the panel
+   * reads as the gap between traces, which is what it is.
+   */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(5, 18, 62, 0.62) 0px,
+    rgba(5, 18, 62, 0.62) 1.5px,
+    /* the lit line between the dark ones: a raster emits as well as subtracts */
+    rgba(160, 204, 255, 0.06) 2.2px,
+    rgba(0, 0, 0, 0) 3px,
+    rgba(0, 0, 0, 0) 4px
+  );
+  filter: blur(0.5px);
+  /*
+   * The raster drifts, at the character's own 5px/s over a 4px period. A still
+   * raster is a texture; a moving one is a tube scanning. This is most of what
+   * reads as flicker on the character's eyes, and the display looked inert
+   * beside it because it was the one thing missing.
+   */
+  animation: live-scan-drift 0.8s linear infinite;
+  /*
+   * Above the text, not behind it.
+   *
+   * Lines that stop at the glyphs are lines drawn on a pane in front of a
+   * label; lines that cross them are a display rendering its own text. Same
+   * reason the character's scanlines run over its eyes.
+   */
+  z-index: 20;
+  mix-blend-mode: multiply;
+}
+
+.live-display-glass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    /* specular sheet across the top of the glass — the character's, same angle */
+    linear-gradient(
+      168deg,
+      rgba(255, 255, 255, 0.09) 0%,
+      rgba(255, 255, 255, 0.028) 26%,
+      transparent 46%
+    ),
+    /*
+     * A convex face turns away at the rim. Most of that fall-off is in the
+     * fill itself now, so this only deepens the last of the corner — and it
+     * deepens toward the panel's own dark blue, not toward black, or the
+     * corners read as soot on the glass.
+     */
+    radial-gradient(
+        ellipse 80% 72% at 50% 45%,
+        transparent 0%,
+        transparent 62%,
+        rgba(3, 12, 42, 0.2) 86%,
+        rgba(3, 12, 42, 0.42) 100%
+      );
+  z-index: 30;
+}
+
+/*
+ * Emitted, not printed.
+ *
+ * The eyes are built as a near-white core inside a saturated halo — the colour
+ * lives in the bloom, never in the core, because phosphor does not dim by
+ * fading, it dims by spreading. The text is now built the same way: an almost
+ * white glyph carrying four rings of blue. A tinted glyph with a tinted shadow
+ * is a label on glass, which is what this was.
+ */
+.live-display-text {
+  color: #f4f8ff;
+  /*
+   * Above the raster, below the glass.
+   *
+   * The lines used to cross the glyphs, on the argument that a display renders
+   * its own text so the raster must run over it — which is true of the
+   * character's eyes, where the shapes are big and solid enough to survive
+   * being cut. At 13-14px type it just shredded the strokes. So the text sits
+   * on top of the lines and gives back the same signal a different way: at 80%
+   * it lets the raster through everywhere the glyph is thin or the bloom is
+   * soft, so the lines still read across it without eating the letterforms.
+   */
+  position: relative;
+  z-index: 25;
+  opacity: 0.8;
+  /*
+   * The first pair is chromatic fringing — a shadow mask never lands its three
+   * guns in exactly the same place, and that half-pixel of red and cyan either
+   * side of a stroke is one of the strongest signals that something is a tube
+   * rather than a panel.
+   *
+   * The tight white shadow fattens the stroke to blunt the vector edge: a beam
+   * has width, so glyph edges bleed into the phosphor rather than ending. Sharp
+   * text is the clearest tell that a CRT is being imitated by a screenshot.
+   *
+   * The two wide rings are the eye's own halo pair (7px and 24px) at text
+   * scale; they are what spills onto the dark fill and makes the panel look lit
+   * from inside rather than printed on.
+   */
+  text-shadow:
+    -0.6px 0 0.8px rgba(255, 72, 120, 0.35),
+    0.6px 0 0.8px rgba(64, 224, 255, 0.35),
+    0 0 1.5px rgba(235, 244, 255, 0.95),
+    0 0 5px rgba(150, 196, 255, 0.85),
+    0 0 14px rgba(96, 160, 255, 0.7),
+    0 0 30px rgba(43, 112, 250, 0.5);
+}
+
+/* Idle keeps its bright core and simply throws less light. */
+.live-display-text--idle {
+  color: #c9dcfb;
+  text-shadow:
+    -0.5px 0 0.8px rgba(255, 72, 120, 0.2),
+    0.5px 0 0.8px rgba(64, 224, 255, 0.2),
+    0 0 1.5px rgba(210, 230, 255, 0.6),
+    0 0 6px rgba(120, 170, 250, 0.4),
+    0 0 16px rgba(43, 112, 250, 0.28);
+}
+
+/* ------------------------------------------------------------ light mode */
+
+/*
+ * The same panel, the other way up.
+ *
+ * The Figma fill over a light page composites to exactly the pale blue of the
+ * reference frames — which is an LCD, not a CRT. That is a different device
+ * and it has to be drawn as one: on a backlit panel the crystal blocks light,
+ * so the text is the dark thing and the glass around it is the bright thing.
+ * A glowing white glyph on pale blue is just low-contrast text.
+ *
+ * This is the character's own LCD polarity, the Tamagotchi inversion it
+ * already ships for the PIP preset — so the two stay one system across themes
+ * rather than the display inventing a third look.
+ */
+.tour-stage .live-display {
+  background:
+    /* backlight still pools behind the middle, just in white rather than blue */
+    radial-gradient(
+      ellipse 70% 62% at 50% 44%,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 255, 255, 0.14) 45%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 80% 74% at 50% 46%,
+      transparent 48%,
+      rgba(20, 71, 230, 0.1) 86%,
+      rgba(20, 71, 230, 0.18) 100%
+    ),
+    rgba(32, 99, 243, 0.2);
+  border-color: rgba(20, 71, 230, 0.55);
+  /*
+   * A bloom on a light ground is invisible — there is nothing darker around it
+   * to be lit. What a physical LCD has instead is a body: a cast shadow and a
+   * rim that darkens where the bezel meets the glass. Figma's own 4px glow is
+   * kept as the innermost ring so the spec value survives the theme.
+   */
+  box-shadow:
+    inset 0 0 20px rgba(20, 71, 230, 0.12),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    0 0 4px rgba(32, 99, 243, 0.25),
+    0 1px 2px rgba(12, 24, 60, 0.12),
+    0 8px 22px rgba(12, 24, 60, 0.1);
+}
+
+.tour-stage .live-display--live {
+  box-shadow:
+    inset 0 0 20px rgba(20, 71, 230, 0.18),
+    inset 0 1px 2px rgba(255, 255, 255, 0.6),
+    0 0 6px rgba(32, 99, 243, 0.35),
+    0 1px 2px rgba(12, 24, 60, 0.14),
+    0 10px 26px rgba(12, 24, 60, 0.13);
+}
+
+/*
+ * Same period and drift, opposite job. There is no lit line between the dark
+ * ones here: an emitted line needs a dark gap to show against, and on pale
+ * glass it only greys the panel. The raster is pure subtraction, which is what
+ * a segment grid on an LCD actually is.
+ */
+.tour-stage .live-display-scan {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(13, 39, 121, 0.2) 0px,
+    rgba(13, 39, 121, 0.2) 1.5px,
+    rgba(0, 0, 0, 0) 1.5px,
+    rgba(0, 0, 0, 0) 4px
+  );
+}
+
+.tour-stage .live-display-glass {
+  background:
+    linear-gradient(
+      168deg,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0.16) 26%,
+      transparent 46%
+    ),
+    radial-gradient(
+      ellipse 80% 72% at 50% 45%,
+      transparent 0%,
+      transparent 62%,
+      rgba(13, 39, 121, 0.06) 86%,
+      rgba(13, 39, 121, 0.12) 100%
+    );
+}
+
+/*
+ * #0d2779 is the blue palette's own `eye` value — the colour the character
+ * draws its eyes in when it is an LCD. The text is crystal now, so it darkens
+ * by thickening rather than by glowing: the tight shadow is the small bleed a
+ * segment has at its edge, and there is no halo, because nothing is emitting.
+ * The chromatic fringing goes too — that is a shadow-mask artefact and an LCD
+ * does not have one.
+ */
+.tour-stage .live-display-text {
+  color: #0d2779;
+  opacity: 0.88;
+  text-shadow:
+    0 0 1px rgba(13, 39, 121, 0.4),
+    0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+/*
+ * One step heavier, per weight, in light mode only.
+ *
+ * On the emissive panel the bloom thickens every stroke before it reaches the
+ * eye, so 500 lands looking like 600. Subtract the glow for the LCD and the
+ * same numeral reads thin against a lit ground — the weight has to be put
+ * back explicitly. Transcript 500 → 600, idle 400 → 500.
+ */
+.tour-stage .live-display-text p {
+  font-weight: 600;
+}
+
+.tour-stage .live-display-text p.live-display-text--idle {
+  font-weight: 500;
+}
+
+.tour-stage .live-display-text--idle {
+  color: #2f4a9c;
+  text-shadow:
+    0 0 1px rgba(47, 74, 156, 0.3),
+    0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+/*
+ * Backlights flicker less than beams do — an LCD's instability is in a lamp,
+ * not in a scanning gun. Half the amplitude, same irregular steps.
+ */
+.tour-stage .live-display {
+  animation-name: live-flicker-lcd;
+}
+
+@keyframes live-flicker-lcd {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  8% {
+    filter: brightness(1.011);
+  }
+  14% {
+    filter: brightness(0.996);
+  }
+  37% {
+    filter: brightness(1.006);
+  }
+  52% {
+    filter: brightness(0.993);
+  }
+  63% {
+    filter: brightness(1.009);
+  }
+  81% {
+    filter: brightness(0.998);
+  }
+}
+
+/*
+ * A character that never stops moving is an accessibility problem, and so is a
+ * screen that never stops flickering. The texture stays; only the motion goes.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .live-display,
+  .live-display-scan {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------- tour stage
+ *
+ * Figma Portfolio-2025 · MacBook Air - 20 (1190:11120)
+ * Full-bleed light stage, focus photo centre, satellite context around it,
+ * character + transcript docked bottom-centre.
+ */
+.tour-stage {
+  --tour-teal: #21bbab;
+  --tour-teal-soft: rgba(33, 187, 171, 0.4);
+  --tour-teal-glow: rgba(33, 187, 171, 0.25);
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #f8f8f8;
+  color: var(--foreground);
+}
+
+.tour-scan {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(75, 119, 251, 0.3) 0px,
+    rgba(75, 119, 251, 0.3) 2px,
+    transparent 2px,
+    transparent 4px
+  );
+  mix-blend-mode: color-burn;
+  opacity: 0.35;
+}
+
+.tour-vignette {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  background:
+    radial-gradient(
+      ellipse 78% 62% at 50% 40%,
+      transparent 52%,
+      rgba(11, 13, 16, 0.1) 78%,
+      rgba(11, 13, 16, 0.22) 100%
+    ),
+    linear-gradient(180deg, transparent 70%, rgba(248, 248, 248, 0.85) 100%);
+}
+
+.tour-focus {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  z-index: 10;
+  width: min(56.5vw, 723px);
+  aspect-ratio: 723 / 542;
+  translate: -50% -50%;
+  overflow: hidden;
+  border-radius: 29px;
+  border: 7px solid var(--tour-teal);
+  box-shadow: 0 0 7px 7px var(--tour-teal-glow);
+  background: rgb(0 0 0 / 0.06);
+  transition:
+    border-color 700ms ease,
+    box-shadow 700ms ease;
+}
+
+.tour-focus--empty {
+  border-width: 2px;
+  border-style: dashed;
+  border-color: var(--tour-teal-soft);
+  box-shadow: none;
+}
+
+.tour-float {
+  position: absolute;
+  z-index: 5;
+  width: min(16.3vw, 209px);
+  aspect-ratio: 209 / 156;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 4px solid var(--tour-teal-soft);
+  box-shadow: 0 0 4px 4px var(--tour-teal-glow);
+  opacity: 0.9;
+  translate: -50% -50%;
+}
+
+/*
+ * One element per photo, so a promotion is the same card travelling rather
+ * than a crossfade. Entrance is driven in JS: a short skid (transform,
+ * ease-out), then a longer morph into the resting slot (ease-in-out).
+ */
+/*
+ * The card layer: one stacking context for every photo, so each card's own
+ * z-index (earliest on top, focus above all) only orders cards among
+ * themselves. Above the empty focus placeholder (10), below the vignette.
+ */
+.tour-cards {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  pointer-events: none;
+}
+
+.tour-card {
+  position: absolute;
+  z-index: 6;
+  overflow: hidden;
+  translate: -50% -50%;
+  transform-origin: center center;
+  background: #d7dbe0;
+  /* Hidden until TourCard's entrance takes over — the server-rendered cards
+     are already at their final spots, and would flash there before the
+     staggered pop-in starts. The entrance (or reduced motion) sets opacity. */
+  opacity: 0;
+}
+
+/*
+ * width and aspect-ratio are set inline per card (see TourCard / FOCUS_MAX,
+ * FLOAT_MAX in tour/page.tsx), fitted to that photo's own dimensions rather
+ * than forced into one shape here — a photo that's landscape, portrait, or
+ * square keeps its real proportions instead of getting cropped to match its
+ * siblings. What's declared here is everything that genuinely IS shared
+ * across every photo regardless of its shape: position, border, glow.
+ */
+.tour-card--focus {
+  left: 50%;
+  top: 38%;
+  z-index: 12;
+  border-radius: 29px;
+  border: 7px solid var(--tour-teal);
+  box-shadow: 0 0 7px 7px var(--tour-teal-glow);
+}
+
+.tour-card--float {
+  z-index: 6;
+  border-radius: 16px;
+  border: 4px solid var(--tour-teal-soft);
+  box-shadow: 0 0 4px 4px var(--tour-teal-glow);
+}
+
+/*
+ * Every photo can be pointed at. The layer stays click-through so the stage
+ * behind it still gets its clicks; only the cards themselves take them.
+ */
+.tour-card {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.tour-card:focus-visible {
+  outline: 2px solid var(--tour-teal);
+  outline-offset: 4px;
+}
+
+/* A resting photo sits back a little and comes forward under the cursor. */
+.tour-card--float img {
+  opacity: 0.8;
+  transition: opacity 150ms ease-out;
+}
+
+.tour-card--float:hover img,
+.tour-card--float:focus-visible img {
+  opacity: 1;
+}
+
+.tour-card--float:hover {
+  border-color: var(--tour-teal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-card {
+    transition: none !important;
+  }
+}
+
+.tour-dock {
+  position: absolute;
+  left: 50%;
+  bottom: max(24px, 6.7dvh);
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  translate: -50% 0;
+}
+
+/*
+ * Before the tour starts PIP is up in the middle of the stage, larger, as the
+ * head of the start card: held away from its place in the dock by a transform
+ * on .tour-pip-body. Across by half the caption's width and its gap, up to
+ * the start card. Nothing in the layout moves — the dock and the caption are
+ * already where they end up.
+ *
+ * Letting go is not a CSS transition. The trip down is one animation along
+ * one curve at one speed, built in TourStage (see the travel effect there):
+ * two transitions with different easings did bend the path, but they also
+ * gave it two bursts of speed — across, then down — and that read as a
+ * stumble rather than a glide.
+ */
+.tour-pip-body {
+  position: relative;
+  height: 100%;
+  transform-origin: center bottom;
+  /* Its own layer for good, so it is not promoted and demoted around the trip. */
+  will-change: transform;
+}
+/*
+ * While PIP travels its scanlines are off: fine lines moved and resized
+ * across the pixel grid shimmer. Out quickly as it leaves, back gently once
+ * it has landed. `!important` because the character writes this layer's
+ * style itself on every frame.
+ */
+.tour-pip-body .char-scan {
+  transition: opacity 280ms ease;
+}
+.tour-pip-body--moving .char-scan {
+  opacity: 0 !important;
+  transition-duration: 90ms;
+}
+
+.tour-dock--intro .tour-pip-body {
+  translate: calc((min(52vw, 560px) + 24px) / 2) calc(max(24px, 6.7dvh) - 61dvh);
+  scale: 1.4;
+}
+
+/* The start card when PIP is sitting above it: hung below PIP rather than centred. */
+.tour-start.tour-start--intro {
+  top: 43dvh;
+  translate: -50% 0;
+}
+
+
+/*
+ * What is being said, beside PIP — as wide as the photo above it, so the two
+ * read as one column. Grows upward from PIP's baseline.
+ */
+.tour-caption {
+  display: flex;
+  width: min(52vw, 560px);
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-left: 24px;
+  overflow: hidden;
+  padding-bottom: 6px;
+  /* Comes up once PIP has landed beside it — see .tour-pip. */
+  transition: opacity 400ms ease 800ms;
+}
+
+.tour-caption--closed {
+  pointer-events: none;
+  opacity: 0;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-caption {
+    transition: none;
+  }
+}
+
+.tour-caption-who {
+  margin-right: 8px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-ink);
+}
+
+/*
+ * A box three lines tall, always, filled from the top: the first line of a
+ * sentence appears where it will stay and the next ones are added under it,
+ * so nothing shifts as PIP talks. A sentence that needs a fourth line scrolls
+ * the box up by one (TourStage keeps it at the end).
+ */
+.tour-caption-text {
+  height: calc(3 * 1.35em);
+  overflow: hidden;
+  font-size: clamp(16px, 1.45vw, 21px);
+  font-weight: 500;
+  line-height: 1.35;
+  text-wrap: pretty;
+  color: var(--foreground);
+}
+
+.tour-caption-text--you {
+  font-weight: 400;
+  color: var(--control-ink);
+}
+
+
+/* Drops from its button in the top bar, over a side band rather than the photo. */
+.tour-history {
+  position: absolute;
+  right: 20px;
+  top: 68px;
+  z-index: 60;
+  display: flex;
+  max-height: min(64dvh, 560px);
+  width: min(calc(100vw - 40px), 400px);
+  flex-direction: column;
+  border-radius: 20px;
+  box-shadow: 0 0 0 4px var(--tour-teal-glow);
+  border: 1px solid var(--hairline);
+  background: var(--tour-panel);
+  backdrop-filter: blur(12px);
+}
+
+.tour-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--hairline);
+  padding: 10px 12px 10px 18px;
+  font-size: 12px;
+  color: var(--control-ink);
+}
+
+.tour-history-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  padding: 16px 18px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.tour-history-you {
+  color: var(--control-ink);
+}
+
+/* The way in, where the first photo will land. */
+.tour-start {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  z-index: 35;
+  display: flex;
+  width: min(84vw, 420px);
+  translate: -50% -50%;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.tour-start-title {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.tour-start-body {
+  font-size: 15px;
+  line-height: 1.5;
+  text-wrap: pretty;
+  color: var(--control-ink);
+}
+
+
+.tour-start-hint {
+  font-size: 12px;
+  color: var(--muted-ink);
+}
+.tour-start-hint kbd {
+  color: var(--control-ink);
+}
+
+.tour-chrome {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+}
+
+.tour-events {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 45;
+  max-height: 120px;
+  width: min(320px, 40vw);
+  overflow-y: auto;
+  border-radius: 12px;
+  border: 1px solid var(--hairline);
+  background: rgb(255 255 255 / 0.72);
+  padding: 8px 10px;
+  backdrop-filter: blur(8px);
+}
+
+/* ------------------------------------------------------------- folio stage
+ *
+ * /folio — the portfolio as PIP's device. Same light stage, scanlines, teal
+ * casings and LCD display as /tour, so the work reads as something shown ON
+ * the device rather than a website beside it. Chrome, centre and dock are
+ * grid areas instead of /tour's absolute layers, because here the folders
+ * and the prompt are content, not decoration, and must never overlap.
+
+/*
+ * Over the whole site rather than inside its column. The z-index is in the
+ * range StickyFooter treats as a covering overlay, so the footer steps aside.
+ */
+.tour-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 9995;
+  min-height: 0;
+}
+
+/* ------------------------------------------------------------------ looks
+ *
+ * Two directions for the stage, each behind a switch in the DialKit panel
+ * (see `look` in TourStage): a dark room that PIP and the photos light, and
+ * the library laid out by chapter. Both off is the stage as it was.
+ */
+.tour-stage {
+  --tour-bg: #f8f8f8;
+  --tour-panel: rgb(255 255 255 / 0.9);
+  background: var(--tour-bg);
+  transition: background-color 900ms ease;
+}
+
+.tour-stage--dark {
+  --tour-bg: #0b0d10;
+  --tour-panel: rgb(22 26 32 / 0.92);
+  --foreground: #eef1f4;
+  --hairline: rgb(255 255 255 / 0.14);
+  --control: rgb(255 255 255 / 0.06);
+  --control-ink: rgb(255 255 255 / 0.72);
+  --muted-ink: rgb(255 255 255 / 0.42);
+  --tour-teal-soft: rgba(33, 187, 171, 0.22);
+  --tour-teal-glow: rgba(33, 187, 171, 0.1);
+}
+
+/*
+ * The glow behind the photo in the centre: a tiny blurred copy of the photo,
+ * scaled up (TourStage draws it 12 times smaller than the photo). The numbers
+ * here are in the copy's own small pixels — a 5px blur is about 70 on stage —
+ * which is what keeps it cheap. It sits under the teal halo, not instead of
+ * it: the halo is the casing, this is the light coming off the picture.
+ */
+.tour-glow {
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  z-index: 1;
+  translate: -50% -50%;
+  scale: 14;
+  opacity: 0;
+  filter: blur(5px) saturate(1.5);
+  will-change: opacity;
+  transition: opacity 350ms ease;
+}
+/*
+ * Every photo is shown on a tube, like PIP's own face: scanlines, a faint
+ * red-green-blue phosphor grain, and corners that fall away into the glass.
+ * One painted layer per card and nothing animated, so 38 of them cost a
+ * texture each and no frames. The line pitch is the stage's own (.tour-scan,
+ * 4px), so the two sets of lines never beat against each other.
+ * --tour-crt is the Photo Crt dial.
+ */
+.tour-card::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: var(--tour-crt, 0.6);
+  background:
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 40, 40, 0.07) 0 1px,
+      rgba(40, 255, 90, 0.05) 1px 2px,
+      rgba(60, 90, 255, 0.07) 2px 3px
+    ),
+    radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, 0.38) 100%);
+}
+
+/* The one in the centre is switched on: a little more punch, and a slow band of light rolling down it. */
+.tour-card--focus img {
+  filter: saturate(1.1) contrast(1.04);
+}
+/* Above every resting photo, whatever the honeycomb's lens last made of it. */
+.tour-card--focus {
+  --fz: 999 !important;
+}
+.tour-card--focus::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 1;
+  height: 28%;
+  opacity: var(--tour-crt, 0.6);
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.09), transparent);
+  translate: 0 -100%;
+  animation: tour-crt-roll 7s linear infinite;
+}
+@keyframes tour-crt-roll {
+  to {
+    translate: 0 460%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour-card--focus::before {
+    display: none;
+  }
+}
+
+/* The light stage's scanlines burn into a pale ground; on a dark one they have to add. */
+.tour-stage--dark .tour-scan {
+  mix-blend-mode: screen;
+  opacity: 0.07;
+}
+.tour-stage--dark .tour-vignette {
+  background:
+    radial-gradient(ellipse 78% 62% at 50% 40%, transparent 45%, rgba(0, 0, 0, 0.35) 100%),
+    linear-gradient(180deg, transparent 70%, rgba(11, 13, 16, 0.85) 100%);
+}
+
+/* Resting photos wait in the dark; the one in the centre is the bright thing in the room. */
+.tour-stage--dark .tour-card--float img {
+  opacity: 1;
+  filter: brightness(0.5) saturate(0.7);
+  transition: filter 600ms ease;
+}
+.tour-stage--dark .tour-card--float:hover img,
+.tour-stage--dark .tour-card--float:focus-visible img,
+.tour-stage--dark .tour-card--kin img {
+  filter: brightness(0.95) saturate(1);
+}
+.tour-stage--dark .tour-card--dim img {
+  filter: brightness(0.3) saturate(0.5);
+}
+.tour-stage--dark .tour-card--focus {
+  --tour-teal-glow: rgba(33, 187, 171, 0.3);
+}
+
+/* PIP's screen is the other light in the room. */
+.tour-pip-body::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  width: 420px;
+  height: 300px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(120, 210, 90, 0.2), transparent);
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+.tour-stage--dark .tour-pip-body::before {
+  opacity: 1;
+}
+
+/* By chapter, on the light stage: the focus photo's own chapter stays, the rest step back. */
+.tour-card--float img {
+  transition:
+    opacity 300ms ease-out,
+    filter 600ms ease;
+}
+.tour-card--kin img {
+  opacity: 1;
+}
+.tour-card--kin {
+  border-color: var(--tour-teal);
+}
+.tour-stage:not(.tour-stage--dark) .tour-card--dim img {
+  opacity: 0.4;
+}
+
+.tour-chapter {
+  pointer-events: none;
+  position: absolute;
+  z-index: 20;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-ink);
+  transition: color 400ms ease;
+}
+.tour-chapter--on {
+  color: var(--tour-teal);
+}
+
+/*
+ * Asleep — dozing, or paused mid-visit. The photos lose their colour and sink
+ * back, and in the dark room the lights go down with them.
+ */
+.tour-cards {
+  transition:
+    filter 1400ms ease,
+    opacity 1400ms ease;
+}
+.tour-stage--asleep .tour-cards {
+  filter: grayscale(0.9);
+  opacity: 0.45;
+}
+.tour-stage--asleep .tour-glow,
+.tour-stage--dark.tour-stage--asleep .tour-pip-body::before {
+  opacity: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-stage,
+  .tour-cards,
+  .tour-glow,
+  .tour-card--float img {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------- buttons
+ *
+ * One button for the whole stage, cut from the same cloth as the photo
+ * casings: a rounded shell with a hairline edge that turns teal when it is
+ * the live thing, and the small tracked capitals of the title beside it.
+ * The primary one — the way into the tour — wears the casing outright: a
+ * teal body with the same soft halo a photo in the centre has.
+ */
+.tour-btn {
+  display: inline-flex;
+  height: 34px;
+  align-items: center;
+  gap: 7px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  background: var(--tour-panel);
+  padding: 0 14px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--control-ink);
+  backdrop-filter: blur(10px);
+  transition:
+    border-color 180ms ease-out,
+    color 180ms ease-out,
+    box-shadow 180ms ease-out,
+    scale 120ms ease-out;
+}
+.tour-btn:hover,
+.tour-btn[aria-pressed='true'] {
+  border-color: var(--tour-teal);
+  color: var(--foreground);
+}
+.tour-btn:active {
+  scale: 0.97;
+}
+.tour-btn:focus-visible {
+  outline: 2px solid var(--tour-teal);
+  outline-offset: 3px;
+}
+.tour-btn:disabled {
+  opacity: 0.5;
+}
+
+.tour-btn--primary {
+  border-color: var(--tour-teal);
+  background: var(--tour-teal);
+  color: #06201d;
+  box-shadow: 0 0 0 4px var(--tour-teal-glow);
+}
+.tour-btn--primary:hover {
+  color: #06201d;
+  box-shadow: 0 0 0 7px var(--tour-teal-glow);
+}
+
+.tour-btn--large {
+  height: 46px;
+  margin-top: 6px;
+  padding: 0 26px;
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-btn {
+    transition: none;
+  }
+}
+
+/*
+ * The honeycomb: each resting photo is moved and sized by the lens (TourStage
+ * writes --fx, --fy and --fs on it every frame). Only resting photos — the one
+ * in the centre drops the class and with it the lens.
+ */
+.tour-stage--hex .tour-card--float {
+  translate: calc(-50% + var(--fx, 0px)) calc(-50% + var(--fy, 0px));
+  scale: var(--fs, 1);
+}

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import ProjectThumbnailCard from '@/components/ProjectThumbnailCard';
 import { CraftContent } from '@/components/CraftContent';
+import CameoCharacters from '@/components/cameo/CameoCharacters';
 import { ExpandableJournal } from '@/components/journal/ExpandableJournal';
 import { IconArrowDown } from 'nucleo-micro-bold-essential';
 
@@ -160,12 +161,20 @@ export default function Home() {
 
           {/* Projects section */}
           <motion.div
-            className="flex flex-col gap-4 w-full mt-8"
+            id="selected-work"
+            className="flex flex-col gap-4 w-full mt-8 scroll-mt-8"
             variants={selectedWorkVariants}
           >
             <div className="text-subheader text-pretty flex items-center gap-1 text-stone-400!"><span>Selected Work</span> <IconArrowDown size={14} /></div>
             <div className="w-full flex flex-col gap-20 items-start">
                   
+              <ProjectThumbnailCard name="Cameo" link="/projects/cameo">
+                <div className="text-body text-pretty">An expressive little face for AI interfaces, published as an npm package. It blinks, follows the cursor, and listens, thinks and speaks along with whatever your product is doing. I designed and built it, and used it to make a spoken tour of my own work.</div>
+                <div className="relative w-full aspect-4/3 mt-4 bg-stone-100 rounded-2xl border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">
+                  <CameoCharacters names={['PIP']} size={200} />
+                </div>
+              </ProjectThumbnailCard>
+
               <ProjectThumbnailCard name="Quinn" link="/projects/quinn">
                 <div className="text-body text-pretty">AI-native relationship intelligence product focused on how executives manage and maintain their professional networks. I led the 10–12 month product vision, shaping the system&apos;s foundations, long-term evolution, and growth direction.</div>
                 <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/HalftoneDots.webp')] bg-cover bg-center rounded-2xl border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">

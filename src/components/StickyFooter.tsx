@@ -16,6 +16,7 @@ import {
 
 // Project navigation order - defines the sequence of projects
 const projectOrder = [
+  { slug: 'cameo', name: 'Cameo' },
   { slug: 'quinn', name: 'Quinn' },
   { slug: 'itinerai', name: 'ItinerAI' },
   { slug: 'dashworks', name: 'Dashworks' },

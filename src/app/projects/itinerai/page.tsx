@@ -13,7 +13,7 @@ export default function ItinerAIProject() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   
   // Get the ItinerAI project data
-  const project = projectsData[1]; // ItinerAI is now the second project in the array
+  const project = projectsData.find((p) => p.title === 'ItinerAI')!; // by title, so the list can be reordered
 
   return (
     <div className="min-h-screen flex justify-center bg-stone-50">

@@ -13,7 +13,7 @@ export default function WeatherWiseProject() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   
   // Get the WeatherWise project data
-  const project = projectsData[3]; // WeatherWise is now the fourth project in the array
+  const project = projectsData.find((p) => p.title === 'WeatherWise')!; // by title, so the list can be reordered
 
   return (
     <div className="min-h-screen flex justify-center bg-stone-50">

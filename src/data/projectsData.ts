@@ -1,6 +1,15 @@
 // Project data with different information structures for each project
 export const projectsData = [
   {
+    title: "Cameo",
+    description: [
+      "An expressive little face for AI interfaces, published as an npm package. It blinks, follows the cursor, and listens, thinks and speaks along with your product.",
+    ],
+    images: [],
+    role: "Design and engineering",
+    timeline: "2026",
+  },
+  {
     title: "Quinn",
     description: [
       "AI-native relationship intelligence platform that transforms how executives and business leaders manage their professional networks.",

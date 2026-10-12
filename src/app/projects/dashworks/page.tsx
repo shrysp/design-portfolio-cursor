@@ -14,7 +14,7 @@ export default function DashworksProject() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   
   // Get the Dashworks project data
-  const project = projectsData[2]; // Dashworks is now the third project in the array
+  const project = projectsData.find((p) => p.title === 'DashWorks')!; // by title, so the list can be reordered
 
   // References and state for image comparison slider
   const containerRef = useRef<HTMLDivElement>(null);

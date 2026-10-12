@@ -14,7 +14,7 @@ export default function QuinnProject() {
   const selectedImageIndex = 0;
   
   // Get the Quinn project data (first in array after we add it)
-  const project = projectsData[0]; // Quinn will be the first project in the array
+  const project = projectsData.find((p) => p.title === 'Quinn')!; // by title, so the list can be reordered
 
   return (
     <div className="min-h-screen flex justify-center bg-stone-50">

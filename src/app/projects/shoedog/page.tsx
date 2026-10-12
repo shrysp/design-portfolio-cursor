@@ -15,7 +15,7 @@ export default function ShoedogProject() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   
   // Get the Shoedog project data (Assuming it's index 3 based on original file)
-  const project = projectsData[4]; // Shoedog is now the fifth project in the array
+  const project = projectsData.find((p) => p.title === 'ShoeDog')!; // by title, so the list can be reordered
 
   return (
     <div className="min-h-screen flex justify-center bg-gray-50">
