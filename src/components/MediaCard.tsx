@@ -11,6 +11,7 @@ interface MediaCardProps {
   src: string; // image URL or video URL depending on mediaType
   aspectClass?: string; // e.g. 'aspect-4/3', 'aspect-[16/9]'
   caption?: string; // if provided, renders the caption bar
+  alt?: string; // describes the image; falls back to the caption
   rightIcon?: React.ReactNode; // optional right-side icon/content in caption bar
   className?: string; // optional extra classes for outer wrapper
   posterSrc?: string; // optional poster for video
@@ -25,6 +26,7 @@ export default function MediaCard({
   src,
   aspectClass = 'aspect-4/3',
   caption,
+  alt: altText,
   rightIcon,
   className,
   posterSrc,
@@ -58,7 +60,7 @@ export default function MediaCard({
       });
     });
   };
-  const alt = caption || 'Project image';
+  const alt = altText || caption || 'Project image';
 
   return (
     <div className={`isolate relative w-full surface bg-stone-100 -space-y-2 my-3 ${className || ''}`}>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import ProjectHeader from "@/components/ProjectHeader";
 
@@ -22,6 +23,35 @@ export function CaseStudy({ title, children }: CaseStudyProps) {
         {children}
       </main>
     </div>
+  );
+}
+
+interface HeroProps {
+  /** The project's slug, shared with its card on the home page */
+  slug: string;
+  src: string;
+  /** The backdrop behind the image, as on the home page card */
+  background: string;
+  alt: string;
+  caption?: string;
+  children?: ReactNode;
+}
+
+// The opening image, framed exactly like the project's card on the home page
+// so that card can morph into it. Nothing here animates in: it has to be on
+// screen the moment the page arrives. Children (the Meta row) sit beneath it.
+export function Hero({ slug, src, background, alt, caption, children }: HeroProps) {
+  return (
+    <figure className="w-full flex flex-col gap-6">
+      <div
+        className="relative w-full aspect-[4/3] surface bg-stone-100 bg-cover bg-center"
+        style={{ backgroundImage: `url("${background}")`, viewTransitionName: `project-${slug}` }}
+      >
+        <Image src={src} alt={alt} fill priority sizes="(min-width: 672px) 672px, 100vw" className="object-cover" />
+      </div>
+      {caption && <figcaption className="text-caption -mt-2">{caption}</figcaption>}
+      {children}
+    </figure>
   );
 }
 
@@ -66,7 +96,7 @@ export function Points({ children }: { children: ReactNode }) {
 }
 
 // A line worth stopping on, set on a pane of glass with a gel bar down its side
-export function PullQuote({ children }: { children: ReactNode }) {
+export function PullQuote({ children, by }: { children: ReactNode; by?: string }) {
   return (
     <blockquote className="glass-pane relative mt-3 py-5 pl-9 pr-6 text-important text-pretty italic w-full">
       <span
@@ -74,8 +104,77 @@ export function PullQuote({ children }: { children: ReactNode }) {
         className="absolute left-4 top-5 bottom-5 w-1.5 rounded-full bg-linear-to-b from-stone-200 to-stone-400 shadow-[0_0_0_1px_var(--color-stone-400),inset_1px_0_0.5px_rgba(255,255,255,0.85)]"
       />
       {children}
+      {by && <footer className="mt-2 text-sm not-italic text-stone-500">{by}</footer>}
     </blockquote>
   );
+}
+
+// A small label above a heading, like "Iteration 2"
+export function Kicker({ children }: { children: ReactNode }) {
+  return <p className="text-subheader pt-4 -mb-3">{children}</p>;
+}
+
+interface CalloutProps {
+  /** A short tag for what this is: "Statistic", "Reddit" */
+  label?: string;
+  /** A small icon for the tag, shown on a gel badge */
+  icon?: ReactNode;
+  /** The badge's colour */
+  tone?: "blue" | "orange" | "stone";
+  title?: string;
+  children: ReactNode;
+  className?: string;
+}
+
+const badgeTones = { blue: "aqua-blue", orange: "aqua-orange", stone: "" };
+
+// Something set apart from the running text on a pane of glass: a statistic,
+// a quote from research, a note. With an icon it becomes a pinned card: a gel
+// tile sits in the top-left corner saying what kind of thing this is, and
+// dashed guides rule off the margins around the content.
+export function Callout({ label, icon, tone = "blue", title, children, className = "" }: CalloutProps) {
+  const heading = title && <h4 className="text-header-2 mx-0 text-stone-800!">{title}</h4>;
+
+  if (!icon) {
+    return (
+      <div className={`glass-pane w-full flex flex-col gap-2 p-6 ${className}`}>
+        {label && <p className="text-subheader text-stone-400! mx-0">{label}</p>}
+        {heading}
+        {children}
+      </div>
+    );
+  }
+
+  const guide = "absolute border-dashed border-stone-300/70 pointer-events-none";
+  return (
+    <div className={`glass-pane relative w-full ${className}`}>
+      {/* The top margin, with the tile pinned in its corner. The tile sits 2px
+          in from the card's edge, so its corner is the card's radius less 2px:
+          the two curves stay parallel. */}
+      <div className="relative flex items-center gap-2.5 h-8 p-[2px] border-b border-dashed border-stone-300/70">
+        <span
+          aria-hidden
+          className={`aqua ${badgeTones[tone]} size-7 shrink-0 pointer-events-none rounded-[5px]! rounded-tl-[calc(var(--surface-radius)-2px)]! [--aqua-gloss-radius:calc(var(--surface-radius)-4px)_3px_3px_3px]`}
+        >
+          {icon}
+        </span>
+        {label && <p className="text-subheader text-stone-400! mx-0 w-auto pl-2">{label}</p>}
+      </div>
+      <div aria-hidden className={`${guide} inset-y-0 left-8 border-l`} />
+      <div aria-hidden className={`${guide} inset-y-0 right-8 border-l`} />
+      <div aria-hidden className={`${guide} inset-x-0 bottom-8 border-b`} />
+
+      <div className="flex flex-col gap-2 px-11 pt-5 pb-12">
+        {heading}
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// Figures shown side by side for comparison
+export function FigureRow({ children }: { children: ReactNode }) {
+  return <div className="grid grid-cols-2 gap-4 [&>*]:my-0">{children}</div>;
 }
 
 // The facts under the hero: role, timeline and the like

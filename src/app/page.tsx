@@ -5,17 +5,17 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import ProjectThumbnailCard from '@/components/ProjectThumbnailCard';
 import { CraftContent } from '@/components/CraftContent';
+import StickOnSticker, { STICK_ON_DEFAULTS } from '@/components/StickOnSticker';
+import HandNote from '@/components/HandNote';
 import { ExpandableJournal } from '@/components/journal/ExpandableJournal';
 import { IconArrowDown } from 'nucleo-micro-bold-essential';
 import { clearReturningFrom, peekReturningFrom } from '@/lib/routeTransition';
 
 
 // ── Animation timeline ──
-// Stickers:   0ms       → ~900ms (5 stickers, 150ms stagger, 300ms each)
-// Journal:    800ms     → 1000ms (scale + opacity, 200ms)
-// Hold:       ~1000ms   → 1020ms
-// Name text:  1020ms    → 1420ms
-// Content:    1220ms+   → stagger 150ms
+// Stickers are stuck on one by one, `stagger` apart. The journal appears as the
+// last of them goes down, then the name, then the content. Everything after the
+// stickers is timed from them, so slowing the stickers slows the whole sequence.
 
 const slideIn = (delay: number) => ({
   hidden: { opacity: 0, y: 30, filter: "blur(4px)" },
@@ -27,46 +27,12 @@ const slideIn = (delay: number) => ({
   }
 });
 
-const stickerGroupVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0
-    }
-  }
-};
-
-const stickerVariants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.3, ease: "easeOut" as const }
-  }
-};
-
-const journalVariants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.2, delay: 0.8, ease: "easeOut" as const }
-  }
-};
-
-const nameVariants = {
-  hidden: { opacity: 0, filter: "blur(4px)" },
-  visible: {
-    opacity: 1,
-    filter: "blur(0px)",
-    transition: { duration: 0.4, delay: 1.02, ease: "easeOut" as const }
-  }
-};
-
-const selectedWorkVariants = slideIn(1.22);
-const craftVariants = slideIn(1.37);
-
+// The stickers in the hero, counting the "Click to know more" note in its slot
+const STICKER_SLOTS = 5;
+// Seconds between one sticker going on and the next
+const STICKER_STAGGER = 0.22;
+// How fast the handwritten notes write themselves; 1 is the font's natural pace
+const NOTE_SPEED = 6;
 
 // Where a project card's top sits after coming back to it: level with the
 // title on the project page, so the title barely has to move
@@ -87,7 +53,28 @@ export default function Home() {
 
   useEffect(() => clearReturningFrom(), []);
 
-  const initial = returnSlug ? false : "hidden";
+  const stickerDelay = (index: number) => index * STICKER_STAGGER;
+  const stickOn = STICK_ON_DEFAULTS;
+
+  // The journal comes in as the last sticker starts going down
+  const journalDelay = stickerDelay(STICKER_SLOTS - 1) + 0.2;
+  const journalVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.2, delay: journalDelay, ease: "easeOut" as const } },
+  };
+  const nameVariants = {
+    hidden: { opacity: 0, filter: "blur(4px)" },
+    visible: { opacity: 1, filter: "blur(0px)", transition: { duration: 0.4, delay: journalDelay + 0.22, ease: "easeOut" as const } },
+  };
+  const selectedWorkVariants = slideIn(journalDelay + 0.42);
+  const craftVariants = slideIn(journalDelay + 0.57);
+
+  const isReturning = returnSlug !== null;
+  const initial = isReturning ? false : "hidden";
+
+  // A sticker's handwritten note writes itself out once the sticker is pressed flat
+  const noteDelay = (index: number) => stickerDelay(index) + stickOn.arrive * 0.5 + stickOn.press;
+  const note = { instant: isReturning, speed: NOTE_SPEED, className: "font-normal text-[1.1rem] leading-[1.15]" };
 
   return (
     <div className="min-h-screen flex justify-center">
@@ -114,56 +101,74 @@ export default function Home() {
                 />
               </motion.div>
 
-              {/* Stickers — appear after journal, stagger in. They overhang the
-                  section below, so they must not swallow its hovers and clicks */}
-              <motion.div
-                variants={stickerGroupVariants}
-                initial={initial}
-                animate="visible"
-                className="contents pointer-events-none"
-              >
-                <motion.div variants={stickerVariants} className="hidden md:flex absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 gap-2">
-                  <img
+              {/* Stickers. Each is stuck down in turn, left edge first, the same
+                  way the name sticker goes onto the journal; its note fades in
+                  once it's flat. They overhang the section below, so they must
+                  not swallow its hovers and clicks. */}
+              <div className="contents pointer-events-none">
+                <div className="hidden md:flex absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 gap-2">
+                  <StickOnSticker
                     src="/images/About/Mission Peak Sticker.webp"
                     alt="Mission Peak sticker"
-                    className="z-[0] size-100 object-contain"
+                    aspect={1148 / 1536}
+                    imgClassName="z-[0] size-100 object-contain"
+                    delay={stickerDelay(0)}
+                    instant={isReturning}
+                    {...stickOn}
                   />
-                  <div className="absolute text-stone-500 text-sm font-handwriting text-left left-1/5 top-20">Mission Peak</div>
-                </motion.div>
+                  <div className="absolute text-stone-500 text-left left-[15%] top-20 whitespace-nowrap"><HandNote {...note} delay={noteDelay(0)}>Mission Peak</HandNote></div>
+                </div>
 
-                <motion.div variants={stickerVariants} className="hidden md:flex z-[0] absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 gap-2">
-                  <div className="absolute text-stone-500 text-sm font-handwriting text-left w-30 -rotate-60 top-8 left-1/5">Based in Bay Area</div>
-                  <img
+                <div className="hidden md:flex z-[0] absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 gap-2">
+                  <div className="absolute z-10 text-stone-500 text-left w-34 -rotate-60 top-8 left-1/5"><HandNote {...note} delay={noteDelay(1)}>Based in Bay Area</HandNote></div>
+                  <StickOnSticker
                     src="/images/About/Golden-Gate-Bridge-sticker.webp"
                     alt="Golden Gate Bridge sticker"
-                    className="size-100 object-contain"
+                    aspect={1}
+                    imgClassName="size-100 object-contain"
+                    delay={stickerDelay(1)}
+                    instant={isReturning}
+                    {...stickOn}
                   />
-                </motion.div>
+                </div>
 
-                <motion.div variants={stickerVariants} className="hidden md:flex absolute -top-10 left-2/3 gap-2 items-center">
+                <motion.div
+                  initial={isReturning ? false : { opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3, ease: "easeOut", delay: noteDelay(4) }}
+                  className="hidden md:flex absolute -top-10 left-2/3 gap-2 items-center"
+                >
                   <svg width="42" height="15" viewBox="0 0 42 15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: "scaleY(-1)" }}>
                     <path d="M2.54828 0.0432179C2.2963 -0.0697398 2.00045 0.0429621 1.8875 0.294945L0.0467438 4.40124C-0.0662139 4.65322 0.046488 4.94906 0.298471 5.06202C0.550453 5.17498 0.846295 5.06227 0.959253 4.81029L2.59548 1.16026L6.24551 2.79648C6.4975 2.90944 6.79334 2.79673 6.9063 2.54475C7.01925 2.29277 6.90655 1.99693 6.65457 1.88397L2.54828 0.0432179ZM15.8438 10.5177L15.6714 10.0483L15.8438 10.5177ZM21.6997 7.17961L21.383 6.79267L21.6997 7.17961ZM2.34375 0.499473L1.87651 0.67747C2.52271 2.37374 3.55684 5.86028 5.64221 8.44332C6.69551 9.748 8.03834 10.8537 9.76489 11.3934C11.4959 11.9345 13.5582 11.8896 16.0161 10.987L15.8438 10.5177L15.6714 10.0483C13.3793 10.89 11.5458 10.9024 10.0632 10.439C8.57624 9.97417 7.38782 9.01359 6.42029 7.81516C4.46399 5.39199 3.49813 2.1252 2.81099 0.321475L2.34375 0.499473ZM15.8438 10.5177L16.0161 10.987C18.472 10.0852 20.4356 8.86022 22.0163 7.56655L21.6997 7.17961L21.383 6.79267C19.8787 8.02376 18.0112 9.18915 15.6714 10.0483L15.8438 10.5177ZM35.7867 6.65666L35.3794 6.94664C36.5667 8.61438 37.379 10.209 38.2294 11.583C39.0476 12.9049 39.9199 14.0528 41.1856 14.4747L41.3438 14.0004L41.5019 13.526C40.6123 13.2295 39.9028 12.3865 39.0797 11.0567C38.2888 9.77893 37.4002 8.06095 36.194 6.36669L35.7867 6.65666ZM21.6997 7.17961L22.0163 7.56655C24.4719 5.55691 26.972 4.18862 29.2665 3.92831C31.5095 3.67384 33.616 4.4697 35.3794 6.94664L35.7867 6.65666L36.194 6.36669C34.2334 3.61268 31.781 2.63663 29.1538 2.93469C26.578 3.22691 23.8966 4.73556 21.383 6.79267L21.6997 7.17961Z" fill="#A6A09B"/>
                   </svg>
-                  <div className="text-stone-500 text-sm font-handwriting text-left w-30">Click to know
-                  More About me</div>
+                  <div className="text-stone-500 text-left w-32"><HandNote {...note} delay={noteDelay(4) + 0.2}>Click to know more about me</HandNote></div>
                 </motion.div>
 
-                <motion.div variants={stickerVariants} className="hidden md:flex absolute -z-[1] top-2/3 right-1/5 translate-x-1/2 -translate-y-1/2">
-                  <div className="absolute text-stone-500 text-sm font-handwriting text-left w-30 mt-2 left-1/2 bottom-1/5">MS in HCI @ RIT</div>
-                  <img
+                <div className="hidden md:flex absolute -z-[1] top-2/3 right-1/5 translate-x-1/2 -translate-y-1/2">
+                  <div className="absolute z-10 text-stone-500 text-left w-34 mt-2 left-1/2 bottom-1/5"><HandNote {...note} delay={noteDelay(3)}>MS in HCI @ RIT</HandNote></div>
+                  <StickOnSticker
                     src="/images/About/RIT Ritchie Sticker.webp"
                     alt="RIT Ritchie sticker"
-                    className="size-140 object-contain"
+                    aspect={1536 / 1146}
+                    imgClassName="size-140 object-contain"
+                    delay={stickerDelay(3)}
+                    instant={isReturning}
+                    {...stickOn}
                   />
-                </motion.div>
+                </div>
 
-                <motion.img
-                  variants={stickerVariants}
-                  src="/images/About/Cricket Sticker.webp"
-                  alt="Cricket sticker"
-                  className="hidden md:flex -z-[2] h-120 absolute top-1/2 -right-15 translate-x-1/2 -translate-y-1/2 object-contain"
-                />
-              </motion.div>
+                <div className="hidden md:flex -z-[2] absolute top-1/2 -right-15 translate-x-1/2 -translate-y-1/2">
+                  <StickOnSticker
+                    src="/images/About/Cricket Sticker.webp"
+                    alt="Cricket sticker"
+                    aspect={1}
+                    imgClassName="h-120 w-auto max-w-none object-contain"
+                    delay={stickerDelay(4)}
+                    instant={isReturning}
+                    {...stickOn}
+                  />
+                </div>
+              </div>
 
             </div>
 

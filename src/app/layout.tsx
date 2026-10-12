@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Source_Serif_4, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import "dialkit/styles.css";
 import StickyFooter from "@/components/StickyFooter";
 import MotionProvider from "@/components/MotionProvider";
 import DevFeedback from "@/components/DevFeedback";
 import RouteTransitionSettler from "@/components/RouteTransitionSettler";
-import { DialRoot } from "dialkit";
 
 
 const geist = Geist({
@@ -76,7 +74,6 @@ export default function RootLayout({
           {children}
           <StickyFooter />
         </MotionProvider>
-        {process.env.NODE_ENV !== 'production' && <DialRoot />}
 
       </body>
     </html>

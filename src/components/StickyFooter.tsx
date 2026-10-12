@@ -7,7 +7,6 @@ import { IconLinkedin  } from 'nucleo-social-media';
 import EmailCopyButton from './EmailCopyButton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
-import { useDialKit } from 'dialkit';
 import Glass, { canRefract } from './Glass';
 import { isRouteTransitioning, onRouteTransitionEnd } from '@/lib/routeTransition';
 import { DockTooltip, useDockTooltip } from './DockTooltip';
@@ -20,6 +19,9 @@ const projectOrder = [
   { slug: 'weatherwise', name: 'WeatherWise' },
   
 ];
+
+// The dock's glass, as tuned in the browser
+const glass = { blur: 2, saturate: 2, tint: 1, refraction: 26, bezel: 10 };
 
 const dockTips = {
   x: 'Follow on X',
@@ -117,14 +119,6 @@ export default function StickyFooter() {
     };
   }, []);
 
-  // Tuned live from the DialKit panel in development
-  const glass = useDialKit('Glass dock', {
-    blur: [2, 0, 40],
-    saturate: [2, 1, 3],
-    tint: [1, 0, 1],
-    refraction: [26, 0, 80],
-    bezel: [10, 2, 24],
-  });
 
   // During a page transition the dock is drawn as a picture of itself, which
   // can't blur what's behind it. The picture's frame is given the same
@@ -132,7 +126,7 @@ export default function StickyFooter() {
   useEffect(() => {
     const lens = canRefract() && glass.refraction > 0 ? 'url(#dock-lens) ' : '';
     document.documentElement.style.setProperty('--dock-backdrop', `${lens}blur(${glass.blur}px) saturate(${glass.saturate})`);
-  }, [glass.blur, glass.saturate, glass.refraction]);
+  }, []);
 
   const dockRef = useRef<HTMLDivElement>(null);
   const { tip, tipFor } = useDockTooltip(dockRef);

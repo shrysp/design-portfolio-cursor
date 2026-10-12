@@ -1,9 +1,8 @@
 "use client";
 
 import React from 'react';
-import Image from 'next/image';
 import MediaCard from '@/components/MediaCard';
-import { CaseStudy, Section, Points, PullQuote, Meta } from '@/components/case-study/CaseStudy';
+import { CaseStudy, Hero, Section, Points, PullQuote, Meta } from '@/components/case-study/CaseStudy';
 
 // Import the project data
 import { projectsData } from '@/data/projectsData';
@@ -14,34 +13,20 @@ export default function QuinnProject() {
 
   return (
     <CaseStudy title={project.title}>
-      {/* Hero and the facts beneath it */}
-      {/* No entrance animation: the hero has to be on screen the moment the
-          page arrives, so the home page thumbnail can morph into it */}
-      <figure className="w-full flex flex-col gap-6">
-        {/* The same framing as the home page card, so the page opens on the image just clicked */}
-        <div
-          className="relative w-full aspect-[4/3] surface bg-stone-100 bg-[url('/images/projects/thumbnails/HalftoneDots.webp')] bg-cover bg-center"
-          style={{ viewTransitionName: 'project-quinn' }}
-        >
-          <Image
-            src="/images/projects/Quinn/Masterlist.webp"
-            alt={`${project.title} - main image`}
-            fill
-            priority
-            sizes="(min-width: 800px) 800px, 100vw"
-            className="object-cover"
-          />
-        </div>
-        <figcaption className="text-caption -mt-2">
-          Enterprise-scale relationship management with strength indicators, recent activity, and intelligent context
-        </figcaption>
+      <Hero
+        slug="quinn"
+        src="/images/projects/Quinn/Masterlist.webp"
+        background="/images/projects/thumbnails/HalftoneDots.webp"
+        alt={`${project.title} - main image`}
+        caption="Enterprise-scale relationship management with strength indicators, recent activity, and intelligent context"
+      >
         <Meta
           items={[
             { label: 'My Role', value: project.role },
             { label: 'Timeline', value: project.timeline },
           ]}
         />
-      </figure>
+      </Hero>
 
       <Section id="what" nav="Overview" title="What is Quinn?">
         <p className="text-body">Quinn is an AI-native relationship intelligence platform that transforms how executives and business leaders manage their professional networks. The product bridges the gap between traditional CRM systems and intelligent relationship management.</p>

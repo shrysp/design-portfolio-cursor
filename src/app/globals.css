@@ -276,7 +276,7 @@ body {
     left: var(--aqua-gloss-x, 2px);
     right: var(--aqua-gloss-x, 2px);
     height: 50%;
-    border-radius: 12px 12px 4px 4px;
+    border-radius: var(--aqua-gloss-radius, 12px 12px 4px 4px);
     background: linear-gradient(to bottom, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.2));
     pointer-events: none;
     transition: opacity 150ms ease-out;
@@ -334,6 +334,15 @@ body {
   --aqua-lit-3: var(--color-blue-500);
   --aqua-lit-edge: var(--color-blue-800);
   --aqua-lit-ink: #fff;
+}
+
+/* Orange at rest */
+@utility aqua-orange {
+  --aqua-1: var(--color-orange-300);
+  --aqua-2: var(--color-orange-500);
+  --aqua-3: var(--color-orange-400);
+  --aqua-edge: var(--color-orange-700);
+  --aqua-ink: #fff;
 }
 
 /* Stone at rest, lights up blue */
