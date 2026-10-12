@@ -86,6 +86,14 @@ function memory(): Store {
 // On globalThis so a dev server's hot reloads don't hand out a fresh, empty store.
 const g = globalThis as { __tourStore?: Store };
 
+/** Whether codes are kept in Upstash — the store the live site uses — rather than in this process. */
+export function hasRealStore(): boolean {
+  return Boolean(
+    (process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL) &&
+      (process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN),
+  );
+}
+
 export function getStore(): Store {
   if (g.__tourStore) return g.__tourStore;
   const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;

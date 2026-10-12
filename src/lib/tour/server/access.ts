@@ -20,7 +20,7 @@
  */
 
 import { MIN_CODE_LENGTH, type NotionVisitor, getVisitor, listVisitors, notionConfigured, reportUsage } from './notion';
-import { getStore, toRecord } from './store';
+import { getStore, hasRealStore, toRecord } from './store';
 
 /** The longest one session may run. */
 export const SESSION_CAP_SECONDS = 5 * 60;
@@ -50,12 +50,13 @@ export async function hashCode(code: string): Promise<string> {
 
 /**
  * A development server without a store has nowhere to keep codes between
- * restarts, so it takes one from TOUR_DEV_CODE. Never in production: there the
- * store is required and this does nothing.
+ * restarts, so it takes one from TOUR_DEV_CODE. Never in production, and
+ * never into a real store: a development server pointed at the live one would
+ * otherwise write its test code where the live site would honour it.
  */
 async function seedDevCode() {
   const code = process.env.TOUR_DEV_CODE;
-  if (process.env.NODE_ENV === 'production' || !code) return;
+  if (process.env.NODE_ENV === 'production' || !code || hasRealStore()) return;
   const key = codeKey(await hashCode(code));
   const rec = toRecord(await getStore().cmd<string[]>('HGETALL', key));
   if (rec.label) return;
