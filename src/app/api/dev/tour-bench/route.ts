@@ -12,7 +12,8 @@
  */
 
 import { notFound } from 'next/navigation';
-import { TOUR_BACKEND_BLOCKS } from '@/lib/tour/server/context';
+import { backendBlocks } from '@/lib/tour/server/context';
+import { currentStory, refreshStory } from '@/lib/tour/server/story';
 import { BENCH_QUESTIONS } from '@/lib/tour/server/bench-questions';
 import { BENCH_SUGGESTIONS } from '@/lib/tour/server/bench-suggestions';
 import { readSentence, type SentenceReading } from '@/lib/tour/server/read-sentence';
@@ -23,7 +24,13 @@ const live = process.env.NODE_ENV !== 'production';
 /** What the tour is running right now, as the bench's starting point. */
 export async function GET() {
   if (!live) notFound();
-  return Response.json({ blocks: TOUR_BACKEND_BLOCKS, questions: BENCH_QUESTIONS, suggestions: BENCH_SUGGESTIONS });
+  // The bench starts from what a visitor would get now — his story from Notion, if that is where it is.
+  await refreshStory();
+  return Response.json({
+    blocks: backendBlocks(await currentStory()),
+    questions: BENCH_QUESTIONS,
+    suggestions: BENCH_SUGGESTIONS,
+  });
 }
 
 type OutputItem = { type?: string; content?: { type?: string; text?: string }[] };

@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "journal:capture": "node scripts/capture-journal-pages.mjs",
-    "tour:codes": "node scripts/tour-codes.mjs"
+    "tour:codes": "node scripts/tour-codes.mjs",
+    "tour:notion": "node scripts/tour-notion.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.7",

@@ -191,7 +191,29 @@ export const TOUR_BACKEND_BLOCKS = {
 
 export const TOUR_VOICE_INSTRUCTIONS = `${PERSONALITY_PROMPT}\n\n${VOICE_OPENER}\n\n${VOICE_HANDOVER}`;
 
-export const TOUR_BACKEND_INSTRUCTIONS = Object.values(TOUR_BACKEND_BLOCKS).join('\n\n');
+/**
+ * The same blocks with his story taken from Notion (see story.ts) in place of
+ * the two written here. The story sits where they sat — after how to answer,
+ * before what may not be said — and keeps the one instruction MOMENTS carried
+ * with it, since a page of his own notes will not say how to retell them.
+ */
+export function backendBlocks(story?: string): Record<string, string> {
+  if (!story) return TOUR_BACKEND_BLOCKS;
+  const { personality, opener, shape, grounding, guardrails } = TOUR_BACKEND_BLOCKS;
+  return {
+    personality,
+    opener,
+    shape,
+    story:
+      `# What you know about Shreyas\n${story}\n\n` +
+      'Where this describes real moments from his life, bring them up when they fit the conversation, told ' +
+      'as anecdotes in your own words — never as a list, and never read out as written.',
+    grounding,
+    guardrails,
+  };
+}
+
+export const backendInstructions = (story?: string) => Object.values(backendBlocks(story)).join('\n\n');
 
 /**
  * A code belongs to one person, so PIP can know who has come in.
@@ -212,6 +234,26 @@ export function visitorInstructions(visitor: { name?: string; note?: string }): 
   ]
     .filter(Boolean)
     .join('\n');
+}
+
+/**
+ * The same person, for the backend — which writes the answers, and so is
+ * where knowing who is listening can change what gets said. This is the
+ * longer of the two things written about a visitor (the Context column in
+ * Notion): who they are, what they would care about. It is its owner's
+ * writing, not the visitor's, so it is trusted; the limits on it are about
+ * tact. Each session is given its own visitor's and nobody else's.
+ */
+export function visitorContext(context: string | undefined): string {
+  if (!context) return '';
+  return [
+    '# Who you are talking to',
+    context,
+    'Shreyas wrote this about the visitor so you can choose what is worth bringing out for them. Let it ' +
+      'shape what you emphasise. Do not recite it or tell them what you were told about them, and do not ' +
+      'claim to know anything about them beyond it. Every rule above still holds: it changes which true ' +
+      'things you pick, never what is true.',
+  ].join('\n');
 }
 
 /**

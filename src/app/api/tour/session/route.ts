@@ -12,16 +12,19 @@
  * with time left (see access.ts).
  */
 
-import { endSession, startSession } from '@/lib/tour/server/access';
+import { after } from 'next/server';
+import { endSession, refreshVisitor, startSession } from '@/lib/tour/server/access';
 import { accessFrom } from '@/lib/tour/server/auth';
 import {
-  TOUR_BACKEND_INSTRUCTIONS,
+  backendInstructions,
   TOUR_VOICE_INSTRUCTIONS,
   type Turn,
   greetingFor,
   historyInstructions,
+  visitorContext,
   visitorInstructions,
 } from '@/lib/tour/server/context';
+import { currentStory } from '@/lib/tour/server/story';
 import { TOUR_IMAGES } from '@/data/tour-images';
 
 const LIVE_SESSIONS = 'https://api.openai.com/v1/live/sessions';
@@ -84,6 +87,7 @@ export async function POST(request: Request) {
    * real backend that OpenAI runs for us. The backend carries the knowledge;
    * the voice layer carries only personality and pacing.
    */
+  const story = await currentStory().catch(() => undefined);
   // Both layers get it: the voice so it does not say hello twice, the backend
   // so "tell me more about that" has something to refer to.
   const earlier = historyInstructions(readHistory(history));
@@ -99,7 +103,9 @@ export async function POST(request: Request) {
       type: 'responses',
       responses: {
         model: BACKEND_MODEL,
-        instructions: [TOUR_BACKEND_INSTRUCTIONS, earlier].filter(Boolean).join('\n\n'),
+        instructions: [backendInstructions(story), visitorContext(started.visitor.context), earlier]
+          .filter(Boolean)
+          .join('\n\n'),
       },
     },
     // No `audio` block: GPT-Live rejects `session.audio.input`. Turn detection
@@ -127,6 +133,11 @@ export async function POST(request: Request) {
     console.error(`[tour/session] OpenAI ${res.status}:`, body.slice(0, 1500));
     return Response.json({ error: `The voice model returned ${res.status}.` }, { status: 502 });
   }
+
+  // Once the answer is on its way: check this person's Notion row, so an edit
+  // or a switched-off code is in place for their next session without this
+  // one having waited for it.
+  after(() => refreshVisitor(id));
 
   return Response.json({
     ...JSON.parse(body),

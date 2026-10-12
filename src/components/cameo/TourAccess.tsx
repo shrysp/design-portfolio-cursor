@@ -16,10 +16,19 @@ export default function TourAccess({ unlocked }: { unlocked: boolean }) {
   const [busy, setBusy] = useState(false);
 
   if (unlocked) {
+    // A browser stays unlocked for a week, so there has to be a way back to
+    // the form — for a shared computer, or to come in as someone else.
+    const lock = async () => {
+      await fetch('/api/tour/unlock', { method: 'DELETE' }).catch(() => {});
+      router.refresh();
+    };
     return (
-      <Button onClick={() => router.push('/projects/cameo/tour')} className="self-start">
-        Open the tour
-      </Button>
+      <div className="flex flex-wrap items-center gap-4">
+        <Button onClick={() => router.push('/projects/cameo/tour')}>Open the tour</Button>
+        <button type="button" onClick={lock} className="text-sm text-stone-500 underline underline-offset-4 hover:text-stone-800">
+          Use a different code
+        </button>
+      </div>
     );
   }
 

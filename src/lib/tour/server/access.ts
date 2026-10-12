@@ -6,6 +6,12 @@
  * the seconds used so far. `scripts/tour-codes.mjs` adds, lists and revokes
  * them; nothing in the site can create one.
  *
+ * People can also be written in Notion — one row each, see notion.ts. A row
+ * becomes a record here the first time its code is entered, and the record is
+ * then a copy of the row: refreshed when its owner comes back, so an edit or
+ * an unticked Active box takes effect, and good enough to run on if Notion
+ * cannot be reached. What a code has spent is never Notion's: it lives here.
+ *
  * Voice time is the cost that matters ($0.05 a minute, billed while connected),
  * so that is what the budget counts. A session's whole allowance is charged
  * when it starts and the unused part handed back when it ends, measured by
@@ -13,6 +19,7 @@
  * that never says goodbye simply keeps what it reserved.
  */
 
+import { MIN_CODE_LENGTH, type NotionVisitor, getVisitor, listVisitors, notionConfigured, reportUsage } from './notion';
 import { getStore, toRecord } from './store';
 
 /** The longest one session may run. */
@@ -25,6 +32,12 @@ const MIN_SESSION_SECONDS = 20;
 /** Wrong codes allowed per address before it has to wait out the window. */
 const UNLOCK_ATTEMPTS = 8;
 const UNLOCK_WINDOW_SECONDS = 10 * 60;
+
+/** How old a copy of a Notion row may be before it is looked at again. */
+const SYNC_AFTER_MS = 60_000;
+/** Most of a person's context that PIP is given. Longer costs more on every answer and is read less well. */
+const MAX_CONTEXT = 1500;
+const MAX_NOTE = 300;
 
 const codeKey = (id: string) => `tour:code:${id}`;
 
@@ -67,7 +80,63 @@ export type Visitor = {
   note?: string;
   /** Ids from the photo library to bring to the centre as PIP says hello. */
   photos: string[];
+  /** Who they are and what to bring out for them — for PIP to know, not to recite. */
+  context?: string;
 };
+
+/** Copies a Notion row into this code's record. Never touches what the code has spent. */
+async function saveFromNotion(id: string, row: NotionVisitor) {
+  await getStore().cmd(
+    'HSET', codeKey(id),
+    'label', row.label,
+    'budget', Math.round((row.minutes ?? DEFAULT_BUDGET_SECONDS / 60) * 60),
+    'name', row.name,
+    'note', row.note.slice(0, MAX_NOTE),
+    'context', row.context.slice(0, MAX_CONTEXT),
+    'photos', row.photos.join(','),
+    'page', row.page,
+    'revoked', row.active ? '0' : '1',
+    'synced', Date.now(),
+  );
+}
+
+/** Whether a Notion row is the one this code id was made from. */
+async function isRowFor(id: string, row: NotionVisitor) {
+  const letters = row.code.replace(/[^a-z0-9]/gi, '');
+  return letters.length >= MIN_CODE_LENGTH && (await hashCode(row.code)) === id;
+}
+
+/**
+ * Brings a code's record up to date with its Notion row, if it has one and
+ * the copy is old enough to be worth checking. A row that is gone, switched
+ * off, or has had its code changed stops the old code working. Notion being
+ * unreachable changes nothing: the copy stands.
+ */
+export async function refreshVisitor(id: string, timeoutMs?: number): Promise<void> {
+  if (!notionConfigured()) return;
+  const store = getStore();
+  const rec = toRecord(await store.cmd<string[]>('HGETALL', codeKey(id)));
+  if (!rec.page || Date.now() - Number(rec.synced ?? 0) < SYNC_AFTER_MS) return;
+  try {
+    const row = await getVisitor(rec.page, timeoutMs);
+    if (row && (await isRowFor(id, row))) await saveFromNotion(id, row);
+    else await store.cmd('HSET', codeKey(id), 'revoked', '1', 'synced', Date.now());
+  } catch (err) {
+    console.error('[tour] Notion could not be read; using the saved copy.', err);
+  }
+}
+
+/** Tells the person's Notion row what they have used. Best effort: the tour does not depend on it. */
+export async function reportVisit(id: string): Promise<void> {
+  if (!notionConfigured()) return;
+  const rec = toRecord(await getStore().cmd<string[]>('HGETALL', codeKey(id)));
+  if (!rec.page) return;
+  try {
+    await reportUsage(rec.page, Math.round((Number(rec.used ?? 0) / 60) * 10) / 10, new Date(Number(rec.lastUsed) || Date.now()));
+  } catch (err) {
+    console.error('[tour] Could not write usage back to Notion.', err);
+  }
+}
 
 export type UnlockResult = { ok: true; id: string } | { ok: false; status: 401 | 429 };
 
@@ -80,7 +149,23 @@ export async function unlock(code: string, address: string): Promise<UnlockResul
   if (n > UNLOCK_ATTEMPTS) return { ok: false, status: 429 };
 
   const id = await hashCode(code);
-  const rec = toRecord(await store.cmd<string[]>('HGETALL', codeKey(id)));
+  let rec = toRecord(await store.cmd<string[]>('HGETALL', codeKey(id)));
+  if (notionConfigured()) {
+    if (rec.page) {
+      // Someone coming back: pick up whatever has changed about them since.
+      await refreshVisitor(id);
+    } else if (!rec.label) {
+      // A code this store has not seen. It may be a row added in Notion since
+      // — the one moment the whole table is read, and it is behind the
+      // attempt limit above.
+      for (const row of await listVisitors()) {
+        if (!(await isRowFor(id, row))) continue;
+        await saveFromNotion(id, row);
+        break;
+      }
+    }
+    rec = toRecord(await store.cmd<string[]>('HGETALL', codeKey(id)));
+  }
   if (!rec.label || rec.revoked === '1') return { ok: false, status: 401 };
   return { ok: true, id };
 }
@@ -123,6 +208,7 @@ export async function startSession(id: string): Promise<StartResult> {
       name: rec.name || undefined,
       note: rec.note || undefined,
       photos: (rec.photos ?? '').split(',').map((p) => p.trim()).filter(Boolean),
+      context: rec.context || undefined,
     },
   };
 }

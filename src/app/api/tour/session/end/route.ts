@@ -4,7 +4,8 @@
  * browser. Sent with sendBeacon as a tab closes, hence no body to read.
  */
 
-import { endSession } from '@/lib/tour/server/access';
+import { after } from 'next/server';
+import { endSession, reportVisit } from '@/lib/tour/server/access';
 import { accessFrom } from '@/lib/tour/server/auth';
 
 export async function POST(request: Request) {
@@ -12,6 +13,7 @@ export async function POST(request: Request) {
   if (!id) return Response.json({ error: 'An access code is required.' }, { status: 401 });
   try {
     await endSession(id);
+    after(() => reportVisit(id));
   } catch (err) {
     console.error('[tour/session/end]', err);
   }
