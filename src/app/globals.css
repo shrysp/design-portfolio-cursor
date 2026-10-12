@@ -308,6 +308,15 @@ body {
   --aqua-edge-now: var(--aqua-lit-edge, var(--color-stone-400));
 }
 
+/* Held down and lit without a pointer on it: a keyboard shortcut showing on
+   its button */
+@utility aqua-pressed {
+  --aqua-on: 1;
+  --aqua-ink-now: var(--aqua-lit-ink, var(--color-stone-600));
+  --aqua-edge-now: var(--aqua-lit-edge, var(--color-stone-400));
+  scale: 0.94;
+}
+
 /* A circle needs a narrower gloss than a pill */
 @utility aqua-round {
   --aqua-gloss-x: 5px;
@@ -420,23 +429,23 @@ body {
 /* The rest of the page doesn't just appear around the travelling pieces: the
    old page blurs away quickly, and the new one comes into focus over the same
    stretch as the morph, so everything settles together. */
-::view-transition-old(root) {
+:root[data-vt="route"]::view-transition-old(root) {
   animation: page-blur-out 180ms ease-out both;
   mix-blend-mode: normal;
 }
 
-::view-transition-new(root) {
+:root[data-vt="route"]::view-transition-new(root) {
   animation: page-blur-in 400ms cubic-bezier(0.2, 0.8, 0.2, 1) 100ms both;
   mix-blend-mode: normal;
 }
 
 /* Named pieces that exist on only one of the two pages (the other projects'
    cards, say) have nothing to morph into, so they come and go with the page */
-::view-transition-old(*):only-child {
+:root[data-vt="route"]::view-transition-old(*):only-child {
   animation: page-blur-out 180ms ease-out both;
 }
 
-::view-transition-new(*):only-child {
+:root[data-vt="route"]::view-transition-new(*):only-child {
   animation: page-blur-in 400ms cubic-bezier(0.2, 0.8, 0.2, 1) 100ms both;
 }
 
@@ -456,6 +465,31 @@ body {
 ::view-transition-new(dock) {
   animation: none;
   mix-blend-mode: normal;
+}
+
+/* ── Enlarging a figure ──
+   The figure grows into the enlarged view and shrinks back into its place.
+   For that moment it is the only named piece on the page: the hero, titles
+   and dock would otherwise be lifted above the dark backdrop. */
+:root[data-vt="zoom"] body * {
+  view-transition-name: none !important;
+}
+
+:root[data-vt="zoom"] body [data-zoom-active] {
+  view-transition-name: zoom-image !important;
+}
+
+:root[data-vt="zoom"]::view-transition-group(zoom-image) {
+  animation-duration: 380ms;
+}
+
+/* The figure is cropped and the enlarged view isn't, so each picture keeps
+   its own proportions inside the moving frame instead of being squashed */
+:root[data-vt="zoom"]::view-transition-old(zoom-image),
+:root[data-vt="zoom"]::view-transition-new(zoom-image) {
+  height: 100%;
+  object-fit: cover;
+  animation-duration: 380ms;
 }
 
 @keyframes page-blur-out {

@@ -54,6 +54,8 @@ export function startRouteTransition(navigate: () => void) {
   }
 
   active = true;
+  // Lets the stylesheet tell a page change from an image being enlarged
+  document.documentElement.dataset.vt = "route";
   const transition = document.startViewTransition(
     () =>
       new Promise<void>((resolve) => {
@@ -68,6 +70,31 @@ export function startRouteTransition(navigate: () => void) {
 
   transition.finished.finally(() => {
     active = false;
+    delete document.documentElement.dataset.vt;
     endListeners.forEach((listener) => listener());
+  });
+}
+
+/**
+ * Morphs one element into another across a state change on the same page:
+ * a figure into its enlarged view and back. Whichever element carries
+ * `data-zoom-active` before `update` runs becomes the one carrying it after.
+ * `update` must apply its change synchronously (flushSync).
+ */
+export function startZoomTransition(update: () => void) {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!("startViewTransition" in document) || reduceMotion || active) {
+    update();
+    return;
+  }
+
+  document.documentElement.dataset.vt = "zoom";
+  const transition = document.startViewTransition(update);
+  // If the browser can't run the morph it still applies the change; there's
+  // nothing to report
+  transition.ready.catch(() => {});
+  transition.finished.catch(() => {}).finally(() => {
+    delete document.documentElement.dataset.vt;
+    document.querySelectorAll("[data-zoom-active='figure']").forEach((el) => el.removeAttribute("data-zoom-active"));
   });
 }

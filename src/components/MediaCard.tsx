@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from 'react';
+import { flushSync } from 'react-dom';
 import Image from 'next/image';
 import Lightbox, { type LightboxItem } from '@/components/Lightbox';
+import { startZoomTransition } from '@/lib/routeTransition';
 
 interface MediaCardProps {
   mediaType: 'image' | 'video';
@@ -35,8 +37,26 @@ export default function MediaCard({
 
   const openZoom = (trigger: HTMLElement) => {
     const figures = Array.from(document.querySelectorAll<HTMLElement>('[data-zoom-src]'));
-    setGallery(figures.map((figure) => ({ src: figure.dataset.zoomSrc as string, caption: figure.dataset.zoomCaption })));
-    setZoomedIndex(Math.max(0, figures.indexOf(trigger)));
+    const items = figures.map((figure) => {
+      // The picture already on the page gives the enlarged view its shape, and
+      // something to show while the full-size file loads
+      const image = figure.querySelector('img');
+      return {
+        src: figure.dataset.zoomSrc as string,
+        caption: figure.dataset.zoomCaption,
+        ratio: image?.naturalWidth ? image.naturalWidth / image.naturalHeight : undefined,
+        preview: image?.currentSrc || undefined,
+      };
+    });
+
+    trigger.setAttribute('data-zoom-active', 'figure');
+    startZoomTransition(() => {
+      trigger.removeAttribute('data-zoom-active');
+      flushSync(() => {
+        setGallery(items);
+        setZoomedIndex(Math.max(0, figures.indexOf(trigger)));
+      });
+    });
   };
   const alt = caption || 'Project image';
 

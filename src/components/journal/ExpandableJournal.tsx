@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence, animate, useMotionValue, useTransform, MotionValue } from "framer-motion";
 import { IconArrowLeft, IconArrowRight, IconXmark } from "nucleo-micro-bold-essential";
+import { useKeyFlash } from "@/lib/useKeyFlash";
 import { Button } from "@/components/ui/button";
 import { useCanHover } from "@/lib/useCanHover";
 import { JournalCover, JOURNAL_EMAIL } from "./journalPages";
@@ -226,6 +227,8 @@ export function ExpandableJournal({
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const [isKeyboardNavigating, setIsKeyboardNavigating] = useState(false); // Track keyboard navigation mode
   const [copied, setCopied] = useState(false);
+  // Arrow keys and Esc show on their buttons
+  const [pressedKey, flashKey] = useKeyFlash<"previous" | "next" | "close">();
   const journal3DRef = useRef<Journal3DHandle | null>(null);
   const fallbackRef = useRef<JournalFallbackHandle | null>(null);
   const collapsedRef = useRef<HTMLDivElement>(null);
@@ -408,6 +411,7 @@ export function ExpandableJournal({
       if (!isExpanded) return;
       
       if (event.key === "Escape") {
+        flashKey("close");
         handleClose();
         return;
       }
@@ -416,10 +420,12 @@ export function ExpandableJournal({
       if (event.key === "ArrowRight") {
         event.preventDefault();
         setIsKeyboardNavigating(true);
+        flashKey("next");
         flipJournal(1);
       } else if (event.key === "ArrowLeft") {
         event.preventDefault();
         setIsKeyboardNavigating(true);
+        flashKey("previous");
         flipJournal(-1);
       }
     }
@@ -437,7 +443,7 @@ export function ExpandableJournal({
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("mousemove", onMouseMove);
     };
-  }, [isExpanded, flipJournal, handleClose, isKeyboardNavigating]);
+  }, [isExpanded, flipJournal, handleClose, isKeyboardNavigating, flashKey]);
 
   // We need to render the AnimatePresence outside the portal conditional
   // to properly handle exit animations
@@ -475,7 +481,7 @@ export function ExpandableJournal({
                 aria-label="Previous page"
                 title="Previous page (←)"
                 onClick={() => flipJournal(-1)}
-                className="size-8"
+                className={`size-8 ${pressedKey === "previous" ? "aqua-pressed" : ""}`}
               >
                 <IconArrowLeft size={14} />
               </Button>
@@ -486,7 +492,7 @@ export function ExpandableJournal({
                 aria-label="Next page"
                 title="Next page (→)"
                 onClick={() => flipJournal(1)}
-                className="size-8"
+                className={`size-8 ${pressedKey === "next" ? "aqua-pressed" : ""}`}
               >
                 <IconArrowRight size={14} />
               </Button>
@@ -496,7 +502,7 @@ export function ExpandableJournal({
                 aria-label="Close journal"
                 title="Close (Esc)"
                 onClick={handleClose}
-                className="h-8 pl-2 pr-2.5 gap-1 text-sm"
+                className={`h-8 pl-2 pr-2.5 gap-1 text-sm ${pressedKey === "close" ? "aqua-pressed" : ""}`}
               >
                 <IconXmark size={14} />
                 Esc
