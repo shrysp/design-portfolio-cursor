@@ -24,7 +24,9 @@ export type LiveSessionOptions = {
    */
   endpoint: string;
   /** What the server allows this session: how long it may run. */
-  onSession?: (info: { maxSeconds?: number; spotlight?: string[] }) => void;
+  onSession?: (info: { maxSeconds?: number; spotlight?: string[]; last?: boolean }) => void;
+  /** The code has no tour time left. Called instead of the connection failing loudly. */
+  onSpent?: () => void;
   /**
    * What was said earlier in this visit, if the visitor is coming back from a
    * pause. Sent with the offer so the new session can carry on instead of
@@ -204,12 +206,15 @@ export function createLiveSession(options: LiveSessionOptions): LiveSession {
       });
 
       const result = await res.json();
-      if (!res.ok) throw new Error(result.detail || result.error || `HTTP ${res.status}`);
+      if (!res.ok) {
+        if (result.spent) options.onSpent?.();
+        throw new Error(result.detail || result.error || `HTTP ${res.status}`);
+      }
       // Torn down while the exchange was in flight: the answer is for a
       // connection that no longer exists.
       if (pc !== connection) return;
       if (typeof result.greeting === 'string') greeting = result.greeting;
-      options.onSession?.({ maxSeconds: result.maxSeconds, spotlight: result.spotlight });
+      options.onSession?.({ maxSeconds: result.maxSeconds, spotlight: result.spotlight, last: result.last === true });
 
       await connection.setRemoteDescription({ type: 'answer', sdp: result.transport.sdp });
       setState('live');

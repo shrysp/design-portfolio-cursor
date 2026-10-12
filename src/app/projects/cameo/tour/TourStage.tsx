@@ -704,6 +704,12 @@ function TourCard({
   );
 }
 
+/** How the stage looks. The dials in development start from this; a visitor gets exactly this. */
+const LOOK = { darkRoom: true, chapters: true, honeycomb: true, spacing: 0.7, lens: 0.7, photoGlow: 0.7, photoCrt: 0.7 };
+
+/** Where the tour sends people when PIP has run out of time to talk. */
+const EMAIL = 'shreyaspatil.design@gmail.com';
+
 export default function TourStage() {
   const char = useRef<CharacterHandle>(null);
   const session = useRef<LiveSession | null>(null);
@@ -774,26 +780,37 @@ export default function TourStage() {
   const [lastClose, setLastClose] = useState<string | null>(null);
   /** Whether the whole conversation so far is open over the stage. */
   const [history, setHistory] = useState(false);
+  /**
+   * The code's time is used up: the visit is over rather than paused. Nothing
+   * on the stage offers to start PIP again, because nothing would open.
+   */
+  const [over, setOver] = useState(false);
+  const overRef = useRef(false);
+  /** Whether the session now running is the last this code has time for. */
+  const lastSession = useRef(false);
+  const [copied, setCopied] = useState(false);
   /** The builder's readouts and event log — see LAB_KEY. */
   const [lab, setLab] = useState(false);
   /**
    * Two directions for the stage, switchable while the tour runs so they can
    * be judged against the current look with real photos and a live PIP.
    */
-  const look = useDialKit('Tour look', {
-    darkRoom: true,
-    chapters: true,
+  const dial = useDialKit('Tour look', {
+    darkRoom: LOOK.darkRoom,
+    chapters: LOOK.chapters,
     // The watch-style grid, biggest under the cursor: one honeycomb per side band, or per chapter with chapters on.
-    honeycomb: true,
+    honeycomb: LOOK.honeycomb,
     // How far apart a honeycomb's cells are, in photo heights. Under 1 the photos start to touch.
-    spacing: [0.7, 0.7, 1.4, 0.02],
+    spacing: [LOOK.spacing, 0.7, 1.4, 0.02],
     // How strong the honeycomb's lens is: 0 is a plain grid, 1 makes the middle photo twice its size.
-    lens: [0.7, 0, 2, 0.1],
+    lens: [LOOK.lens, 0, 2, 0.1],
     // How strongly the photo in the centre glows with its own colours, under its teal halo.
-    photoGlow: [0.7, 0, 1, 0.05],
+    photoGlow: [LOOK.photoGlow, 0, 1, 0.05],
     // How much of a tube each photo is shown on: scanlines, phosphor, dark corners.
-    photoCrt: [0.7, 0, 1, 0.05],
+    photoCrt: [LOOK.photoCrt, 0, 1, 0.05],
   });
+  // Visitors get the look as it was settled on; the panel is not there for them to change it.
+  const look = process.env.NODE_ENV === 'production' ? LOOK : dial;
   const glow = useRef<HTMLCanvasElement>(null);
   const captionText = useRef<HTMLParagraphElement>(null);
   const pipBody = useRef<HTMLDivElement>(null);
@@ -1156,7 +1173,7 @@ export default function TourStage() {
    */
   const connect = useCallback(async (opts?: { byVoice?: boolean }) => {
     const byVoice = opts?.byVoice === true;
-    if (connecting.current) return;
+    if (connecting.current || overRef.current) return;
     disconnectRef.current({ keepMic: true });
     connecting.current = true;
     window.clearTimeout(dozeTimer.current);
@@ -1197,9 +1214,14 @@ export default function TourStage() {
         return mic;
       },
       endpoint: '/api/tour/session',
+      onSpent: () => {
+        overRef.current = true;
+        setOver(true);
+      },
       history: () => linesRef.current,
       onSession: (info) => {
         maxSeconds.current = info.maxSeconds ?? Infinity;
+        lastSession.current = info.last === true;
         welcomePhotos.current = info.spotlight ?? [];
         // The cards have to be on stage before one can come forward.
         if (welcomePhotos.current.length) setArrived(true);
@@ -1235,6 +1257,11 @@ export default function TourStage() {
     } catch (err) {
       // Not left half-awake with a microphone open.
       if (session.current === s) disconnectRef.current();
+      // Out of time is an ending, shown as one — not a fault to report.
+      if (overRef.current) {
+        setFault(null);
+        return;
+      }
       throw err;
     } finally {
       connecting.current = false;
@@ -1424,7 +1451,10 @@ export default function TourStage() {
       // connected past it would be time nobody budgeted for.
       const ranFor = (performance.now() - startedAt.current) / 1000;
       if (ranFor >= maxSeconds.current) {
-        setFault('This session reached its time limit. Start the tour again to keep going.');
+        if (lastSession.current) {
+          overRef.current = true;
+          setOver(true);
+        } else setFault('This session reached its time limit. Start the tour again to keep going.');
         disconnectRef.current();
       } else if (left <= 0) dozeRef.current();
     }, 500);
@@ -1819,7 +1849,7 @@ export default function TourStage() {
             <button className={btn} onClick={() => disconnect()}>
               End
             </button>
-          ) : (
+          ) : over ? null : (
             <button
               className={`${btn} tour-btn--primary`}
               onClick={() => void connect()}
@@ -1907,7 +1937,44 @@ export default function TourStage() {
        * The centre belongs to the photos. Until the tour starts it holds the
        * way in instead; once live it is left empty for whatever comes forward.
        */}
-      {!focusId && !live && !dozing && (paused || state !== 'connecting') && (
+      {/*
+       * The end of the visit. PIP cannot say goodbye — the time it would take
+       * is the time that has run out — so the stage says it, and hands the
+       * conversation to the person it was about.
+       */}
+      {over && !focusId && (
+        <div className={`tour-start ${paused ? '' : 'tour-start--intro'}`}>
+          <p className="tour-start-title">{paused ? 'That\u2019s the tour' : 'This tour has been taken'}</p>
+          <p className="tour-start-body">
+            {paused
+              ? 'PIP has used all the time it was given for this visit. Shreyas would be glad to carry on the conversation himself.'
+              : 'The time on this access code has been used. Shreyas would be glad to hear from you himself.'}
+          </p>
+          <div className="tour-end-actions">
+            <a className="tour-btn tour-btn--primary tour-btn--large" href={`mailto:${EMAIL}`}>
+              Email Shreyas
+            </a>
+            <Link href="/#selected-work" className="tour-btn tour-btn--large">
+              See his work
+              <Icon d="M5 11 11 5M6 5h5v5" />
+            </Link>
+          </div>
+          <button
+            className="tour-end-address"
+            onClick={() => {
+              void navigator.clipboard?.writeText(EMAIL).then(() => {
+                setCopied(true);
+                window.setTimeout(() => setCopied(false), 2000);
+              });
+            }}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            {copied ? 'Copied' : EMAIL}
+          </button>
+        </div>
+      )}
+
+      {!over && !focusId && !live && !dozing && (paused || state !== 'connecting') && (
         <div className={`tour-start ${paused ? '' : 'tour-start--intro'}`}>
           <p className="tour-start-title">{paused ? 'PIP is resting' : 'Meet PIP'}</p>
           <p className="tour-start-body">
@@ -1989,7 +2056,8 @@ export default function TourStage() {
           ) : state === 'connecting' ? (
             <p className="tour-caption-text tour-caption-text--you">Connecting…</p>
           ) : (
-            !paused && (
+            !paused &&
+            !over && (
               <p className="tour-caption-text tour-caption-text--you">
                 Press Space to start the tour and ask about this photo.
               </p>

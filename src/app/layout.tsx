@@ -74,7 +74,8 @@ export default function RootLayout({
           {children}
           <StickyFooter />
         </MotionProvider>
-        <DialRoot />
+        {/* The tuning panel: for building with, never for visitors. */}
+        {process.env.NODE_ENV !== 'production' && <DialRoot />}
 
       </body>
     </html>

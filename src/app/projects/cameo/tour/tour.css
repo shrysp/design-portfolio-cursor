@@ -799,6 +799,24 @@
 }
 
 
+.tour-end-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* The address itself, for anyone whose browser has no mail app to open. */
+.tour-end-address {
+  font-size: 12px;
+  color: var(--muted-ink);
+  cursor: copy;
+  user-select: text;
+}
+.tour-end-address:hover {
+  color: var(--control-ink);
+}
+
 .tour-start-hint {
   font-size: 12px;
   color: var(--muted-ink);

@@ -13,7 +13,7 @@
  */
 
 import { after } from 'next/server';
-import { endSession, refreshVisitor, startSession } from '@/lib/tour/server/access';
+import { MIN_SESSION_SECONDS, endSession, refreshVisitor, startSession } from '@/lib/tour/server/access';
 import { accessFrom } from '@/lib/tour/server/auth';
 import {
   backendInstructions,
@@ -95,7 +95,9 @@ export async function POST(request: Request) {
     console.error('[tour/session]', err);
     return Response.json({ error: 'The tour is not available right now.' }, { status: 503 });
   }
-  if (!started.ok) return Response.json({ error: started.error }, { status: started.status });
+  if (!started.ok) {
+    return Response.json({ error: started.error, spent: started.status === 402 }, { status: started.status });
+  }
 
   /**
    * Delegation is what actually produces the words — and leaving it out does
@@ -160,6 +162,9 @@ export async function POST(request: Request) {
   return Response.json({
     ...JSON.parse(body),
     maxSeconds: started.maxSeconds,
+    // Whether this is the last session the code has time for, so the tour can
+    // say goodbye when it ends rather than offer a way on that will not open.
+    last: started.remaining < MIN_SESSION_SECONDS,
     // Someone coming back from a pause has already been greeted, and pressed
     // the key because they have something to say: PIP wakes and listens.
     greeting: earlier ? '' : greetingFor(started.visitor),

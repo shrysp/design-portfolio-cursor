@@ -27,7 +27,7 @@ export const SESSION_CAP_SECONDS = 5 * 60;
 /** What a new code gets unless the script says otherwise: 20 minutes in all. */
 export const DEFAULT_BUDGET_SECONDS = 20 * 60;
 /** Less than this left is not worth opening a session for. */
-const MIN_SESSION_SECONDS = 20;
+export const MIN_SESSION_SECONDS = 20;
 
 /** Wrong codes allowed per address before it has to wait out the window. */
 const UNLOCK_ATTEMPTS = 8;
@@ -171,7 +171,7 @@ export async function unlock(code: string, address: string): Promise<UnlockResul
 }
 
 export type StartResult =
-  | { ok: true; maxSeconds: number; visitor: Visitor }
+  | { ok: true; maxSeconds: number; remaining: number; visitor: Visitor }
   | { ok: false; status: 401 | 402; error: string };
 
 /** Charges a session's allowance up front and says how long it may run. */
@@ -204,6 +204,8 @@ export async function startSession(id: string): Promise<StartResult> {
   return {
     ok: true,
     maxSeconds: reserve,
+    // What the code will have left once this session has run its full length.
+    remaining: Number(rec.budget ?? 0) - used,
     visitor: {
       name: rec.name || undefined,
       note: rec.note || undefined,
