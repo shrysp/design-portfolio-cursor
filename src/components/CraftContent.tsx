@@ -95,7 +95,7 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
 
   return (
     <div className={`min-h-screen flex justify-center ${hideBackground ? '' : ''}`}>
-      <main className="w-full md:max-w-[800px] max-w-[361px] flex flex-col gap-12">
+      <main className="w-full md:max-w-(--column) max-w-[361px] flex flex-col gap-12">
         <div className="flex flex-col gap-12 items-start  px-0">
          
           {!hideHeader && (

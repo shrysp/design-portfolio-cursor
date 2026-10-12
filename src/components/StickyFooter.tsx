@@ -8,7 +8,8 @@ import EmailCopyButton from './EmailCopyButton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
 import { useDialKit } from 'dialkit';
-import Glass from './Glass';
+import Glass, { canRefract } from './Glass';
+import { isRouteTransitioning, onRouteTransitionEnd } from '@/lib/routeTransition';
 import { DockTooltip, useDockTooltip } from './DockTooltip';
 
 // Project navigation order - defines the sequence of projects
@@ -42,6 +43,9 @@ export default function StickyFooter() {
 
   useEffect(() => {
     const handleScroll = () => {
+      // The dock holds its shape while one page morphs into the next, then
+      // catches up, so "Top" slides in or out afterwards instead of mid-flight
+      if (isRouteTransitioning()) return;
       const viewportHeight = window.innerHeight;
       const scrollPosition = window.scrollY;
       setShowScrollTop(scrollPosition > viewportHeight / 2);
@@ -56,7 +60,11 @@ export default function StickyFooter() {
     window.addEventListener('scroll', handleScroll);
     // Initial check
     handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    const stopListening = onRouteTransitionEnd(handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      stopListening();
+    };
   }, []);
 
   // Detect overlay visibility
@@ -118,6 +126,14 @@ export default function StickyFooter() {
     bezel: [10, 2, 24],
   });
 
+  // During a page transition the dock is drawn as a picture of itself, which
+  // can't blur what's behind it. The picture's frame is given the same
+  // backdrop instead (see ::view-transition-group(dock) in globals.css).
+  useEffect(() => {
+    const lens = canRefract() && glass.refraction > 0 ? 'url(#dock-lens) ' : '';
+    document.documentElement.style.setProperty('--dock-backdrop', `${lens}blur(${glass.blur}px) saturate(${glass.saturate})`);
+  }, [glass.blur, glass.saturate, glass.refraction]);
+
   const dockRef = useRef<HTMLDivElement>(null);
   const { tip, tipFor } = useDockTooltip(dockRef);
 
@@ -174,7 +190,9 @@ export default function StickyFooter() {
             the page from within another pane of glass. */}
         <div ref={dockRef} className="relative pointer-events-auto">
           <DockTooltip tip={tip} labels={dockTipLabels} raised={showProjectNav} />
-          <Glass {...glass} className="flex items-center p-1.5">
+          {/* The page-transition name goes on the glass itself. On a wrapper it
+              would wall the glass off from the page it's meant to blur. */}
+          <Glass {...glass} filterId="dock-lens" style={{ viewTransitionName: 'dock' }} className="flex items-center p-1.5">
             <div className="flex items-center gap-1.5">
               <a
                 href="https://x.com/ShreyasPatil_"

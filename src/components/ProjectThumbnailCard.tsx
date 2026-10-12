@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { IconArrowRight } from 'nucleo-micro-bold-essential';
+import { startRouteTransition } from '@/lib/routeTransition';
 
 interface ProjectThumbnailCardProps {
   name: string;
@@ -11,11 +13,27 @@ interface ProjectThumbnailCardProps {
 }
 
 export default function ProjectThumbnailCard({ name, link, children }: ProjectThumbnailCardProps) {
+  const router = useRouter();
+
+  // A plain click morphs the thumbnail into the project's hero. Anything
+  // else (new tab, new window) is left to the link.
+  const openWithTransition = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    startRouteTransition(() => router.push(link));
+  };
+
   return (
-    <Link href={link} className="isolate group w-full flex flex-col gap-4 cursor-pointer relative active:scale-[0.98] md:active:scale-100 transition-transform duration-100">
+    <Link href={link} onClick={openWithTransition} className="isolate group w-full flex flex-col gap-4 cursor-pointer relative active:scale-[0.98] md:active:scale-100 transition-transform duration-100">
       {/* Header */}
-      <div className="w-full flex justify-between items-center">
-        <h2 className="text-header text-gradient-primary">{name}</h2>
+      <div className="column flex justify-between items-center">
+        {/* Shares a name with the title on the project page, so one becomes the other */}
+        <h2
+          className="text-header mx-0 w-auto text-gradient-primary"
+          style={{ viewTransitionName: `project-title-${link.split('/').filter(Boolean).pop()}` }}
+        >
+          {name}
+        </h2>
         <Button
           variant="iconPrimary"
           size="icon"

@@ -17,7 +17,7 @@ export default function FractionsProject() {
 
   return (
     <div className="min-h-screen flex justify-center bg-gray-50">
-      <main className="w-full max-w-[800px] flex flex-col gap-12">
+      <main className="w-full max-w-(--column) flex flex-col gap-12">
         <div className="flex flex-col gap-12 items-start md:pt-24 pt-8 md:px-0 p-4 md:pb-24 pb-24">
           {/* Back button and header */}
           <ProjectHeader 

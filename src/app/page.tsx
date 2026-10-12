@@ -1,12 +1,13 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import ProjectThumbnailCard from '@/components/ProjectThumbnailCard';
 import { CraftContent } from '@/components/CraftContent';
 import { ExpandableJournal } from '@/components/journal/ExpandableJournal';
 import { IconArrowDown } from 'nucleo-micro-bold-essential';
+import { clearReturningFrom, peekReturningFrom } from '@/lib/routeTransition';
 
 
 // ── Animation timeline ──
@@ -67,22 +68,41 @@ const selectedWorkVariants = slideIn(1.22);
 const craftVariants = slideIn(1.37);
 
 
+// Where a project card's top sits after coming back to it: level with the
+// title on the project page, so the title barely has to move
+const RETURN_OFFSET = 88;
+
 export default function Home() {
+  // Set when the visitor arrives by the back button on a project page. The
+  // page then opens on that project's card with no entrance animation, so the
+  // project's hero and title can morph straight back into it.
+  const [returnSlug] = useState(peekReturningFrom);
+
+  useLayoutEffect(() => {
+    if (!returnSlug) return;
+    const card = document.querySelector(`a[href="/projects/${returnSlug}"]`);
+    if (!card) return;
+    window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - RETURN_OFFSET, behavior: 'instant' });
+  }, [returnSlug]);
+
+  useEffect(() => clearReturningFrom(), []);
+
+  const initial = returnSlug ? false : "hidden";
 
   return (
     <div className="min-h-screen flex justify-center">
-      <main className="relative w-full md:max-w-[800px] max-w-[377px]">
+      <main className="relative w-full md:max-w-(--column) max-w-[377px]">
 
         <motion.div
           className="relative flex flex-col gap-16 items-start md:pt-32 pt-16 md:px-0 px-4 md:pb-24 pb-24"
-          initial="hidden"
+          initial={initial}
           animate="visible"
         >
 
           <div className="w-full relative mb-0 md:gap-8 gap-12 items-center flex flex-col">
 
             {/* Expandable Journal area */}
-            <div className="isolate relative z-10 group w-full h-80 flex items-center justify-center">
+            <div className="isolate relative z-10 group w-full md:w-[800px] h-80 flex items-center justify-center">
 
               {/* Journal — highest z-index, appears first */}
               <motion.div variants={journalVariants} className="relative z-20">
@@ -98,7 +118,7 @@ export default function Home() {
                   section below, so they must not swallow its hovers and clicks */}
               <motion.div
                 variants={stickerGroupVariants}
-                initial="hidden"
+                initial={initial}
                 animate="visible"
                 className="contents pointer-events-none"
               >
@@ -168,28 +188,28 @@ export default function Home() {
                   
               <ProjectThumbnailCard name="Quinn" link="/projects/quinn">
                 <div className="text-body text-pretty">AI-native relationship intelligence product focused on how executives manage and maintain their professional networks. I led the 10–12 month product vision, shaping the system&apos;s foundations, long-term evolution, and growth direction.</div>
-                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/HalftoneDots.webp')] bg-cover bg-center surface">
+                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/HalftoneDots.webp')] bg-cover bg-center surface" style={{ viewTransitionName: 'project-quinn' }}>
                   <Image src="/images/projects/Quinn/Masterlist.webp" alt="Quinn" fill className="object-cover object-center" />
                 </div>
               </ProjectThumbnailCard>
 
               <ProjectThumbnailCard name="ItinerAI" link="/projects/itinerai">
                 <div className="text-body text-pretty">ItinerAI is an experimental travel assistant where multiple AI agents, each with a distinct personality and focus area, collaborate to help you plan and coordinate trips effortlessly. From surfacing the best flight options to optimizing your itinerary around your schedule, these agents communicate with each other and with you, just like a well-aligned team.</div>
-                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/ItinearAI-Thumbnail-Background.webp')] bg-cover bg-center surface">
+                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/ItinearAI-Thumbnail-Background.webp')] bg-cover bg-center surface" style={{ viewTransitionName: 'project-itinerai' }}>
                   <Image src="/images/projects/ItinerAI/ItinerAI-Thumbnail.png" alt="ItinerAI" fill className="object-cover object-center" />
                 </div>
               </ProjectThumbnailCard>
 
               <ProjectThumbnailCard name="Dashworks" link="/projects/dashworks">
                 <div className="text-body text-pretty">Dashworks is an AI-powered knowledge assistant that helps companies centralize their knowledge scattered across various apps. It provides accurate answers to employee questions by searching across the company&apos;s connected applications.</div>
-                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/Dashworks-Thumbnail-Background.webp')] bg-cover bg-center surface">
+                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/Dashworks-Thumbnail-Background.webp')] bg-cover bg-center surface" style={{ viewTransitionName: 'project-dashworks' }}>
                   <Image src="/images/projects/Dashworks/Dashworks-Onboarding-1.png" alt="Dashworks" fill className="object-cover object-center" />
                 </div>
               </ProjectThumbnailCard>
 
               <ProjectThumbnailCard name="WeatherWise" link="/projects/weatherwise">
                 <div className="text-body text-pretty">Improving Navigational Safety with Weather-Adaptive Routing in Google Maps.</div>
-                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/WeatherWiseThumbnail-Background.webp')] bg-cover bg-center surface">
+                <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/WeatherWiseThumbnail-Background.webp')] bg-cover bg-center surface" style={{ viewTransitionName: 'project-weatherwise' }}>
                   <Image src="/images/projects/Weatherwise/WeatherWise-Thumbnail.webp" alt="WeatherWise" fill className="object-cover object-center" />
                 </div>
               </ProjectThumbnailCard>                  

@@ -1,5 +1,8 @@
-import React from 'react';
+"use client";
+
+import React, { useState } from 'react';
 import Image from 'next/image';
+import Lightbox, { type LightboxItem } from '@/components/Lightbox';
 
 interface MediaCardProps {
   mediaType: 'image' | 'video';
@@ -25,23 +28,40 @@ export default function MediaCard({
   posterSrc,
   videoAttributes
 }: MediaCardProps) {
+  // The enlarged view steps through every figure on the page, so each card
+  // gathers them from the page in reading order when it's opened.
+  const [gallery, setGallery] = useState<LightboxItem[]>([]);
+  const [zoomedIndex, setZoomedIndex] = useState<number | null>(null);
 
+  const openZoom = (trigger: HTMLElement) => {
+    const figures = Array.from(document.querySelectorAll<HTMLElement>('[data-zoom-src]'));
+    setGallery(figures.map((figure) => ({ src: figure.dataset.zoomSrc as string, caption: figure.dataset.zoomCaption })));
+    setZoomedIndex(Math.max(0, figures.indexOf(trigger)));
+  };
+  const alt = caption || 'Project image';
 
   return (
     <div className={`isolate relative w-full surface bg-stone-100 -space-y-2 my-3 ${className || ''}`}>
       <div className='isolate relative rounded-[calc(var(--surface-radius)-1px)] bg-white overflow-hidden outline outline-stone-200'>
         {mediaType === 'image' ? (
-          <div className={`w-full h-full ${aspectClass} relative bg-white`}>
+          <button
+            type="button"
+            onClick={(event) => openZoom(event.currentTarget)}
+            data-zoom-src={src}
+            data-zoom-caption={caption}
+            aria-label={`Enlarge image: ${alt}`}
+            className={`block w-full ${aspectClass} relative bg-white cursor-zoom-in`}
+          >
             <Image
               src={src}
-              alt="Project image"
+              alt={alt}
               fill
               className="object-cover"
-              sizes=""
+              sizes="(min-width: 800px) 800px, 100vw"
               loading="lazy"
               quality={85}
             />
-          </div>
+          </button>
         ) : (
           <div className={`w-full h-full ${aspectClass} bg-black`}> 
             <video
@@ -57,7 +77,7 @@ export default function MediaCard({
       </div>
 
       {typeof caption === 'string' && caption.length > 0 && (
-        <div className='w-full flex items-center justify-between px-4 py-3  pt-4'>
+        <div className='w-full flex items-center justify-between px-4 py-3 pt-4'>
           <div className="relative text-sm text-stone-600 mt-1 flex-1 pr-3">{caption}</div>
           {rightIcon && (
             <div className="relative flex items-center justify-center flex-shrink-0">
@@ -66,8 +86,10 @@ export default function MediaCard({
           )}
         </div>
       )}
+
+      {mediaType === 'image' && (
+        <Lightbox items={gallery} index={zoomedIndex} onIndexChange={setZoomedIndex} />
+      )}
     </div>
   );
 }
-
-

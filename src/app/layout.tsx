@@ -5,6 +5,7 @@ import "dialkit/styles.css";
 import StickyFooter from "@/components/StickyFooter";
 import MotionProvider from "@/components/MotionProvider";
 import DevFeedback from "@/components/DevFeedback";
+import RouteTransitionSettler from "@/components/RouteTransitionSettler";
 import { DialRoot } from "dialkit";
 
 
@@ -70,6 +71,7 @@ export default function RootLayout({
         className={`${geist.variable} ${geistMono.variable} ${sourceSerif4.variable} antialiased bg-stone-50 text-stone-900 overflow-x-clip`}
       >
         <DevFeedback />
+        <RouteTransitionSettler />
         <MotionProvider>
           {children}
           <StickyFooter />

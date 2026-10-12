@@ -74,7 +74,7 @@ export default function DashworksProject() {
 
   return (
     <div className="min-h-screen flex justify-center bg-stone-50">
-      <main className="w-full max-w-[800px] flex flex-col gap-12">
+      <main className="w-full max-w-(--column) flex flex-col gap-12">
         <div className="flex flex-col gap-12 items-start  md:pt-24 pt-8 md:px-0 p-4 md:pb-24 pb-24 ">
           {/* Back button and header */}
             <ProjectHeader title={project.title} />
@@ -84,9 +84,9 @@ export default function DashworksProject() {
             {/* Main image display */}
             <div className="w-full flex flex-col gap-2">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
+              // Drawn at once, so the home page thumbnail can morph into it
+              initial={false}
+              style={{ viewTransitionName: 'project-dashworks' }}
               className="w-full aspect-[4/3] surface mb-6"
             >
               <Image
@@ -138,7 +138,7 @@ export default function DashworksProject() {
               transition={{ duration: 0.3, delay: 0.35 }}
               className=""
             >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="column grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <h2 className="text-subheader mb-1">My Role</h2>
                   <p className="text-body">Product Design Intern</p>

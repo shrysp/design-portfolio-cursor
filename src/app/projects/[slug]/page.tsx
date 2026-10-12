@@ -287,7 +287,7 @@ export default function ProjectDetail() {
 
   return (
     <div className="min-h-screen flex justify-center bg-gradient-to-b from-slate-50 to-white">
-      <main className="w-full md:max-w-[800px] max-w-[361px] flex flex-col gap-12 py-6">
+      <main className="w-full md:max-w-(--column) max-w-[361px] flex flex-col gap-12 py-6">
         <div className="flex flex-col gap-6 items-start border border-slate-200 md:p-8 p-4 h-[94vh] overflow-y-auto scrollbar-hide rounded-4xl">
           {/* Back button and header */}
           <motion.div

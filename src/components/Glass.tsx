@@ -16,11 +16,13 @@ interface GlassProps extends Omit<HTMLMotionProps<"div">, "children"> {
   refraction?: number;
   /** Width of the bending rim in px */
   bezel?: number;
+  /** A fixed id for the bending filter, for when CSS elsewhere has to point at it */
+  filterId?: string;
 }
 
 // Bending the backdrop needs an SVG filter inside backdrop-filter, which only
 // Chromium draws. Everywhere else the glass keeps its blur and rim light.
-const canRefract = () => typeof navigator !== "undefined" && /Chrome\//.test(navigator.userAgent);
+export const canRefract = () => typeof navigator !== "undefined" && /Chrome\//.test(navigator.userAgent);
 
 // A displacement map for a capsule lens: red pushes along x, green along y, and
 // the flat middle is neutral so only the rim bends.
@@ -41,13 +43,14 @@ function lensMap(width: number, height: number, bezel: number) {
 }
 
 const Glass = forwardRef<HTMLDivElement, GlassProps>(function Glass(
-  { blur = 10, saturate = 1.6, tint = 0.5, refraction = 28, bezel = 10, className, style, children, ...props },
+  { blur = 10, saturate = 1.6, tint = 0.5, refraction = 28, bezel = 10, filterId: fixedFilterId, className, style, children, ...props },
   forwardedRef
 ) {
   const ref = useRef<HTMLDivElement>(null);
   useImperativeHandle(forwardedRef, () => ref.current as HTMLDivElement);
 
-  const filterId = `glass-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  const generatedId = `glass-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  const filterId = fixedFilterId ?? generatedId;
   const [map, setMap] = useState<string | null>(null);
 
   useEffect(() => {

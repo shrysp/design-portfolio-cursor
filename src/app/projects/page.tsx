@@ -8,7 +8,7 @@ import { projectsData } from '@/data/projectsData';
 export default function Projects() {
   return (
     <div className="min-h-screen flex justify-center bg-gray-50">
-      <main className="w-full md:max-w-[800px] max-w-[361px] flex flex-col gap-12">
+      <main className="w-full md:max-w-(--column) max-w-[361px] flex flex-col gap-12">
         <div className="flex flex-col gap-12 items-start  md:pt-16 pt-8 md:px-0 p-4 md:pb-24 pb-24 ">
         {/* Page header */}
          <motion.div
