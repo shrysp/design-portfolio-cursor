@@ -1,7 +1,70 @@
 "use client";
 
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import LazyVideo from '@/components/LazyVideo';
+import ImageToolbar from '@/components/craft/ImageToolbar';
+
+type Piece = { title: string; ratio: number } & (
+  | { kind: 'video'; src: string; poster: string }
+  | { kind: 'image'; src: string }
+  | { kind: 'live'; render: () => React.ReactNode }
+);
+
+const video = (title: string, file: string, ratio: number, folder = '/videos'): Piece => ({
+  kind: 'video',
+  title,
+  ratio,
+  src: `${folder}/${file}.mp4`,
+  poster: `/videos/posters/${file}.jpg`,
+});
+
+const image = (title: string, file: string): Piece => ({
+  kind: 'image',
+  title,
+  ratio: 4 / 3,
+  src: `/images/Craft/${file}.png`,
+});
+
+// Every craft piece, in reading order. `ratio` is width / height of the media.
+const pieces: Piece[] = [
+  video('Turf waitlist', 'Turf-Waitlist-animation', 2740 / 2160),
+  { kind: 'live', title: 'Image toolbar', ratio: 1496 / 1080, render: () => <ImageToolbar /> },
+  video('Bento portfolio', 'Bento-Portfolio', 2862 / 2160),
+  video('Themed navbar', 'Navbar-themes', 3096 / 2160),
+  video('Mobile tab bar', 'Mobile-Navbar', 1040 / 1000),
+  video('iPad × Figma', 'iPadxFigma', 2880 / 2160),
+  video('Image answer engine', 'Image-Answer-Engine-Prototype', 1996 / 1080),
+  video('Aero', 'aero_recording', 3 / 4),
+  video('ItinerAI build', 'ItinerAIbuild-1', 808 / 1080),
+  image('Delay plugin', 'BuiLD09'),
+  image('Instagram.exe', 'BuiLD11'),
+  image('Field recorder', 'BuiLD08'),
+  video('Perplexity Mindlab', 'pplx-mindlab-1', 16 / 9, '/images/Craft'),
+  image('Mail client', 'BuiLD04'),
+  image('Pocket synth', 'BuiLD10'),
+  video('Dashworks modal suite', 'Modals', 16 / 9, '/images/Craft'),
+  video('Whop join modal', 'Whop-Modal', 1, '/images/Craft'),
+];
+
+const kindLabels: Record<Piece['kind'], string> = {
+  video: 'Motion',
+  image: 'Visual',
+  live: 'Live · try it',
+};
+
+// Deals the pieces into two columns, always onto the shorter one, so mixed
+// shapes pack without gaps. Heights are in units of a column's width.
+const CAPTION_HEIGHT = 0.12;
+const columns = pieces.reduce<{ items: Piece[]; height: number }[]>(
+  (cols, piece) => {
+    const shorter = cols[0].height <= cols[1].height ? cols[0] : cols[1];
+    shorter.items.push(piece);
+    shorter.height += 1 / piece.ratio + CAPTION_HEIGHT;
+    return cols;
+  },
+  [{ items: [], height: 0 }, { items: [], height: 0 }]
+).map((column) => column.items);
 
 interface CraftContentProps {
   hideHeader?: boolean;
@@ -54,175 +117,43 @@ export function CraftContent({ hideHeader = false, hideBackground = false }: Cra
           )}
 
 
-          {/* Craft sections */}
-          <motion.div 
-            className="grid md:grid-cols-2 grid-cols-1 gap-6 h-auto w-full"
+          {/* Craft pieces, dealt into two columns on wide screens */}
+          <motion.div
+            className="flex flex-col md:flex-row gap-6 w-full"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
           >
-            <motion.div 
-              className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
-              variants={gridVariants}
-            >
-              <LazyVideo src="/videos/Turf-Waitlist-animation.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
-              
-            </motion.div>
-
-            <motion.div 
-              className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
-              variants={gridVariants}
-            >
-              <LazyVideo src="/videos/Toolbar.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
-              
-            </motion.div>
-
-            <motion.div 
-              className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
-              variants={gridVariants}
-            >
-              <LazyVideo src="/videos/Bento-Portfolio.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
-              
-            </motion.div>
-
-            <motion.div 
-              className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
-              variants={gridVariants}
-            >
-              <LazyVideo src="/videos/Navbar-themes.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
-              
-            </motion.div>
-
-            <motion.div 
-              className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
-              variants={gridVariants}
-            >
-              <LazyVideo src="/videos/Mobile-Navbar.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
-              
-            </motion.div>
-
-            <motion.div 
-              className="isolate relative w-full h-full aspect-4/3 bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
-              variants={gridVariants}
-            >
-              <LazyVideo src="/videos/iPadxFigma.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
-              
-            </motion.div>
-
-            <motion.div 
-              className="isolate relative w-full h-full aspect-video bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
-              variants={gridVariants}
-            >
-              <LazyVideo src="/videos/Image-Answer-Engine-Prototype.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
-              
-            </motion.div>
-
-            <motion.div 
-              className="isolate relative w-full h-full aspect-[3/4] bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-4"
-              variants={gridVariants}
-            >
-              <LazyVideo src="/videos/aero_recording.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
-              
-            </motion.div>
-
-            <motion.div 
-              className="isolate relative w-full h-full aspect-[3/4] bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-4"
-              variants={gridVariants}
-            >
-              <LazyVideo src="/videos/ItinerAIbuild-1.mp4" className='absolute inset-0 w-full h-full object-cover rounded-xl -z-10' />
-              
-            </motion.div>
-
-            <motion.div 
-              className="isolate relative w-full h-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
-              variants={gridVariants}
-            >
-              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
-                <div className="w-full h-full aspect-4/3 relative bg-white bg-[url('/images/Craft/BuiLD09.png')] bg-cover bg-center">
-                </div>
-                
+            {columns.map((column, index) => (
+              // On a phone the columns dissolve and `order` puts the pieces back in reading order
+              <div key={index} className="max-md:contents flex flex-1 min-w-0 flex-col gap-6">
+                {column.map((piece) => (
+                  <motion.figure
+                    key={piece.title}
+                    variants={gridVariants}
+                    className="surface bg-stone-100"
+                    style={{ order: pieces.indexOf(piece) }}
+                  >
+                    <div
+                      className="isolate relative overflow-hidden rounded-[calc(var(--surface-radius)-1px)] bg-white outline outline-stone-200"
+                      style={{ aspectRatio: piece.ratio }}
+                    >
+                      {piece.kind === 'video' && (
+                        <LazyVideo src={piece.src} poster={piece.poster} className="absolute inset-0 w-full h-full object-cover" />
+                      )}
+                      {piece.kind === 'image' && (
+                        <Image src={piece.src} alt={piece.title} fill sizes="(min-width: 768px) 400px, 100vw" className="object-cover" />
+                      )}
+                      {piece.kind === 'live' && piece.render()}
+                    </div>
+                    <figcaption className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+                      <span className="font-medium text-stone-700">{piece.title}</span>
+                      <span className="shrink-0 text-stone-400">{kindLabels[piece.kind]}</span>
+                    </figcaption>
+                  </motion.figure>
+                ))}
               </div>
-            </motion.div>
-            
-            <motion.div 
-              className="isolate relative w-full h-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
-              variants={gridVariants}
-            >
-              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
-                <div className="w-full h-full aspect-square relative bg-white bg-[url('/images/Craft/BuiLD11.png')] bg-cover bg-center">
-                </div>
-                
-              </div>
-            </motion.div>
-
-            <motion.div 
-              className="isolate relative w-full h-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-xl col-span-1 row-span-2"
-              variants={gridVariants}
-            >
-              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
-                <div className="w-full h-full aspect-square relative bg-white bg-[url('/images/Craft/BuiLD08.png')] bg-cover bg-center">
-                </div>
-                
-              </div>
-            </motion.div>
-          
-            <motion.div 
-              className="isolate relative w-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-2xl col-span-1 row-span-1"
-              variants={gridVariants}
-            >
-              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
-                <div className="w-full h-full aspect-16/9 relative bg-black">
-                  <LazyVideo src="/images/Craft/pplx-mindlab-1.mp4" className='w-full h-full object-cover' />
-                </div>
-                
-              </div>
-            </motion.div>
-
-            <motion.div 
-              className="isolate relative w-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-2xl col-span-1 row-span-2"
-              variants={gridVariants}
-            >
-              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
-                <div className="w-full h-full aspect-4/3 relative bg-white bg-[url('/images/Craft/BuiLD04.png')] bg-cover bg-center">
-                </div>
-               
-              </div>
-            </motion.div>
-
-            <motion.div 
-              className="isolate relative w-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-2xl col-span-1 row-span-2"
-              variants={gridVariants}
-            >
-              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
-                <div className="w-full h-full aspect-4/3 relative bg-white bg-[url('/images/Craft/BuiLD10.png')] bg-cover bg-center">
-                </div>
-                
-              </div>
-            </motion.div>
-
-            <motion.div 
-              className="isolate relative w-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-2xl col-span-1 row-span-1"
-              variants={gridVariants}
-            >
-              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
-                <div className="w-full h-full aspect-16/9 relative bg-black">
-                  <LazyVideo src="/images/Craft/Modals.mp4" className='w-full h-full object-cover' />
-                </div>
-                
-              </div>
-            </motion.div>
-
-            <motion.div 
-              className="isolate relative w-full bg-gray-100 shadow-[0_0_0_1px_rgba(0,0,0,0.03),0_1px_4px_-0.5px_rgba(0,0,0,0.08),0_2px_8px_-2px_rgba(0,0,0,0.08),0_4px_32px_-2px_rgba(0,0,0,0.08)] rounded-2xl col-span-1 row-span-2"
-              variants={gridVariants}
-            >
-              <div className='isolate relative rounded-xl bg-white overflow-hidden outline outline-gray-200'>
-                <div className="w-full h-full aspect-square relative bg-black">
-                  <LazyVideo src="/images/Craft/Whop-Modal.mp4" className='w-full h-full object-cover' />
-                </div>
-                
-              </div>
-            </motion.div>
+            ))}
           </motion.div>
 
         </div>
