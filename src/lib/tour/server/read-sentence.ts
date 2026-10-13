@@ -15,6 +15,7 @@
  * fired in parallel, with mood riding along in the first.
  */
 
+import type { Mood } from '@/components/cameo/moods';
 import { TOUR_IMAGES, type TourImage } from '@/data/tour-images';
 
 const SYSTEMONE = 'https://api.typesafe.ai/v1/systemone';
@@ -27,18 +28,33 @@ const THRESHOLD = 0.5;
 /** More than this per sentence stops being illustration and becomes a slideshow. */
 const MAX_PHOTOS = 3;
 
-const MOODS: Record<string, string> = {
+/**
+ * What each mood means, for the reader. The names are the ones the page has a
+ * face for (components/cameo/moods.ts), so a mood added there needs its
+ * meaning written here.
+ *
+ * Error, frustrated and sad were one mood, "concerned", until the three were
+ * found to be read apart reliably: an apology, a complaint and a loss are
+ * different things to say and deserve different faces.
+ */
+const MOODS: Record<Mood, string> = {
   excited:
-    'Delighted, enthusiastic, impressed or pleasantly surprised. Something landed well.',
+    'Delighted, enthusiastic or impressed. Something landed well or is cause for celebration.',
   curious:
     'Asking, wondering, probing or thinking out loud towards a question. Wants to know something. ' +
     'Also fits weighing options or comparing choices toward a decision — that is open-minded ' +
     'interest, not distress.',
-  concerned:
-    'Something is wrong, broken, confusing or frustrating. Includes apology and genuinely being ' +
-    'stuck. Does NOT include ordinary deliberation — weighing options, comparing choices or ' +
-    'thinking aloud toward a decision is neutral or curious, not concerned, even with hesitant ' +
-    'filler like "um" or "trying to decide".',
+  surprised:
+    'Caught off guard by something unexpected, without yet judging it good or bad.',
+  error:
+    'Reporting that something failed, broke or could not be done, including apologising for that ' +
+    'failure.',
+  frustrated:
+    'Annoyed, angry or fed up. Complaining, or demanding that something be fixed. Does NOT include ' +
+    'ordinary deliberation — weighing options, comparing choices or thinking aloud toward a ' +
+    'decision is neutral or curious, even with hesitant filler like "um" or "trying to decide".',
+  sad:
+    'Sorrow, loss, regret or disappointment. Bad news that cannot be put right.',
   calm:
     'Settled and unhurried. Acknowledging, agreeing, confirming, or narrating without urgency.',
   neutral:

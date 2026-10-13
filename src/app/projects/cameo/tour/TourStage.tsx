@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import Image from 'next/image';
 import Link from 'next/link';
 import { HOUSING_W, housingHeight, lookAt, PIP, type Reaction } from '@shrysp/cameo';
+import { MOOD_REACTIONS } from '@/components/cameo/moods';
 import { Character, type CharacterHandle } from '@shrysp/cameo/react';
 import {
   type LiveEvent,
@@ -347,19 +348,6 @@ const HIDDEN_GRACE_MS = 5000;
 
 /** Shows and hides the readouts and event log. Does nothing in a production build. */
 const LAB_KEY = '`';
-
-/**
- * Mapped here, not derived from api/mood's map, because this is a different
- * character reacting to different material — its own answer, not a visitor's
- * voice. Kept small on purpose: a guide's face should read as attentive, not
- * as a puppet show.
- */
-const MOOD_REACTIONS: Record<string, Reaction> = {
-  'mood:excited': { pose: 'starstruck', duration: 1.6, arousal: 0.95, volume: 0 },
-  'mood:curious': { pose: 'curious', duration: 1.8, arousal: 0.85, volume: 0 },
-  'mood:concerned': { pose: 'suspicious', duration: 1.6, arousal: 0.75, volume: 0 },
-  'mood:calm': { pose: 'idle', duration: 1.4, arousal: 0.5, volume: 0 },
-};
 
 /**
  * The visitor's hand, as PIP sees it. Hover is a glance and nothing else —
