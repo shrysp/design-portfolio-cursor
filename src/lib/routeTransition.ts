@@ -83,7 +83,10 @@ export function startRouteTransition(navigate: () => void) {
  */
 export function startZoomTransition(update: () => void) {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (!("startViewTransition" in document) || reduceMotion || active) {
+  // A morph already under way is left to finish: starting another would cut it
+  // short, and the picture would snap into place
+  const isBusy = active || document.documentElement.dataset.vt !== undefined;
+  if (!("startViewTransition" in document) || reduceMotion || isBusy) {
     update();
     return;
   }
@@ -97,4 +100,21 @@ export function startZoomTransition(update: () => void) {
     delete document.documentElement.dataset.vt;
     document.querySelectorAll("[data-zoom-active='figure']").forEach((el) => el.removeAttribute("data-zoom-active"));
   });
+}
+
+/**
+ * Morphs the page from one arrangement into another: a layout switching, or a
+ * grid changing how many columns it has. Every named piece travels to its new
+ * place. `update` must apply its change synchronously (flushSync).
+ */
+export function startLayoutTransition(update: () => void) {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!("startViewTransition" in document) || reduceMotion || active || document.documentElement.dataset.vt) {
+    update();
+    return;
+  }
+
+  const transition = document.startViewTransition(update);
+  transition.ready.catch(() => {});
+  transition.finished.catch(() => {});
 }

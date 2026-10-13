@@ -134,7 +134,7 @@ export default function Lightbox({ items, index, onIndexChange }: LightboxProps)
               close();
             }, CLOSE_KEY_DELAY);
           }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center gap-4 p-4 pt-16 md:px-20 md:pb-8 md:pt-20 cursor-zoom-out outline-none"
+          className="fixed inset-0 z-[9999] flex flex-col items-center gap-4 p-4 pt-16 md:px-20 md:pb-8 md:pt-20 cursor-collapse outline-none"
         >
           <Dialog.Title className="sr-only">{item?.caption || "Project image"}</Dialog.Title>
 
@@ -145,6 +145,8 @@ export default function Lightbox({ items, index, onIndexChange }: LightboxProps)
           )}
 
           <Dialog.Close
+            // The backdrop behind it also closes on click; one close is enough
+            onClick={(event) => event.stopPropagation()}
             className={`aqua aqua-to-amber absolute top-4 right-4 md:top-6 md:right-6 h-8 pl-2 pr-2.5 gap-1 text-sm font-medium ${pressedKey === "close" ? "aqua-pressed" : ""}`}
           >
             <IconXmark size={14} />

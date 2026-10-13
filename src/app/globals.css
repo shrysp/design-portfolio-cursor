@@ -388,6 +388,19 @@ body {
   margin-inline: auto;
 }
 
+/* ── Cursors ──
+   Anything that opens up larger shows an expand cursor, and the opened view
+   shows a collapse one. Each is the gel button in miniature (stone gradient,
+   stone edge, gloss across the top) carrying Nucleo's ArrowsExpandDiagonal3
+   or ArrowsReduceDiagonal. */
+@utility cursor-expand {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2236%22 height=%2236%22 viewBox=%220 0 36 36%22%3E%3Cdefs%3E%3CradialGradient id=%22g%22 cx=%2250%25%22 cy=%2275%25%22 r=%2275%25%22%3E%3Cstop offset=%220%22 stop-color=%22%23f5f5f4%22/%3E%3Cstop offset=%22.55%22 stop-color=%22%23e7e5e4%22/%3E%3Cstop offset=%221%22 stop-color=%22%23d6d3d1%22/%3E%3C/radialGradient%3E%3ClinearGradient id=%22s%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23fff%22 stop-opacity=%22.85%22/%3E%3Cstop offset=%221%22 stop-color=%22%23fff%22 stop-opacity=%22.2%22/%3E%3C/linearGradient%3E%3ClinearGradient id=%22i%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%230a0a0a%22 stop-opacity=%22.16%22/%3E%3Cstop offset=%22.4%22 stop-color=%22%230a0a0a%22 stop-opacity=%220%22/%3E%3Cstop offset=%22.85%22 stop-color=%22%230a0a0a%22 stop-opacity=%220%22/%3E%3Cstop offset=%221%22 stop-color=%22%230a0a0a%22 stop-opacity=%22.14%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cellipse cx=%2218%22 cy=%2220%22 rx=%2212.5%22 ry=%2212%22 fill=%22%23000%22 fill-opacity=%22.2%22/%3E%3Ccircle cx=%2218%22 cy=%2218%22 r=%2213.5%22 fill=%22url%28%23g%29%22/%3E%3Ccircle cx=%2218%22 cy=%2218%22 r=%2213.5%22 fill=%22url%28%23i%29%22/%3E%3Ccircle cx=%2218%22 cy=%2218%22 r=%2213.5%22 fill=%22none%22 stroke=%22%23a6a09b%22/%3E%3Cpath d=%22M9.5 16.5a8.5 9 0 0 1 17 0q0 2-2.5 2h-12q-2.500 0-2.500-2z%22 fill=%22url%28%23s%29%22/%3E%3Cg transform=%22translate%2811.500 11.500%29 scale%280.65%29%22 fill=%22none%22 stroke=%22%2357534d%22 stroke-width=%222.200%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cline x1=%223%22 y1=%2217%22 x2=%2217%22 y2=%223%22/%3E%3Cpolyline points=%2212 3 17 3 17 8%22/%3E%3Cpolyline points=%228 17 3 17 3 12%22/%3E%3C/g%3E%3C/svg%3E") 18 18, zoom-in;
+}
+
+@utility cursor-collapse {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2236%22 height=%2236%22 viewBox=%220 0 36 36%22%3E%3Cdefs%3E%3CradialGradient id=%22g%22 cx=%2250%25%22 cy=%2275%25%22 r=%2275%25%22%3E%3Cstop offset=%220%22 stop-color=%22%23f5f5f4%22/%3E%3Cstop offset=%22.55%22 stop-color=%22%23e7e5e4%22/%3E%3Cstop offset=%221%22 stop-color=%22%23d6d3d1%22/%3E%3C/radialGradient%3E%3ClinearGradient id=%22s%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23fff%22 stop-opacity=%22.85%22/%3E%3Cstop offset=%221%22 stop-color=%22%23fff%22 stop-opacity=%22.2%22/%3E%3C/linearGradient%3E%3ClinearGradient id=%22i%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%230a0a0a%22 stop-opacity=%22.16%22/%3E%3Cstop offset=%22.4%22 stop-color=%22%230a0a0a%22 stop-opacity=%220%22/%3E%3Cstop offset=%22.85%22 stop-color=%22%230a0a0a%22 stop-opacity=%220%22/%3E%3Cstop offset=%221%22 stop-color=%22%230a0a0a%22 stop-opacity=%22.14%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cellipse cx=%2218%22 cy=%2220%22 rx=%2212.5%22 ry=%2212%22 fill=%22%23000%22 fill-opacity=%22.2%22/%3E%3Ccircle cx=%2218%22 cy=%2218%22 r=%2213.5%22 fill=%22url%28%23g%29%22/%3E%3Ccircle cx=%2218%22 cy=%2218%22 r=%2213.5%22 fill=%22url%28%23i%29%22/%3E%3Ccircle cx=%2218%22 cy=%2218%22 r=%2213.5%22 fill=%22none%22 stroke=%22%23a6a09b%22/%3E%3Cpath d=%22M9.5 16.5a8.5 9 0 0 1 17 0q0 2-2.5 2h-12q-2.500 0-2.500-2z%22 fill=%22url%28%23s%29%22/%3E%3Cg transform=%22translate%2811.500 11.500%29 scale%280.65%29%22 fill=%22none%22 stroke=%22%2357534d%22 stroke-width=%222.200%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpolyline points=%223 12 8 12 8 17%22/%3E%3Cline x1=%228%22 y1=%2212%22 x2=%223%22 y2=%2217%22/%3E%3Cpolyline points=%2217 8 12 8 12 3%22/%3E%3Cline x1=%2212%22 y1=%228%22 x2=%2217%22 y2=%223%22/%3E%3C/g%3E%3C/svg%3E") 18 18, zoom-out;
+}
+
 /* A flat pane of the same glass, for things that sit on the page rather than
    float over it: there's nothing behind it to blur, so it only keeps the rim
    light and the milky fill. */
@@ -560,43 +573,43 @@ body {
   backface-visibility: hidden;
 }
 
-/* Hide video controls */
-video::-webkit-media-controls {
+/* Hide video controls, except on a video that asks for them */
+video:not([controls])::-webkit-media-controls {
   display: none !important;
 }
 
-video::-webkit-media-controls-enclosure {
+video:not([controls])::-webkit-media-controls-enclosure {
   display: none !important;
 }
 
-video::-webkit-media-controls-panel {
+video:not([controls])::-webkit-media-controls-panel {
   display: none !important;
 }
 
-video::-webkit-media-controls-play-button {
+video:not([controls])::-webkit-media-controls-play-button {
   display: none !important;
 }
 
-video::-webkit-media-controls-timeline {
+video:not([controls])::-webkit-media-controls-timeline {
   display: none !important;
 }
 
-video::-webkit-media-controls-current-time-display {
+video:not([controls])::-webkit-media-controls-current-time-display {
   display: none !important;
 }
 
-video::-webkit-media-controls-time-remaining-display {
+video:not([controls])::-webkit-media-controls-time-remaining-display {
   display: none !important;
 }
 
-video::-webkit-media-controls-mute-button {
+video:not([controls])::-webkit-media-controls-mute-button {
   display: none !important;
 }
 
-video::-webkit-media-controls-volume-slider {
+video:not([controls])::-webkit-media-controls-volume-slider {
   display: none !important;
 }
 
-video::-webkit-media-controls-fullscreen-button {
+video:not([controls])::-webkit-media-controls-fullscreen-button {
   display: none !important;
 }

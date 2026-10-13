@@ -1,13 +1,14 @@
 "use client";
 
 import React from 'react';
-import { ChartBar, RedditLogo } from '@phosphor-icons/react';
 
 import MediaCard from '@/components/MediaCard';
 import { CaseStudy, Hero, Meta, Section, SubSection, Kicker, Callout, FigureRow, PullQuote } from '@/components/case-study/CaseStudy';
 
 // Import the project data
 import { projectsData } from '@/data/projectsData';
+import { IconChartColumn } from 'nucleo-micro-bold-essential';
+import { IconReddit } from 'nucleo-social-media';
 
 export default function WeatherWiseProject() {
   const project = projectsData[3];
@@ -44,7 +45,7 @@ export default function WeatherWiseProject() {
       </Section>
 
       <Section id="research" nav="Research" title="Quick Statistics">
-        <Callout label="Statistic" icon={<ChartBar size={14} weight="fill" />} title="Annual Fatality Comparison">
+        <Callout label="Statistic" icon={<IconChartColumn size={14} />} title="Annual Fatality Comparison">
           <p className="text-body mx-0">The data reveals that weather-related car crashes cause approximately 15 times more fatalities annually than all major weather disasters combined in the United States.</p>
           {/* The two figures as bars, drawn to scale */}
           <div className="isolate relative flex items-center justify-start p-4 md:text-lg text-sm font-semibold text-white w-full h-16 bg-gradient-to-b from-blue-500 to-blue-700 border border-blue-500 mt-3 rounded-2xl overflow-hidden">
@@ -61,7 +62,7 @@ export default function WeatherWiseProject() {
           </div>
         </Callout>
 
-        <Callout label="Statistic" icon={<ChartBar size={14} weight="fill" />} title="Significance of Rain and Snowy Conditions">
+        <Callout label="Statistic" icon={<IconChartColumn size={14} />} title="Significance of Rain and Snowy Conditions">
           <p className="text-body mx-0">Weather conditions significantly impact road safety, with a substantial portion of crashes occurring during adverse weather.</p>
           <div className="md:grid md:grid-cols-2 flex flex-col gap-4 mt-4">
             <div>
@@ -85,13 +86,13 @@ export default function WeatherWiseProject() {
 
         <SubSection title="A Shared Concern of Unpredictable Weather on the Road on Reddit">
           <div className="md:grid md:grid-cols-2 flex flex-col gap-4">
-            <Callout label="Reddit" tone="orange" icon={<RedditLogo size={15} weight="fill" />} title="Weather Warnings missing from Waze">
+            <Callout label="Reddit" tone="orange" icon={<IconReddit size={15} />} title="Weather Warnings missing from Waze">
             <p className="text-body mx-0">I vividly remember the day I narrowly avoided driving straight into a severe thunderstorm, thanks to a quick check on my weather app. It struck me then how invaluable it would be to have these alerts directly in our navigation systems.</p>
           </Callout>
-            <Callout label="Reddit" tone="orange" icon={<RedditLogo size={15} weight="fill" />} title="Weather along the route?">
+            <Callout label="Reddit" tone="orange" icon={<IconReddit size={15} />} title="Weather along the route?">
             <p className="text-body mx-0">Hi, I don&apos;t think Google Maps can show you the weather along your planned router like where it is snowing, where it&apos;s raining, etc. I&apos;m trying to plan 26-hour trip and need to see the weather of all the cities on my route as I travel. Is there any other navigation app which can help me in this regards?</p>
           </Callout>
-            <Callout label="Reddit" tone="orange" icon={<RedditLogo size={15} weight="fill" />} title="Real time weather" className="md:col-span-2">
+            <Callout label="Reddit" tone="orange" icon={<IconReddit size={15} />} title="Real time weather" className="md:col-span-2">
             <p className="text-body mx-0">I have always wondered why an integrated weather alert system couldn&apos;t be applied. For example, last summer I was on a long road trip driving west across Tennessee. The clouds ahead were very dark so I asked my son to check the weather app. Sure enough we were under a severe thunderstorm earning with high wind and hail. We pulled over to a safe location. Had we not looked, we would have been in the middle of it. I get the community reported weather, but if it knows my route and there is a warning issued for something, it would be very helpful to be warned.</p>
           </Callout>
           </div>
@@ -99,7 +100,7 @@ export default function WeatherWiseProject() {
 
         <SubSection title="How People deal with this currently">
           <p className="text-body">During my NYC trip, I utilized a weather app and maps to find safer routes, a simple yet effective approach. I noticed this pattern among other users as well. However, this method is not foolproof, as weather is not static but continually changes. It&apos;s a band-aid solution that many have adopted, yet it&apos;s far from ideal.</p>
-          <Callout label="Reddit" tone="orange" icon={<RedditLogo size={15} weight="fill" />} title="Checking Hourly Forecasts">
+          <Callout label="Reddit" tone="orange" icon={<IconReddit size={15} />} title="Checking Hourly Forecasts">
             <p className="text-body mx-0">I would screenshot the hourly forecast for the areas you&apos;ll pass through showing the time you expect to pass through, and I would do it the day before you leave.</p>
           </Callout>
         </SubSection>

@@ -4,7 +4,7 @@ import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import ProjectThumbnailCard from '@/components/ProjectThumbnailCard';
-import { CraftContent } from '@/components/CraftContent';
+import { CraftWall } from '@/components/CraftContent';
 import StickOnSticker, { STICK_ON_DEFAULTS } from '@/components/StickOnSticker';
 import HandNote from '@/components/HandNote';
 import { ExpandableJournal } from '@/components/journal/ExpandableJournal';
@@ -46,7 +46,8 @@ export default function Home() {
 
   useLayoutEffect(() => {
     if (!returnSlug) return;
-    const card = document.querySelector(`a[href="/projects/${returnSlug}"]`);
+    // A project's card, or the section that leads to the page being returned from
+    const card = document.querySelector(`a[href="/projects/${returnSlug}"], [data-return="${returnSlug}"]`);
     if (!card) return;
     window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - RETURN_OFFSET, behavior: 'instant' });
   }, [returnSlug]);
@@ -222,15 +223,17 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* Craft section */}
+          {/* Craft section: the whole wall, edge to edge */}
           <motion.div
             className="flex flex-col gap-6 w-full mt-16"
             variants={craftVariants}
+            data-return="craft"
           >
-            <div className="text-subheader text-pretty flex items-center gap-1 text-stone-400!"><span>Craft</span> <IconArrowDown size={14} /></div>
-            <CraftContent hideHeader hideBackground />
+            <div className="text-subheader text-pretty flex items-center gap-1 text-stone-400!">
+              <span className="inline-block" style={{ viewTransitionName: 'project-title-craft' }}>Craft</span> <IconArrowDown size={14} />
+            </div>
+            <CraftWall />
           </motion.div>
-
 
         </motion.div>
 

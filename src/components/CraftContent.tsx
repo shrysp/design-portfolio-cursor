@@ -1,18 +1,36 @@
 "use client";
 
-import { motion } from 'framer-motion';
+import { useLayoutEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import Image from 'next/image';
+import ProjectHeader from '@/components/ProjectHeader';
+import dynamic from 'next/dynamic';
+import { startLayoutTransition, startZoomTransition } from '@/lib/routeTransition';
 import LazyVideo from '@/components/LazyVideo';
 import ImageToolbar from '@/components/craft/ImageToolbar';
+import CraftStage from '@/components/craft/CraftStage';
+import { IconArrowsExpandDiagonal3 } from 'nucleo-micro-bold-essential';
 
-type Piece = { title: string; ratio: number } & (
-  | { kind: 'video'; src: string; poster: string }
-  | { kind: 'image'; src: string }
-  | { kind: 'live'; render: () => React.ReactNode }
-);
+// Built prototypes stay out of the page until someone opens one
+const ModalGrid = dynamic(() => import('@/components/ModalGrid'), { ssr: false });
+
+// A craft piece is one of three kinds of card on the same frame:
+//   look: a still or a short loop. Nothing to do but look.
+//   play: a small live piece, used right there in the tile.
+//   open: something bigger. The tile shows a loop or a still, and its button
+//         opens the piece on a stage at full size.
+type Media =
+  | { media: 'video'; src: string; poster: string }
+  | { media: 'image'; src: string }
+  | { media: 'live'; render: () => React.ReactNode };
+
+type Piece = { title: string; ratio: number } & Media & {
+    /** Makes this an "open" card: the button's label, and what the stage shows */
+    open?: { label: string; render?: () => React.ReactNode };
+  };
 
 const video = (title: string, file: string, ratio: number, folder = '/videos'): Piece => ({
-  kind: 'video',
+  media: 'video',
   title,
   ratio,
   src: `${folder}/${file}.mp4`,
@@ -20,144 +38,200 @@ const video = (title: string, file: string, ratio: number, folder = '/videos'): 
 });
 
 const image = (title: string, file: string): Piece => ({
-  kind: 'image',
+  media: 'image',
   title,
   ratio: 4 / 3,
   src: `/images/Craft/${file}.png`,
 });
 
+// A recording long enough to be worth watching at full size
+const walkthrough = (piece: Piece): Piece => ({ ...piece, open: { label: 'Watch walkthrough' } });
+
 // Every craft piece, in reading order. `ratio` is width / height of the media.
 const pieces: Piece[] = [
   video('Turf waitlist', 'Turf-Waitlist-animation', 2740 / 2160),
-  { kind: 'live', title: 'Image toolbar', ratio: 1496 / 1080, render: () => <ImageToolbar /> },
+  { media: 'live', title: 'Image toolbar', ratio: 1496 / 1080, render: () => <ImageToolbar /> },
   video('Bento portfolio', 'Bento-Portfolio', 2862 / 2160),
-  video('Themed navbar', 'Navbar-themes', 3096 / 2160),
+  walkthrough(video('Themed navbar', 'Navbar-themes', 3096 / 2160)),
   video('Mobile tab bar', 'Mobile-Navbar', 1040 / 1000),
-  video('iPad × Figma', 'iPadxFigma', 2880 / 2160),
-  video('Image answer engine', 'Image-Answer-Engine-Prototype', 1996 / 1080),
+  walkthrough(video('iPad × Figma', 'iPadxFigma', 2880 / 2160)),
+  walkthrough(video('Image answer engine', 'Image-Answer-Engine-Prototype', 1996 / 1080)),
   video('Aero', 'aero_recording', 3 / 4),
-  video('ItinerAI build', 'ItinerAIbuild-1', 808 / 1080),
+  walkthrough(video('ItinerAI build', 'ItinerAIbuild-1', 808 / 1080)),
   image('Delay plugin', 'BuiLD09'),
   image('Instagram.exe', 'BuiLD11'),
   image('Field recorder', 'BuiLD08'),
-  video('Perplexity Mindlab', 'pplx-mindlab-1', 16 / 9, '/images/Craft'),
+  walkthrough(video('Perplexity Mindlab', 'pplx-mindlab-1', 16 / 9, '/images/Craft')),
   image('Mail client', 'BuiLD04'),
   image('Pocket synth', 'BuiLD10'),
-  video('Dashworks modal suite', 'Modals', 16 / 9, '/images/Craft'),
+  {
+    ...video('Dashworks modal suite', 'Modals', 16 / 9, '/images/Craft'),
+    // The real thing, built: it loads only when it's opened
+    open: { label: 'View prototype', render: () => <ModalGrid /> },
+  },
   video('Whop join modal', 'Whop-Modal', 1, '/images/Craft'),
 ];
 
-const kindLabels: Record<Piece['kind'], string> = {
-  video: 'Motion',
-  image: 'Visual',
-  live: 'Live · try it',
-};
+const slugOf = (piece: Piece) => piece.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-// Deals the pieces into two columns, always onto the shorter one, so mixed
-// shapes pack without gaps. Heights are in units of a column's width.
+// A tile on the wall is never narrower than this; wider screens get more columns
+const MIN_TILE_WIDTH = 360;
+
+// The space between tiles, across and down, and at the screen's edges
+const WALL_GAP = 8;
+// Columns are counted as if the gap were this, so the tight gap makes the
+// tiles bigger rather than squeezing in another column
+const COLUMN_FIT_GAP = 24;
+// A caption's height in units of a column's width, for balancing the columns
 const CAPTION_HEIGHT = 0.12;
-const columns = pieces.reduce<{ items: Piece[]; height: number }[]>(
-  (cols, piece) => {
-    const shorter = cols[0].height <= cols[1].height ? cols[0] : cols[1];
-    shorter.items.push(piece);
-    shorter.height += 1 / piece.ratio + CAPTION_HEIGHT;
-    return cols;
-  },
-  [{ items: [], height: 0 }, { items: [], height: 0 }]
-).map((column) => column.items);
 
-interface CraftContentProps {
-  hideHeader?: boolean;
-  hideBackground?: boolean;
-}
+// One craft piece in its frame, with its name beneath. The name it carries for
+// page transitions is the same wherever the piece appears, so it can travel
+// between the home page and the wall, and between one arrangement and another.
+// What a piece is, in a word
+const kindOf = (piece: Piece) =>
+  piece.open?.render ? 'Prototype' : piece.media === 'live' ? 'Live' : piece.media === 'video' ? 'Motion' : 'Visual';
 
-export function CraftContent({ hideHeader = false, hideBackground = false }: CraftContentProps) {
-  const gridVariants = {
-    hidden: { opacity: 0, y: 20, filter: "blur(4px)", scale: 0.95 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      filter: "blur(0px)",
-      scale: 1,
-      transition: { duration: 0.4 }
-    }
-  };
-
-  const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
-  };
+function CraftTile({ piece, sizes, onOpen }: { piece: Piece; sizes: string; onOpen: (piece: Piece) => void }) {
+  const label = piece.open?.label;
+  const openIt = () => onOpen(piece);
 
   return (
-    <div className={`min-h-screen flex justify-center ${hideBackground ? '' : ''}`}>
-      <main className="w-full md:max-w-(--column) max-w-[361px] flex flex-col gap-12">
-        <div className="flex flex-col gap-12 items-start  px-0">
-         
-          {!hideHeader && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, filter: "blur(4px)", scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="isolate relative min-h-14 flex w-full bg-slate-800 border-3 border-slate-800 rounded-full items-center gap-4 overflow-hidden"
-          >
-            <div className="absolute inset-x-1 top-0.5 h-1/2 bg-gradient-to-b from-slate-50/40 to-slate-50/5 rounded-t-[24px] rounded-b-[6px] z-10"></div>
-            <div className="flex items-center w-full h-full">
-              <h1 className="md:text-[24px] text-[16px] font-bold text-slate-50 w-full px-6 py-2">
-                Craft
-              </h1>
-              
-              <div className="flex w-full h-full bg-[url('/images/Banners/Banner-Craft.png')] bg-cover bg-[50%_61%] [mask-image:radial-gradient(50%_400%_at_0%_50%,transparent_10%,rgba(0,0,0,0.7)_100%)] [mask-type:alpha]"></div>
-            </div>
-          </motion.div>
-          )}
+    <figure className="surface bg-stone-100" style={{ viewTransitionName: `craft-${slugOf(piece)}` }}>
+      <div
+        data-craft-media={slugOf(piece)}
+        className="isolate relative overflow-hidden rounded-[calc(var(--surface-radius)-1px)] bg-white outline outline-stone-200"
+        style={{ aspectRatio: piece.ratio }}
+      >
+        {piece.media === 'video' && (
+          <LazyVideo src={piece.src} poster={piece.poster} className="absolute inset-0 w-full h-full object-cover" />
+        )}
+        {piece.media === 'image' && <Image src={piece.src} alt={piece.title} fill sizes={sizes} className="object-cover" />}
+        {piece.media === 'live' && piece.render()}
+        {/* The whole picture opens the piece, as well as its button */}
+        {label && <button type="button" tabIndex={-1} aria-hidden onClick={openIt} className="absolute inset-0 z-10 cursor-expand" />}
+      </div>
 
+      <figcaption className="flex items-center justify-between gap-3 min-h-11 pl-4 pr-2 py-2 text-sm">
+        <span className="flex min-w-0 items-baseline gap-2">
+          <span className="font-medium text-stone-700">{piece.title}</span>
+          <span className="shrink-0 text-stone-400">{kindOf(piece)}</span>
+        </span>
 
-          {/* Craft pieces, dealt into two columns on wide screens */}
-          <motion.div
-            className="flex flex-col md:flex-row gap-6 w-full"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {columns.map((column, index) => (
-              // On a phone the columns dissolve and `order` puts the pieces back in reading order
-              <div key={index} className="max-md:contents flex flex-1 min-w-0 flex-col gap-6">
-                {column.map((piece) => (
-                  <motion.figure
-                    key={piece.title}
-                    variants={gridVariants}
-                    className="surface bg-stone-100"
-                    style={{ order: pieces.indexOf(piece) }}
-                  >
-                    <div
-                      className="isolate relative overflow-hidden rounded-[calc(var(--surface-radius)-1px)] bg-white outline outline-stone-200"
-                      style={{ aspectRatio: piece.ratio }}
-                    >
-                      {piece.kind === 'video' && (
-                        <LazyVideo src={piece.src} poster={piece.poster} className="absolute inset-0 w-full h-full object-cover" />
-                      )}
-                      {piece.kind === 'image' && (
-                        <Image src={piece.src} alt={piece.title} fill sizes="(min-width: 768px) 400px, 100vw" className="object-cover" />
-                      )}
-                      {piece.kind === 'live' && piece.render()}
-                    </div>
-                    <figcaption className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
-                      <span className="font-medium text-stone-700">{piece.title}</span>
-                      <span className="shrink-0 text-stone-400">{kindLabels[piece.kind]}</span>
-                    </figcaption>
-                  </motion.figure>
-                ))}
-              </div>
-            ))}
-          </motion.div>
+        {piece.media === 'live' && (
+          <span className="flex shrink-0 items-center gap-1.5 pr-2 text-stone-500">
+            <span aria-hidden className="size-2 rounded-full bg-blue-500 shadow-[0_0_0_1px_var(--color-blue-700),inset_0_1px_0_rgba(255,255,255,0.6)]" />
+            Try it
+          </span>
+        )}
+        {label && (
+          <button type="button" onClick={openIt} aria-label={label} title={label} className="aqua aqua-round aqua-to-blue shrink-0 size-7">
+            <IconArrowsExpandDiagonal3 size={13} />
+          </button>
+        )}
+      </figcaption>
+    </figure>
+  );
+}
 
+// Deals pieces into columns, always onto the shortest one, so mixed shapes
+// pack without gaps and still read roughly left to right
+function dealIntoColumns(items: Piece[], count: number) {
+  const columns = Array.from({ length: count }, () => ({ items: [] as Piece[], height: 0 }));
+  for (const piece of items) {
+    const shortest = columns.reduce((best, column) => (column.height < best.height ? column : best));
+    shortest.items.push(piece);
+    shortest.height += 1 / piece.ratio + CAPTION_HEIGHT;
+  }
+  return columns.map((column) => column.items);
+}
+
+// Every piece, edge to edge across the screen. The number of columns follows
+// the screen's width, and the tiles glide to their new places when it changes.
+export function CraftWall() {
+  const wallRef = useRef<HTMLDivElement>(null);
+  // Three columns until the screen has been measured (the server can't know its width)
+  const [columnCount, setColumnCount] = useState(3);
+  const shownCount = useRef<number | null>(null);
+  const [opened, setOpened] = useState<Piece | null>(null);
+
+  // The tile's picture grows into the stage, and shrinks back into it on close
+  const mediaOf = (piece: Piece) => document.querySelector<HTMLElement>(`[data-craft-media="${slugOf(piece)}"]`);
+  const open = (piece: Piece) => {
+    const media = mediaOf(piece);
+    media?.setAttribute('data-zoom-active', 'figure');
+    startZoomTransition(() => {
+      media?.removeAttribute('data-zoom-active');
+      flushSync(() => setOpened(piece));
+    });
+  };
+  const close = () => {
+    const piece = opened;
+    if (!piece) return;
+    startZoomTransition(() => {
+      flushSync(() => setOpened(null));
+      mediaOf(piece)?.setAttribute('data-zoom-active', 'figure');
+    });
+  };
+
+  useLayoutEffect(() => {
+    const wall = wallRef.current;
+    if (!wall) return;
+
+    const fit = () => {
+      const next = Math.max(1, Math.floor((wall.clientWidth - COLUMN_FIT_GAP) / (MIN_TILE_WIDTH + COLUMN_FIT_GAP)));
+      if (next === shownCount.current) return;
+      // The first fit just sets the columns; later ones are a change worth animating
+      const isFirstFit = shownCount.current === null;
+      shownCount.current = next;
+      if (isFirstFit) setColumnCount(next);
+      else startLayoutTransition(() => flushSync(() => setColumnCount(next)));
+    };
+
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(wall);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    // Breaks out of whatever column it sits in to span the whole screen
+    <div ref={wallRef} className="relative left-1/2 -translate-x-1/2 w-screen flex" style={{ gap: WALL_GAP, paddingInline: WALL_GAP }}>
+      {dealIntoColumns(pieces, columnCount).map((column, index) => (
+        <div key={index} className="flex flex-1 min-w-0 flex-col" style={{ gap: WALL_GAP }}>
+          {column.map((piece) => (
+            <CraftTile key={piece.title} piece={piece} sizes={`${Math.round(100 / columnCount)}vw`} onOpen={open} />
+          ))}
         </div>
-      </main>
+      ))}
+      <CraftStage
+        onClose={close}
+        piece={
+          opened && {
+            title: opened.title,
+            ratio: opened.ratio,
+            settles: Boolean(opened.open?.render),
+            poster: opened.media === 'video' ? opened.poster : undefined,
+            content: opened.open?.render ? (
+              opened.open.render()
+            ) : opened.media === 'video' ? (
+              <video src={opened.src} poster={opened.poster} controls autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-contain bg-black" />
+            ) : null,
+          }
+        }
+      />
+    </div>
+  );
+}
+
+// The craft page: a title and the wall
+export function CraftContent() {
+  return (
+    <div className="min-h-screen flex flex-col items-center gap-12 bg-stone-50 md:pt-24 pt-8 pb-24">
+      <div className="w-full max-w-(--column) px-4 md:px-0">
+        <ProjectHeader title="Craft" />
+      </div>
+      <CraftWall />
     </div>
   );
 }

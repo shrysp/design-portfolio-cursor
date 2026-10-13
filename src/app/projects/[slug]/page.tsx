@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, GithubLogo, Globe } from '@phosphor-icons/react';
 import Image from 'next/image';
 
 // Import the project data from the separate file
 import { projectsData } from '@/data/projectsData';
+import { IconArrowLeft, IconGlobe } from 'nucleo-micro-bold-essential';
+import { IconGithub } from 'nucleo-social-media';
 
 // Define a flexible Project type that can accommodate different structures
 interface Project {
@@ -260,7 +261,7 @@ export default function ProjectDetail() {
                       rel="noopener noreferrer"
                       className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 text-white rounded-md text-sm hover:bg-slate-700 transition-colors"
                     >
-                      <GithubLogo size={16} />
+                      <IconGithub size={16} />
                       <span>GitHub</span>
                     </a>
                   )}
@@ -272,7 +273,7 @@ export default function ProjectDetail() {
                       rel="noopener noreferrer"
                       className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-500 transition-colors"
                     >
-                      <Globe size={16} />
+                      <IconGlobe size={16} />
                       <span>Live Demo</span>
                     </a>
                   )}
@@ -302,7 +303,7 @@ export default function ProjectDetail() {
                 active:bg-radial-[at_50%_75%] active:from-blue-300 active:via-blue-500 active:to-blue-700 active:border-blue-700 active:text-white/80 active:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset]`}
             >
               <div className={`absolute flex inset-[2px] h-1/2 items-center justify-center bg-gradient-to-b from-white to-white/20 rounded-t-[60px] rounded-b-[12px] z-10`}></div>
-              <ArrowLeft size={20} weight="bold" />
+              <IconArrowLeft size={20} />
             </motion.div>
             <h1 className="text-[24px] font-bold text-slate-800">
               {project.title}

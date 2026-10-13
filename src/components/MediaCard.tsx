@@ -72,7 +72,7 @@ export default function MediaCard({
             data-zoom-src={src}
             data-zoom-caption={caption}
             aria-label={`Enlarge image: ${alt}`}
-            className={`block w-full ${aspectClass} relative bg-white cursor-zoom-in`}
+            className={`block w-full ${aspectClass} relative bg-white cursor-expand`}
           >
             <Image
               src={src}

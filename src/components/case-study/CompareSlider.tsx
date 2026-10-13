@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { SplitHorizontal } from "@phosphor-icons/react";
+import { IconArrowsOppositeDirectionX } from "nucleo-micro-bold-essential";
 
 interface CompareSliderProps {
   /** Shown on the left of the handle */
@@ -64,7 +64,7 @@ export default function CompareSlider({ before, after }: CompareSliderProps) {
         >
           <div className="aqua md:w-[24px] md:px-3 px-2">
             <div className="size-6 flex items-center justify-center p-1">
-              <SplitHorizontal size={16} weight="bold" />
+              <IconArrowsOppositeDirectionX size={16} />
             </div>
           </div>
         </div>
