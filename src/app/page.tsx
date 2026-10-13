@@ -4,13 +4,33 @@ import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import ProjectThumbnailCard from '@/components/ProjectThumbnailCard';
-import { CraftWall } from '@/components/CraftContent';
+import { CraftWall, craftCount } from '@/components/CraftContent';
 import StickOnSticker, { STICK_ON_DEFAULTS } from '@/components/StickOnSticker';
 import HandNote from '@/components/HandNote';
 import { ExpandableJournal } from '@/components/journal/ExpandableJournal';
-import { IconArrowDown } from 'nucleo-micro-bold-essential';
 import { clearReturningFrom, peekReturningFrom } from '@/lib/routeTransition';
 
+
+// A section's title, ruled off like a heading in a notebook: a gel bead (the
+// one that bullets the case study lists), the name, a dashed guide out to the
+// column's edge (as on the pinned callouts) and how many things follow.
+function SectionTitle({ children, count, transitionName }: { children: React.ReactNode; count: number; transitionName?: string }) {
+  return (
+    <div className="text-subheader flex items-center gap-2.5 text-stone-400!">
+      <span
+        aria-hidden
+        className="size-[7px] shrink-0 rounded-full bg-radial-[at_50%_80%] from-stone-200 to-stone-400 shadow-[0_0_0_1px_var(--color-stone-400),inset_0_1.5px_0.5px_rgba(255,255,255,0.85),0_1px_1px_rgba(0,0,0,0.15)]"
+      />
+      <span className="inline-block shrink-0" style={transitionName ? { viewTransitionName: transitionName } : undefined}>
+        {children}
+      </span>
+      <span aria-hidden className="flex-1 border-t border-dashed border-stone-300/70" />
+      <span className="shrink-0 tabular-nums" aria-label={`${count} items`}>
+        {String(count).padStart(2, '0')}
+      </span>
+    </div>
+  );
+}
 
 // ── Animation timeline ──
 // Stickers are stuck on one by one, `stagger` apart. The journal appears as the
@@ -75,7 +95,7 @@ export default function Home() {
 
   // A sticker's handwritten note writes itself out once the sticker is pressed flat
   const noteDelay = (index: number) => stickerDelay(index) + stickOn.arrive * 0.5 + stickOn.press;
-  const note = { instant: isReturning, speed: NOTE_SPEED, className: "font-normal text-[1.1rem] leading-[1.15]" };
+  const note = { instant: isReturning, speed: NOTE_SPEED, className: "font-normal text-[1rem] leading-[1.2]" };
 
   return (
     <div className="min-h-screen flex justify-center">
@@ -121,7 +141,7 @@ export default function Home() {
                 </div>
 
                 <div className="hidden md:flex z-[0] absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 gap-2">
-                  <div className="absolute z-10 text-stone-500 text-left w-34 -rotate-60 top-8 left-1/5"><HandNote {...note} delay={noteDelay(1)}>Based in Bay Area</HandNote></div>
+                  <div className="absolute z-10 text-stone-500 text-left w-34 whitespace-nowrap -rotate-60 top-8 left-1/5"><HandNote {...note} delay={noteDelay(1)}>Based in Bay Area</HandNote></div>
                   <StickOnSticker
                     src="/images/About/Golden-Gate-Bridge-sticker.webp"
                     alt="Golden Gate Bridge sticker"
@@ -186,10 +206,11 @@ export default function Home() {
 
           {/* Projects section */}
           <motion.div
-            className="flex flex-col gap-4 w-full mt-8"
+            // The gap clears the pane a card grows on hover, which reaches a rem above it
+            className="flex flex-col gap-8 w-full mt-20"
             variants={selectedWorkVariants}
           >
-            <div className="text-subheader text-pretty flex items-center gap-1 text-stone-400!"><span>Selected Work</span> <IconArrowDown size={14} /></div>
+            <SectionTitle count={4}>Selected Work</SectionTitle>
             <div className="w-full flex flex-col gap-20 items-start">
                   
               <ProjectThumbnailCard name="Quinn" link="/projects/quinn">
@@ -225,13 +246,11 @@ export default function Home() {
 
           {/* Craft section: the whole wall, edge to edge */}
           <motion.div
-            className="flex flex-col gap-6 w-full mt-16"
+            className="flex flex-col gap-8 w-full mt-16"
             variants={craftVariants}
             data-return="craft"
           >
-            <div className="text-subheader text-pretty flex items-center gap-1 text-stone-400!">
-              <span className="inline-block" style={{ viewTransitionName: 'project-title-craft' }}>Craft</span> <IconArrowDown size={14} />
-            </div>
+            <SectionTitle count={craftCount} transitionName="project-title-craft">Craft</SectionTitle>
             <CraftWall />
           </motion.div>
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { TegakiRenderer } from "tegaki/react";
-import caveat from "tegaki/fonts/caveat";
+import indieFlower from "@/fonts/indie-flower-tegaki/bundle";
 
 interface HandNoteProps {
   children: string;
@@ -28,7 +28,7 @@ export default function HandNote({ children, delay = 0, speed = 1, instant = fal
 
   return (
     <TegakiRenderer
-      font={caveat}
+      font={indieFlower}
       className={className}
       time={instant ? "100%" : { mode: "uncontrolled", delay, speed }}
       reducedMotion="user"

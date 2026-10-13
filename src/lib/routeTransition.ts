@@ -75,13 +75,33 @@ export function startRouteTransition(navigate: () => void) {
   });
 }
 
+// Matches the zoom-image group's duration in globals.css
+const ZOOM_DURATION = 380;
+
+// The corner radius an element is seen with: its own, or that of a wrapper of
+// the same size that clips it (a figure's picture is square, its card rounds it)
+function visibleRadius(element: Element | null) {
+  for (let node = element, depth = 0; node && depth < 3; node = node.parentElement, depth++) {
+    const radius = parseFloat(getComputedStyle(node).borderTopLeftRadius) || 0;
+    if (radius > 0) return radius;
+    const box = node.getBoundingClientRect();
+    const outer = node.parentElement?.getBoundingClientRect();
+    if (!outer || Math.abs(outer.width - box.width) > 2 || Math.abs(outer.height - box.height) > 2) break;
+  }
+  return 0;
+}
+
 /**
  * Morphs one element into another across a state change on the same page:
  * a figure into its enlarged view and back. Whichever element carries
  * `data-zoom-active` before `update` runs becomes the one carrying it after.
  * `update` must apply its change synchronously (flushSync).
+ *
+ * `dissolve` is for two ends that aren't the same picture (a tile's recording
+ * and the prototype it opens): each blurs as it fades, so one melts into the
+ * other instead of the two showing through each other.
  */
-export function startZoomTransition(update: () => void) {
+export function startZoomTransition(update: () => void, { dissolve = false } = {}) {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   // A morph already under way is left to finish: starting another would cut it
   // short, and the picture would snap into place
@@ -91,13 +111,36 @@ export function startZoomTransition(update: () => void) {
     return;
   }
 
-  document.documentElement.dataset.vt = "zoom";
-  const transition = document.startViewTransition(update);
+  const root = document.documentElement;
+  root.dataset.vt = "zoom";
+  const from = document.querySelector("[data-zoom-active]");
+  // Lets the stylesheet slide the dock away as a figure opens. On the way back
+  // the dock slides up by itself once the enlarged view is gone.
+  if (from?.getAttribute("data-zoom-active") === "figure") root.dataset.vtZoom = "open";
+  if (dissolve) root.dataset.vtDissolve = "";
+  const fromRadius = visibleRadius(from);
+  let toRadius = fromRadius;
+  const transition = document.startViewTransition(() => {
+    update();
+    toRadius = visibleRadius(document.querySelector("[data-zoom-active]"));
+  });
   // If the browser can't run the morph it still applies the change; there's
   // nothing to report
-  transition.ready.catch(() => {});
+  transition.ready
+    .then(() => {
+      // When one end is rounded and the other square, the moving frame eases
+      // its corners from one to the other rather than snapping at the start
+      if (fromRadius === toRadius || (fromRadius > 0 && toRadius > 0)) return;
+      root.animate(
+        { clipPath: [`inset(0 round ${fromRadius}px)`, `inset(0 round ${toRadius}px)`] },
+        { duration: ZOOM_DURATION, easing: "ease", fill: "both", pseudoElement: "::view-transition-group(zoom-image)" }
+      );
+    })
+    .catch(() => {});
   transition.finished.catch(() => {}).finally(() => {
-    delete document.documentElement.dataset.vt;
+    delete root.dataset.vt;
+    delete root.dataset.vtZoom;
+    delete root.dataset.vtDissolve;
     document.querySelectorAll("[data-zoom-active='figure']").forEach((el) => el.removeAttribute("data-zoom-active"));
   });
 }

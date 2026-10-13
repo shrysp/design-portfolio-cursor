@@ -174,7 +174,10 @@ export default function Lightbox({ items, index, onIndexChange }: LightboxProps)
                     step(info.offset.x < 0 ? 1 : -1);
                   }}
                   data-zoom-active="frame"
-                  className="absolute inset-0 m-auto bg-cover bg-center"
+                  // White behind the picture, as in its figure on the page, so
+                  // a cut-out with a transparent background arrives on the same
+                  // backing it left with instead of landing on the dark backdrop
+                  className="absolute inset-0 m-auto bg-white bg-cover bg-center"
                   style={{
                     aspectRatio: ratio,
                     width: `min(100cqw, calc(100cqh * ${ratio}))`,

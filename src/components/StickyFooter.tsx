@@ -186,7 +186,7 @@ export default function StickyFooter() {
           <DockTooltip tip={tip} labels={dockTipLabels} raised={showProjectNav} />
           {/* The page-transition name goes on the glass itself. On a wrapper it
               would wall the glass off from the page it's meant to blur. */}
-          <Glass {...glass} filterId="dock-lens" style={{ viewTransitionName: 'dock' }} className="flex items-center p-1.5">
+          <Glass {...glass} filterId="dock-lens" data-dock style={{ viewTransitionName: 'dock' }} className="flex items-center p-1.5">
             <div className="flex items-center gap-1.5">
               <a
                 href="https://x.com/ShreyasPatil_"

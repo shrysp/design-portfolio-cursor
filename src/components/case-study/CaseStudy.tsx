@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import ProjectHeader from "@/components/ProjectHeader";
 
 /* The pieces a case study is written with. A page is a <CaseStudy> holding
@@ -17,7 +17,7 @@ interface CaseStudyProps {
 export function CaseStudy({ title, children }: CaseStudyProps) {
   return (
     <div className="min-h-screen flex justify-center bg-stone-50">
-      <SectionRail />
+      <SectionRail title={title} />
       <main className="w-full max-w-(--column) flex flex-col gap-16 md:pt-24 pt-8 md:px-0 px-4 pb-24">
         <ProjectHeader title={title} />
         {children}
@@ -197,10 +197,32 @@ interface RailItem {
 }
 
 // The table of contents in the left margin on wide screens. It lists every
-// section that has a `nav` name and marks the one being read.
-function SectionRail() {
+// section that has a `nav` name and marks the one being read. While the
+// project's title is on screen nothing is marked; once it scrolls away the
+// title takes its place at the head of the rail.
+function SectionRail({ title }: { title: string }) {
   const [items, setItems] = useState<RailItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [titleInView, setTitleInView] = useState(true);
+  // Set while the page scrolls to a section picked from the rail, so the
+  // sections passing on the way don't take the marker
+  const isJumping = useRef(false);
+
+  // Marks the picked section at once and holds it until the scroll settles.
+  // A short section can come to rest above the reading band and would
+  // otherwise never be marked.
+  const jumpTo = (id: string) => {
+    setActiveId(id);
+    isJumping.current = true;
+    const settle = () => {
+      isJumping.current = false;
+      window.removeEventListener("scrollend", settle);
+      clearTimeout(fallback);
+    };
+    // For browsers without scrollend, and for a jump that doesn't scroll at all
+    const fallback = setTimeout(settle, 1000);
+    window.addEventListener("scrollend", settle);
+  };
 
   useEffect(() => {
     const sections = Array.from(document.querySelectorAll<HTMLElement>("section[data-nav]"));
@@ -209,14 +231,28 @@ function SectionRail() {
     // A section is "being read" while it crosses a band a third of the way down the screen
     const observer = new IntersectionObserver(
       (entries) => {
+        if (isJumping.current) return;
         entries.forEach((entry) => {
           if (entry.isIntersecting) setActiveId(entry.target.id);
+          // Scrolling back up until the first section drops below the band
+          // leaves nothing being read
+          else if (entry.target === sections[0] && entry.boundingClientRect.top > (entry.rootBounds?.bottom ?? 0)) {
+            setActiveId((current) => (current === entry.target.id ? null : current));
+          }
         });
       },
       { rootMargin: "-30% 0px -65% 0px" }
     );
     sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
+
+    const heading = document.querySelector("main h1");
+    const titleObserver = new IntersectionObserver(([entry]) => setTitleInView(entry.isIntersecting));
+    if (heading) titleObserver.observe(heading);
+
+    return () => {
+      observer.disconnect();
+      titleObserver.disconnect();
+    };
   }, []);
 
   if (items.length === 0) return null;
@@ -226,12 +262,33 @@ function SectionRail() {
       aria-label="Sections"
       className="hidden xl:flex fixed top-1/2 -translate-y-1/2 left-[max(1.5rem,calc(50%-var(--column)/2-13rem))] w-40 flex-col gap-0.5"
     >
+      {/* Hung above the list rather than in it, so the list stays put as the
+          title comes and goes */}
+      <AnimatePresence>
+        {!titleInView && (
+          <motion.a
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute bottom-full left-0 right-0 mb-3 pl-4 text-sm font-medium text-stone-800 text-pretty"
+          >
+            {title}
+          </motion.a>
+        )}
+      </AnimatePresence>
       {items.map((item) => {
-        const isActive = item.id === activeId;
+        const isActive = !titleInView && item.id === activeId;
         return (
           <a
             key={item.id}
             href={`#${item.id}`}
+            onClick={() => jumpTo(item.id)}
             aria-current={isActive ? "location" : undefined}
             className={`relative py-1 pl-4 text-sm transition-colors duration-200 ${isActive ? "text-stone-800" : "text-stone-400 hover:text-stone-600"}`}
           >

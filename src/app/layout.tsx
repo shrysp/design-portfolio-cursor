@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Source_Serif_4, Geist_Mono } from "next/font/google";
+import { Geist, Indie_Flower } from "next/font/google";
 import "./globals.css";
 import StickyFooter from "@/components/StickyFooter";
 import MotionProvider from "@/components/MotionProvider";
@@ -13,15 +13,12 @@ const geist = Geist({
   display: "swap",
 });
 
-const sourceSerif4 = Source_Serif_4({
-  variable: "--font-serif",
+// The journal's handwriting
+const indieFlower = Indie_Flower({
+  variable: "--font-handwriting",
+  weight: "400",
   subsets: ["latin"],
   display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
@@ -62,11 +59,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth overflow-x-clip">
-      <head>
-        <link rel="stylesheet" href="https://use.typekit.net/uoh4dmf.css" />
-      </head>
       <body
-        className={`${geist.variable} ${geistMono.variable} ${sourceSerif4.variable} antialiased bg-stone-50 text-stone-900 overflow-x-clip`}
+        className={`${geist.variable} ${indieFlower.variable} antialiased bg-stone-50 text-stone-900 overflow-x-clip`}
       >
         <DevFeedback />
         <RouteTransitionSettler />

@@ -12,8 +12,9 @@ export interface StagedPiece {
   /** The still the tile shows. The frame opens and closes on it, so the morph
       is one picture changing size and never two different things blending. */
   poster?: string;
-  /** A built prototype, which looks nothing like the still: it fades in once
-      the frame has landed and fades out before the frame leaves */
+  /** A built prototype, which looks nothing like the still: it comes into
+      focus while the frame is still growing, so the tile becomes the prototype
+      in one motion rather than landing as a still and then swapping */
   settles?: boolean;
   content: ReactNode;
 }
@@ -26,9 +27,11 @@ interface CraftStageProps {
 
 // How long Esc shows on its button before the stage starts to close
 const CLOSE_KEY_DELAY = 120;
-// How long the frame takes to land, and a prototype to fade in or out over its still
-const LAND_MS = 380;
+// How long a recording takes to fade in over its still
 const SETTLE_MS = 180;
+// How long a prototype takes to come into focus. The frame lands in 380ms
+// (see startZoomTransition), so the two finish together.
+const EMERGE_MS = 340;
 
 // A craft piece opened up to use or watch at full size. It has no open or
 // close animation of its own: its tile on the wall morphs into the frame and
@@ -40,6 +43,7 @@ export default function CraftStage({ piece, onClose }: CraftStageProps) {
 
   // Whether the content is showing over the still
   const [isRevealed, setIsRevealed] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
   const settles = piece?.settles ?? false;
   useEffect(() => {
     if (!piece) return;
@@ -47,23 +51,28 @@ export default function CraftStage({ piece, onClose }: CraftStageProps) {
       setIsRevealed(true);
       return;
     }
-    const timer = setTimeout(() => setIsRevealed(true), LAND_MS);
-    return () => clearTimeout(timer);
+    // A frame on, so the hidden state has been drawn and there is something to
+    // ease from; and not before the prototype has loaded, or a blank sheet
+    // would fade in ahead of it
+    let frame = requestAnimationFrame(function reveal() {
+      if (contentRef.current?.childElementCount) setIsRevealed(true);
+      else frame = requestAnimationFrame(reveal);
+    });
+    return () => cancelAnimationFrame(frame);
   }, [piece, settles]);
 
-  // Closes once: a prototype first fades back to its still, so what shrinks
-  // into the tile is the same picture the tile shows
+  // Closes once. The frame shrinks straight back into the tile, the prototype
+  // dissolving into the tile's picture on the way.
   const requestClose = (afterKey = false) => {
     if (isClosing.current) return;
     isClosing.current = true;
-    if (settles) setIsRevealed(false);
     setTimeout(
       () => {
         isClosing.current = false;
         setIsRevealed(false);
         onClose();
       },
-      Math.max(settles ? SETTLE_MS : 0, afterKey ? CLOSE_KEY_DELAY : 0)
+      afterKey ? CLOSE_KEY_DELAY : 0
     );
   };
 
@@ -117,8 +126,13 @@ export default function CraftStage({ piece, onClose }: CraftStageProps) {
                 }}
               >
                 <div
-                  className="absolute inset-0 overflow-auto bg-white transition-opacity ease-out"
-                  style={{ opacity: isRevealed ? 1 : 0, transitionDuration: `${SETTLE_MS}ms` }}
+                  ref={contentRef}
+                  className="absolute inset-0 overflow-auto bg-white transition-[opacity,filter] ease-out"
+                  style={{
+                    opacity: isRevealed ? 1 : 0,
+                    filter: settles && !isRevealed ? "blur(8px)" : "blur(0px)",
+                    transitionDuration: `${settles ? EMERGE_MS : SETTLE_MS}ms`,
+                  }}
                 >
                   {piece.content}
                 </div>

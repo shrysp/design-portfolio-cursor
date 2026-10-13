@@ -15,6 +15,8 @@ interface ProjectHeaderProps {
 // back button lives in the left margin, at the head of the side rail, and stays
 // there while the page scrolls. That leaves the title on the same edge as on
 // the home page card, so the two can morph into each other.
+// The button lines up with the rail's labels, not the marker dot hanging beside
+// them: a rem in from the rail's edge, less 2px so its curve looks flush.
 // Nothing here animates in: it has to be on screen the moment the page arrives.
 export default function ProjectHeader({ 
   title, 
@@ -36,13 +38,13 @@ export default function ProjectHeader({
           if (slug) markReturningFrom(slug);
           startRouteTransition(() => router.push('/', { scroll: false }));
         }}
-        className="size-8 shrink-0 xl:fixed xl:z-40 xl:top-24 xl:left-[max(1.5rem,calc(50%-var(--column)/2-13rem))]"
+        className="size-8 shrink-0 xl:fixed xl:z-40 xl:top-24 xl:left-[calc(max(1.5rem,50%-var(--column)/2-13rem)+1rem-2px)]"
       >
         <IconArrowLeft size={16} />
       </Button>
 
       <h1
-        className={`text-header mx-0 w-auto text-stone-700 ${titleClassName}`}
+        className={`text-header mx-0 w-auto text-gradient-primary ${titleClassName}`}
         style={{ viewTransitionName: `project-title-${slug}` }}
       >
         {title}

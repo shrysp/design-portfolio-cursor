@@ -26,7 +26,7 @@ type Media =
 
 type Piece = { title: string; ratio: number } & Media & {
     /** Makes this an "open" card: the button's label, and what the stage shows */
-    open?: { label: string; render?: () => React.ReactNode };
+    open?: { label: string; render?: () => React.ReactNode; /** Fetches what `render` needs ahead of time */ preload?: () => void };
   };
 
 const video = (title: string, file: string, ratio: number, folder = '/videos'): Piece => ({
@@ -67,10 +67,13 @@ const pieces: Piece[] = [
   {
     ...video('Dashworks modal suite', 'Modals', 16 / 9, '/images/Craft'),
     // The real thing, built: it loads only when it's opened
-    open: { label: 'View prototype', render: () => <ModalGrid /> },
+    open: { label: 'View prototype', render: () => <ModalGrid />, preload: () => void import('@/components/ModalGrid') },
   },
   video('Whop join modal', 'Whop-Modal', 1, '/images/Craft'),
 ];
+
+/** How many pieces are on the wall, for the section's title */
+export const craftCount = pieces.length;
 
 const slugOf = (piece: Piece) => piece.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
@@ -97,7 +100,13 @@ function CraftTile({ piece, sizes, onOpen }: { piece: Piece; sizes: string; onOp
   const openIt = () => onOpen(piece);
 
   return (
-    <figure className="surface bg-stone-100" style={{ viewTransitionName: `craft-${slugOf(piece)}` }}>
+    <figure
+      className="surface bg-stone-100"
+      style={{ viewTransitionName: `craft-${slugOf(piece)}` }}
+      // A prototype is fetched as the pointer arrives, so it's there to show as the tile opens
+      onPointerEnter={piece.open?.preload}
+      onFocus={piece.open?.preload}
+    >
       <div
         data-craft-media={slugOf(piece)}
         className="isolate relative overflow-hidden rounded-[calc(var(--surface-radius)-1px)] bg-white outline outline-stone-200"
@@ -157,13 +166,15 @@ export function CraftWall() {
 
   // The tile's picture grows into the stage, and shrinks back into it on close
   const mediaOf = (piece: Piece) => document.querySelector<HTMLElement>(`[data-craft-media="${slugOf(piece)}"]`);
+  // A prototype looks nothing like its tile's recording, so the two dissolve
+  const isPrototype = (piece: Piece) => Boolean(piece.open?.render);
   const open = (piece: Piece) => {
     const media = mediaOf(piece);
     media?.setAttribute('data-zoom-active', 'figure');
     startZoomTransition(() => {
       media?.removeAttribute('data-zoom-active');
       flushSync(() => setOpened(piece));
-    });
+    }, { dissolve: isPrototype(piece) });
   };
   const close = () => {
     const piece = opened;
@@ -171,7 +182,7 @@ export function CraftWall() {
     startZoomTransition(() => {
       flushSync(() => setOpened(null));
       mediaOf(piece)?.setAttribute('data-zoom-active', 'figure');
-    });
+    }, { dissolve: isPrototype(piece) });
   };
 
   useLayoutEffect(() => {
