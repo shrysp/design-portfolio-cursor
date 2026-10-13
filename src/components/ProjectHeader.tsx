@@ -1,9 +1,9 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { IconArrowLeft } from 'nucleo-micro-bold-essential';
 import { Button } from '@/components/ui/button';
+import { markReturningFrom, startRouteTransition } from '@/lib/routeTransition';
 
 interface ProjectHeaderProps {
   title: string;
@@ -11,33 +11,44 @@ interface ProjectHeaderProps {
   titleClassName?: string;
 }
 
+// The project's title, with the way back to the home page. On wide screens the
+// back button lives in the left margin, at the head of the side rail, and stays
+// there while the page scrolls. That leaves the title on the same edge as on
+// the home page card, so the two can morph into each other.
+// The button lines up with the rail's labels, not the marker dot hanging beside
+// them: a rem in from the rail's edge, less 2px so its curve looks flush.
+// Nothing here animates in: it has to be on screen the moment the page arrives.
 export default function ProjectHeader({ 
   title, 
   className = "", 
   titleClassName = "" 
 }: ProjectHeaderProps) {
   const router = useRouter();
+  const slug = usePathname()?.split('/').filter(Boolean).pop();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={`flex w-full items-center gap-4 ${className}`}
-    >
+    <div className={`column flex items-center gap-4 ${className}`}>
       <Button
         variant="iconPrimary"
         size="icon"
-        onClick={() => router.push('/')}
-        className="relative size-8 transition-[color,border-color,box-shadow] duration-200 group-hover:hover group-hover:text-white group-hover:bg-[radial-gradient(at_50%_75%,theme(colors.blue.300),theme(colors.blue.500),theme(colors.blue.400))] group-hover:border-blue-700 group-hover:shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset]"
+        aria-label="Back to home"
+        onClick={() => {
+          // The home page lands on this project's card, so the hero and
+          // title can morph back into it
+          if (slug) markReturningFrom(slug);
+          startRouteTransition(() => router.push('/', { scroll: false }));
+        }}
+        className="size-8 shrink-0 xl:fixed xl:z-40 xl:top-24 xl:left-[calc(max(1.5rem,50%-var(--column)/2-13rem)+1rem-2px)]"
       >
-        <div className="absolute inset-1.5 top-0.5 h-1/2 rounded-t-[12px] rounded-b-[4px] bg-gradient-to-b from-white/70 to-white/20 z-10" />
         <IconArrowLeft size={16} />
       </Button>
 
-      <h1 className={`text-header text-stone-700 ${titleClassName}`}>
+      <h1
+        className={`text-header mx-0 w-auto text-gradient-primary ${titleClassName}`}
+        style={{ viewTransitionName: `project-title-${slug}` }}
+      >
         {title}
       </h1>
-    </motion.div>
+    </div>
   );
 }

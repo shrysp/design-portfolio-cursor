@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Source_Serif_4, Geist_Mono } from "next/font/google";
+import { Geist, Indie_Flower } from "next/font/google";
 import "./globals.css";
-import "dialkit/styles.css";
 import StickyFooter from "@/components/StickyFooter";
 import MotionProvider from "@/components/MotionProvider";
 import DevFeedback from "@/components/DevFeedback";
+import RouteTransitionSettler from "@/components/RouteTransitionSettler";
+import "dialkit/styles.css";
 import { DialRoot } from "dialkit";
 
 
@@ -14,19 +15,24 @@ const geist = Geist({
   display: "swap",
 });
 
-const sourceSerif4 = Source_Serif_4({
-  variable: "--font-serif",
+// The journal's handwriting
+const indieFlower = Indie_Flower({
+  variable: "--font-handwriting",
+  weight: "400",
   subsets: ["latin"],
   display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-});
+// Where the site lives, so share previews can point at full image addresses.
+// Vercel supplies the production domain; set NEXT_PUBLIC_SITE_URL to override it.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
 
 export const metadata: Metadata = {
-  title: "Shreyas Patil | Product Designer",
+  metadataBase: new URL(siteUrl),
+  // A page that names itself ("Quinn") gets the name appended
+  title: { default: "Shreyas Patil | Product Designer", template: "%s | Shreyas Patil" },
   description: "Shreyas is a product designer with a passion for creating user-friendly and intuitive designs.",
   keywords: ["portfolio", "design", "Shreyas Patil", "Product Designer", "next.js", "tailwind css", "framer motion", "web development"],
   authors: [{ name: "Shreyas Patil" }],
@@ -63,13 +69,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth overflow-x-clip">
-      <head>
-        <link rel="stylesheet" href="https://use.typekit.net/uoh4dmf.css" />
-      </head>
       <body
-        className={`${geist.variable} ${geistMono.variable} ${sourceSerif4.variable} antialiased bg-stone-50 text-stone-900 overflow-x-clip`}
+        className={`${geist.variable} ${indieFlower.variable} antialiased bg-stone-50 text-stone-900 overflow-x-clip`}
       >
         <DevFeedback />
+        <RouteTransitionSettler />
         <MotionProvider>
           {children}
           <StickyFooter />

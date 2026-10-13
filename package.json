@@ -9,7 +9,8 @@
     "lint": "next lint",
     "journal:capture": "node scripts/capture-journal-pages.mjs",
     "tour:codes": "node scripts/tour-codes.mjs",
-    "tour:notion": "node scripts/tour-notion.mjs"
+    "tour:notion": "node scripts/tour-notion.mjs",
+    "og:generate": "node scripts/generate-og-images.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.7",
@@ -28,6 +29,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.0.2",
+    "tegaki": "^1.1.0",
     "three": "^0.186.1",
     "usehooks-ts": "^3.1.1"
   },

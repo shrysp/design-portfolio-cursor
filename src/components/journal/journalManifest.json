@@ -2,7 +2,7 @@
   "pageWidth": 420,
   "pageHeight": 560,
   "glossAlpha": 160,
-  "version": "mv01pcbx",
+  "version": "mv6icwek",
   "sides": [
     "/images/journal/pages/00.webp",
     "/images/journal/pages/01.webp",
@@ -64,7 +64,7 @@
       "side": 19,
       "x": 0.1,
       "y": 0.48125,
-      "width": 0.5460565476190476,
+      "width": 0.5124627976190477,
       "height": 0.05,
       "action": "copy-email"
     },

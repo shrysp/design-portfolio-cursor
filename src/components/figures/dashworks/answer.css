@@ -1,0 +1,67 @@
+/* The Dashworks bench's own parts. The shared look is in ../figure.css. */
+
+/* This bench lights in Dashworks' purple, not the site's blue: the same
+   purples as the modal suite further down the case study */
+.answer[data-theme="light"] {
+  --anatomy-lit: #972aa1;
+  --anatomy-lit-top: #fcf5fc;
+  --anatomy-lit-shade: #f4e3f6;
+  --fig-tag-fill: #fcf5fc;
+  --fig-tag-edge: #e6c4ea;
+  --fig-tag-ink: #4f0d52;
+}
+
+/* The two ends of the bench, engraved on the plate; the one in play lights */
+.answer .aw-name {
+  fill: var(--anatomy-lo);
+  letter-spacing: 0.08em;
+  transition: fill 240ms ease-out;
+}
+
+.answer .aw-name[data-on] {
+  fill: var(--anatomy-lit);
+}
+
+/* An app's name on its drum lights while it is being searched */
+.answer .aw-app {
+  fill: var(--anatomy-mid);
+  letter-spacing: 0.04em;
+  transition: fill 240ms ease-out;
+}
+
+.answer .aw-app[data-on] {
+  fill: var(--anatomy-lit);
+}
+
+/* What is written on the question card */
+.answer .aw-slip {
+  fill: var(--anatomy-lit);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.answer .aw-wire {
+  stroke-width: 1.3px;
+}
+
+/* A source's path shows only while a query or a document is travelling along it */
+.answer .aw-flow {
+  stroke-width: 1.6px;
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+
+.answer .aw-flow[data-flow] {
+  opacity: 1;
+}
+
+/* The reader's lamp, and the answer's reference marks */
+.answer .aw-lamp circle {
+  transition: fill 240ms ease-out, opacity 240ms ease-out;
+}
+
+.answer .aw-lamp[data-on] circle,
+.answer .aw-refs circle {
+  fill: var(--anatomy-lit);
+  opacity: 1;
+}

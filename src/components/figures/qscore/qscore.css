@@ -1,0 +1,81 @@
+/* The Q-score bench's own parts. The shared look is in ../figure.css. */
+
+/* The bench as a whole isn't one button: each meter is its own target */
+.qscore .qs-stage {
+  cursor: default;
+}
+
+.qscore .qs-meter {
+  cursor: pointer;
+}
+
+/* The readings carry more weight than the hairlines around them */
+.qscore .qs-needle {
+  stroke-width: 1.5px;
+}
+
+.qscore .qs-arc,
+.qscore .qs-track {
+  stroke-width: 3px;
+  stroke-linecap: round;
+}
+
+.qscore .qs-name {
+  stroke-width: 1.2px;
+}
+
+.qscore .qs-lead {
+  stroke-width: 1.3px;
+}
+
+/* Engraved on each meter: its goal, and the score in a window beside it */
+.qscore .qs-goal {
+  fill: var(--anatomy-hi);
+  letter-spacing: 0.07em;
+}
+
+.qscore .qs-score {
+  fill: var(--anatomy-lit);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* What is flagged on the card */
+.qscore .qs-signal-text {
+  fill: var(--anatomy-mid);
+  letter-spacing: 0.05em;
+}
+
+/* ── Pointing out one goal ──
+   The meter that is pointed at keeps its colour, and so do the flag on the
+   card that drives it and the lead between them. The other meter steps back. */
+.qscore .qs-signal-text,
+.qscore .qs-flag,
+.qscore .qs-lead,
+.qscore .qs-arc,
+.qscore .qs-needle,
+.qscore .qs-score,
+.qscore .qs-goal {
+  transition: fill 220ms ease-out, stroke 220ms ease-out, opacity 220ms ease-out;
+}
+
+.qscore .qs-stage[data-active="0"] .qs-signal[data-goal="0"] .qs-signal-text,
+.qscore .qs-stage[data-active="1"] .qs-signal[data-goal="1"] .qs-signal-text {
+  fill: var(--anatomy-lit);
+}
+
+.qscore .qs-stage[data-active="0"] .qs-signal[data-goal="0"] .qs-flag,
+.qscore .qs-stage[data-active="1"] .qs-signal[data-goal="1"] .qs-flag {
+  stroke: var(--anatomy-lit);
+  fill: var(--anatomy-lit);
+}
+
+.qscore .qs-stage[data-active="0"] .qs-lead[data-goal="0"],
+.qscore .qs-stage[data-active="1"] .qs-lead[data-goal="1"] {
+  stroke: var(--anatomy-lit);
+}
+
+.qscore .qs-stage[data-active="0"] .qs-meter[data-goal="1"] :is(.qs-arc, .qs-needle, .qs-score, .qs-goal),
+.qscore .qs-stage[data-active="1"] .qs-meter[data-goal="0"] :is(.qs-arc, .qs-needle, .qs-score, .qs-goal) {
+  opacity: 0.35;
+}

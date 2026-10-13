@@ -2,12 +2,12 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ImageSquare } from '@phosphor-icons/react';
 import Image from 'next/image';
 import MediaCard from '@/components/MediaCard';
 import ProjectHeader from '@/components/ProjectHeader';
 // Import the project data
 import { projectsData } from '@/data/projectsData';
+import { IconPhotoFilled } from 'nucleo-micro-bold-essential';
 
 export default function FractionsProject() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -17,7 +17,7 @@ export default function FractionsProject() {
 
   return (
     <div className="min-h-screen flex justify-center bg-gray-50">
-      <main className="w-full max-w-[800px] flex flex-col gap-12">
+      <main className="w-full max-w-(--column) flex flex-col gap-12">
         <div className="flex flex-col gap-12 items-start md:pt-24 pt-8 md:px-0 p-4 md:pb-24 pb-24">
           {/* Back button and header */}
           <ProjectHeader 
@@ -35,7 +35,7 @@ export default function FractionsProject() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
-                className="w-full aspect-[4/3] rounded-3xl border border-slate-200 overflow-hidden mb-6 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.12),0px_4px_4px_-2px_rgba(0,0,0,0.12)]"
+                className="w-full aspect-[4/3] surface mb-6"
               >
                 <Image
                   src={project.images[selectedImageIndex + 1]}
@@ -186,7 +186,7 @@ export default function FractionsProject() {
                     </div>
                     <div className='absolute top-[1px] left-[1px] flex items-center justify-center size-7 text-white rounded-tl-[10px] rounded-sm bg-radial-[at_50%_75%] from-blue-300 via-blue-500 to-blue-700 shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(0,0,0,0.15)_inset,0px_-2px_2px_0px_rgba(0,0,0,0.15)_inset] border border-blue-500'>
                       <div className={`absolute flex inset-[1px] top-[1px] h-1/2 items-center justify-center bg-gradient-to-b from-white/60 to-white/10 rounded-tl-[8px] rounded-[2px] z-10`}></div>
-                      <ImageSquare size={16} weight="fill" className='text-white mt-[1px] mx-1' />
+                      <IconPhotoFilled size={16} className='text-white mt-[1px] mx-1' />
                     </div>
                     
                   </div>
@@ -298,7 +298,7 @@ export default function FractionsProject() {
                 className="group text-white font-semibold w-full md:w-[240px] h-[36px] bg-gradient-to-b from-slate-700 via-slate-500 to-slate-300 border border-slate-500 rounded-full shadow-[0px_2px_2px_-1px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:shadow-[0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_8px_8px_-4px_rgba(0,0,0,0.25),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] hover:border-slate-700 active:shadow-[0px_4px_4px_-2px_rgba(0,0,0,0.25),0px_8px_8px_-4px_rgba(0,0,0,0.0),0px_4px_8px_1px_rgba(10,10,10,0.15)_inset,0px_-2px_2px_0px_rgba(10,10,10,0.15)_inset] transition-all duration-300 relative overflow-hidden active:bg-gradient-to-b active:from-slate-800 active:via-slate-600 active:to-slate-400 cursor-pointer flex items-center justify-center gap-2"
                 onClick={() => window.open(project.github, '_blank')}
               >
-                <GithubLogo size={20} weight="fill" />
+                <IconGithub size={20} />
                 GitHub Repository
                 <div className="absolute inset-2 top-0.5 h-1/2 rounded-t-[12px] rounded-b-[4px] bg-gradient-to-b from-white/70 group-active:from-white/30" />
               </Button>
@@ -306,7 +306,7 @@ export default function FractionsProject() {
                 className="group text-white font-semibold w-full md:w-[240px] h-[36px] bg-gradient-to-b from-blue-700 via-blue-500 to-blue-300 border border-blue-500 rounded-full shadow-[0px_2px_2px_-1px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.0),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:shadow-[0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.25),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] hover:border-blue-700 active:shadow-[0px_4px_4px_-2px_rgba(28,57,142,0.25),0px_8px_8px_-4px_rgba(28,57,142,0.0),0px_4px_8px_1px_rgba(28,57,142,0.25)_inset,0px_-2px_2px_0px_rgba(28,57,142,0.25)_inset] transition-all duration-300 relative overflow-hidden active:bg-gradient-to-b active:from-blue-800 active:via-blue-600 active:to-blue-400 cursor-pointer flex items-center justify-center gap-2"
                 onClick={() => window.open(project.live, '_blank')}
               >
-                <Globe size={20} weight="fill" />
+                <IconGlobe size={20} />
                 Live Demo
                 <div className="absolute inset-2 top-0.5 h-1/2 rounded-t-[12px] rounded-b-[4px] bg-gradient-to-b from-white/70 group-active:from-white/30" />
               </Button>
