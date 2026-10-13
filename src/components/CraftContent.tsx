@@ -8,11 +8,18 @@ import dynamic from 'next/dynamic';
 import { startLayoutTransition, startZoomTransition } from '@/lib/routeTransition';
 import LazyVideo from '@/components/LazyVideo';
 import ImageToolbar from '@/components/craft/ImageToolbar';
+import TurfWaitlist from '@/components/craft/TurfWaitlist';
 import CraftStage from '@/components/craft/CraftStage';
-import { IconArrowsExpandDiagonal3 } from 'nucleo-micro-bold-essential';
+import VideoPlayer from '@/components/craft/VideoPlayer';
+import { IconArrowsExpandDiagonal3, IconArrowUpRight } from 'nucleo-micro-bold-essential';
 
 // Built prototypes stay out of the page until someone opens one
 const ModalGrid = dynamic(() => import('@/components/ModalGrid'), { ssr: false });
+// Cameo draws itself in the browser, and its package stays out of the page's first load
+const CameoFaces = dynamic(() => import('@/components/craft/CameoFaces'), { ssr: false });
+// The shapes tile is a drawing that plays by itself; the playground it opens loads when asked for
+const CameoShapeBlueprint = dynamic(() => import('@/components/craft/CameoShapeBlueprint'), { ssr: false });
+const CameoShape = dynamic(() => import('@/components/craft/CameoShape'), { ssr: false });
 
 // A craft piece is one of three kinds of card on the same frame:
 //   look: a still or a short loop. Nothing to do but look.
@@ -27,6 +34,8 @@ type Media =
 type Piece = { title: string; ratio: number } & Media & {
     /** Makes this an "open" card: the button's label, and what the stage shows */
     open?: { label: string; render?: () => React.ReactNode; /** Fetches what `render` needs ahead of time */ preload?: () => void };
+    /** Somewhere the piece lives outside the portfolio: its docs, its site */
+    link?: { label: string; href: string };
   };
 
 const video = (title: string, file: string, ratio: number, folder = '/videos'): Piece => ({
@@ -49,8 +58,23 @@ const walkthrough = (piece: Piece): Piece => ({ ...piece, open: { label: 'Watch 
 
 // Every craft piece, in reading order. `ratio` is width / height of the media.
 const pieces: Piece[] = [
-  video('Turf waitlist', 'Turf-Waitlist-animation', 2740 / 2160),
+  { media: 'live', title: 'Turf waitlist', ratio: 2740 / 2160, render: () => <TurfWaitlist /> },
   { media: 'live', title: 'Image toolbar', ratio: 1496 / 1080, render: () => <ImageToolbar /> },
+  {
+    media: 'live',
+    title: 'Cameo',
+    ratio: 4 / 3,
+    render: () => <CameoFaces />,
+    link: { label: 'Visit the Cameo site', href: 'https://usecameo.vercel.app/' },
+  },
+  {
+    media: 'live',
+    title: 'Cameo shapes',
+    ratio: 4 / 3,
+    render: () => <CameoShapeBlueprint />,
+    open: { label: 'Open the shape playground', render: () => <CameoShape />, preload: () => void import('@/components/craft/CameoShape') },
+    link: { label: 'Make your own on the Cameo site', href: 'https://usecameo.vercel.app/' },
+  },
   video('Bento portfolio', 'Bento-Portfolio', 2862 / 2160),
   walkthrough(video('Themed navbar', 'Navbar-themes', 3096 / 2160)),
   video('Mobile tab bar', 'Mobile-Navbar', 1040 / 1000),
@@ -127,16 +151,28 @@ function CraftTile({ piece, sizes, onOpen }: { piece: Piece; sizes: string; onOp
           <span className="shrink-0 text-stone-400">{kindOf(piece)}</span>
         </span>
 
-        {piece.media === 'live' && (
-          <span className="flex shrink-0 items-center gap-1.5 pr-2 text-stone-500">
+        {piece.media === 'live' && !label && (
+          <span className={`ml-auto flex shrink-0 items-center gap-1.5 text-stone-500 ${piece.link ? '' : 'pr-2'}`}>
             <span aria-hidden className="size-2 rounded-full bg-blue-500 shadow-[0_0_0_1px_var(--color-blue-700),inset_0_1px_0_rgba(255,255,255,0.6)]" />
             Try it
           </span>
         )}
         {label && (
-          <button type="button" onClick={openIt} aria-label={label} title={label} className="aqua aqua-round aqua-to-blue shrink-0 size-7">
+          <button type="button" onClick={openIt} aria-label={label} title={label} className="aqua aqua-round aqua-to-blue ml-auto shrink-0 size-7">
             <IconArrowsExpandDiagonal3 size={13} />
           </button>
+        )}
+        {piece.link && (
+          <a
+            href={piece.link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={piece.link.label}
+            title={piece.link.label}
+            className="aqua aqua-round aqua-to-blue shrink-0 size-7"
+          >
+            <IconArrowUpRight size={13} />
+          </a>
         )}
       </figcaption>
     </figure>
@@ -226,7 +262,7 @@ export function CraftWall() {
             content: opened.open?.render ? (
               opened.open.render()
             ) : opened.media === 'video' ? (
-              <video src={opened.src} poster={opened.poster} controls autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-contain bg-black" />
+              <VideoPlayer src={opened.src} poster={opened.poster} />
             ) : null,
           }
         }
