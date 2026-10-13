@@ -2,6 +2,8 @@
 
 import React from 'react';
 import MediaCard from '@/components/MediaCard';
+import FrameworkFigure from '@/components/figures/framework/FrameworkFigure';
+import QScoreFigure from '@/components/figures/qscore/QScoreFigure';
 import { CaseStudy, Hero, Section, Points, PullQuote, Meta } from '@/components/case-study/CaseStudy';
 
 // Import the project data
@@ -145,6 +147,7 @@ export default function QuinnProject() {
 
       <div className="flex flex-col gap-4">
         <h3 className="text-header-2 pt-4">Progressive Complexity Framework</h3>
+        <FrameworkFigure />
         <Points>
           <li>
             <span className="font-semibold">Search</span> &rarr; Natural language queries creating temporary contact tables
@@ -228,6 +231,7 @@ export default function QuinnProject() {
         <div className="flex flex-col gap-4">
         <h3 className="text-header-2 pt-4">Contextual Q-Scores</h3>
           <p className="text-body text-pretty">The same person gets different Q-scores based on your current business objective. Sambhav Anand shows &ldquo;High Q-Score&rdquo; for hiring contexts because Fulcrum recently posted engineering roles, but &ldquo;Low Q-Score&rdquo; for fundraising contexts since they just completed their Series A.</p>
+          <QScoreFigure />
           <MediaCard
             mediaType="image"
             src="/images/projects/Quinn/Q-Score.png"

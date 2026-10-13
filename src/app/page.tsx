@@ -194,7 +194,7 @@ export default function Home() {
             <div className="w-full flex flex-col gap-20 items-start">
                   
               <ProjectThumbnailCard name="Quinn" link="/projects/quinn">
-                <div className="text-body text-pretty">AI-native relationship intelligence product focused on how executives manage and maintain their professional networks. I led the 10–12 month product vision, shaping the system&apos;s foundations, long-term evolution, and growth direction.</div>
+                <div className="text-body text-pretty">AI-native relationship intelligence product focused on how executives manage and maintain their professional networks. Over three months, I shaped the product vision for the next 10–12 months: the system&apos;s foundations, long-term evolution, and growth direction.</div>
                 <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/HalftoneDots.webp')] bg-cover bg-center surface" style={{ viewTransitionName: 'project-quinn' }}>
                   <Image src="/images/projects/Quinn/Masterlist.webp" alt="Quinn" fill className="object-cover object-center" />
                 </div>

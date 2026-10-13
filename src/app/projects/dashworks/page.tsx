@@ -4,6 +4,7 @@ import React from 'react';
 import ModalGrid from '@/components/ModalGrid';
 import CompareSlider from '@/components/case-study/CompareSlider';
 import MediaCard from '@/components/MediaCard';
+import AnswerFigure from '@/components/figures/dashworks/AnswerFigure';
 import { CaseStudy, Hero, Meta, Section, Points } from '@/components/case-study/CaseStudy';
 
 // Import the project data
@@ -48,7 +49,7 @@ export default function DashworksProject() {
       <Section id="research" nav="Research" title="Gaining technical knowledge to drive impactful design decisions">
         <p className="text-body">Designing for complex enterprise tools requires a deep understanding of both the product and its technical foundation. During my internship at Dashworks, I conducted a comprehensive product audit, analyzing its entire ecosystem to identify areas for improvement. This process helped bridge the gap between design and engineering, ensuring that our solutions were both user-friendly and technically feasible.</p>
         <MediaCard mediaType="image" src="/images/projects/Dashworks/Audit.png" aspectClass="aspect-4/3" />
-        <MediaCard mediaType="image" src="/images/projects/Dashworks/How-Dashworks-works.png" aspectClass="aspect-4/3" />
+        <AnswerFigure />
       </Section>
 
       <Section id="design-system" nav="Design system" title="Design System">

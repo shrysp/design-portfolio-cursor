@@ -1,0 +1,37 @@
+/* The Search, Groups, Playbooks bench's own parts. The shared look is in ../figure.css. */
+
+/* A station's name, engraved on the plate; the one in play lights */
+.framework .fw-name {
+  fill: var(--anatomy-lo);
+  letter-spacing: 0.08em;
+  transition: fill 240ms ease-out;
+}
+
+.framework .fw-name[data-on] {
+  fill: var(--anatomy-lit);
+}
+
+/* What is written on the query and goal cards */
+.framework .fw-slip {
+  fill: var(--anatomy-lit);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.framework .fw-link {
+  stroke-width: 1.3px;
+}
+
+.framework .fw-link[data-flow] {
+  stroke: var(--anatomy-lit);
+}
+
+/* The feeder's lamp comes on while the group is adding a card */
+.framework .fw-lamp circle {
+  transition: fill 240ms ease-out, opacity 240ms ease-out;
+}
+
+.framework .fw-lamp[data-on] circle {
+  fill: var(--anatomy-lit);
+  opacity: 1;
+}
