@@ -139,6 +139,7 @@ export default function StickyFooter() {
 
   return (
       <motion.div
+        data-site-dock
         className="sticky bottom-0 w-full flex flex-col items-center gap-3 px-4 pt-6 pb-4 z-50 pointer-events-none will-change-transform"
         initial={{ y: 0 }}
         animate={{ 

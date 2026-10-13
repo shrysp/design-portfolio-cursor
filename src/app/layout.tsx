@@ -21,8 +21,16 @@ const indieFlower = Indie_Flower({
   display: "swap",
 });
 
+// Where the site lives, so share previews can point at full image addresses.
+// Vercel supplies the production domain; set NEXT_PUBLIC_SITE_URL to override it.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
+
 export const metadata: Metadata = {
-  title: "Shreyas Patil | Product Designer",
+  metadataBase: new URL(siteUrl),
+  // A page that names itself ("Quinn") gets the name appended
+  title: { default: "Shreyas Patil | Product Designer", template: "%s | Shreyas Patil" },
   description: "Shreyas is a product designer with a passion for creating user-friendly and intuitive designs.",
   keywords: ["portfolio", "design", "Shreyas Patil", "Product Designer", "next.js", "tailwind css", "framer motion", "web development"],
   authors: [{ name: "Shreyas Patil" }],

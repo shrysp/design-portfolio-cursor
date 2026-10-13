@@ -536,6 +536,11 @@ body {
   }
 }
 
+/* The 404 page stands alone: no dock, so there is nothing to scroll to */
+body:has([data-not-found]) [data-site-dock] {
+  display: none;
+}
+
 /* The dock slides down out of the way as a figure opens, the reverse of how
    it slides back up afterwards. It travels as its own piece, above the dark
    backdrop; otherwise it would just dim out with the rest of the page. */
