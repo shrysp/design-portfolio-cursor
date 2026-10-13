@@ -156,6 +156,7 @@ export default function StickyFooter() {
           {showProjectNav && (
             <Glass
               {...glass}
+              data-project-switcher
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 12 }}

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import ProjectHeader from "@/components/ProjectHeader";
+import CaseStudyEnd from "./CaseStudyEnd";
 
 /* The pieces a case study is written with. A page is a <CaseStudy> holding
    <Section>s; inside a section go plain paragraphs, <SubSection>, <Points>,
@@ -21,6 +22,7 @@ export function CaseStudy({ title, children }: CaseStudyProps) {
       <main className="w-full max-w-(--column) flex flex-col gap-16 md:pt-24 pt-8 md:px-0 px-4 pb-24">
         <ProjectHeader title={title} />
         {children}
+        <CaseStudyEnd />
       </main>
     </div>
   );

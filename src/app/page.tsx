@@ -7,30 +7,10 @@ import ProjectThumbnailCard from '@/components/ProjectThumbnailCard';
 import { CraftWall, craftCount } from '@/components/CraftContent';
 import StickOnSticker, { STICK_ON_DEFAULTS } from '@/components/StickOnSticker';
 import HandNote from '@/components/HandNote';
+import SectionTitle from '@/components/SectionTitle';
 import { ExpandableJournal } from '@/components/journal/ExpandableJournal';
 import { clearReturningFrom, peekReturningFrom } from '@/lib/routeTransition';
 
-
-// A section's title, ruled off like a heading in a notebook: a gel bead (the
-// one that bullets the case study lists), the name, a dashed guide out to the
-// column's edge (as on the pinned callouts) and how many things follow.
-function SectionTitle({ children, count, transitionName }: { children: React.ReactNode; count: number; transitionName?: string }) {
-  return (
-    <div className="text-subheader flex items-center gap-2.5 text-stone-400!">
-      <span
-        aria-hidden
-        className="size-[7px] shrink-0 rounded-full bg-radial-[at_50%_80%] from-stone-200 to-stone-400 shadow-[0_0_0_1px_var(--color-stone-400),inset_0_1.5px_0.5px_rgba(255,255,255,0.85),0_1px_1px_rgba(0,0,0,0.15)]"
-      />
-      <span className="inline-block shrink-0" style={transitionName ? { viewTransitionName: transitionName } : undefined}>
-        {children}
-      </span>
-      <span aria-hidden className="flex-1 border-t border-dashed border-stone-300/70" />
-      <span className="shrink-0 tabular-nums" aria-label={`${count} items`}>
-        {String(count).padStart(2, '0')}
-      </span>
-    </div>
-  );
-}
 
 // ── Animation timeline ──
 // Stickers are stuck on one by one, `stagger` apart. The journal appears as the

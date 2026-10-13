@@ -4,6 +4,7 @@ import "./globals.css";
 import StickyFooter from "@/components/StickyFooter";
 import MotionProvider from "@/components/MotionProvider";
 import DevFeedback from "@/components/DevFeedback";
+import DevDials from "@/components/DevDials";
 import RouteTransitionSettler from "@/components/RouteTransitionSettler";
 
 
@@ -71,6 +72,7 @@ export default function RootLayout({
         className={`${geist.variable} ${indieFlower.variable} antialiased bg-stone-50 text-stone-900 overflow-x-clip`}
       >
         <DevFeedback />
+        <DevDials />
         <RouteTransitionSettler />
         <MotionProvider>
           {children}

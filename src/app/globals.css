@@ -536,6 +536,12 @@ body {
   }
 }
 
+/* PROTOTYPE (see CaseStudyEnd): a case study that ends on a next-project card
+   doesn't also need the dock's row of project buttons */
+:root[data-case-end="card"] [data-project-switcher] {
+  display: none;
+}
+
 /* The 404 page stands alone: no dock, so there is nothing to scroll to */
 body:has([data-not-found]) [data-site-dock] {
   display: none;
