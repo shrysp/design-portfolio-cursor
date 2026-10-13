@@ -197,7 +197,7 @@ export default function Home() {
                   
               <ProjectThumbnailCard name="Cameo" link="/projects/cameo">
                 <div className="text-body text-pretty">An expressive little face for AI interfaces, published as an npm package. It blinks, follows the cursor, and listens, thinks and speaks along with whatever your product is doing. I designed and built it, and used it to make a spoken tour of my own work.</div>
-                <div className="relative w-full aspect-4/3 mt-4 bg-stone-100 rounded-2xl border border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.05),0_4px_4px_-2px_rgba(0,0,0,0.07)] overflow-hidden">
+                <div className="relative w-full aspect-4/3 mt-4 bg-stone-100 surface" style={{ viewTransitionName: 'project-cameo' }}>
                   <CameoCharacters names={['PIP']} size={200} />
                 </div>
               </ProjectThumbnailCard>

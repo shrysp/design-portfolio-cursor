@@ -4,12 +4,18 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import ProjectThumbnailCard from "@/components/ProjectThumbnailCard";
 import SectionTitle from "@/components/SectionTitle";
+import CameoCharacters from "@/components/cameo/CameoCharacters";
 import { projectMeta, type ProjectSlug } from "@/lib/projectMeta";
 
 const slugs = Object.keys(projectMeta) as ProjectSlug[];
 
 // The picture's height as a share of its width: the top of the 4:3 thumbnail
 const PICTURE_HEIGHT = 0.32;
+
+// Projects shown running in place of their picture, as in their own hero
+const liveHeroes: Partial<Record<ProjectSlug, React.ReactNode>> = {
+  cameo: <CameoCharacters names={["JADE", "NOVA", "PIP", "TIDE"]} size={96} />,
+};
 
 // How a case study ends: the next project as a card, the same one as on the
 // home page, which opens with the same morph. The dock's row of project
@@ -23,6 +29,7 @@ export default function CaseStudyEnd() {
   const nextIndex = (index + 1) % slugs.length;
   const nextSlug = slugs[nextIndex];
   const next = projectMeta[nextSlug];
+  const live = liveHeroes[nextSlug];
 
   return (
     <nav aria-label="Next project" className="column flex flex-col gap-8 mt-8">
@@ -39,7 +46,7 @@ export default function CaseStudyEnd() {
             viewTransitionName: `project-${nextSlug}`,
           }}
         >
-          <Image src={next.hero} alt={next.title} fill sizes="(min-width: 672px) 672px, 100vw" className="object-cover object-top" />
+          {live ?? <Image src={next.hero} alt={next.title} fill sizes="(min-width: 672px) 672px, 100vw" className="object-cover object-top" />}
         </div>
       </ProjectThumbnailCard>
     </nav>

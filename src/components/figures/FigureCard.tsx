@@ -8,6 +8,8 @@ interface FigureCardProps {
   className: string; // the figure's own class, for its scoped styles
   ratio: number; // the drawing's width over its height, to hold its place before it is drawn
   caption?: React.ReactNode; // if provided, renders the caption bar
+  above?: React.ReactNode; // a figure's own controls, inside the frame over the drawing
+  below?: React.ReactNode; // and what it has to say for itself, inside the frame under it
   children: React.ReactNode;
 }
 
@@ -20,7 +22,7 @@ const subscribe = () => () => {};
  * and cosines rounded to a tenth, and Node and the browser disagree on the
  * last digit often enough that a server-drawn figure fails to hydrate.
  */
-export default function FigureCard({ className, ratio, caption, children }: FigureCardProps) {
+export default function FigureCard({ className, ratio, caption, above, below, children }: FigureCardProps) {
   const mounted = React.useSyncExternalStore(
     subscribe,
     () => true,
@@ -30,7 +32,9 @@ export default function FigureCard({ className, ratio, caption, children }: Figu
   return (
     <figure className={`iso fig ${className} isolate relative w-full surface bg-stone-100 -space-y-2 my-3`} data-theme="light">
       <div className="isolate relative rounded-[calc(var(--surface-radius)-1px)] bg-white overflow-hidden outline outline-stone-200 px-2 py-5 md:px-5 md:py-7">
+        {above}
         <div style={{ aspectRatio: ratio }}>{mounted ? children : null}</div>
+        {below}
       </div>
       {caption ? (
         <figcaption className="w-full flex items-center justify-between px-4 py-3 pt-4">

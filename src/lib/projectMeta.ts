@@ -5,6 +5,15 @@ import type { Metadata } from "next";
 // `npm run og:generate` (scripts/generate-og-images.mjs), which reads `hero`
 // and `background` from here.
 export const projectMeta = {
+  // Cameo's hero is the package running, not a picture. `hero` is a still of
+  // it for the share image; the pages draw the live characters instead.
+  cameo: {
+    title: "Cameo",
+    description:
+      "An expressive little face for AI interfaces, published as an npm package. It blinks, follows the cursor, and listens, thinks and speaks along with your product.",
+    hero: "/images/projects/Cameo/Cameo-Hero.webp",
+    background: "/images/projects/thumbnails/Cameo-Thumbnail-Background.webp",
+  },
   quinn: {
     title: "Quinn",
     description:

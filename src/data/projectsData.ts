@@ -7,7 +7,7 @@ export const projectsData = [
     ],
     images: [],
     role: "Design and engineering",
-    timeline: "2026",
+    timeline: "2025 – 2026",
   },
   {
     title: "Quinn",

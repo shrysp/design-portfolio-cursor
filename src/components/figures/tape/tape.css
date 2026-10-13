@@ -1,0 +1,130 @@
+/* The tape deck's own parts. The shared look is in ../figure.css. */
+
+/* What is engraved on the heads and under the reader's lamps */
+.tape .tp-name {
+  fill: var(--anatomy-lo);
+  letter-spacing: 0.08em;
+  transition: fill 200ms ease-out;
+}
+
+.tape .tp-name[data-on] {
+  fill: var(--anatomy-lit);
+}
+
+/* The tape: its face is paper, and the voice is written on it */
+.tape .tp-wave {
+  stroke-width: 1px;
+}
+
+.tape .tp-sentence {
+  stroke-width: 1.6px;
+  transition: stroke 200ms ease-out;
+}
+
+.tape .tp-ribbon {
+  fill: var(--anatomy-face);
+  stroke: none;
+}
+
+/* A line shows lit only while something is travelling along it */
+.tape .tp-wire {
+  stroke-width: 1.3px;
+}
+
+.tape .tp-flow {
+  stroke-width: 1.6px;
+  opacity: 0;
+  transition: opacity 160ms ease-out;
+}
+
+.tape .tp-flow[data-flow] {
+  opacity: 1;
+}
+
+/* Lamps: a head's while it is working, and the reader's one for the mood it read */
+.tape .tp-lamp circle {
+  transition: fill 160ms ease-out, opacity 160ms ease-out;
+}
+
+.tape .tp-lamp[data-on] circle {
+  fill: var(--anatomy-lit);
+  opacity: 1;
+}
+
+/* The character's screen and what is on it. Colour is the subject here: the
+   face takes the colour of the mood it was given, as the real one does. */
+.tape .tp-face {
+  --face-ink: var(--anatomy-lit);
+  --face-glass: var(--anatomy-lit-top);
+}
+
+.tape .tp-face[data-pose="error"],
+.tape .tp-face[data-pose="angry"] {
+  --face-ink: var(--color-red-600);
+  --face-glass: var(--color-red-50);
+}
+
+.tape .tp-face[data-pose="starstruck"] {
+  --face-ink: var(--color-amber-600);
+  --face-glass: var(--color-amber-50);
+}
+
+.tape .tp-face[data-pose="sad"] {
+  --face-ink: var(--color-indigo-500);
+  --face-glass: var(--color-indigo-50);
+}
+
+.tape .tp-bezel {
+  fill: var(--anatomy-shade-1);
+  stroke: var(--anatomy-mid);
+  stroke-width: var(--anatomy-weight);
+}
+
+.tape .tp-screen {
+  fill: var(--face-glass);
+  stroke: var(--face-ink);
+  stroke-width: 1px;
+  transition: fill 260ms ease-out, stroke 260ms ease-out;
+}
+
+.tape .tp-eye {
+  fill: var(--face-ink);
+  transition: fill 260ms ease-out;
+}
+
+.tape .tp-counter {
+  fill: var(--anatomy-mid);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The numbered markers: fixed over the three places a sentence passes, each
+   lighting once the sentence has got that far */
+.tape .tp-mark,
+.tape .tp-step-mark {
+  display: grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--color-stone-300);
+  color: var(--color-stone-500);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transition: background-color 200ms ease-out, color 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.tape .tp-mark {
+  position: absolute;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+.tape .tp-mark[data-on],
+.tape [data-done] > .tp-step-mark {
+  background: var(--color-blue-500);
+  box-shadow: inset 0 0 0 1px var(--color-blue-700);
+  color: #fff;
+}

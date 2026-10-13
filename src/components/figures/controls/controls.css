@@ -1,0 +1,63 @@
+/* The control box's own parts. The shared look is in ../figure.css. */
+
+/* What is engraved by the lever's stops, on the keys and under the events' lamps */
+.controls .ct-name {
+  fill: var(--anatomy-lo);
+  letter-spacing: 0.08em;
+  transition: fill 200ms ease-out;
+}
+
+.controls .ct-name[data-on] {
+  fill: var(--anatomy-lit);
+}
+
+/* A line shows lit only while something is travelling along it */
+.controls .ct-wire {
+  stroke-width: 1.3px;
+}
+
+.controls .ct-flow {
+  stroke-width: 1.6px;
+  opacity: 0;
+  transition: opacity 160ms ease-out;
+}
+
+.controls .ct-flow[data-flow] {
+  opacity: 1;
+}
+
+.controls .ct-lamp circle {
+  transition: fill 160ms ease-out, opacity 160ms ease-out;
+}
+
+.controls .ct-lamp[data-on] circle {
+  fill: var(--anatomy-lit);
+  opacity: 1;
+}
+
+/* What the pen has drawn */
+.controls .ct-trace {
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+}
+
+/* A visitor's hand: each control on the drawing can be pressed where it is */
+.controls .ct-touch {
+  position: absolute;
+  width: 1.6rem;
+  height: 1.6rem;
+  translate: -50% -50%;
+  border-radius: 999px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.controls .ct-touch:hover {
+  background: rgb(59 130 246 / 0.1);
+}
+
+.controls .ct-touch:focus-visible {
+  outline: 1px solid var(--anatomy-muted);
+  outline-offset: 1px;
+}

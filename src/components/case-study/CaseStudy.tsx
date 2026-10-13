@@ -31,10 +31,12 @@ export function CaseStudy({ title, children }: CaseStudyProps) {
 interface HeroProps {
   /** The project's slug, shared with its card on the home page */
   slug: string;
-  src: string;
+  src?: string;
   /** The backdrop behind the image, as on the home page card */
-  background: string;
-  alt: string;
+  background?: string;
+  alt?: string;
+  /** Something live in place of the image, for a project that is better shown running */
+  media?: ReactNode;
   caption?: string;
   children?: ReactNode;
 }
@@ -42,14 +44,15 @@ interface HeroProps {
 // The opening image, framed exactly like the project's card on the home page
 // so that card can morph into it. Nothing here animates in: it has to be on
 // screen the moment the page arrives. Children (the Meta row) sit beneath it.
-export function Hero({ slug, src, background, alt, caption, children }: HeroProps) {
+export function Hero({ slug, src, background, alt = "", media, caption, children }: HeroProps) {
   return (
     <figure className="w-full flex flex-col gap-6">
       <div
         className="relative w-full aspect-[4/3] surface bg-stone-100 bg-cover bg-center"
-        style={{ backgroundImage: `url("${background}")`, viewTransitionName: `project-${slug}` }}
+        style={{ backgroundImage: background && `url("${background}")`, viewTransitionName: `project-${slug}` }}
       >
-        <Image src={src} alt={alt} fill priority sizes="(min-width: 672px) 672px, 100vw" className="object-cover" />
+        {src && <Image src={src} alt={alt} fill priority sizes="(min-width: 672px) 672px, 100vw" className="object-cover" />}
+        {media}
       </div>
       {caption && <figcaption className="text-caption -mt-2">{caption}</figcaption>}
       {children}

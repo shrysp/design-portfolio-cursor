@@ -1,0 +1,44 @@
+/* The character on a bench. Colour is the subject on its screen: the face
+   takes the colour of the mood it is in, as the real one does. */
+.fig .dv-face {
+  --face-ink: var(--anatomy-lit);
+  --face-glass: var(--anatomy-lit-top);
+}
+
+.fig .dv-face[data-pose="error"],
+.fig .dv-face[data-pose="angry"] {
+  --face-ink: var(--color-red-600);
+  --face-glass: var(--color-red-50);
+}
+
+.fig .dv-face[data-pose="starstruck"],
+.fig .dv-face[data-pose="happy"],
+.fig .dv-face[data-pose="excited"] {
+  --face-ink: var(--color-amber-600);
+  --face-glass: var(--color-amber-50);
+}
+
+.fig .dv-face[data-pose="sad"],
+.fig .dv-face[data-pose="sleeping"],
+.fig .dv-face[data-pose="drowsy"] {
+  --face-ink: var(--color-indigo-500);
+  --face-glass: var(--color-indigo-50);
+}
+
+.fig .dv-bezel {
+  fill: var(--anatomy-shade-1);
+  stroke: var(--anatomy-mid);
+  stroke-width: var(--anatomy-weight);
+}
+
+.fig .dv-screen {
+  fill: var(--face-glass);
+  stroke: var(--face-ink);
+  stroke-width: 1px;
+  transition: fill 260ms ease-out, stroke 260ms ease-out;
+}
+
+.fig .dv-eye {
+  fill: var(--face-ink);
+  transition: fill 260ms ease-out;
+}

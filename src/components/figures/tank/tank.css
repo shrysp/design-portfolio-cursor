@@ -1,0 +1,92 @@
+/* The header tank's own parts. The shared look is in ../figure.css. */
+
+.tank .tk-name {
+  fill: var(--anatomy-lo);
+  letter-spacing: 0.08em;
+  transition: fill 200ms ease-out;
+}
+
+.tank .tk-name[data-on] {
+  fill: var(--anatomy-lit);
+}
+
+/* What is drawn on the tank's face keeps its line weight however the face is turned */
+.tank .tk-face * {
+  vector-effect: non-scaling-stroke;
+}
+
+.tank .tk-glass {
+  fill: var(--anatomy-card);
+  stroke: var(--anatomy-mid);
+  stroke-width: 1px;
+}
+
+.tank .tk-water {
+  fill: var(--color-blue-200);
+}
+
+.tank .tk-surface {
+  stroke: var(--anatomy-lit);
+  stroke-width: 1.2px;
+  fill: none;
+}
+
+.tank .tk-float {
+  fill: var(--anatomy-card);
+  stroke: var(--anatomy-lit);
+  stroke-width: 1px;
+}
+
+.tank .tk-pointer {
+  stroke: var(--anatomy-lit);
+  stroke-width: 1px;
+  fill: none;
+}
+
+.tank .tk-pointer-end {
+  fill: var(--anatomy-lit);
+}
+
+.tank .tk-tick {
+  stroke: var(--anatomy-mid);
+  stroke-width: 0.75px;
+  fill: none;
+}
+
+.tank .tk-mark {
+  stroke: var(--anatomy-lo);
+  stroke-width: 0.75px;
+  fill: none;
+}
+
+.tank .tk-wire {
+  stroke-width: 1.3px;
+}
+
+.tank .tk-flow {
+  stroke-width: 1.6px;
+  opacity: 0;
+  transition: opacity 160ms ease-out;
+}
+
+.tank .tk-flow[data-flow] {
+  opacity: 1;
+}
+
+.tank .tk-lamp circle {
+  transition: fill 160ms ease-out, opacity 160ms ease-out;
+}
+
+.tank .tk-lamp[data-on] circle {
+  fill: var(--anatomy-lit);
+  opacity: 1;
+}
+
+.tank .tk-drop {
+  fill: var(--color-blue-400);
+}
+
+.tank .tk-trace {
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+}

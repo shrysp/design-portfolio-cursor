@@ -1,0 +1,55 @@
+/* The program disc's own parts. The shared look is in ../figure.css. */
+
+.disc .dc-name {
+  fill: var(--anatomy-lo);
+  letter-spacing: 0.08em;
+  transition: fill 200ms ease-out;
+}
+
+.disc .dc-name[data-on] {
+  fill: var(--anatomy-lit);
+}
+
+/* What is cut into the disc */
+.disc .dc-track {
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+}
+
+.disc .dc-start {
+  stroke-width: 1.2px;
+}
+
+.disc .dc-wire {
+  stroke-width: 1.3px;
+}
+
+.disc .dc-lamp circle {
+  transition: fill 160ms ease-out, opacity 160ms ease-out;
+}
+
+.disc .dc-lamp[data-on] circle {
+  fill: var(--anatomy-lit);
+  opacity: 1;
+}
+
+/* A visitor's hand: each switch can be pressed where it is drawn */
+.disc .dc-touch {
+  position: absolute;
+  width: 1.6rem;
+  height: 1.6rem;
+  translate: -50% -50%;
+  border-radius: 999px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.disc .dc-touch:hover {
+  background: rgb(59 130 246 / 0.1);
+}
+
+.disc .dc-touch:focus-visible {
+  outline: 1px solid var(--anatomy-muted);
+  outline-offset: 1px;
+}
