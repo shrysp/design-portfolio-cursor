@@ -172,7 +172,7 @@ export default function QuinnProject() {
       
       
 
-      <Section id="execution" nav="Execution" title="Design Execution: Progressive Complexity Framework">
+      <Section id="execution" nav="Execution" title="Design Execution: The Three Layers">
         <div className="flex flex-col gap-4">
           <h3 className="text-header-2 pt-4">Layer 1: Queryable Relationships + Natural Language Intelligence</h3>
           <MediaCard
