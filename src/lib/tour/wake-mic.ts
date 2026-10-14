@@ -26,7 +26,30 @@ export type WakeMic = {
   listen: (onVoice: () => void) => void;
   /** Lets go of the microphone. */
   close: () => void;
+  /** No microphone behind it (createSilentMic): the visitor is typing. */
+  silent?: boolean;
 };
+
+/**
+ * A stand-in for a visitor who types: a session still needs an audio track to
+ * send, and this one carries silence, so starting by typing never asks the
+ * browser for the microphone. Swapped for a real one if they start talking
+ * (LiveSession.replaceMicrophone).
+ */
+export function createSilentMic(): WakeMic {
+  const context = new AudioContext();
+  const silence = context.createMediaStreamDestination().stream;
+  return {
+    raw: silence,
+    send: silence,
+    silent: true,
+    pass() {},
+    listen() {},
+    close() {
+      void context.close();
+    },
+  };
+}
 
 const WORKLET = '/tour/wake-worklet.js';
 

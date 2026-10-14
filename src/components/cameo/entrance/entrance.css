@@ -1,0 +1,561 @@
+/*
+ * The way into the tour. Its colours are the tour's dark room (tour.css,
+ * `.tour-stage--dark`), so the page that follows begins where this ends.
+ */
+.entrance {
+  --entrance-bg: #0b0d10;
+  --entrance-panel: rgb(22 26 32 / 0.92);
+  --entrance-ink: #eef1f4;
+  --entrance-soft: rgb(238 241 244 / 0.72);
+  --entrance-faint: rgb(238 241 244 / 0.48);
+  --entrance-line: rgb(255 255 255 / 0.14);
+  --entrance-teal: #21bbab;
+  --entrance-on-teal: #06201d;
+  --entrance-error: #ff9a85;
+  --entrance-lcd: #95d06b;
+  --entrance-amber: #ffb13a;
+
+  position: fixed;
+  inset: 0;
+  /* Over the tour's stage too (9995 in tour.css): it stays up across the route change and lands there. */
+  z-index: 10000;
+  color: var(--entrance-ink);
+  color-scheme: dark;
+}
+
+/* The case study, softened behind the light — the same circle as the shader's. */
+.entrance-veil {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(14px) saturate(0.7);
+  -webkit-backdrop-filter: blur(14px) saturate(0.7);
+}
+
+.entrance-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* No WebGL: a still version of the same room, faded in whole. */
+.entrance--flat {
+  opacity: 0;
+  background:
+    radial-gradient(40% 35% at 50% 32%, rgb(126 190 80 / 0.14), transparent 70%),
+    radial-gradient(70% 60% at 50% 40%, rgb(33 187 171 / 0.08), transparent 75%),
+    var(--entrance-bg);
+}
+.entrance--flat .entrance-field {
+  display: none;
+}
+
+.entrance-pip {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  opacity: 0;
+  scale: 0.86;
+  filter: blur(12px) brightness(1.6);
+  transition:
+    opacity calc(1400ms / var(--motion, 1)) ease,
+    scale calc(1800ms / var(--motion, 1)) cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter calc(1400ms / var(--motion, 1)) ease;
+}
+.entrance-pip[data-awake='true'] {
+  opacity: 1;
+  scale: 1;
+  filter: none;
+}
+
+.entrance-card {
+  position: absolute;
+  left: 50%;
+  top: 43dvh;
+  width: min(calc(100vw - 32px), 420px);
+  translate: -50% 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity calc(700ms / var(--motion, 1)) ease,
+    translate calc(900ms / var(--motion, 1)) cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.entrance-card[data-show='true'] {
+  opacity: 1;
+  translate: -50% 0;
+  pointer-events: auto;
+}
+
+.entrance-title {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.entrance-body {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--entrance-soft);
+  text-wrap: pretty;
+}
+
+.entrance-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding-top: 10px;
+}
+
+/*
+ * The code, on an LCD set into the glass: eight cells in two fours, never more. Each cell shows its unlit segments faintly; a character lights up
+ * out of a blur as it is typed, and a paste lights in a run. While the code
+ * is checked a light passes along it; wrong, it flashes amber and shakes;
+ * right, it lights up green, left to right, on the way in.
+ */
+.entrance-lcd {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 64px;
+  max-width: 100%;
+  padding: 0 18px;
+  border-radius: 16px;
+  border: 1px solid #07090b;
+  background: linear-gradient(to bottom, #0b1507, #12210a);
+  box-shadow:
+    inset 0 2px 6px rgb(0 0 0 / 0.75),
+    inset 0 0 18px rgb(149 208 107 / 0.06),
+    0 1px 0 rgb(255 255 255 / 0.08);
+  color: var(--entrance-lcd);
+  font-family: var(--font-dot), ui-monospace, monospace;
+  font-weight: 900;
+  font-variation-settings: 'ROND' 100;
+  font-size: 32px;
+  line-height: 1;
+  cursor: text;
+  transition: box-shadow 250ms ease;
+}
+.entrance-lcd:focus-within {
+  box-shadow:
+    inset 0 2px 6px rgb(0 0 0 / 0.75),
+    inset 0 0 18px rgb(149 208 107 / 0.1),
+    0 1px 0 rgb(255 255 255 / 0.08),
+    0 0 0 2px rgb(62 115 34 / 0.9);
+}
+.entrance-lcd-dash {
+  width: 10px;
+  text-align: center;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 18px;
+  opacity: 0.35;
+}
+.entrance-lcd-cell {
+  position: relative;
+  display: grid;
+  width: 0.72em;
+  height: 1.3em;
+  place-items: center;
+}
+/*
+ * Lit character and unlit dots, one over the other, each a character's box:
+ * Doto is monospaced at 0.6em, and draws a letter in 5 × 7 dots 0.1em apart,
+ * across the first 0.5em and from 0.15em to the baseline at 0.85em of a
+ * line-height-1 box. The unlit dots are that grid, drawn faintly behind.
+ */
+.entrance-lcd-cell > span,
+.entrance-wait-ch > span {
+  grid-area: 1 / 1;
+  display: block;
+  width: 0.6em;
+  height: 1em;
+  line-height: 1;
+}
+.entrance-lcd-ghost {
+  box-sizing: border-box;
+  padding: 0.15em 0.1em 0.15em 0;
+  background: radial-gradient(circle, currentColor 0 0.036em, transparent 0.043em) 0 0 / 0.1em 0.1em;
+  background-origin: content-box;
+  background-clip: content-box;
+  opacity: 0.13;
+}
+.entrance-lcd-lit {
+  text-shadow: 0 0 8px rgb(149 208 107 / 0.6);
+  /* Out of a blur and a little bright, as phosphor catches: an ease-out, quick. */
+  animation: entrance-lcd-in calc(220ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation-delay: calc(var(--burst, 0ms) / var(--motion, 1));
+}
+@keyframes entrance-lcd-in {
+  from {
+    opacity: 0;
+    filter: blur(4px) brightness(1.8);
+    scale: 1.12;
+  }
+}
+/* The next cell to fill: an LCD's cursor, a bar under it, blinking. */
+.entrance-lcd-cell[data-caret]::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  box-shadow: 0 0 6px rgb(149 208 107 / 0.7);
+  animation: entrance-lcd-caret calc(1000ms / var(--motion, 1)) steps(1, end) infinite;
+}
+@keyframes entrance-lcd-caret {
+  50% {
+    opacity: 0;
+  }
+}
+/* Checking: a light passing along the code, cell by cell. */
+.entrance-lcd[data-state='checking'] .entrance-lcd-lit {
+  animation: entrance-lcd-scan calc(900ms / var(--motion, 1)) ease-in-out infinite;
+  animation-delay: calc(var(--i) * 55ms / var(--motion, 1));
+}
+@keyframes entrance-lcd-scan {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  35% {
+    opacity: 1;
+    text-shadow: 0 0 12px rgb(149 208 107 / 0.95);
+  }
+}
+/* Wrong: amber, like the countdown in its last minute. */
+.entrance-lcd[data-state='error'] {
+  color: var(--entrance-amber);
+}
+.entrance-lcd[data-state='error'] .entrance-lcd-lit {
+  text-shadow: 0 0 8px rgb(255 177 58 / 0.6);
+}
+/* Right: every cell lights, left to right, and stays lit on the way in. */
+.entrance-lcd[data-state='open'] .entrance-lcd-lit {
+  animation: entrance-lcd-open calc(360ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation-delay: calc(var(--i) * 40ms / var(--motion, 1));
+}
+@keyframes entrance-lcd-open {
+  50% {
+    filter: brightness(1.9);
+    text-shadow: 0 0 16px rgb(190 240 150 / 1);
+  }
+  to {
+    text-shadow: 0 0 10px rgb(149 208 107 / 0.85);
+  }
+}
+.entrance-lcd--shake {
+  animation: entrance-shake calc(380ms / var(--motion, 1)) ease-out;
+}
+@keyframes entrance-shake {
+  20% { translate: -8px 0; }
+  45% { translate: 7px 0; }
+  70% { translate: -4px 0; }
+  100% { translate: 0 0; }
+}
+/* The real input, over the cells and unseen: it takes the typing, they show it. */
+.entrance-lcd-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: 0;
+  /* 16px, or a phone zooms in on focus. */
+  font-size: 16px;
+  color: transparent;
+  caret-color: transparent;
+  cursor: text;
+}
+
+/*
+ * Buttons: the tour's own gel (tour.css, "controls"), so the way in and the
+ * tour are one set of things to press. Graphite for the way back, PIP's green,
+ * lit, for the way in.
+ */
+.entrance-btn {
+  --gel-1: #5d646d;
+  --gel-2: #2b3037;
+  --gel-3: #3b414a;
+  --gel-edge: #0b0d10;
+  --gel-ink: #eef1f4;
+  --gel-gloss: 0.42;
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  height: 46px;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  border: 1px solid var(--gel-edge);
+  background: radial-gradient(at 50% 75%, var(--gel-1), var(--gel-2), var(--gel-3));
+  padding: 0 26px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--gel-ink);
+  cursor: pointer;
+  box-shadow:
+    0 2px 3px -1px rgb(0 0 0 / 0.55),
+    inset 0 4px 8px 1px rgb(0 0 0 / 0.18),
+    inset 0 -2px 2px 0 rgb(0 0 0 / 0.2);
+  transition:
+    filter 180ms ease-out,
+    box-shadow 180ms ease-out,
+    opacity 200ms ease,
+    scale 150ms ease-out;
+}
+.entrance-btn::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  right: 3px;
+  height: 50%;
+  border-radius: 999px 999px 6px 6px;
+  background: linear-gradient(to bottom, rgb(255 255 255 / var(--gel-gloss)), rgb(255 255 255 / calc(var(--gel-gloss) * 0.15)));
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .entrance-btn:hover:not(:disabled) {
+    filter: brightness(1.12);
+  }
+}
+.entrance-btn:active:not(:disabled) {
+  scale: 0.96;
+}
+.entrance-btn:focus-visible {
+  outline: 2px solid var(--entrance-lcd);
+  outline-offset: 3px;
+}
+.entrance-btn--primary {
+  --gel-1: #bcdf9d;
+  --gel-2: #72c13f;
+  --gel-3: #82c953;
+  --gel-edge: #3e7322;
+  --gel-ink: #1d3a0b;
+  --gel-gloss: 0.7;
+  min-width: 140px;
+  justify-content: center;
+  font-weight: 600;
+  box-shadow:
+    0 2px 3px -1px rgb(0 0 0 / 0.55),
+    inset 0 4px 8px 1px rgb(0 0 0 / 0.12),
+    inset 0 -2px 2px 0 rgb(0 0 0 / 0.16),
+    0 0 22px rgb(114 193 63 / 0.35);
+}
+/* Not until there is a whole code: unlit, the gel goes grey, not just faint. */
+.entrance-btn:disabled {
+  cursor: default;
+}
+.entrance-btn--primary:disabled {
+  filter: saturate(0.25) brightness(0.8);
+  opacity: 0.6;
+  box-shadow:
+    0 2px 3px -1px rgb(0 0 0 / 0.55),
+    inset 0 4px 8px 1px rgb(0 0 0 / 0.12);
+}
+
+.entrance-error {
+  min-height: 20px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--entrance-error);
+}
+.entrance-help {
+  font-size: 13px;
+  color: var(--entrance-faint);
+}
+.entrance-help a,
+.entrance-help button {
+  color: var(--entrance-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.entrance-help button:hover {
+  color: var(--entrance-ink);
+}
+
+/*
+ * The wait for the tour page (TourEntrance, WAIT_LINES): a line on the code's
+ * LCD, where the code was. It comes up out of a blur, each new line types
+ * itself out cell by cell, and the lit cells pulse gently while it waits.
+ */
+.entrance-wait {
+  position: absolute;
+  left: 50%;
+  /* Just under PIP, where the card's title was. */
+  top: calc(43dvh + 24px);
+  translate: -50% 6px;
+  opacity: 0;
+  filter: blur(6px);
+  pointer-events: none;
+  transition:
+    opacity calc(300ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1),
+    filter calc(300ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1),
+    translate calc(300ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1);
+}
+.entrance-wait[data-show='true'] {
+  opacity: 1;
+  filter: none;
+  translate: -50% 0;
+}
+.entrance-wait-lcd {
+  display: flex;
+  gap: 2px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 1px solid #07090b;
+  background: linear-gradient(to bottom, #0b1507, #12210a);
+  box-shadow:
+    inset 0 2px 6px rgb(0 0 0 / 0.75),
+    0 1px 0 rgb(255 255 255 / 0.08);
+  color: var(--entrance-lcd);
+  font-family: var(--font-dot), ui-monospace, monospace;
+  font-weight: 900;
+  font-variation-settings: 'ROND' 100;
+  font-size: 24px;
+  line-height: 1;
+}
+.entrance-wait-ch {
+  display: grid;
+}
+.entrance-wait-lit {
+  text-shadow: 0 0 7px rgb(149 208 107 / 0.6);
+  animation:
+    entrance-lcd-in calc(220ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1) both,
+    entrance-wait-pulse calc(1400ms / var(--motion, 1)) ease-in-out infinite;
+  animation-delay:
+    calc(var(--i) * 30ms / var(--motion, 1)),
+    calc((var(--i) * 70ms + 400ms) / var(--motion, 1));
+}
+@keyframes entrance-wait-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/*
+ * An invited guest's greeting: their name, and a line on what this is.
+ * Under PIP, where the code card has its title and its line, in the same
+ * type — and their ticket prints under it (top set from its height in
+ * TourEntrance). Up out of a slight blur as PIP wakes.
+ */
+.entrance-invite-head {
+  position: absolute;
+  left: 50%;
+  top: 43dvh;
+  width: min(calc(100vw - 32px), 480px);
+  translate: -50% 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  opacity: 0;
+  filter: blur(6px);
+  pointer-events: none;
+  transition:
+    opacity calc(600ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1),
+    filter calc(600ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1),
+    translate calc(600ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1);
+}
+.entrance-invite-head[data-show='true'] {
+  opacity: 1;
+  filter: none;
+  translate: -50% 0;
+}
+.entrance-invite-short {
+  display: none;
+}
+/* A shorter screen: the same words, smaller, so the ticket still fits under them. */
+@media (max-height: 820px) {
+  .entrance-invite-head {
+    gap: 6px;
+  }
+  .entrance-invite-head .entrance-title {
+    font-size: 21px;
+  }
+  .entrance-invite-head .entrance-body {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+}
+/* Shorter still: the title and one line. */
+@media (max-height: 760px) {
+  .entrance-invite-head .entrance-title {
+    font-size: 19px;
+  }
+  .entrance-invite-long {
+    display: none;
+  }
+  .entrance-invite-short {
+    display: inline;
+  }
+}
+
+/* That the conversation is kept: centred at the foot of the screen, quiet, while the code is asked for. */
+.entrance-notice {
+  position: absolute;
+  left: 50%;
+  bottom: max(20px, 3dvh);
+  /* One line where the window allows, so it takes as little height as it can. */
+  width: min(calc(100vw - 32px), 680px);
+  translate: -50% 0;
+  text-align: center;
+  text-wrap: balance;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--entrance-faint);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity calc(700ms / var(--motion, 1)) ease;
+}
+.entrance-notice[data-show='true'] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Where the tour puts its own Back button, so the way out does not move either. */
+.entrance-back {
+  position: absolute;
+  left: 20px;
+  top: 16px;
+  height: 34px;
+  padding: 0 15px;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+}
+.entrance-back[data-show='true'] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entrance-pip,
+  .entrance-card,
+  .entrance-wait,
+  .entrance-invite-head {
+    transition-duration: 1ms;
+  }
+  .entrance-lcd--shake,
+  .entrance-lcd-lit,
+  .entrance-wait-lit,
+  .entrance-lcd-cell[data-caret]::after {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,28 @@
+/* PIP's tube over the screen (CrtLayer): above everything, and never in the way. */
+.crt-glass {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Over everything, the tour's stage (9995) and the takeover (10000) included. */
+  z-index: 10010;
+  pointer-events: none;
+}
+
+.crt-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* While the tube glitches, what is behind it bends too (see the filter in CrtLayer). */
+[data-crt-glitch] {
+  filter: url(#crt-glitch);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-crt-glitch] {
+    filter: none;
+  }
+}

@@ -81,7 +81,11 @@ const PHOTO_INSTRUCTIONS = (description: string) =>
 
 type Answers = Record<string, { choice?: string; noul?: number; probabilities?: Record<string, number> }>;
 
-async function ask(key: string, state: string, questions: Record<string, unknown>): Promise<Answers> {
+async function ask(
+  key: string,
+  state: string,
+  questions: Record<string, unknown>,
+): Promise<{ answers: Answers; input: number }> {
   const res = await fetch(SYSTEMONE, {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
@@ -94,13 +98,16 @@ async function ask(key: string, state: string, questions: Record<string, unknown
     console.error(`[tour] TypeSafe ${res.status}:`, body.slice(0, 1500));
     throw new Error(`TypeSafe returned ${res.status}`);
   }
-  return JSON.parse(body)?.answers ?? {};
+  const parsed = JSON.parse(body);
+  return { answers: parsed?.answers ?? {}, input: Number(parsed?.usage?.input_tokens) || 0 };
 }
 
 export type SentenceReading = {
   mood: string;
   moodP: number;
   images: { id: string; p: number }[];
+  /** Jev input tokens the reading took, for what it cost (see costs.ts). */
+  inputTokens: number;
 };
 
 /** The cutoffs are arguments so the bench can try others; the tour uses the defaults. */
@@ -117,7 +124,7 @@ export async function readSentence(
   const slices: TourImage[][] = [];
   for (let i = 0; i < TOUR_IMAGES.length; i += SLICE) slices.push(TOUR_IMAGES.slice(i, i + SLICE));
 
-  const answers = await Promise.all(
+  const replies = await Promise.all(
     slices.map((slice, i) => {
       const questions: Record<string, unknown> = {};
       if (i === 0) questions.mood = { type: 'choice', instructions: MOOD_INSTRUCTIONS, criteria: MOODS };
@@ -125,6 +132,7 @@ export async function readSentence(
       return ask(key, state, questions);
     }),
   );
+  const answers = replies.map((r) => r.answers);
 
   const moodAnswer = answers[0].mood;
   const mood = moodAnswer?.choice;
@@ -153,5 +161,6 @@ export async function readSentence(
     moodP: moodAnswer?.probabilities?.[mood] ?? 1,
     // Best first. Empty is a real, common answer — most sentences name nothing photographed.
     images,
+    inputTokens: replies.reduce((sum, r) => sum + r.input, 0),
   };
 }

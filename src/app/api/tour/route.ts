@@ -3,14 +3,18 @@
  * mentions. The reading itself is in lib/tour/server/read-sentence.ts.
  */
 
+import { after } from 'next/server';
+import { chargeApi } from '@/lib/tour/server/access';
 import { accessFrom } from '@/lib/tour/server/auth';
+import { jevMicros } from '@/lib/tour/server/costs';
 import { readSentence } from '@/lib/tour/server/read-sentence';
 
 /** A spoken sentence is short. Anything longer is not one, and is not paid for. */
 const MAX_TEXT = 600;
 
 export async function POST(request: Request) {
-  if (!(await accessFrom(request))) {
+  const id = await accessFrom(request);
+  if (!id) {
     return Response.json({ error: 'An access code is required.' }, { status: 401 });
   }
 
@@ -29,7 +33,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    return Response.json(await readSentence(key, text, question ?? undefined));
+    const { inputTokens, ...reading } = await readSentence(key, text, question ?? undefined);
+    after(() => chargeApi(id, jevMicros(inputTokens)));
+    return Response.json(reading);
   } catch (err) {
     console.error('[tour]', err);
     return Response.json({ error: 'Could not read that sentence.' }, { status: 502 });

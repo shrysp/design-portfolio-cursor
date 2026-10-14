@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import localFont from 'next/font/local';
+import { AnimatePresence, motion as fm, useReducedMotion } from 'framer-motion';
 import { HOUSING_W, housingHeight, lookAt, PIP, type Reaction } from '@shrysp/cameo';
 import { MOOD_REACTIONS } from '@/components/cameo/moods';
 import { Character, type CharacterHandle } from '@shrysp/cameo/react';
@@ -14,31 +16,58 @@ import {
   listMicrophones,
 } from '@/lib/tour/live-session';
 import { idleSecondsLeft } from '@/lib/tour/idle';
-import { type WakeMic, createWakeMic } from '@/lib/tour/wake-mic';
+import { type WakeMic, createSilentMic, createWakeMic } from '@/lib/tour/wake-mic';
+import { NOTICES, type NoticeId, noticeClip, noticeFor } from '@/lib/tour/notices';
 import { createTourClassifier } from '@/lib/tour/tour-model';
 import { CHAPTERS, type ChapterId, TOUR_IMAGES, chapterOf } from '@/data/tour-images';
 import { SUGGESTIONS } from '@/lib/tour/suggestions';
 import { useDialKit } from 'dialkit';
 import { PHOTO_POP } from '@/lib/tour/tour-sounds';
+import { crtGlitch } from '@/components/cameo/crt/CrtLayer';
+import { type Arrival, takeArrival } from '@/components/cameo/crt/arrival';
+import { motion, slowed } from '@/components/cameo/crt/motion';
+import { driftSpots, FLOAT_MAX, sessionSeed, STREAM_CRUISE } from '@/components/cameo/entrance/library';
+import { LANDED } from '@/components/cameo/entrance/context';
+import LibraryDive, { type DiveHandle } from '@/components/cameo/entrance/LibraryDive';
+import { pipCentre } from '@/components/cameo/entrance/TourEntrance';
+import { createField, type Field } from '@/components/cameo/entrance/field';
 import { playRecipe } from '@shrysp/cameo/sound';
 import '@shrysp/cameo/styles.css';
 import './tour.css';
 import {
-  HANDOUT_LINKS,
-  HANDOUT_LOOKS,
   HANDOUT_PROJECTS,
   type Handout,
-  type HandoutLink,
-  type HandoutLook,
   TourHandout,
 } from './TourHandout';
+import MicCheck, { useMicAccess } from './MicCheck';
+
+/** Seven segments, for the time left: the same kind of LCD as PIP's face (see Countdown). */
+const lcd = localFont({
+  src: '../../../../../node_modules/dseg/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2',
+  variable: '--font-lcd',
+  display: 'block',
+});
 
 /**
  * Tells the server the session is over, so the time it did not use goes back
  * to the visitor's access code. A beacon, because the usual moment for this is
  * a tab closing. Safe to send twice: the server refunds once.
  */
-const reportEnd = () => navigator.sendBeacon('/api/tour/session/end');
+/**
+ * Tells the server a session is over. `answers` are the ids of what the
+ * backend model wrote in it, so the server can charge them to the code;
+ * `exchange` is what was said in it, for the visitor's page in Notion (the
+ * server never hears the voice, so only the browser has it).
+ */
+const reportEnd = (answers: React.RefObject<string[]>, exchange: { who: 'you' | 'pip'; text: string }[]) => {
+  const responses = answers.current.splice(0);
+  // Read as a session's end by whichever arrives first, so it must not arrive
+  // for one session after the next has begun: see endOnce.
+  navigator.sendBeacon(
+    '/api/tour/session/end',
+    new Blob([JSON.stringify({ responses, exchange })], { type: 'application/json' }),
+  );
+};
 
 const IMAGE_BY_ID = new Map(TOUR_IMAGES.map((img) => [img.id, img]));
 
@@ -173,8 +202,12 @@ function chapterSpots(ids: string[]): Map<string, ClusterSpot> {
  * well as sizing them, so a big one pushes its neighbours aside instead of
  * covering them.
  */
-/** A resting photo's height in the honeycomb before the lens, in pixels — a little under FLOAT_MAX's 84. */
-const HEX_CELL = 71;
+/**
+ * A resting photo's height in the honeycomb before the lens, in pixels — well
+ * under FLOAT_MAX's 84, so the lower honeycombs stay clear of the bar and the
+ * caption at the foot of the stage. The lens still brings one up to full size.
+ */
+const HEX_CELL = 60;
 /**
  * Padding between a honeycomb's outermost cells and the edge its lens works
  * against, in cells: room for the outer photos to sit in.
@@ -218,6 +251,19 @@ function hexSpots(ids: string[]): { bands: Map<string, HexSpot>; chapters: Map<s
   return { bands, chapters };
 }
 
+/*
+ * A fourth way to lay the library out, and the one the entrance's dive lands
+ * in: drift (entrance/library.ts, shared with the stream so both draw the
+ * same photo in the same place).
+ */
+type DriftSpot = { pos: { left: string; top: string }; size: number; depth: number; tilt: number };
+
+/**
+ * The seed the library is laid out from: the session's (library.ts), which
+ * the entrance's stream was drawn from too. Arriving by the dive confirms it.
+ */
+let cloudSeed: number | null = null;
+
 /** Where a cell is on the stage, as the card's `left` and `top`. */
 function hexSlot(spot: HexSpot, spacing: number) {
   const { ox, oy } = hexPx(spot, spacing);
@@ -255,8 +301,18 @@ const POP_FROM = 0.4;
  * across the whole run instead of each photo's own proportions deciding it.
  */
 const ENTRANCE_HEIGHT = 360;
-/** Centre of the middle space, as a fraction of the stage — matches `.tour-focus { left: 50%; top: 38% }`. */
+/**
+ * Where a photo in the centre sits, in screen pixels. The stylesheet places
+ * it (--focus-cy, tour.css): in the middle of the room between the top bar and
+ * PIP's column, which depends on the window and on PIP's size. An empty probe
+ * is placed by the same rule, so this reads it rather than repeating the sum.
+ * FOCUS_CENTER, as a fraction of the window, is only for before the stage is up.
+ */
 const FOCUS_CENTER = { x: 0.5, y: 0.38 };
+function focusPoint(scope: ParentNode | null | undefined = typeof document !== 'undefined' ? document : null) {
+  const r = scope?.querySelector('.tour-focus-probe')?.getBoundingClientRect();
+  return r ? { x: r.left, y: r.top } : { x: window.innerWidth * FOCUS_CENTER.x, y: window.innerHeight * FOCUS_CENTER.y };
+}
 
 /**
  * The Figma frame's own boxes (723×542 focus, 209×156 satellite) — no longer
@@ -270,7 +326,6 @@ const FOCUS_CENTER = { x: 0.5, y: 0.38 };
  * one cloud cell (see CLOUD_X), so neighbours graze rather than stack.
  */
 const FOCUS_MAX = { w: 723, h: 542, vw: 56.5 };
-const FLOAT_MAX = { w: 112, h: 84, vw: 7.8 };
 
 /**
  * The teal "casing" (border + glow) at full size, for a photo that fills its
@@ -415,6 +470,8 @@ type Placed = Photo & {
   cluster: ClusterSpot;
   /** Its cell in a side band's honeycomb and in its chapter's, before the lens. */
   hex: { band: HexSpot; chapter: HexSpot };
+  /** Where it has come to rest in the drift layout, and how far back. */
+  drift: DriftSpot;
   chapter: ChapterId;
 };
 
@@ -427,14 +484,21 @@ type Placed = Photo & {
  * Built on first call, which only ever happens in the browser, after that
  * first interaction: the spots are random, so a server render would never
  * match the client's.
- * Cached for the rest of the page's life, so a re-render doesn't reshuffle.
+ * Cached so a re-render doesn't reshuffle — but for its seed: the module
+ * outlives a visit (leave the tour and come back, and it is still loaded), and
+ * a layout cached from an earlier seed would put the cards somewhere other
+ * than where the entrance's stream has just landed them.
  */
 let cloud: Placed[] | null = null;
+let cloudFor: number | null = null;
 function getCloud(): Placed[] {
-  if (!cloud) {
+  const seed = (cloudSeed ??= sessionSeed());
+  if (!cloud || cloudFor !== seed) {
+    cloudFor = seed;
     const spots = cloudPositions(TOUR_IMAGES.length);
     const byChapter = chapterSpots(TOUR_IMAGES.map((img) => img.id));
     const hex = hexSpots(TOUR_IMAGES.map((img) => img.id));
+    const drifts = driftSpots(seed);
     // One chapter at a time, in the order CHAPTERS lists them — top left, top
     // right, then down the two sides — and within a chapter its centre piece
     // first, so each cluster is seen to gather before the next one starts.
@@ -453,6 +517,11 @@ function getCloud(): Placed[] {
       cluster: byChapter.get(img.id) ?? { pos: spots[i], size: 1, rank: i },
       chapter: chapterOf(img.id),
       hex: { band: hex.bands.get(img.id)!, chapter: hex.chapters.get(img.id)! },
+      drift: (() => {
+        const d = drifts.get(img.id)!;
+        // Exact, not rounded: the stream brings its photo to rest at this very point.
+        return { pos: { left: `${d.x}%`, top: `${d.y}%` }, size: d.size, depth: d.depth, tilt: d.tilt };
+      })(),
     }));
   }
   return cloud;
@@ -486,6 +555,9 @@ function TourCard({
   square = false,
   onPoint,
   onHover,
+  arrival = null,
+  tilt = 0,
+  depth = 0,
 }: {
   photo: Photo;
   place: 'focus' | 'float';
@@ -507,6 +579,11 @@ function TourCard({
   square?: boolean;
   onPoint: (id: string) => void;
   onHover: (el: Element) => void;
+  /** How the visitor came in; 'dive' lands the photos out of the entrance's dive. */
+  arrival?: Arrival | null;
+  /** Drift layout: how askew it hangs, in degrees, and how far back it rests, 0 near to 1 far. */
+  tilt?: number;
+  depth?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const booted = useRef(false);
@@ -545,13 +622,25 @@ function TourCard({
       });
     };
 
+    if (!booted.current && arrival?.how === 'dive') {
+      // Landed by the entrance's stream, which is still over the stage and
+      // brings this photo to rest exactly here before it fades: the card waits
+      // in its place, as it will be.
+      booted.current = true;
+      prevBox.current = next;
+      el.style.opacity = '1';
+      el.style.transform = '';
+      return;
+    }
+
     if (!booted.current) {
       booted.current = true;
-      const stage = el.closest('.tour-stage')?.getBoundingClientRect();
+      const stage = el.closest('.tour-stage');
       const fx = next.left + next.width / 2;
       const fy = next.top + next.height / 2;
-      const cx = stage ? stage.left + stage.width * FOCUS_CENTER.x : fx;
-      const cy = stage ? stage.top + stage.height * FOCUS_CENTER.y : fy;
+      const centre = stage ? focusPoint(stage) : null;
+      const cx = centre ? centre.x : fx;
+      const cy = centre ? centre.y : fy;
       const dx = (cx - fx) / lens;
       const dy = (cy - fy) / lens;
       const s = next.height > 0 ? ENTRANCE_HEIGHT / next.height : 1;
@@ -613,7 +702,7 @@ function TourCard({
     return () => {
       cancelled = true;
     };
-  }, [place, slot?.left, slot?.top, order, size, square]);
+  }, [place, slot?.left, slot?.top, order, size, square, arrival, photo.id, photo.path]);
 
   // Fit each photo's own shape inside the same max box the fixed-ratio class
   // used to force everything into — landscape, portrait, and square all keep
@@ -670,9 +759,20 @@ function TourCard({
       }`}
       style={{
         ...(place === 'float' && slot ? { left: slot.left, top: slot.top } : {}),
-        width: `min(${max.vw}vw, ${w}px)`,
+        // In the centre, no taller than the room over PIP's column (--focus-h-max in tour.css).
+        width:
+          place === 'focus'
+            ? `min(${max.vw}vw, ${w}px, calc(var(--focus-h-max, ${h}px) * ${ratio.toFixed(4)}))`
+            : `min(${max.vw}vw, ${w}px)`,
         // --fz is the honeycomb's: under the lens the bigger photo is on top.
         zIndex: `var(--fz, ${z})`,
+        // Askew and set back in the drift layout; `rotate` is its own property,
+        // so neither the travel (`transform`) nor the drift (`translate`) touches it.
+        ...(place === 'float' && tilt ? { rotate: `${tilt.toFixed(1)}deg` } : {}),
+        ['--depth' as string]: place === 'float' ? depth.toFixed(2) : '0',
+        // Each resting photo drifts on its own clock (tour.css, .tour-card--float).
+        ['--drift-period' as string]: `${9 + (order % 5) * 1.3}s`,
+        ['--drift-delay' as string]: `${-((order * 1.7) % 11)}s`,
         borderWidth: `${borderPx.toFixed(2)}px`,
         boxShadow: `0 0 ${glowPx.toFixed(2)}px ${glowPx.toFixed(2)}px var(--tour-teal-glow)`,
       }}
@@ -718,8 +818,40 @@ const CHIPS_SHOWN = 3;
 /** How long the conversation has to be silent before the chips come back. */
 const CHIPS_AFTER_MS = 4000;
 
+/**
+ * When each of PIP's words goes into the caption. The transcript runs ahead of
+ * the voice, but not by a fixed amount: the first words after a pause arrive
+ * as they are said, and the text then pulls ahead to 0.8–1.3 s (measured over
+ * three sessions, 14 Oct 2026). So the caption goes at speaking pace, 16
+ * characters a second, from shortly after a word arrives, and never trails it
+ * by more than a second. A word a little late reads as a caption; one early,
+ * as a spoiler.
+ */
+const CAPTION_LAG_MS = 1000;
+const CAPTION_MIN_MS = 200;
+const SPOKEN_CHARS_PER_MS = 16 / 1000;
+
+/** When the time left in the visit starts to show, counting down. */
+const TIME_SHOWN_SECONDS = 120;
+/** When PIP mentions, once, that time is nearly up. */
+const TIME_WARN_SECONDS = 60;
+/** When PIP says goodbye, in the last session the code has time for. */
+const GOODBYE_SECONDS = 15;
+/**
+ * A session can run SESSION_CAP_SECONDS at most (access.ts); a visit with
+ * time left goes on in a new one. The change is made in the first pause
+ * this close to the cap, so it falls between sentences rather than in one.
+ * The pause is read off the transcript, which is up to 1.3 s ahead of the
+ * voice, hence the margin.
+ */
+const RENEW_EARLY_SECONDS = 40;
+const RENEW_QUIET_MS = 2500;
+
 /** How long a card takes to leave — the length of its exit in tour.css. */
-const HANDOUT_OUT_MS = 180;
+const HANDOUT_OUT_MS = 200;
+
+/** Arriving without the entrance: how long the stage's own stream builds up before it lands. */
+const SELF_DIVE_CRUISE_MS = 900;
 
 /** How the stage looks. The dials in development start from this; a visitor gets exactly this. */
 const LOOK = { darkRoom: true, chapters: true, honeycomb: true, spacing: 0.7, lens: 0.7, photoGlow: 0.7, photoCrt: 0.7 };
@@ -727,7 +859,368 @@ const LOOK = { darkRoom: true, chapters: true, honeycomb: true, spacing: 0.7, le
 /** Where the tour sends people when PIP has run out of time to talk. */
 const EMAIL = 'shreyaspatil.design@gmail.com';
 
-export default function TourStage() {
+/** Whose turn it is, as the caption says it: the visitor's, PIP thinking, or PIP talking. */
+type VoiceTurn = 'listening' | 'you' | 'thinking' | 'talking';
+/**
+ * A start that failed for a passing reason — the voice model or the store
+ * hiccuping, the network dropping a request — is tried again quietly, after
+ * each of these waits, before the visitor is told. Nothing is charged for a
+ * start that fails: the session route refunds what it reserved.
+ */
+const START_RETRIES_MS = [700, 1600];
+const PASSING_FAULT = /voice model|not available right now|HTTP (5\d\d|429)|failed to fetch|networkerror|load failed|timed? ?out/i;
+/** PIP's voice counts as sounding above this level (0..1, the voice envelope's). */
+const PIP_AUDIBLE_LEVEL = 0.04;
+/** How long PIP's voice has to be silent before its turn is over: longer than a pause between words. */
+const PIP_QUIET_MS = 450;
+const MIC_ICON = 'M5.5 4a2.5 2.5 0 0 1 5 0v3.5a2.5 2.5 0 0 1-5 0zM3 7.5a5 5 0 0 0 10 0M8 12.5v2';
+const KEYS_ICON = 'M2 4.5h12v7H2zM4.5 7h1M7.5 7h1M10.5 7h1M5 9.5h6';
+
+const TURN_LABEL: Record<VoiceTurn, string> = {
+  listening: 'Listening',
+  you: 'Listening',
+  thinking: 'PIP is thinking',
+  talking: 'PIP is talking',
+};
+
+/** `visitor`: their first name, for the welcome; empty when the tour does not know it. */
+/**
+ * How the bar moves, everything in it on one clock, and PIP rising with it
+ * (.tour-dock's bottom in tour.css uses the same): a quick ease-out for
+ * what opens and closes, a touch quicker on the way out, and ease-in-out for
+ * the one thing that travels across the bar, the mode's lit thumb.
+ */
+const BAR_EASE = [0.23, 1, 0.32, 1] as const;
+const BAR_IN = 0.3;
+const BAR_OUT = 0.24;
+const THUMB = { duration: 0.24, ease: [0.645, 0.045, 0.355, 1] as const };
+
+/** The start screen's talk/type swap: out of focus and back, quickly, so it reads as one change. */
+const START_SWAP = {
+  initial: { opacity: 0, filter: 'blur(8px)', y: 4 },
+  animate: { opacity: 1, filter: 'blur(0px)', y: 0, transition: { duration: 0.26, ease: [0.2, 0.8, 0.2, 1] } },
+  exit: { opacity: 0, filter: 'blur(8px)', y: -4, transition: { duration: 0.14, ease: [0.4, 0, 1, 1] } },
+} as const;
+const SOUND_ON_ICON = 'M3 6h2l3-2.5v9L5 10H3zM10.5 6a3 3 0 0 1 0 4M12.5 4.5a5.5 5.5 0 0 1 0 7';
+const SOUND_OFF_ICON = 'M3 6h2l3-2.5v9L5 10H3zM11 6.5l3 3M14 6.5l-3 3';
+
+/**
+ * The time left, on a seven-segment LCD like PIP's own face: the lit digits
+ * over the faint unlit segments of every digit, as a real one shows them.
+ */
+function Countdown({ seconds }: { seconds: number }) {
+  const text = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+  return (
+    <span
+      className={`tour-pill-time ${seconds <= TIME_WARN_SECONDS ? 'tour-pill-time--low' : ''}`}
+      role="timer"
+      aria-label={`${Math.ceil(seconds / 60)} minutes of the tour left`}
+    >
+      <span className="tour-pill-time-ghost" aria-hidden>
+        {text.replace(/\d/g, '8')}
+      </span>
+      <span className="tour-pill-time-lit" aria-hidden>
+        {text}
+      </span>
+    </span>
+  );
+}
+
+/**
+ * The Talk switch's waveform, alive: whose turn it is, in the bar as well as
+ * over the caption. PIP talking, the bars dance; you talking, they ripple;
+ * listening, they breathe together; thinking, a light runs along them. At
+ * rest while typing (the switch is off then). All in tour.css (.tour-voice).
+ */
+function VoiceBars({ turn, live }: { turn: VoiceTurn; live: boolean }) {
+  return (
+    <svg className="tour-voice" data-turn={live ? turn : undefined} width="14" height="14" viewBox="0 0 16 16" aria-hidden>
+      {[3, 5.5, 8, 10.5, 13].map((x, i) => (
+        <rect key={x} x={x - 0.75} y={2} width={1.5} height={12} rx={0.75} style={{ '--i': i } as React.CSSProperties} />
+      ))}
+    </svg>
+  );
+}
+
+/** Durations for the bar, divided by the motion dial, or nothing at all for reduced motion. */
+function useBarTiming() {
+  const reduce = useReducedMotion();
+  const speed = Math.max(0.05, motion());
+  const d = (s: number) => (reduce ? 0 : s / speed);
+  return {
+    enter: { duration: d(BAR_IN), ease: BAR_EASE },
+    exit: { duration: d(BAR_OUT), ease: BAR_EASE },
+    thumb: { ...THUMB, duration: d(THUMB.duration) },
+  };
+}
+
+/**
+ * One switch in the bar, coming and going without a jump: its width eases
+ * open from nothing as it comes out of a blur, and back, so the rest of the
+ * bar slides over rather than snapping. The box that moves has no padding
+ * of its own, so it really reaches nothing (a padded box stops at its
+ * padding, then vanishes in one frame); the padding inside it holds the
+ * button's shadow, so clipping it never cuts the shadow off either.
+ */
+function Slot({ show, children }: { show: boolean; children: React.ReactNode }) {
+  const t = useBarTiming();
+  return (
+    <AnimatePresence initial={false}>
+      {show && (
+        <fm.div
+          className="tour-pill-slot"
+          initial={{ width: 0, opacity: 0, filter: 'blur(6px)' }}
+          animate={{ width: 'auto', opacity: 1, filter: 'blur(0px)', transition: t.enter }}
+          exit={{ width: 0, opacity: 0, filter: 'blur(6px)', transition: t.exit }}
+        >
+          <div className="tour-pill-slot-in">{children}</div>
+        </fm.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/**
+ * The controls, always at the bottom of the stage, so nothing has to move
+ * when a session starts or ends: the sound is here from the first screen,
+ * the way back into a tour (Carry on) when one is closed, and the switches a
+ * session needs — talk or type, mute, the time, End — grow into the row and
+ * leave again.
+ *
+ * Everything else the bar can do, it does by growing upward, like Granola's:
+ * the field for typing opens as a layer over the row, and the transcript as a
+ * layer over that. The row itself never changes for them — mute stays where
+ * it is while you type, only disabled — so the switches stay where your hand
+ * left them. The bar widens to the caption's width for either, by a minimum
+ * width eased in CSS (.tour-console--wide): it never has to measure itself,
+ * so nothing is left to snap into place at the end.
+ */
+export function TourBar({
+  session,
+  resume,
+  turn,
+  typing,
+  typed,
+  setTyped,
+  onSubmit,
+  onTalk,
+  onType,
+  muted,
+  setMuted,
+  silent,
+  setSilent,
+  lines,
+  history,
+  setHistory,
+  timeLeft,
+  onEnd,
+}: {
+  /** A session is open (or typing to wake one): the session's switches are in the bar. */
+  session: boolean;
+  /** No session, but one to start or go back to: its button leads the row. */
+  resume: { label: string; disabled: boolean; onClick: () => void } | null;
+  /** Whose turn it is, for the Talk switch's waveform. */
+  turn: VoiceTurn;
+  typing: boolean;
+  typed: string;
+  setTyped: (value: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  onTalk: () => void;
+  onType: () => void;
+  muted: boolean;
+  setMuted: React.Dispatch<React.SetStateAction<boolean>>;
+  /** PIP's voice off. */
+  silent: boolean;
+  setSilent: React.Dispatch<React.SetStateAction<boolean>>;
+  /** The conversation so far, for the transcript. */
+  lines: Line[];
+  history: boolean;
+  setHistory: React.Dispatch<React.SetStateAction<boolean>>;
+  timeLeft: number | null;
+  onEnd: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const logRef = useRef<HTMLDivElement>(null);
+  const t = useBarTiming();
+  const open = session && typing;
+  const reading = history && lines.length > 0;
+  const wide = open || reading;
+
+  /*
+   * Shut, the bar is as wide as its row of switches, and follows the row as
+   * switches come and go. Opening and shutting ease its minimum width between
+   * that row's width and the caption's (.tour-console--wide) — from the row's
+   * real width rather than from nothing, or the visible part of the ease is
+   * spent in the first frame and the bar snaps shut. Written straight to the
+   * element as the row resizes, so this never renders on its own account.
+   */
+  const consoleRef = useRef<HTMLDivElement>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const wideRef = useRef(wide);
+  wideRef.current = wide;
+  useLayoutEffect(() => {
+    const row = rowRef.current;
+    const shell = consoleRef.current;
+    if (!row || !shell) return;
+    // The shell's 1px border either side of the row.
+    const fit = () => {
+      shell.style.minWidth = wideRef.current ? '' : `${row.offsetWidth + 2}px`;
+    };
+    fit();
+    const watch = new ResizeObserver(fit);
+    watch.observe(row);
+    return () => watch.disconnect();
+  }, []);
+  // Only an open or a shut eases; the row's own changes are followed at once.
+  // Set while rendering, so the easing is on in the same commit as the change.
+  const [wasWide, setWasWide] = useState(wide);
+  const [morph, setMorph] = useState(false);
+  if (wasWide !== wide) {
+    setWasWide(wide);
+    setMorph(true);
+  }
+  useLayoutEffect(() => {
+    const shell = consoleRef.current;
+    const row = rowRef.current;
+    if (shell && row) shell.style.minWidth = wide ? '' : `${row.offsetWidth + 2}px`;
+  }, [wide]);
+  useEffect(() => {
+    if (!morph) return;
+    const id = setTimeout(() => setMorph(false), (t.enter.duration || 0) * 1000 + 60);
+    return () => clearTimeout(id);
+  }, [morph, wide, t.enter.duration]);
+  useEffect(() => {
+    // Without preventScroll the browser scrolls the still-opening layer to the
+    // caret, and the bar lurches as the layer finishes.
+    if (open) inputRef.current?.focus({ preventScroll: true });
+  }, [open]);
+  // The newest line in view, as it arrives and whenever the transcript opens.
+  useEffect(() => {
+    const el = logRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [lines, reading]);
+
+  const layer = {
+    initial: { height: 0, opacity: 0, filter: 'blur(8px)' },
+    animate: { height: 'auto', opacity: 1, filter: 'blur(0px)', transition: t.enter },
+    exit: { height: 0, opacity: 0, filter: 'blur(8px)', transition: t.exit },
+  };
+
+  return (
+    // In front of the CRT glass: a thing you press, not something on the screen.
+    <div
+      ref={consoleRef}
+      className={`tour-console ${wide ? 'tour-console--wide' : ''} ${morph ? 'tour-console--morph' : ''}`}
+      data-crt-clear
+      onKeyDown={(e) => e.stopPropagation()}
+    >
+      <AnimatePresence initial={false}>
+        {reading && (
+          <fm.div key="transcript" className="tour-console-layer" {...layer}>
+            <div className="tour-console-layer-in">
+              <div ref={logRef} className="tour-transcript" role="log" aria-label="Transcript">
+                {lines.map((l, i) => (
+                  <p key={i} className={`tour-transcript-line tour-transcript-line--${l.who}`}>
+                    {l.text.trim()}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </fm.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence initial={false}>
+        {open && (
+          <fm.form key="field" className="tour-console-layer" onSubmit={onSubmit} {...layer}>
+            <div className="tour-console-layer-in">
+            <div className="tour-pill-field-inner">
+              <input
+                ref={inputRef}
+                className="tour-pill-input"
+                value={typed}
+                onChange={(e) => setTyped(e.target.value)}
+                onKeyDown={(e) => {
+                  e.stopPropagation();
+                  if (e.key === 'Escape') onTalk();
+                }}
+                placeholder="Ask PIP about Shreyas"
+                aria-label="Ask PIP about Shreyas"
+              />
+              <button className="tour-pill-ask" disabled={!typed.trim()}>
+                Ask
+              </button>
+            </div>
+            </div>
+          </fm.form>
+        )}
+      </AnimatePresence>
+      <div ref={rowRef} className="tour-pill">
+        <Slot show={!session && !!resume}>
+          <button className="tour-btn tour-btn--primary tour-pill-go" onClick={resume?.onClick} disabled={resume?.disabled}>
+            {resume?.label}
+          </button>
+        </Slot>
+        <Slot show={session}>
+          <div className="tour-mode" role="radiogroup" aria-label="How you ask PIP">
+            {/* A voice, not a microphone: the microphone is the mute button beside it. */}
+            <button role="radio" aria-checked={!typing} aria-label="Talk" title="Talk" className="tour-mode-btn" onClick={onTalk}>
+              {!typing && <fm.span layoutId="tour-mode-thumb" className="tour-mode-thumb" transition={t.thumb} />}
+              <VoiceBars turn={turn} live={session && !typing} />
+            </button>
+            <button role="radio" aria-checked={typing} aria-label="Type" title="Type" className="tour-mode-btn" onClick={onType}>
+              {typing && <fm.span layoutId="tour-mode-thumb" className="tour-mode-thumb" transition={t.thumb} />}
+              <Icon d={KEYS_ICON} />
+            </button>
+          </div>
+        </Slot>
+        {/* Typing turns the microphone off already; the button stays put, disabled, so nothing beside it moves. */}
+        <Slot show={session}>
+          <button
+            className="tour-pill-btn"
+            aria-pressed={muted}
+            aria-label={muted ? 'Unmute your microphone' : 'Mute your microphone'}
+            title={typing ? 'The microphone is off while you type' : muted ? 'Unmute' : 'Mute'}
+            disabled={typing}
+            onClick={() => setMuted((m) => !m)}
+          >
+            <Icon d={muted || typing ? 'M10.5 7V4a2.5 2.5 0 0 0-5 0v.5M5.5 7.5a2.5 2.5 0 0 0 4.3 1.7M3 7.5a5 5 0 0 0 8.4 3.6M13 7.5c0 .7-.1 1.3-.4 1.9M8 12.5v2M2.5 2.5l11 11' : MIC_ICON} />
+          </button>
+        </Slot>
+        <Slot show>
+          <button
+            className="tour-pill-btn"
+            aria-pressed={silent}
+            aria-label={silent ? 'Turn PIP\u2019s voice on' : 'Turn PIP\u2019s voice off'}
+            title={silent ? 'Sound off' : 'Sound on'}
+            onClick={() => setSilent((s) => !s)}
+          >
+            <Icon d={silent ? SOUND_OFF_ICON : SOUND_ON_ICON} />
+          </button>
+        </Slot>
+        <Slot show={lines.length > 0}>
+          <button
+            className="tour-pill-btn"
+            aria-pressed={reading}
+            aria-expanded={reading}
+            aria-label={reading ? 'Hide the transcript' : 'Show the transcript'}
+            title="Transcript"
+            onClick={() => setHistory((h) => !h)}
+          >
+            <Icon d="M3 4.5h10M3 8h10M3 11.5h6" />
+          </button>
+        </Slot>
+        <Slot show={session && timeLeft !== null}>{timeLeft !== null && <Countdown seconds={timeLeft} />}</Slot>
+        <Slot show={session}>
+          <button className="tour-pill-end" onClick={onEnd}>
+            End
+          </button>
+        </Slot>
+      </div>
+    </div>
+  );
+}
+
+export default function TourStage({ visitor = '' }: { visitor?: string }) {
   const char = useRef<CharacterHandle>(null);
   const session = useRef<LiveSession | null>(null);
 
@@ -748,6 +1241,33 @@ export default function TourStage() {
   const linesRef = useRef<Line[]>([]);
   /** How many turns there were when this session began: the caption only shows newer ones. */
   const [captionFrom, setCaptionFrom] = useState(0);
+  /**
+   * How much of PIP's latest turn has been heard by now: `lines[index]` up to
+   * `length`. It trails the transcript; see CAPTION_LAG_MS.
+   */
+  const [heard, setHeard] = useState({ index: -1, length: 0 });
+  /** The turn the transcript is on, kept in step with `lines` as words arrive. */
+  const turn = useRef({ count: 0, who: null as Line['who'] | null, length: 0 });
+  const heardTimers = useRef(new Set<number>());
+  /** The backend's answers this session, by id, for the server to charge (see reportEnd). */
+  const answerIds = useRef<string[]>([]);
+  /**
+   * Sessions whose end has been reported. The server keeps one open session
+   * per code, so a second report — the close being confirmed after a new
+   * session has already opened — would end the new one's reservation instead.
+   */
+  const reported = useRef(new WeakSet<LiveSession>());
+  /** Where this session's lines begin in the visit's: earlier sessions have been reported already. */
+  const exchangeFrom = useRef(0);
+  const endOnce = useCallback((s: LiveSession | null) => {
+    if (!s || reported.current.has(s)) return;
+    reported.current.add(s);
+    const said = linesRef.current.slice(exchangeFrom.current).map((l) => ({ who: l.who, text: l.text }));
+    exchangeFrom.current = linesRef.current.length;
+    reportEnd(answerIds, said);
+  }, []);
+  /** When the last of PIP's words is due in the caption, and how long it is. */
+  const pace = useRef({ at: 0, length: 0 });
   /**
    * Dozing: the session is closed, the microphone is still open, and a voice
    * will open a new one (see wake-mic.ts). Stays true through that wake, until
@@ -778,6 +1298,191 @@ export default function TourStage() {
    */
   const [arrived, setArrived] = useState(false);
   const [focusId, setFocusId] = useState<string | null>(null);
+  // Read after mount, not during render: the server cannot see it, and a
+  // first render that differed from the server's would not hydrate.
+  const [arrival, setArrival] = useState<Arrival | null>(null);
+  const [voiceTurn, setVoiceTurn] = useState<VoiceTurn>('listening');
+  /** The visitor's microphone, switched off from the controls without ending anything. */
+  const [muted, setMuted] = useState(false);
+  /**
+   * Talking or typing: one conversation either way, switched at any time.
+   * Typing turns the microphone off, so PIP is not answering the room; a
+   * visit begun by typing has no microphone at all until they talk.
+   */
+  const [mode, setMode] = useState<'voice' | 'text'>('voice');
+  const typing = mode === 'text';
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const micOff = muted || typing;
+  const micOffRef = useRef(micOff);
+  micOffRef.current = micOff;
+  const localStream = useRef<MediaStream | null>(null);
+  useEffect(() => {
+    localStream.current?.getAudioTracks().forEach((t) => (t.enabled = !micOff));
+  }, [micOff]);
+  const [typed, setTyped] = useState('');
+  const pendingTyped = useRef<string | null>(null);
+  /**
+   * Our own ask for the microphone, before the browser's: what it is for,
+   * with typing as the way round it. 'start' starts the tour once allowed;
+   * 'switch' brings the microphone into a tour begun by typing.
+   */
+  const [askMic, setAskMic] = useState<'start' | 'switch' | null>(null);
+  const micAccess = useMicAccess();
+  const micAccessRef = useRef(micAccess);
+  micAccessRef.current = micAccess;
+  /** Asked once already this visit, by us or by the browser. */
+  const micAsked = useRef(false);
+  /** Said under the type field when the microphone could not be brought in. */
+  const [micNote, setMicNote] = useState<string | null>(null);
+  /** Good morning / afternoon / evening, by the visitor's own clock — so only once mounted. */
+  const [dayPart, setDayPart] = useState('');
+  useEffect(() => {
+    const h = new Date().getHours();
+    setDayPart(h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening');
+  }, []);
+  /** The entrance's takeover is still over the stage, landing its stream on these cards. */
+  const [landingOver, setLandingOver] = useState(false);
+  /**
+   * Came in some other way than the entrance's dive — Back and Forward, a
+   * reload: the stage flies the same stream in itself, from PIP's vanishing
+   * point, and lands it on the cards. Where that point is, while it runs.
+   */
+  const [selfDive, setSelfDive] = useState<[number, number] | null>(null);
+  const selfDiveRef = useRef<DiveHandle>(null);
+  const tookArrival = useRef(false);
+  // Before paint, so the welcome never flashes up ahead of the photos landing.
+  useLayoutEffect(() => {
+    // Once: the arrival is read only once, and Strict Mode runs this twice.
+    if (tookArrival.current) return;
+    tookArrival.current = true;
+    // The photos come on now, out of the depth, rather than waiting for the first click.
+    const came = takeArrival();
+    if (!came) {
+      setArrived(true);
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        setRevealed(true);
+        setSettled(true);
+        return;
+      }
+      const seed = (cloudSeed ??= sessionSeed());
+      setArrival({ how: 'dive', seed, travel: 0, velocity: 0, at: Date.now() });
+      setLandingOver(true);
+      setSelfDive(pipCentre());
+      return;
+    }
+    // Lay the library out as the stream drew it, before the first card renders.
+    cloudSeed = came.seed;
+    setArrival(came);
+    setArrived(true);
+    setLandingOver(true);
+  }, []);
+  useEffect(() => {
+    if (!selfDive) return;
+    selfDiveRef.current?.preload();
+    const start = performance.now();
+    let last = start;
+    let travel = 0;
+    let landingAt = 0;
+    let raf = 0;
+    const step = (now: number) => {
+      const dive = selfDiveRef.current;
+      if (!dive) return;
+      const dt = (Math.min(50, now - last) / 1000) * motion();
+      last = now;
+      const k = Math.min(1, (now - start) / slowed(SELF_DIVE_CRUISE_MS));
+      if (k < 1) {
+        // Building up to cruising speed, as the entrance's dive does, then landing from it.
+        travel += STREAM_CRUISE * k * k * dt;
+        dive.set(travel);
+        dive.fade(Math.min(1, k / 0.15));
+      } else {
+        landingAt ||= now;
+        const surge = 1 + 0.5 * Math.min(1, (now - landingAt) / slowed(250));
+        if (dive.land(dt * surge, STREAM_CRUISE) <= 0) {
+          setSelfDive(null);
+          window.dispatchEvent(new Event(LANDED));
+          return;
+        }
+      }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [selfDive]);
+  // Until the takeover has landed and gone, the cards hold still where the
+  // stream will bring each photo to rest (tour.css, data-landing).
+  /**
+   * Landed: the stage's own words and controls come in the way the rest of
+   * the site does, out of a blur (tour.css, data-reveal). Stays on — taking
+   * it off would play the arrival a second time.
+   */
+  const [revealed, setRevealed] = useState(false);
+  /** The arrival has finished, so opening the microphone can't hitch it. */
+  const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    if (!revealed) return;
+    const done = window.setTimeout(() => setSettled(true), slowed(900));
+    return () => window.clearTimeout(done);
+  }, [revealed]);
+  useEffect(() => {
+    if (!landingOver) return;
+    const landed = () => {
+      setLandingOver(false);
+      setRevealed(true);
+    };
+    window.addEventListener(LANDED, landed);
+    // In case the takeover never says so: the cards are not held for ever.
+    const backstop = window.setTimeout(landed, 15_000);
+    return () => {
+      window.removeEventListener(LANDED, landed);
+      window.clearTimeout(backstop);
+    };
+  }, [landingOver]);
+
+
+
+  /*
+   * The room behind everything: the entrance's tube, powered on — dark glass
+   * with a living green phosphor and light pooled where the attention is
+   * (under PIP, or behind the photo in the centre). The stage the dive
+   * arrives in is the same room it was flying through.
+   */
+  const roomCanvas = useRef<HTMLCanvasElement>(null);
+  const focusRef = useRef<string | null>(null);
+  focusRef.current = focusId;
+  useEffect(() => {
+    const el = roomCanvas.current;
+    if (!el) return;
+    const at = (): [number, number] => {
+      if (focusRef.current) {
+        const centre = focusPoint();
+        return [centre.x, centre.y];
+      }
+      const r = pipBody.current?.getBoundingClientRect();
+      return r && r.width ? [r.left + r.width / 2, r.top + r.height / 2] : [window.innerWidth / 2, window.innerHeight * 0.3];
+    };
+    const room: Field | null = createField(el, 'screen', { off: 1, on: 1, wake: 1, focus: at() });
+    if (!room) return;
+    room.still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // The light follows the attention slowly, like a glow, not a spotlight.
+    let raf = 0;
+    const follow = () => {
+      const [x, y] = at();
+      const f = room.uniforms.focus;
+      room.uniforms.focus = [f[0] + (x - f[0]) * 0.04, f[1] + (y - f[1]) * 0.04];
+      raf = requestAnimationFrame(follow);
+    };
+    raf = requestAnimationFrame(follow);
+    return () => {
+      cancelAnimationFrame(raf);
+      room.destroy();
+    };
+  }, []);
+  // A photo coming forward is a change of channel on PIP's tube.
+  useEffect(() => {
+    if (focusId) crtGlitch(0.3, 150);
+  }, [focusId]);
   /**
    * The photo the visitor is pointing at, if any. While it's set, it owns the
    * centre: PIP's own sentence-matched spotlights are held back, or the answer
@@ -803,6 +1508,23 @@ export default function TourStage() {
    */
   const [over, setOver] = useState(false);
   const overRef = useRef(false);
+  /** Why the tour could not start or carry on, shown and said (see notices.ts). */
+  const [notice, setNotice] = useState<NoticeId | null>(null);
+  /** The line PIP is saying from a recording, for the caption. */
+  const [recorded, setRecorded] = useState<string | null>(null);
+  const stopRecorded = useRef<(() => void) | null>(null);
+  /** Seconds the code has beyond the session now running. */
+  const beyond = useRef(Infinity);
+  /** Seconds left in the whole visit, once few enough to show. */
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const warnedTime = useRef(false);
+  /**
+   * Carrying on in a new session at the cap. The stage goes on looking live
+   * through the second or two that takes: nothing has paused, as far as the
+   * visitor is concerned.
+   */
+  const [renewing, setRenewing] = useState(false);
+  const saidGoodbye = useRef(false);
   /** Whether the session now running is the last this code has time for. */
   const lastSession = useRef(false);
   const [copied, setCopied] = useState(false);
@@ -821,22 +1543,11 @@ export default function TourStage() {
    * Two directions for the stage, switchable while the tour runs so they can
    * be judged against the current look with real photos and a live PIP.
    */
-  const dial = useDialKit('Tour look', {
-    darkRoom: LOOK.darkRoom,
-    chapters: LOOK.chapters,
-    // The watch-style grid, biggest under the cursor: one honeycomb per side band, or per chapter with chapters on.
-    honeycomb: LOOK.honeycomb,
-    // How far apart a honeycomb's cells are, in photo heights. Under 1 the photos start to touch.
-    spacing: [LOOK.spacing, 0.7, 1.4, 0.02],
-    // How strong the honeycomb's lens is: 0 is a plain grid, 1 makes the middle photo twice its size.
-    lens: [LOOK.lens, 0, 2, 0.1],
-    // How strongly the photo in the centre glows with its own colours, under its teal halo.
-    photoGlow: [LOOK.photoGlow, 0, 1, 0.05],
-    // How much of a tube each photo is shown on: scanlines, phosphor, dark corners.
-    photoCrt: [LOOK.photoCrt, 0, 1, 0.05],
-  });
-  // Visitors get the look as it was settled on; the panel is not there for them to change it.
-  const look = process.env.NODE_ENV === 'production' ? LOOK : dial;
+  /** Settled: the look the "Tour look" panel was used to find, now fixed. */
+  const look = LOOK;
+  /** Settled on drift (the photos at rest in depth, where the dive lands) over the honeycombs; it was the Tour layout panel's. */
+  const drift = true as boolean;
+  const honey = look.honeycomb && !drift;
 
   /**
    * The card in the centre, if PIP has handed one over (see TourHandout). For
@@ -862,20 +1573,12 @@ export default function TourStage() {
   const cards = useDialKit(
     'Tour cards',
     {
-      // Two ways a card can be a screen: led by its picture, or PIP's own green display.
-      style: { type: 'select', options: [...HANDOUT_LOOKS], default: 'photo' },
       project: { type: 'select', options: HANDOUT_PROJECTS, default: HANDOUT_PROJECTS[0] },
       showProject: { type: 'action', label: 'Show project card' },
       showContact: { type: 'action', label: 'Show contact card' },
-      link: { type: 'select', options: Object.keys(HANDOUT_LINKS), default: 'cameo' },
-      showLink: { type: 'action', label: 'Show link card' },
       putAway: { type: 'action', label: 'Put the card away' },
-      // How wide a card is, in pixels.
-      width: [400, 300, 560, 10],
-      // Where its middle sits, as a percentage of the stage's height. The photos come forward at 38.
-      top: [38, 20, 60, 1],
-      // How much of the tube shows over a card: 0 is clean; the photos are at 0.7.
-      crt: [0.7, 0, 1, 0.05],
+      // How wide a card is, in pixels. It sits where a photo in the centre does (handout.css).
+      width: [480, 360, 600, 10],
     },
     {
       onAction: (action) => {
@@ -884,11 +1587,11 @@ export default function TourStage() {
         const now = cardsRef.current;
         if (name === 'showProject') showHandout({ kind: 'project', project: now.project });
         else if (name === 'showContact') showHandout({ kind: 'contact' });
-        else if (name === 'showLink') showHandout({ kind: 'link', link: now.link as HandoutLink });
         else if (name === 'putAway') closeHandout();
       },
     },
   );
+
   /**
    * Asks PIP one of the suggestions, as if it had been said aloud. Before the
    * tour is running that means starting it: PIP says hello first and the
@@ -906,6 +1609,7 @@ export default function TourStage() {
       }
       // Shown and remembered as theirs: it is their question, however it was put.
       setLines((prev) => [...prev, { who: 'you', text: question }]);
+      turn.current = { count: turn.current.count + 1, who: 'you', length: question.length };
       heardVisitor.current = true;
       lastQuestion.current = question;
       userUtterance.current = '';
@@ -950,6 +1654,43 @@ export default function TourStage() {
   useEffect(() => {
     askRef.current = ask;
   }, [ask]);
+
+  /**
+   * A question typed rather than said. It goes into the conversation as the
+   * visitor's own words — exactly what a spoken one becomes once transcribed —
+   * and PIP answers it the same way, from his story, out loud. Before the tour
+   * has started it starts it, and is put once PIP has said hello.
+   */
+  const askTyped = useCallback((question: string) => {
+    const text = question.trim();
+    if (!text) return;
+    setQuiet(false);
+    const s = session.current;
+    if (s?.state !== 'live') {
+      pendingTyped.current = text;
+      void connectRef.current();
+      return;
+    }
+    setLines((prev) => [...prev, { who: 'you', text }]);
+    turn.current = { count: turn.current.count + 1, who: 'you', length: text.length };
+    heardVisitor.current = true;
+    lastQuestion.current = text;
+    userUtterance.current = '';
+    lastVoice.current = performance.now();
+    thinking.current ??= char.current?.hold('thinking', { key: 'tour' }) ?? null;
+    setVoiceTurn('thinking');
+    s.send({ type: 'conversation.item.create', item: { type: 'message', role: 'user', content: [{ type: 'input_text', text }] } });
+    s.send({ type: 'response.create' });
+  }, []);
+  const askTypedRef = useRef(askTyped);
+  askTypedRef.current = askTyped;
+  const submitTyped = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!typed.trim()) return;
+    askTyped(typed);
+    // The field stays: typing is the mode they are in, not a one-off.
+    setTyped('');
+  };
   const chips = SUGGESTIONS.filter((q) => !asked.includes(q)).slice(0, CHIPS_SHOWN);
 
   const cardsRef = useRef(cards);
@@ -972,6 +1713,14 @@ export default function TourStage() {
   const detachHearing = useRef<(() => void) | null>(null);
   const detachVoice = useRef<(() => void) | null>(null);
   const micRaf = useRef(0);
+  /**
+   * Whether PIP can be heard right now, from its own audio rather than the
+   * session's events: the model finishes a reply (response.done) seconds
+   * before its voice finishes playing, and the turn read "listening" over it.
+   */
+  const [pipAudible, setPipAudible] = useState(false);
+  const voiceRaf = useRef(0);
+  const voiceEnvelope = useRef<{ stop: () => void } | null>(null);
   const tourModel = useRef(createTourClassifier());
   const userUtterance = useRef('');
   const modelUtterance = useRef('');
@@ -986,9 +1735,12 @@ export default function TourStage() {
   const maxSeconds = useRef(Infinity);
   /** Photos picked for this visitor — brought to the centre as PIP says hello. */
   const welcomePhotos = useRef<string[]>([]);
-  const displayScroll = useRef<HTMLDivElement>(null);
   const connecting = useRef(false);
   const connectRef = useRef<(opts?: { byVoice?: boolean }) => Promise<void>>(async () => {});
+  /** Retries of a failed start so far, the one waiting, and whether one is (it reads as still connecting). */
+  const startTries = useRef(0);
+  const retryTimer = useRef(0);
+  const [retrying, setRetrying] = useState(false);
   const disconnectRef = useRef<(opts?: { keepMic?: boolean }) => void>(() => {});
   const stateRef = useRef(state);
 
@@ -1000,6 +1752,24 @@ export default function TourStage() {
   /** Words keep joining the turn they belong to; a change of speaker starts the next one. */
   const appendLine = useCallback((who: Line['who'], delta: string) => {
     if (!delta) return;
+    const t = turn.current;
+    if (t.who !== who) turn.current = { count: t.count + 1, who, length: 0 };
+    turn.current.length += delta.length;
+    if (who === 'pip') {
+      const at = { index: turn.current.count - 1, length: turn.current.length };
+      const now = performance.now();
+      const last = pace.current;
+      const due = Math.min(
+        now + CAPTION_LAG_MS,
+        Math.max(now + CAPTION_MIN_MS, last.at + last.length / SPOKEN_CHARS_PER_MS),
+      );
+      pace.current = { at: due, length: delta.length };
+      const id = window.setTimeout(() => {
+        heardTimers.current.delete(id);
+        setHeard(at);
+      }, due - now);
+      heardTimers.current.add(id);
+    }
     setLines((prev) => {
       const last = prev[prev.length - 1];
       if (last?.who === who) return [...prev.slice(0, -1), { who, text: last.text + delta }];
@@ -1086,10 +1856,10 @@ export default function TourStage() {
       setLog((l) => [`tour.point ${id}`, ...l].slice(0, 40));
 
       // Look where the photo is going, not where it was — PIP watches it land.
-      const stage = stageRef.current?.getBoundingClientRect();
-      const look = stage && {
-        x: ((stage.left + stage.width * FOCUS_CENTER.x) / window.innerWidth) * 2 - 1,
-        y: ((stage.top + stage.height * FOCUS_CENTER.y) / window.innerHeight) * 2 - 1,
+      const centre = focusPoint(stageRef.current);
+      const look = {
+        x: (centre.x / window.innerWidth) * 2 - 1,
+        y: (centre.y / window.innerHeight) * 2 - 1,
       };
       char.current?.emit({ type: 'photo:point', look: look || undefined });
 
@@ -1165,12 +1935,16 @@ export default function TourStage() {
   }, [classifySentence]);
 
   const handleEvent = useCallback(
-    (event: LiveEvent) => {
+    (event: LiveEvent, from?: LiveSession) => {
       const { type, ...rest } = event;
       // Deltas aren't logged — the transcript's own, or the backend draft's
       // wrapped in response.event. Dozens arrive per answer, and they pushed
       // every tour.answer line — the ones worth reading — out of the log.
       const inner = (event.event as { type?: unknown } | undefined)?.type;
+      if (inner === 'response.completed') {
+        const answer = (event.event as { response?: { id?: unknown } }).response?.id;
+        if (typeof answer === 'string') answerIds.current.push(answer);
+      }
       const routine = type.endsWith('.delta') || (typeof inner === 'string' && inner.endsWith('.delta'));
       if (!routine) {
         const extra = Object.keys(rest).length ? ` ${JSON.stringify(rest).slice(0, 300)}` : '';
@@ -1183,13 +1957,24 @@ export default function TourStage() {
       if (type === 'session.started' && point.current) sharePoint(point.current.id);
       // The connection can be heard now: what the visitor said while it was
       // opening goes first.
-      if (type === 'session.started') wake.current?.pass();
+      if (type === 'session.started') {
+        wake.current?.pass();
+        crtGlitch(0.55, 240);
+      }
       // A beat after the greeting starts, so the photo arrives with the hello
       // rather than ahead of it.
       if (type === 'session.started' && welcomePhotos.current.length) {
         const ids = welcomePhotos.current;
         welcomePhotos.current = [];
         window.setTimeout(() => emitImages(ids), 1800);
+      }
+
+      // The line went down under a live session. Not 'disconnected', which
+      // often recovers by itself; 'failed' does not.
+      if (type === 'client.pc.failed' && stateRef.current === 'live') {
+        disconnectRef.current();
+        setNotice('lost');
+        return;
       }
 
       const intent = interpret(event);
@@ -1264,6 +2049,7 @@ export default function TourStage() {
           if (intent.active) {
             release(thinking);
             listening.current ??= char.current!.hold('listening', { key: 'tour' });
+            setVoiceTurn('you');
           } else {
             release(listening);
           }
@@ -1272,6 +2058,7 @@ export default function TourStage() {
         case 'thinking':
           if (intent.active && !speaking.current) {
             thinking.current ??= char.current!.hold('thinking', { key: 'tour' });
+            setVoiceTurn('thinking');
           }
           break;
 
@@ -1280,8 +2067,10 @@ export default function TourStage() {
             release(thinking);
             release(listening);
             speaking.current ??= char.current!.hold('speaking', { key: 'tour' });
+            setVoiceTurn('talking');
           } else {
             release(speaking);
+            setVoiceTurn('listening');
           }
           break;
 
@@ -1299,6 +2088,7 @@ export default function TourStage() {
           release(listening);
           release(thinking);
           release(speaking);
+          setVoiceTurn('listening');
           // Shown because a per-minute bill you cannot see is one you only
           // discover on the dashboard.
           if (intent.seconds != null) {
@@ -1308,11 +2098,12 @@ export default function TourStage() {
             setLastClose(String(intent.reason));
           }
           setLive_(0);
-          reportEnd();
+          // Closed by the other end, not by disconnect(), which reports its own.
+          if (from === session.current) endOnce(from ?? null);
           break;
       }
     },
-    [appendLine, classifySentence, emitImages, flushModelTail, releasePoint, sharePoint],
+    [appendLine, classifySentence, endOnce, emitImages, flushModelTail, releasePoint, sharePoint],
   );
 
   /**
@@ -1322,6 +2113,13 @@ export default function TourStage() {
   const connect = useCallback(async (opts?: { byVoice?: boolean }) => {
     const byVoice = opts?.byVoice === true;
     if (connecting.current || overRef.current) return;
+    // Talking, with no microphone yet and the browser not having said yes:
+    // ours first, so the browser's prompt never arrives unexplained.
+    const needsMic = modeRef.current === 'voice' && (!wake.current || wake.current.silent);
+    if (needsMic && !byVoice && !micAsked.current && micAccessRef.current !== 'granted') {
+      setAskMic('start');
+      return;
+    }
     disconnectRef.current({ keepMic: true });
     connecting.current = true;
     window.clearTimeout(dozeTimer.current);
@@ -1329,6 +2127,8 @@ export default function TourStage() {
     greeted.current = false;
     heardVisitor.current = false;
     setFault(null);
+    setNotice(null);
+    stopRecorded.current?.();
     startedAt.current = performance.now();
     lastVoice.current = startedAt.current;
     setCaptionFrom(linesRef.current.length);
@@ -1343,15 +2143,28 @@ export default function TourStage() {
     if (remembered !== micId) setMicId(remembered);
 
     const s = createLiveSession({
-      onEvent: handleEvent,
+      onEvent: (event) => handleEvent(event, s),
       onStateChange: (next) => {
+        // A session being replaced confirms its close after the new one is
+        // live; its 'closed' is not the tour's. (Ended with nothing after it,
+        // session.current is null and the close is the tour's own.)
+        if (session.current && session.current !== s) return;
         setState(next);
+        if (next === 'live' || next === 'error') setRenewing(false);
         if (next !== 'live') return;
         setDozing(false);
         release(drowsy);
       },
       microphone: async () => {
-        const mic = wake.current ?? (await createWakeMic(remembered || undefined));
+        // Typed until now, talking from here: the silent stand-in gives way to the real one.
+        if (wake.current?.silent && modeRef.current === 'voice') {
+          wake.current.close();
+          wake.current = null;
+        }
+        if (!wake.current && modeRef.current === 'voice') micAsked.current = true;
+        const mic =
+          wake.current ??
+          (modeRef.current === 'text' ? createSilentMic() : await createWakeMic(remembered || undefined));
         // Ended while the browser was still asking for the microphone.
         if (session.current !== s) {
           if (!wake.current) mic.close();
@@ -1370,12 +2183,19 @@ export default function TourStage() {
       history: () => linesRef.current,
       onSession: (info) => {
         maxSeconds.current = info.maxSeconds ?? Infinity;
+        beyond.current = info.remaining ?? Infinity;
         lastSession.current = info.last === true;
         welcomePhotos.current = info.spotlight ?? [];
         // The cards have to be on stage before one can come forward.
         if (welcomePhotos.current.length) setArrived(true);
       },
       async onLocalStream(stream) {
+        // Kept for the mute control; a session started while muted (or typing) starts that way.
+        localStream.current = stream;
+        stream.getAudioTracks().forEach((t) => (t.enabled = !micOffRef.current));
+        // Again when the microphone is swapped mid-session: PIP's ears move to the new one.
+        detachHearing.current?.();
+        cancelAnimationFrame(micRaf.current);
         detachHearing.current = await char.current!.listenTo(stream, { hold: 'auto', volume: 0.5 });
         const { createVoiceEnvelope } = await import('@shrysp/cameo/sound');
         const env = createVoiceEnvelope(stream);
@@ -1398,6 +2218,26 @@ export default function TourStage() {
           }
         }
         detachVoice.current = await char.current!.speakFrom(stream, { hold: 'auto', volume: 0 });
+        // Listened to for the turn: talking while the voice is sounding, and
+        // for a breath after (PIP_QUIET_MS), so the gaps between words don't flicker it.
+        cancelAnimationFrame(voiceRaf.current);
+        voiceEnvelope.current?.stop();
+        const { createVoiceEnvelope } = await import('@shrysp/cameo/sound');
+        const env = createVoiceEnvelope(stream);
+        voiceEnvelope.current = env;
+        let heard = 0;
+        let on = false;
+        const watch = () => {
+          const now = performance.now();
+          if (env.level() > PIP_AUDIBLE_LEVEL) heard = now;
+          const next = now - heard < PIP_QUIET_MS;
+          if (next !== on) {
+            on = next;
+            setPipAudible(next);
+          }
+          voiceRaf.current = requestAnimationFrame(watch);
+        };
+        voiceRaf.current = requestAnimationFrame(watch);
       },
     });
     session.current = s;
@@ -1411,10 +2251,26 @@ export default function TourStage() {
         setFault(null);
         return;
       }
-      throw err;
+      const message = String((err as { message?: unknown } | null)?.message ?? err);
+      // The notice is the same for every fault; the reason is here, for whoever is looking.
+      console.warn('[tour] The session did not start:', message);
+      if (noticeFor(err) === 'unavailable' && PASSING_FAULT.test(message) && startTries.current < START_RETRIES_MS.length) {
+        const delay = START_RETRIES_MS[startTries.current++];
+        setRetrying(true);
+        retryTimer.current = window.setTimeout(() => {
+          setRetrying(false);
+          void connectRef.current(opts);
+        }, delay);
+        return;
+      }
+      startTries.current = 0;
+      setRetrying(false);
+      setNotice(noticeFor(err));
+      return;
     } finally {
       connecting.current = false;
     }
+    startTries.current = 0;
     setMics(await listMicrophones());
   }, [handleEvent, micId]);
 
@@ -1425,6 +2281,9 @@ export default function TourStage() {
    */
   const disconnect = useCallback((opts?: { keepMic?: boolean }) => {
     if (opts?.keepMic !== true) {
+      // Ended by the visitor: a start waiting to be retried is not.
+      window.clearTimeout(retryTimer.current);
+      setRetrying(false);
       window.clearTimeout(dozeTimer.current);
       wake.current?.close();
       wake.current = null;
@@ -1435,6 +2294,10 @@ export default function TourStage() {
     connecting.current = false;
     cancelAnimationFrame(micRaf.current);
     setMicLevel(0);
+    cancelAnimationFrame(voiceRaf.current);
+    voiceEnvelope.current?.stop();
+    voiceEnvelope.current = null;
+    setPipAudible(false);
     detachHearing.current?.();
     detachHearing.current = null;
     detachVoice.current?.();
@@ -1442,7 +2305,7 @@ export default function TourStage() {
     release(listening);
     release(thinking);
     release(speaking);
-    if (session.current) reportEnd();
+    endOnce(session.current);
     session.current?.disconnect();
     session.current = null;
     // An answer arriving after the session ends would pull a face at nobody.
@@ -1450,7 +2313,76 @@ export default function TourStage() {
     window.clearTimeout(spotlightTimer.current);
     window.clearTimeout(modelFlushTimer.current);
     window.clearTimeout(pointOfferTimer.current);
+  }, [endOnce]);
+
+  /** Into a tour begun by typing, the real microphone, in place of the silence it was sending. */
+  const bringMicIn = useCallback(async () => {
+    const s = session.current;
+    const old = wake.current;
+    if (!s || !old?.silent) return;
+    micAsked.current = true;
+    try {
+      const mic = await createWakeMic(micId || localStorage.getItem('tour.micId') || undefined);
+      // Ended, or swapped already, while the browser was asking.
+      if (session.current !== s || wake.current !== old) {
+        mic.close();
+        return;
+      }
+      await s.replaceMicrophone(mic);
+      wake.current = mic;
+      old.close();
+      mic.pass(true);
+    } catch (err) {
+      setMode('text');
+      setMicNote(
+        noticeFor(err) === 'mic-missing'
+          ? 'No microphone found. Keep typing, or connect one and try again.'
+          : 'Your browser is blocking the microphone. Allow it from the address bar, or keep typing.',
+      );
+    }
+  }, [micId]);
+
+  const switchToText = useCallback(() => {
+    setMicNote(null);
+    setMode('text');
   }, []);
+  const switchToVoice = useCallback(() => {
+    setMicNote(null);
+    setMode('voice');
+    if (!wake.current?.silent || session.current?.state !== 'live') return;
+    if (!micAsked.current && micAccessRef.current !== 'granted') setAskMic('switch');
+    else void bringMicIn();
+  }, [bringMicIn]);
+
+  /** From the start screen's type field: straight into talking, not back to the choice. */
+  const startTalking = () => {
+    switchToVoice();
+    modeRef.current = 'voice';
+    void connect();
+  };
+
+  /** Our ask for the microphone, answered: on to the browser's own. */
+  const allowMic = () => {
+    const why = askMic;
+    setAskMic(null);
+    micAsked.current = true;
+    if (why === 'switch') void bringMicIn();
+    else void connect();
+  };
+  const allowMicRef = useRef(allowMic);
+  allowMicRef.current = allowMic;
+  // Allowed from the address bar while ours was up: carry on without another click.
+  useEffect(() => {
+    if (askMic && micAccess === 'granted') allowMicRef.current();
+  }, [askMic, micAccess]);
+  /** …or not: typing instead, and a question already chosen is put now. */
+  const declineMic = () => {
+    const why = askMic;
+    setAskMic(null);
+    setMode('text');
+    modeRef.current = 'text';
+    if (why === 'start' && (pendingAsk.current || pendingTyped.current)) void connect();
+  };
 
   /**
    * The conversation went quiet. The session closes either way; what is
@@ -1513,9 +2445,64 @@ export default function TourStage() {
     closeHandoutRef.current = closeHandout;
   }, [connect, disconnect, doze, state, history, lines, dozing, handout, closeHandout]);
 
+  const silentRef = useRef(silent);
   useEffect(() => {
+    silentRef.current = silent;
     if (audio.current) audio.current.muted = silent;
   }, [silent]);
+
+  /**
+   * Says a notice's line from its recording, PIP's mouth following the sound
+   * and its face set to match. With the sound off the line is still captioned.
+   */
+  const sayNotice = useCallback(
+    async (id: NoticeId) => {
+      stopRecorded.current?.();
+      const { line, face } = NOTICES[id];
+      emitMood(face, null);
+      setRecorded(line);
+      if (silentRef.current || !char.current) return;
+      const el = new Audio(noticeClip(id));
+      let detach: (() => void) | null = null;
+      const stop = () => {
+        el.pause();
+        detach?.();
+        detach = null;
+        if (stopRecorded.current === stop) stopRecorded.current = null;
+      };
+      stopRecorded.current = stop;
+      el.addEventListener('ended', stop, { once: true });
+      el.addEventListener('error', stop, { once: true });
+      try {
+        detach = await char.current.speakFrom(el, { hold: true });
+        if (stopRecorded.current !== stop) return stop();
+        await el.play();
+      } catch {
+        stop();
+      }
+    },
+    [emitMood],
+  );
+
+
+  /**
+   * A notice or the end of the visit takes the centre: a photo or card there
+   * would hide the one thing that says what happened.
+   */
+  useEffect(() => {
+    if (!notice) return;
+    setFocusId(null);
+    closeHandoutRef.current();
+    void sayNotice(notice);
+  }, [notice, sayNotice]);
+  useEffect(() => {
+    if (!over) return;
+    setFocusId(null);
+    closeHandoutRef.current();
+    // Said live already, when there was time to; and nothing to thank anyone
+    // for on a code that was spent before this visit began.
+    if (!saidGoodbye.current && linesRef.current.length > 0) void sayNotice('over');
+  }, [over, sayNotice]);
 
   /**
    * A tab left in the background is the likeliest way for a session to be
@@ -1542,11 +2529,11 @@ export default function TourStage() {
   // A tab closed mid-session never reaches disconnect().
   useEffect(() => {
     const onHide = () => {
-      if (stateRef.current === 'live') reportEnd();
+      if (stateRef.current === 'live') endOnce(session.current);
     };
     window.addEventListener('pagehide', onHide);
     return () => window.removeEventListener('pagehide', onHide);
-  }, []);
+  }, [endOnce]);
 
   /**
    * Space opens the session, Escape ends it.
@@ -1578,11 +2565,6 @@ export default function TourStage() {
 
   useEffect(() => disconnect, [disconnect]);
 
-  useEffect(() => {
-    const el = displayScroll.current;
-    if (!el) return;
-    el.scrollTop = el.scrollHeight;
-  }, [lines, history]);
 
   const live = state === 'live';
 
@@ -1609,16 +2591,59 @@ export default function TourStage() {
         pendingAsk.current = null;
         askRef.current(question);
       }
-      setQuiet(silentFor > CHIPS_AFTER_MS && !thinking.current && !pendingAsk.current);
+      if (pendingTyped.current && greeted.current && silentFor > ASK_AFTER_HELLO_MS) {
+        const question = pendingTyped.current;
+        pendingTyped.current = null;
+        askTypedRef.current(question);
+      }
+      setQuiet(silentFor > CHIPS_AFTER_MS && !thinking.current && !pendingAsk.current && !pendingTyped.current);
       // The server charged this session for maxSeconds and no more; staying
       // connected past it would be time nobody budgeted for.
       const ranFor = (performance.now() - startedAt.current) / 1000;
-      if (ranFor >= maxSeconds.current) {
+      const sessionLeft = maxSeconds.current - ranFor;
+      const visitLeft = Math.max(0, beyond.current + sessionLeft);
+      setTimeLeft(visitLeft <= TIME_SHOWN_SECONDS ? Math.ceil(visitLeft) : null);
+      const s = session.current;
+      // In a pause, once PIP has said hello: a note sent before the session is
+      // ready is lost, and one sent mid-answer cuts across it.
+      if (
+        !warnedTime.current &&
+        greeted.current &&
+        silentFor > RENEW_QUIET_MS &&
+        visitLeft <= TIME_WARN_SECONDS &&
+        visitLeft > GOODBYE_SECONDS * 2
+      ) {
+        warnedTime.current = true;
+        s?.speak(
+          'Let the visitor know, in a few words of your own, that there is about a minute of the tour left, ' +
+            'and that they can keep asking. Then carry on with whatever you were doing.',
+        );
+      }
+      if (lastSession.current && !saidGoodbye.current && sessionLeft <= GOODBYE_SECONDS) {
+        saidGoodbye.current = true;
+        s?.speak(
+          'The tour is out of time. In one or two short sentences, warmly say goodbye, thank them for ' +
+            'coming, and say Shreyas would love to hear from them by email. Do not start anything new.',
+        );
+      }
+      if (sessionLeft <= 0) {
         if (lastSession.current) {
           overRef.current = true;
           setOver(true);
-        } else setFault('This session reached its time limit. Start the tour again to keep going.');
-        disconnectRef.current();
+          disconnectRef.current();
+        } else {
+          setRenewing(true);
+          void connectRef.current();
+        }
+      } else if (
+        !lastSession.current &&
+        sessionLeft <= RENEW_EARLY_SECONDS &&
+        ranFor > maxSeconds.current / 2 &&
+        silentFor > RENEW_QUIET_MS
+      ) {
+        // The cap is close: carry on in a new session now, in this pause.
+        setRenewing(true);
+        void connectRef.current();
       } else if (left <= 0) dozeRef.current();
     }, 500);
     return () => window.clearInterval(id);
@@ -1633,7 +2658,12 @@ export default function TourStage() {
   useLayoutEffect(() => {
     const el = captionText.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [lines]);
+  }, [lines, heard]);
+
+  useEffect(() => {
+    const timers = heardTimers.current;
+    return () => timers.forEach((id) => window.clearTimeout(id));
+  }, []);
 
   /**
    * The honeycomb's lens.
@@ -1655,7 +2685,7 @@ export default function TourStage() {
    */
   useEffect(() => {
     const stage = stageRef.current;
-    if (!stage || !look.honeycomb || !arrived) return;
+    if (!stage || !honey || !arrived) return;
     const strength = look.lens;
     const spacing = look.spacing;
     const spots = new Map(getCloud().map((p) => [p.id, look.chapters ? p.hex.chapter : p.hex.band]));
@@ -1750,7 +2780,7 @@ export default function TourStage() {
         liveBoxes.delete(el);
       }
     };
-  }, [look.honeycomb, look.lens, look.spacing, look.chapters, arrived]);
+  }, [honey, look.lens, look.spacing, look.chapters, arrived]);
 
   /**
    * The glow behind the photo in the centre is the photo itself: a copy of
@@ -1809,15 +2839,20 @@ export default function TourStage() {
   // The published character draws itself inside its own box at any size, so
   // it needs no pulling back into the slot (the local copy hung down-and-right
   // of it, and this page used to compensate).
-  const btn = 'tour-btn';
 
-  const lastLine = lines[lines.length - 1];
-  const caption =
-    lastLine && lines.length > captionFrom
-      ? lastLine.who === 'pip'
-        ? currentSentence(lastLine.text)
-        : lastLine.text.trim()
-      : '';
+  /**
+   * PIP's words show as they are heard, not as they arrive; until the first of
+   * them is, the question it is answering stays up.
+   */
+  const lastIndex = lines.length - 1;
+  const answering = lines[lastIndex]?.who === 'pip' && heard.index !== lastIndex;
+  const captionIndex = answering ? lastIndex - 1 : lastIndex;
+  const lastLine = captionIndex >= captionFrom ? lines[captionIndex] : undefined;
+  const caption = !lastLine
+    ? ''
+    : lastLine.who === 'pip'
+      ? currentSentence(lastLine.text.slice(0, captionIndex === heard.index ? heard.length : undefined))
+      : lastLine.text.trim();
   /** Coming back to a conversation rather than starting one. */
   const paused = lines.length > 0;
   /** Dozing, or paused mid-visit: the stage steps back until PIP is woken. */
@@ -1827,7 +2862,31 @@ export default function TourStage() {
    * the stage, above the words — and goes down to its place in the dock as
    * the tour starts.
    */
-  const intro = !paused && !live && !dozing && !focusId && !handout && state !== 'connecting';
+  const realIntro = !paused && !live && !dozing && !focusId && !handout && state !== 'connecting';
+
+  /** What the stage draws. */
+  const v = {
+    live: live || renewing,
+    // A start being retried reads as one still connecting.
+    state: renewing ? 'live' : retrying ? 'connecting' : state,
+    dozing,
+    paused,
+    over,
+    notice,
+    timeLeft,
+    quiet,
+    lastLine,
+    caption,
+    recorded,
+    asleep: asleep && !renewing,
+    intro: realIntro,
+  };
+  const intro = v.intro;
+  /** The welcome, or the resting card: up when nothing else is in the middle and no session is live. */
+  /** Whose turn it reads as: while PIP can be heard, PIP is talking, whatever the session last said. */
+  const shownTurn: VoiceTurn = pipAudible ? 'talking' : voiceTurn;
+  const startCard =
+    !v.over && !v.notice && !askMic && !focusId && !handout && !v.live && !v.dozing && (v.paused || v.state !== 'connecting');
 
   /**
    * PIP's trip from the start card down to the dock, when `intro` ends.
@@ -1888,31 +2947,34 @@ export default function TourStage() {
   }, []);
   /** With either look on, the photos from the focus photo's chapter stay lit and the rest step back. */
   const chapters = look.chapters;
-  /** A chapter's name sits just above its photos, wherever the layout in use has put them. */
-  const chapterLabelAt = (id: ChapterId) => {
-    const { cx, cy, rx, ry } = CHAPTER_CLUSTERS[id];
-    const spot = look.honeycomb && getCloud().find((p) => p.chapter === id)?.hex.chapter;
-    if (spot) {
-      const { halfW, halfH } = hexPx(spot, look.spacing);
-      return { left: `calc(${cx}% - ${halfW.toFixed(0)}px)`, top: `calc(${cy}% - ${(halfH + 26).toFixed(0)}px)` };
-    }
-    // Clear of the cluster's top edge, which for a small one is its centre piece.
-    return { left: `${cx - rx - 2}%`, top: `${cy - Math.max(ry + 3, 7.5) - 3}%` };
-  };
   /** Which of a photo's two honeycomb cells is in use. */
   const hexOf = (p: Placed) => (chapters ? p.hex.chapter : p.hex.band);
   const focusChapter = focusId && (look.darkRoom || chapters) ? chapterOf(focusId) : null;
 
   return (
+    <>
     <main
       ref={stageRef}
-      className={`tour-stage ${look.darkRoom ? 'tour-stage--dark' : ''} ${asleep ? 'tour-stage--asleep' : ''} ${
-        look.honeycomb ? 'tour-stage--hex' : ''
+      data-crt-target
+      data-landing={landingOver ? '' : undefined}
+      data-self-dive={selfDive ? '' : undefined}
+      data-live={v.live ? '' : undefined}
+      // What the bar has opened over itself, so PIP rises with it (tour.css).
+      data-field={(v.live || (v.dozing && typing)) && typing ? '' : undefined}
+      data-transcript={history && lines.length > 0 ? '' : undefined}
+      data-focus={focusId ? '' : undefined}
+      data-reveal={revealed ? '' : undefined}
+      className={`tour-stage ${lcd.variable} ${look.darkRoom ? 'tour-stage--dark' : ''} ${v.asleep ? 'tour-stage--asleep' : ''} ${
+        honey ? 'tour-stage--hex' : ''
+      } ${drift ? 'tour-stage--drift' : ''
       }`}
-      style={{ '--tour-crt': look.photoCrt } as React.CSSProperties}
+      style={{ '--tour-crt': look.photoCrt, '--pip-h': `${charHeight}px` } as React.CSSProperties}
     >
+      {/* The room: the entrance's tube, powered on. Its scanlines are the CRT glass's now (CrtLayer). */}
+      <canvas ref={roomCanvas} className="tour-room" aria-hidden />
       <canvas ref={glow} className="tour-glow" aria-hidden />
-      <div className="tour-scan" aria-hidden />
+      {/* Where a photo in the centre sits; focusPoint() reads it. */}
+      <div className="tour-focus-probe" aria-hidden />
       <div className="tour-vignette" aria-hidden />
 
       <div
@@ -1921,18 +2983,12 @@ export default function TourStage() {
         style={process.env.NODE_ENV !== 'production' ? { paddingRight: 72 } : undefined}
       >
         <div className="flex items-center gap-3">
-          <Link href="/projects/cameo" className="tour-btn">
+          <Link href="/projects/cameo" className="tour-btn" data-crt-clear>
             <Icon d="M10 3 5 8l5 5" />
             Back
           </Link>
-          {/* PIP sends questions about projects here — see the grounding block in context.ts. */}
-          <Link href="/#selected-work" className="tour-btn">
-            His projects
-            <Icon d="M5 11 11 5M6 5h5v5" />
-          </Link>
-          <h1 className="text-[13px] uppercase tracking-[0.2em] text-[var(--muted-ink)]">
-            PIP &mdash; an interactive tour
-          </h1>
+          {/* Not shown — the stage says what it is — but still the page's heading for a screen reader. */}
+          <h1 className="sr-only">PIP &mdash; an interactive tour</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {/*
@@ -1951,7 +3007,7 @@ export default function TourStage() {
                   </span>
                 )}
               </span>
-              {live && idleIn !== null && (
+              {v.live && idleIn !== null && (
                 <span
                   className={`text-[11px] tabular-nums ${idleIn <= 4 ? 'text-amber-600/80' : 'text-[var(--muted-ink)]'}`}
                 >
@@ -1990,43 +3046,13 @@ export default function TourStage() {
               </span>
             </>
           )}
-          {/* Up here with the other controls, where it does not push the caption around. */}
-          {lines.length > 0 && (
-            <button
-              className={btn}
-              aria-expanded={history}
-              aria-pressed={history}
-              onClick={() => setHistory((h) => !h)}
-              // Space on the window starts and ends the tour.
-              onKeyDown={(e) => e.stopPropagation()}
-            >
-              <Icon d="M3 4.5h10M3 8h10M3 11.5h6" />
-              Transcript
-            </button>
-          )}
-          <button className={btn} onClick={() => setSilent((s) => !s)} aria-pressed={silent}>
-            <Icon d={silent ? 'M3 6h2l3-2.5v9L5 10H3zM11 6.5l3 3M14 6.5l-3 3' : 'M3 6h2l3-2.5v9L5 10H3zM10.5 6a3 3 0 0 1 0 4M12.5 4.5a5.5 5.5 0 0 1 0 7'} />
-            {silent ? 'Sound off' : 'Sound on'}
-          </button>
-          {live ? (
-            <button className={btn} onClick={() => disconnect()}>
-              End
-            </button>
-          ) : over ? null : (
-            <button
-              className={`${btn} tour-btn--primary`}
-              onClick={() => void connect()}
-              disabled={state === 'connecting'}
-            >
-              {state === 'connecting' ? 'Connecting…' : lines.length > 0 ? 'Carry on' : 'Start the tour'}
-            </button>
-          )}
+          {/* The sound, the transcript, the time and End are all in the bar at the bottom (TourBar), in every state. */}
         </div>
       </div>
 
       <audio ref={audio} autoPlay className="hidden" />
 
-      {fault && (
+      {lab && fault && (
         <p className="absolute left-1/2 top-20 z-50 max-w-lg -translate-x-1/2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-[12px] text-red-700">
           {fault}
         </p>
@@ -2060,41 +3086,41 @@ export default function TourStage() {
                 slot={
                   isFocus
                     ? undefined
-                    : look.honeycomb
+                    : drift
+                      ? p.drift.pos
+                      : honey
                       ? hexSlot(hexOf(p), look.spacing)
                       : chapters
                         ? p.cluster.pos
                         : p.pos
                 }
-                size={look.honeycomb ? HEX_CELL / FLOAT_MAX.h : chapters ? p.cluster.size : 1}
-                square={look.honeycomb}
+                size={drift ? p.drift.size : honey ? HEX_CELL / FLOAT_MAX.h : chapters ? p.cluster.size : 1}
+                square={honey}
+                tilt={drift ? p.drift.tilt : 0}
+                depth={drift ? p.drift.depth : 0}
                 tone={focusChapter ? (p.chapter === focusChapter ? 'kin' : 'dim') : undefined}
                 order={p.order}
                 // In a cluster the main pieces sit on top of the small ones around them.
                 z={
                   isFocus
                     ? TOUR_IMAGES.length + 1
-                    : TOUR_IMAGES.length - (chapters ? p.cluster.rank : p.order)
+                    : drift
+                      ? TOUR_IMAGES.length - Math.round(p.drift.depth * 30)
+                      : TOUR_IMAGES.length - (chapters ? p.cluster.rank : p.order)
                 }
                 pointed={p.id === pointedId}
+                arrival={arrival}
                 onPoint={pointAt}
                 onHover={glanceAt}
               />
             );
           })}
       </div>
-
-      {chapters &&
-        arrived &&
-        CHAPTERS.map(({ id, label }) => (
-          <p
-            key={id}
-            className={`tour-chapter ${focusChapter === id ? 'tour-chapter--on' : ''}`}
-            style={chapterLabelAt(id)}
-          >
-            {label}
-          </p>
-        ))}
+      {selfDive && (
+        <div className="tour-self-dive">
+          <LibraryDive ref={selfDiveRef} focus={selfDive} seed={cloudSeed ?? sessionSeed()} />
+        </div>
+      )}
 
       {/*
        * The centre belongs to the photos. Until the tour starts it holds the
@@ -2105,19 +3131,19 @@ export default function TourStage() {
        * is the time that has run out — so the stage says it, and hands the
        * conversation to the person it was about.
        */}
-      {over && !focusId && !handout && (
-        <div className={`tour-start ${paused ? '' : 'tour-start--intro'}`}>
-          <p className="tour-start-title">{paused ? 'That\u2019s the tour' : 'This tour has been taken'}</p>
+      {v.over && !focusId && !handout && (
+        <div className={`tour-start ${v.paused ? '' : 'tour-start--intro'}`}>
+          <p className="tour-start-title">{v.paused ? 'That\u2019s the tour' : 'This tour has been taken'}</p>
           <p className="tour-start-body">
-            {paused
+            {v.paused
               ? 'PIP has used all the time it was given for this visit. Shreyas would be glad to carry on the conversation himself.'
               : 'The time on this access code has been used. Shreyas would be glad to hear from you himself.'}
           </p>
           <div className="tour-end-actions">
-            <a className="tour-btn tour-btn--primary tour-btn--large" href={`mailto:${EMAIL}`}>
+            <a className="tour-btn tour-btn--primary tour-btn--large" data-crt-clear href={`mailto:${EMAIL}`}>
               Email Shreyas
             </a>
-            <Link href="/#selected-work" className="tour-btn tour-btn--large">
+            <Link href="/#selected-work" className="tour-btn tour-btn--large" data-crt-clear>
               See his work
               <Icon d="M5 11 11 5M6 5h5v5" />
             </Link>
@@ -2137,84 +3163,154 @@ export default function TourStage() {
         </div>
       )}
 
-      {!over && !focusId && !handout && !live && !dozing && (paused || state !== 'connecting') && (
-        <div className={`tour-start ${paused ? '' : 'tour-start--intro'}`}>
-          <p className="tour-start-title">{paused ? 'PIP is resting' : 'Meet PIP'}</p>
-          <p className="tour-start-body">
-            {paused
-              ? 'The tour pauses when it goes quiet. PIP remembers what you were talking about.'
-              : 'Shreyas\u2019s guide. Ask it about him out loud, and it answers with the photos around you.'}
-          </p>
-          {!paused && chips.length > 0 && (
-            <div className="tour-chips">
-              <p className="tour-chips-label">Start with a question</p>
-              {chips.map((q) => (
+      {v.notice && !v.over && !v.live && v.state !== 'connecting' && (
+        <div className={`tour-start ${v.paused ? '' : 'tour-start--intro'}`} role="alert">
+          <p className="tour-start-title">{NOTICES[v.notice].title}</p>
+          <p className="tour-start-body">{NOTICES[v.notice].body}</p>
+          <div className="tour-end-actions">
+            {NOTICES[v.notice].actions.map((action, i) => {
+              const cls = `tour-btn tour-btn--large ${i === 0 ? 'tour-btn--primary' : ''}`;
+              return action === 'email' ? (
+                <a key={action} className={cls} href={`mailto:${EMAIL}`}>
+                  Email Shreyas
+                </a>
+              ) : (
                 <button
-                  key={q}
-                  className="tour-chip"
-                  onClick={() => ask(q)}
+                  key={action}
+                  className={cls}
+                  onClick={() => {
+                    if (action !== 'type') return void connect();
+                    setNotice(null);
+                    switchToText();
+                  }}
                   onKeyDown={(e) => e.stopPropagation()}
-                  disabled={state === 'connecting'}
                 >
-                  {q}
+                  {action === 'retry' ? 'Try again' : action === 'type' ? 'Type instead' : 'Carry on'}
                 </button>
-              ))}
-            </div>
-          )}
-          <button className="tour-btn tour-btn--primary tour-btn--large" onClick={() => void connect()} disabled={state === 'connecting'}>
-            {state === 'connecting' ? 'Connecting…' : paused ? 'Carry on' : 'Start the tour'}
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {startCard && v.paused && (
+        <div className="tour-start">
+          <p className="tour-start-title">PIP is resting</p>
+          <p className="tour-start-body">The tour pauses when it goes quiet. PIP remembers what you were talking about.</p>
+          <button className="tour-btn tour-btn--primary tour-btn--large" data-crt-clear onClick={() => void connect()} disabled={v.state === 'connecting'}>
+            {v.state === 'connecting' ? 'Connecting…' : 'Carry on'}
           </button>
           <p className="tour-start-hint">
             or press <kbd>Space</kbd>
-            {!paused && ' \u00b7 uses your microphone, and pauses when it goes quiet'}
           </p>
+        </div>
+      )}
+      {startCard && !v.paused && (
+        <div className="tour-start tour-start--intro">
+          <p className="tour-start-title">{visitor ? `${dayPart || 'Hello'}, ${visitor}` : 'Meet PIP'}</p>
+          <p className="tour-start-body">
+            PIP is Shreyas{'\u2019'}s guide. Ask about him out loud, and it answers with the photos around you.
+          </p>
+          <MicCheck ready={settled} />
+          {/* Talk or type swaps through a blur, the one going before the other comes. */}
+          <AnimatePresence mode="wait" initial={false}>
+          {typing ? (
+            <fm.div key="type" className="tour-start-swap" {...START_SWAP}>
+              <form className="tour-type" onSubmit={submitTyped}>
+                <input
+                  className="tour-type-input" data-crt-clear
+                  value={typed}
+                  onChange={(e) => setTyped(e.target.value)}
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                    if (e.key === 'Escape') switchToVoice();
+                  }}
+                  placeholder="Ask PIP about Shreyas"
+                  aria-label="Ask PIP about Shreyas"
+                  autoFocus
+                />
+                <button className="tour-btn tour-btn--primary tour-btn--large" data-crt-clear disabled={!typed.trim()}>
+                  Ask
+                </button>
+              </form>
+              <button className="tour-switch" onClick={startTalking} onKeyDown={(e) => e.stopPropagation()}>
+                <Icon d={MIC_ICON} />
+                Talk instead
+              </button>
+            </fm.div>
+          ) : (
+            <fm.div key="talk" className="tour-start-actions" {...START_SWAP}>
+              <button className="tour-btn tour-btn--primary tour-btn--large" data-crt-clear onClick={() => void connect()} disabled={v.state === 'connecting'}>
+                {v.state === 'connecting' ? 'Connecting…' : 'Start talking'}
+              </button>
+              <button className="tour-btn tour-btn--large" data-crt-clear onClick={switchToText} onKeyDown={(e) => e.stopPropagation()}>
+                <Icon d={KEYS_ICON} />
+                Type instead
+              </button>
+            </fm.div>
+          )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/*
+       * Ours, before the browser's: a browser's own microphone prompt cannot
+       * be restyled or replaced, only preceded — so it comes as the answer to
+       * a question the visitor has already said yes to, and typing is offered
+       * as the way round it. Blocked already, it says how to unblock instead.
+       */}
+      {askMic && (
+        <div
+          className={`tour-start tour-mic-ask ${askMic === 'start' ? 'tour-start--intro' : 'tour-mic-ask--live'}`}
+          role="dialog"
+          aria-modal="false"
+          aria-labelledby="tour-mic-ask-title"
+          onKeyDown={(e) => {
+            e.stopPropagation();
+            if (e.key === 'Escape') declineMic();
+          }}
+        >
+          <span className="tour-mic-ask-icon" aria-hidden>
+            <Icon d={MIC_ICON} />
+          </span>
+          <p id="tour-mic-ask-title" className="tour-start-title">
+            {micAccess === 'denied' ? 'Your microphone is blocked' : 'PIP needs to hear you'}
+          </p>
+          <p className="tour-start-body">
+            {micAccess === 'denied'
+              ? 'To talk to PIP, allow the microphone from the icon at the left of the address bar. Or ask by typing instead.'
+              : 'Your browser will ask for the microphone next. It\u2019s only used while you talk to PIP, and you can mute it or switch to typing any time.'}
+          </p>
+          <div className="tour-start-actions">
+            <button className="tour-btn tour-btn--primary tour-btn--large" data-crt-clear onClick={allowMic} autoFocus>
+              {micAccess === 'denied' ? 'Try again' : 'Allow microphone'}
+            </button>
+            <button className="tour-btn tour-btn--large" data-crt-clear onClick={declineMic}>
+              <Icon d={KEYS_ICON} />
+              Type instead
+            </button>
+          </div>
         </div>
       )}
 
       {handout && (
         <TourHandout
           // A different card is a new arrival, not the old one changing its mind.
-          key={handout.kind + ('project' in handout ? handout.project : 'link' in handout ? handout.link : '')}
+          key={handout.kind + ('project' in handout ? handout.project : '')}
           handout={handout}
-          look={cards.style as HandoutLook}
           leaving={handoutLeaving}
           onClose={closeHandout}
-          style={
-            {
-              '--handout-w': `${cards.width}px`,
-              '--handout-top': `${cards.top}%`,
-              '--handout-crt': cards.crt,
-            } as React.CSSProperties
-          }
+          style={{ '--handout-w': `${cards.width}px` } as React.CSSProperties}
         />
       )}
 
-      {history && (
-        <div className="tour-history">
-          <div className="tour-history-head">
-            <span>Transcript</span>
-            <button className="tour-btn" onClick={() => setHistory(false)} onKeyDown={(e) => e.stopPropagation()}>
-              Close
-            </button>
-          </div>
-          <div ref={displayScroll} className="tour-history-lines">
-            {lines.map((l, i) => (
-              <p key={i} className={l.who === 'you' ? 'tour-history-you' : undefined}>
-                <span className="tour-caption-who">{l.who === 'you' ? 'You' : 'PIP'}</span>
-                {l.text.trim()}
-              </p>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Bottom dock — PIP left, what is being said right; contain avoids layout spill. */}
       <div className={`tour-dock ${intro ? 'tour-dock--intro' : ''}`}>
-        {live && quiet && !handout && chips.length > 0 && (
+        {v.live && v.quiet && !handout && chips.length > 0 && (
           <div className="tour-chips tour-chips--dock">
-            <p className="tour-chips-label">Or ask</p>
             {chips.map((q) => (
-              <button key={q} className="tour-chip" onClick={() => ask(q)} onKeyDown={(e) => e.stopPropagation()}>
+              <button key={q} className="tour-chip" data-crt-clear onClick={() => ask(q)} onKeyDown={(e) => e.stopPropagation()}>
                 {q}
               </button>
             ))}
@@ -2241,41 +3337,87 @@ export default function TourStage() {
           // it down — starting, or a photo pointed at first — brings it to the
           // same place, so it never has to shuffle sideways afterwards.
           className={`tour-caption ${intro ? 'tour-caption--closed' : ''}`}
-          style={{ minHeight: charHeight }}
         >
-          {live && caption && lastLine ? (
+          {v.live && v.caption && v.lastLine ? (
             <>
-              <span className="tour-caption-who">{lastLine.who === 'you' ? 'You' : 'PIP'}</span>
+              <span className="tour-turn" data-turn={shownTurn}>
+                <span className="tour-turn-bars" aria-hidden>
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </span>
+                {v.lastLine.who === 'you' && shownTurn !== 'talking'
+                  ? 'You'
+                  : typing && shownTurn === 'listening'
+                    ? 'Your turn'
+                    : TURN_LABEL[shownTurn]}
+                {shownTurn === 'talking' && !typing && <span className="tour-turn-hint">{'\u00b7'} talk to interrupt</span>}
+              </span>
               <p
                 ref={captionText}
-                className={`tour-caption-text ${lastLine.who === 'you' ? 'tour-caption-text--you' : ''}`}
+                className={`tour-caption-text ${v.lastLine.who === 'you' ? 'tour-caption-text--you' : ''}`}
               >
-                {caption}
+                {v.caption}
               </p>
             </>
-          ) : live ? (
+          ) : !v.live && v.recorded && (v.notice || v.over) ? (
+            <>
+              <span className="tour-caption-who">PIP</span>
+              <p className="tour-caption-text">{v.recorded}</p>
+            </>
+          ) : v.live ? (
             <p className="tour-caption-text tour-caption-text--you">
-              Listening… ask anything, or point at a photo.
+              {typing ? 'Type a question below, or point at a photo.' : 'Listening… ask anything, or point at a photo.'}
             </p>
-          ) : dozing ? (
+          ) : v.dozing ? (
             <p className="tour-caption-text tour-caption-text--you">
-              {state === 'connecting' ? 'Waking up…' : 'PIP is dozing. Just start talking, or press Space.'}
+              {v.state === 'connecting'
+                ? 'Waking up…'
+                : typing
+                  ? 'PIP is dozing. Type a question to wake it.'
+                  : 'PIP is dozing. Just start talking, or press Space.'}
             </p>
-          ) : state === 'connecting' ? (
-            <p className="tour-caption-text tour-caption-text--you">Connecting…</p>
-          ) : (
-            !paused &&
-            !over &&
-            // Only a photo is something to ask about; a card in the centre speaks for itself.
-            !handout && (
-              <p className="tour-caption-text tour-caption-text--you">
-                Press Space to start the tour and ask about this photo.
-              </p>
-            )
-          )}
+          ) : null}
         </div>
       </div>
 
+      {/*
+       * The controls, in one bar under PIP, there from the first screen to
+       * the last so nothing in it has to move between states (see TourBar).
+       */}
+      <div className="tour-controls">
+        {typing && micNote && <p className="tour-mic-note-live">{micNote}</p>}
+        <TourBar
+            session={v.live || (v.dozing && typing)}
+            turn={shownTurn}
+            // With the start card closed (a photo open, a notice read) the way into the tour is here.
+            resume={
+              v.live || v.over || startCard
+                ? null
+                : {
+                    label: v.state === 'connecting' ? 'Connecting…' : v.paused ? 'Carry on' : 'Start the tour',
+                    disabled: v.state === 'connecting',
+                    onClick: () => void connect(),
+                  }
+            }
+            typing={typing}
+            typed={typed}
+            setTyped={setTyped}
+            onSubmit={submitTyped}
+            onTalk={switchToVoice}
+            onType={switchToText}
+            muted={muted}
+            setMuted={setMuted}
+            silent={silent}
+            setSilent={setSilent}
+            lines={lines}
+            history={history}
+            setHistory={setHistory}
+            timeLeft={v.timeLeft}
+            onEnd={() => disconnect()}
+          />
+      </div>
       {lab && log.length > 0 && (
         <div className="tour-events">
           <p className="mb-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted-ink)]">Events</p>
@@ -2287,5 +3429,7 @@ export default function TourStage() {
         </div>
       )}
     </main>
+    {/* PIP's tube over the stage is in the shared layout (EntranceHost), carried on from the entrance. */}
+    </>
   );
 }

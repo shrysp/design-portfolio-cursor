@@ -24,7 +24,7 @@ export type LiveSessionOptions = {
    */
   endpoint: string;
   /** What the server allows this session: how long it may run. */
-  onSession?: (info: { maxSeconds?: number; spotlight?: string[]; last?: boolean }) => void;
+  onSession?: (info: { maxSeconds?: number; remaining?: number; spotlight?: string[]; last?: boolean }) => void;
   /** The code has no tour time left. Called instead of the connection failing loudly. */
   onSpent?: () => void;
   /**
@@ -74,6 +74,11 @@ export type LiveSession = {
    * are explicit that it never takes a turn on its own.
    */
   think: (content: string) => void;
+  /**
+   * Sends another microphone from now on, without a new session — a visitor
+   * who started by typing and now wants to talk. Borrowed like `microphone`'s.
+   */
+  replaceMicrophone: (next: { send: MediaStream; raw: MediaStream }) => Promise<void>;
   get state(): LiveState;
 };
 
@@ -214,7 +219,12 @@ export function createLiveSession(options: LiveSessionOptions): LiveSession {
       // connection that no longer exists.
       if (pc !== connection) return;
       if (typeof result.greeting === 'string') greeting = result.greeting;
-      options.onSession?.({ maxSeconds: result.maxSeconds, spotlight: result.spotlight, last: result.last === true });
+      options.onSession?.({
+        maxSeconds: result.maxSeconds,
+        remaining: typeof result.remaining === 'number' ? result.remaining : undefined,
+        spotlight: result.spotlight,
+        last: result.last === true,
+      });
 
       await connection.setRemoteDescription({ type: 'answer', sdp: result.transport.sdp });
       setState('live');
@@ -313,6 +323,17 @@ export function createLiveSession(options: LiveSessionOptions): LiveSession {
         delegation_id: null,
         content,
       });
+    },
+    async replaceMicrophone(next) {
+      const track = next.send.getAudioTracks()[0];
+      const sender = pc?.getSenders().find((s) => s.track?.kind === 'audio');
+      if (!track || !sender) throw new Error('No microphone to replace.');
+      await sender.replaceTrack(track);
+      if (ownsMic) mic?.getTracks().forEach((t) => t.stop());
+      ownsMic = false;
+      mic = next.send;
+      options.onLocalStream?.(next.raw);
+      options.onEvent({ type: 'client.mic', label: track.label, enabled: track.enabled, muted: track.muted });
     },
     get state() {
       return state;

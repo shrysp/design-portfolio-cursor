@@ -162,6 +162,9 @@ export async function POST(request: Request) {
   return Response.json({
     ...JSON.parse(body),
     maxSeconds: started.maxSeconds,
+    // What the code has left beyond this session, so the tour can count down
+    // the whole visit rather than one session of it.
+    remaining: Math.max(0, started.remaining),
     // Whether this is the last session the code has time for, so the tour can
     // say goodbye when it ends rather than offer a way on that will not open.
     last: started.remaining < MIN_SESSION_SECONDS,

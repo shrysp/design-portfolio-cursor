@@ -17,7 +17,7 @@ interface CaseStudyProps {
 
 export function CaseStudy({ title, children }: CaseStudyProps) {
   return (
-    <div className="min-h-screen flex justify-center bg-stone-50">
+    <div data-case-study className="min-h-screen flex justify-center bg-stone-50">
       <SectionRail title={title} />
       <main className="w-full max-w-(--column) flex flex-col gap-16 md:pt-24 pt-8 md:px-0 px-4 pb-24">
         <ProjectHeader title={title} />

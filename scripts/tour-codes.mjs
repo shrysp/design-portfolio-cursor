@@ -10,6 +10,7 @@
  *   npm run tour:codes -- set "Jordan at Figma" --note "…"   change who a code is for
  *   npm run tour:codes -- list                         who has one, and what they've used
  *   npm run tour:codes -- revoke "Jordan at Figma"     stop a code working, at once
+ *   npm run tour:codes -- reset "Jordan at Figma"      give back all their time, and zero their cost
  *
  * Talks to the same Upstash store the site reads (UPSTASH_REDIS_REST_URL and
  * _TOKEN, from the environment or .env.local). A code is shown once, when it
@@ -58,8 +59,9 @@ const hash = (code) =>
 
 // No 0/O or 1/I/L: these get read aloud and typed by hand.
 const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+// Eight characters, in two fours (XXXX-XXXX): the access code field takes exactly eight.
 const newCode = () =>
-  Array.from({ length: 3 }, () =>
+  Array.from({ length: 2 }, () =>
     Array.from({ length: 4 }, () => ALPHABET[randomInt(ALPHABET.length)]).join(''),
   ).join('-');
 
@@ -68,6 +70,34 @@ const record = (flat) => Object.fromEntries(flat.flatMap((v, i) => (i % 2 ? [] :
 async function all() {
   const ids = await cmd('SMEMBERS', INDEX);
   return Promise.all(ids.map(async (id) => ({ id, ...record(await cmd('HGETALL', codeKey(id))) })));
+}
+
+/**
+ * Codes written as Notion rows are in the store under their hash but not in
+ * INDEX, so they are found through the row: its title is the label.
+ */
+async function fromNotion(label) {
+  const { NOTION_TOKEN, NOTION_VISITORS_DB } = process.env;
+  if (!NOTION_TOKEN || !NOTION_VISITORS_DB) return [];
+  const res = await fetch(`https://api.notion.com/v1/databases/${NOTION_VISITORS_DB}/query`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${NOTION_TOKEN}`, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' },
+    body: '{}',
+  });
+  if (!res.ok) throw new Error(`Notion ${res.status}`);
+  const text = (p) => (p?.rich_text ?? p?.title ?? []).map((t) => t.plain_text ?? '').join('').trim();
+  return (await res.json()).results
+    .filter((page) => text(Object.values(page.properties).find((p) => p.type === 'title')) === label)
+    .map((page) => ({ page: page.id, id: hash(text(page.properties.Code)) }));
+}
+
+async function notionPatch(page, properties) {
+  const res = await fetch(`https://api.notion.com/v1/pages/${page}`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${process.env.NOTION_TOKEN}`, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ properties }),
+  });
+  if (!res.ok) throw new Error(`Notion ${res.status}: ${(await res.text()).slice(0, 200)}`);
 }
 
 const argv = process.argv.slice(2);
@@ -110,7 +140,25 @@ if (action === 'add' && label) {
   if (!hits.length) throw new Error(`No code labelled "${label}".`);
   for (const r of hits) await cmd('HSET', codeKey(r.id), 'revoked', 1);
   console.log(`Revoked ${hits.length} code(s) for ${label}. A tour already in progress runs out its session.`);
+} else if (action === 'reset' && label) {
+  const ids = new Set((await all()).filter((r) => r.label === label).map((r) => r.id));
+  const rows = await fromNotion(label);
+  for (const r of rows) ids.add(r.id);
+  if (!ids.size) throw new Error(`No code labelled "${label}".`);
+  let n = 0;
+  for (const id of ids) {
+    const rec = record(await cmd('HGETALL', codeKey(id)));
+    // A Notion row whose code has never been entered has nothing to reset.
+    if (!rec.label) continue;
+    console.log(`  ${rec.label}: ${(Number(rec.used ?? 0) / 60).toFixed(1)} min used → 0`);
+    // An open session would hand back time it never took: close it out too.
+    await cmd('HSET', codeKey(id), 'used', 0, 'apiMicros', 0);
+    await cmd('HDEL', codeKey(id), 'openAt', 'openReserve');
+    n++;
+  }
+  for (const r of rows) await notionPatch(r.page, { 'Minutes used': { number: 0 }, Cost: { number: 0 } });
+  console.log(`Reset ${n} code(s) for ${label}${rows.length ? ', and its Notion row' : ''}.`);
 } else {
-  console.log('Usage: tour-codes add "<label>" [minutes] [--name … --note … --photos id,id] | set "<label>" --… | list | revoke "<label>"');
+  console.log('Usage: tour-codes add "<label>" [minutes] [--name … --note … --photos id,id] | set "<label>" --… | list | revoke "<label>" | reset "<label>"');
   process.exit(1);
 }

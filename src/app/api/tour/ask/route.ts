@@ -15,7 +15,10 @@
  * a click costs a model call only the first time anyone makes it.
  */
 
+import { after } from 'next/server';
+import { chargeApi } from '@/lib/tour/server/access';
 import { accessFrom } from '@/lib/tour/server/auth';
+import { backendMicros } from '@/lib/tour/server/costs';
 import { TOUR_BACKEND_MODEL, backendInstructions } from '@/lib/tour/server/context';
 import { getStore, toRecord } from '@/lib/tour/server/store';
 import { currentStory, refreshStory } from '@/lib/tour/server/story';
@@ -31,7 +34,8 @@ async function versionOf(story: string): Promise<string> {
 }
 
 export async function POST(request: Request) {
-  if (!(await accessFrom(request))) {
+  const id = await accessFrom(request);
+  if (!id) {
     return Response.json({ error: 'An access code is required.' }, { status: 401 });
   }
 
@@ -76,6 +80,8 @@ export async function POST(request: Request) {
     if (!answer) throw new Error('The model returned no answer.');
 
     await store.cmd('HSET', kept, 'text', answer, 'version', version);
+    // Written once and kept for everyone; whoever asked first pays for it.
+    after(() => chargeApi(id, backendMicros(data.usage)));
     return Response.json({ answer });
   } catch (err) {
     console.error('[tour/ask]', err);

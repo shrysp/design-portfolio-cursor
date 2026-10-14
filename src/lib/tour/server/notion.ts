@@ -20,8 +20,14 @@
  *   Minutes         number    their time budget; empty means the default
  *   Welcome photos  multi-select or text   ids from src/data/tour-images.ts, shown during the hello
  *   Active          checkbox  untick to stop the code working; a table without the column is all active
+ *   Invite          checkbox  tick to send them an invitation instead of a code: their link
+ *                             (/invite/<code>) opens on a ticket PIP prints for them
+ *   Invite no.      number    the number printed on their ticket ("No. 07")
+ *   Invite note     text      a line from Shreyas, in his hand on the ticket, to them —
+ *                             not the Greeting note, which is PIP's to say about them
  *   Minutes used    number    written back by the site
  *   Last visit      date      written back by the site
+ *   Cost            number    written back by the site: dollars spent on them so far (see costs.ts)
  */
 
 const API = process.env.NOTION_API_URL ?? 'https://api.notion.com';
@@ -41,6 +47,9 @@ export type NotionVisitor = {
   minutes: number | null;
   photos: string[];
   active: boolean;
+  invite: boolean;
+  inviteNo: number | null;
+  inviteNote: string;
 };
 
 export const notionConfigured = () => Boolean(process.env.NOTION_TOKEN && process.env.NOTION_VISITORS_DB);
@@ -98,6 +107,9 @@ function read(page: Page): NotionVisitor {
       .filter(Boolean),
     // No Active column at all means nobody has been switched off.
     active: props['Active']?.type === 'checkbox' ? props['Active'].checkbox === true : true,
+    invite: props['Invite']?.checkbox === true,
+    inviteNo: typeof props['Invite no.']?.number === 'number' ? props['Invite no.'].number : null,
+    inviteNote: text(props['Invite note']),
   };
 }
 
@@ -129,17 +141,58 @@ export async function getVisitor(page: string, timeoutMs?: number): Promise<Noti
 }
 
 /** Writes what a person has used back to their row, so the table doubles as the record of who came. */
-export async function reportUsage(page: string, minutesUsed: number, lastVisit: Date): Promise<void> {
-  const res = await notion(`pages/${page}`, {
-    method: 'PATCH',
-    body: {
-      properties: {
-        'Minutes used': { number: minutesUsed },
-        'Last visit': { date: { start: lastVisit.toISOString() } },
+export async function reportUsage(
+  page: string,
+  usage: { minutesUsed: number; lastVisit: Date; cost: number },
+): Promise<void> {
+  const properties: Record<string, unknown> = {
+    'Minutes used': { number: usage.minutesUsed },
+    'Last visit': { date: { start: usage.lastVisit.toISOString() } },
+    Cost: { number: usage.cost },
+  };
+  let res = await notion(`pages/${page}`, { method: 'PATCH', body: { properties } });
+  // A table without a Cost column still gets its minutes.
+  if (res.status === 400 && (await res.clone().text()).includes('Cost')) {
+    delete properties.Cost;
+    res = await notion(`pages/${page}`, { method: 'PATCH', body: { properties } });
+  }
+  if (!res.ok) throw new Error(`Notion ${res.status}: ${(await res.text()).slice(0, 200)}`);
+}
+
+/**
+ * A session's conversation, added to the bottom of the visitor's own page in
+ * the table: a heading with when it was, then each line — theirs and PIP's —
+ * and a divider. Nothing reads a visitor's page body back (their context is
+ * the Context column), so this is a record only. Lines are as the voice model
+ * transcribed them; typed ones are exact.
+ */
+export async function appendExchange(page: string, lines: { who: 'you' | 'pip'; text: string }[], at: Date): Promise<void> {
+  // Notion's limit for one run of text.
+  const cut = (t: string) => (t.length > 1900 ? `${t.slice(0, 1900)}…` : t);
+  const blocks: unknown[] = [
+    {
+      type: 'heading_3',
+      heading_3: {
+        // A date mention, so Notion shows it in the reader's own time zone.
+        rich_text: [{ type: 'text', text: { content: 'Conversation · ' } }, { type: 'mention', mention: { date: { start: at.toISOString() } } }],
       },
     },
-  });
-  if (!res.ok) throw new Error(`Notion ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    ...lines.map((l) => ({
+      type: 'paragraph',
+      paragraph: {
+        rich_text: [
+          { type: 'text', text: { content: l.who === 'you' ? 'Them: ' : 'PIP: ' }, annotations: { bold: true } },
+          { type: 'text', text: { content: cut(l.text) }, annotations: { color: l.who === 'you' ? 'default' : 'gray' } },
+        ],
+      },
+    })),
+    { type: 'divider', divider: {} },
+  ];
+  // At most 100 blocks a request, in order.
+  for (let i = 0; i < blocks.length; i += 100) {
+    const res = await notion(`blocks/${page}/children`, { method: 'PATCH', body: { children: blocks.slice(i, i + 100) }, timeoutMs: 8000 });
+    if (!res.ok) throw new Error(`Notion ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  }
 }
 
 type Block = {

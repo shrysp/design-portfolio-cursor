@@ -670,3 +670,8 @@ video:not([controls])::-webkit-media-controls-fullscreen-button {
   display: none !important;
 }
 
+
+/* The tuning panels (development only): beside the feedback button in the corner, not under it. */
+.dialkit-root .dialkit-panel[data-position="bottom-right"] {
+  right: 72px;
+}

@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { refreshVisitor } from '@/lib/tour/server/access';
+import { after } from 'next/server';
+import { refreshVisitor, visitorFirstName } from '@/lib/tour/server/access';
 import { refreshStory } from '@/lib/tour/server/story';
 import { ACCESS_COOKIE, verifyAccess } from '@/lib/tour/server/auth';
 import TourStage from './TourStage';
@@ -21,8 +22,10 @@ export default async function TourPage() {
   if (!id) redirect('/projects/cameo#tour');
   // Opening the tour is when Notion is read again — this person's row, and
   // the story if it is due — so the session they are about to start has the
-  // latest of both and does not have to wait for either. Briefly, and never
-  // fatally.
-  await Promise.all([refreshVisitor(id, 2500), refreshStory(2500)]).catch((err) => console.error('[tour]', err));
-  return <TourStage />;
+  // latest of both. After the page is sent, not before: nothing on it is
+  // drawn from them, and the visitor is a click and a microphone prompt away
+  // from a session, which is time enough. Briefly, and never fatally.
+  after(() => Promise.all([refreshVisitor(id, 2500), refreshStory(2500)]).catch((err) => console.error('[tour]', err)));
+  // One read of the saved copy, for the welcome by name.
+  return <TourStage visitor={await visitorFirstName(id)} />;
 }

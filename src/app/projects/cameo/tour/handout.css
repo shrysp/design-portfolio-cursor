@@ -1,0 +1,370 @@
+/*
+ * Handouts — the cards PIP puts in the centre (TourHandout.tsx), and the one
+ * the way in shows a visitor without a code.
+ *
+ * The same thing as the bar at the foot of the stage: smoked plastic in
+ * front of the glass (data-crt-clear), with what it shows set into it. Most
+ * of a card is its window — a picture, recessed, with a faint tube of its
+ * own; or with no picture, a green dot-matrix LCD — and under it one line:
+ * an LCD tag for what kind of card, its name, and its buttons.
+ *
+ * Everything it needs is defined here, on the card, because the way in does
+ * not load the tour's stylesheet.
+ */
+.tour-handout {
+  --handout-ink: #eef1f4;
+  --handout-soft: rgb(238 241 244 / 0.72);
+  --handout-faint: rgb(238 241 244 / 0.42);
+  --handout-lcd: #95d06b;
+  --handout-amber: #ffb13a;
+  --handout-edge: #3e7322;
+  --handout-well:
+    inset 0 2px 4px rgb(0 0 0 / 0.7),
+    0 1px 0 rgb(255 255 255 / 0.07);
+  --handout-gel:
+    0 2px 3px -1px rgb(0 0 0 / 0.55),
+    inset 0 4px 8px 1px rgb(0 0 0 / 0.18),
+    inset 0 -2px 2px 0 rgb(0 0 0 / 0.2);
+
+  position: absolute;
+  left: 50%;
+  /* In the room over PIP's column, where a photo in the centre goes (tour.css --focus-cy). */
+  top: var(--focus-cy, 38%);
+  z-index: 40;
+  display: flex;
+  width: min(calc(100vw - 32px), var(--handout-w, 480px));
+  translate: -50% -50%;
+  flex-direction: column;
+  padding: 5px;
+  border-radius: 22px;
+  border: 1px solid #07090b;
+  background: linear-gradient(to bottom, #363b42, #262a30 60%, #1c1f23);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    inset 0 -1px 0 rgb(0 0 0 / 0.4),
+    0 24px 60px -16px rgb(0 0 0 / 0.75);
+  color: var(--handout-ink);
+  /* In: out of a slight blur and scale, an ease-out; the inside follows a beat after (below). */
+  animation: handout-in calc(320ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+/* Out a little quicker than in (HANDOUT_OUT_MS in TourStage). */
+.tour-handout--leaving {
+  pointer-events: none;
+  animation: handout-out calc(200ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+/* On the way in: hung from where the code card is, under PIP. */
+.tour-handout--entrance {
+  top: 43dvh;
+  translate: -50% 0;
+}
+@keyframes handout-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    scale: 0.97;
+    transform: translateY(10px);
+  }
+}
+@keyframes handout-out {
+  to {
+    opacity: 0;
+    filter: blur(4px);
+    scale: 0.98;
+  }
+}
+/* What is on the card arrives just after the card, in order. */
+.handout-face,
+.handout-line > * {
+  animation: handout-part calc(280ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation-delay: calc((60ms + var(--n, 0) * 40ms) / var(--motion, 1));
+}
+.handout-line > :nth-child(1) { --n: 1; }
+.handout-line > :nth-child(2) { --n: 2; }
+.handout-line > :nth-child(3) { --n: 3; }
+@keyframes handout-part {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+
+/* The window: most of the card. A picture set into the plastic, a small screen with its own tube. */
+.handout-window {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  /* Never taller than the room it is in. */
+  max-height: calc(var(--focus-band, 80dvh) - 72px);
+  width: 100%;
+  overflow: hidden;
+  border-radius: 17px;
+  border: 1px solid #07090b;
+  background: #0b0d10;
+  box-shadow: var(--handout-well);
+}
+.handout-window img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--shot-at, 50% 50%);
+  user-select: none;
+}
+.handout-window:not(.handout-compose)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.16) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 80% 75% at 50% 45%, transparent 55%, rgb(0 0 0 / 0.45));
+  box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.6);
+}
+/* No picture: an LCD, its line typed out in dots. */
+.handout-window--lcd {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(to bottom, #0b1507, #12210a);
+}
+.handout-window--lcd::after {
+  background: radial-gradient(ellipse 80% 75% at 50% 45%, transparent 60%, rgb(0 0 0 / 0.35)) !important;
+}
+.handout-poster {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 20px;
+  font-family: var(--font-dot), ui-monospace, monospace;
+  font-weight: 900;
+  font-variation-settings: 'ROND' 100;
+  line-height: 1;
+  color: var(--handout-lcd);
+  text-shadow: 0 0 8px rgb(149 208 107 / 0.55);
+}
+.handout-poster span {
+  animation: handout-type calc(160ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation-delay: calc((240ms + var(--i) * 30ms) / var(--motion, 1));
+}
+@keyframes handout-type {
+  from {
+    opacity: 0;
+    filter: blur(3px) brightness(1.8);
+  }
+}
+
+/* Writing: the window becomes the page — who to reply to, and the message. */
+.handout-compose {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: linear-gradient(to bottom, #15181c, #1b1f24);
+}
+.handout-input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #07090b;
+  background: linear-gradient(to bottom, #0e1114, #15181c);
+  box-shadow: var(--handout-well);
+  font: inherit;
+  font-size: 14px;
+  color: var(--handout-ink);
+  transition: box-shadow 150ms ease;
+}
+.handout-input::placeholder {
+  color: var(--handout-faint);
+}
+.handout-input:focus-visible {
+  outline: none;
+  box-shadow:
+    var(--handout-well),
+    0 0 0 2px var(--handout-edge);
+}
+.handout-textarea {
+  flex: 1;
+  min-height: 0;
+  resize: none;
+  line-height: 1.5;
+}
+.handout-note {
+  min-height: 0;
+  font-size: 12.5px;
+  color: var(--handout-amber);
+}
+.handout-note:empty {
+  display: none;
+}
+/* Not an error: what is left before it can be sent. */
+.handout-note--hint {
+  color: var(--handout-faint);
+}
+
+/* The one line under the window: what kind of card, its name, what it does. */
+.handout-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 5px 2px 0 8px;
+}
+.handout-tag {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid #07090b;
+  background: linear-gradient(to bottom, #0b1507, #12210a);
+  box-shadow: var(--handout-well);
+  font-family: var(--font-dot), ui-monospace, monospace;
+  font-weight: 900;
+  font-variation-settings: 'ROND' 100;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--handout-lcd);
+  text-shadow: 0 0 6px rgb(149 208 107 / 0.5);
+}
+.handout-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.handout-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+/*
+ * Buttons: the bar's gel, one size for all of them (34px), and the pointer
+ * that says they can be pressed. Graphite by default; green, lit from inside,
+ * for the one that does the thing.
+ */
+.handout-btn {
+  --gel-1: #5d646d;
+  --gel-2: #2b3037;
+  --gel-3: #3b414a;
+  --gel-edge: #0b0d10;
+  --gel-ink: #eef1f4;
+  --gel-gloss: 0.42;
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--gel-edge);
+  background: radial-gradient(at 50% 75%, var(--gel-1), var(--gel-2), var(--gel-3));
+  box-shadow: var(--handout-gel);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--gel-ink);
+  cursor: pointer;
+  transition:
+    filter 180ms ease-out,
+    scale 150ms ease-out;
+}
+.handout-btn::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  right: 3px;
+  height: 50%;
+  border-radius: 999px 999px 6px 6px;
+  background: linear-gradient(to bottom, rgb(255 255 255 / var(--gel-gloss)), rgb(255 255 255 / calc(var(--gel-gloss) * 0.15)));
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .handout-btn:hover:not(:disabled) {
+    filter: brightness(1.12);
+  }
+}
+.handout-btn:active:not(:disabled) {
+  scale: 0.96;
+}
+.handout-btn:focus-visible {
+  outline: 2px solid var(--handout-lcd);
+  outline-offset: 3px;
+}
+.handout-btn:disabled {
+  cursor: default;
+  filter: saturate(0.3) brightness(0.8);
+  opacity: 0.6;
+}
+.handout-btn--go,
+.handout-btn[data-done] {
+  --gel-1: #bcdf9d;
+  --gel-2: #72c13f;
+  --gel-3: #82c953;
+  --gel-edge: #3e7322;
+  --gel-ink: #1d3a0b;
+  --gel-gloss: 0.7;
+  box-shadow:
+    var(--handout-gel),
+    inset 0 0 10px rgb(196 240 150 / 0.45);
+}
+.handout-btn--go {
+  font-weight: 600;
+}
+/* Both of a button's labels, one over the other, only one showing: its width never changes. */
+.handout-btn-labels {
+  display: grid;
+}
+.handout-btn-labels > span {
+  grid-area: 1 / 1;
+  text-align: center;
+}
+.handout-btn-labels > [data-on='false'] {
+  visibility: hidden;
+}
+/* Round, for a link that is only its icon (X, LinkedIn): the same height as the rest. */
+.handout-btn--icon {
+  width: 34px;
+  padding: 0;
+}
+/* Put away: a small round switch on the window's corner. */
+.handout-btn--round {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+}
+.handout-close {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+  z-index: 2;
+}
+/* For bots only. */
+.handout-honey {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-handout,
+  .tour-handout--leaving,
+  .handout-face,
+  .handout-line > *,
+  .handout-poster span {
+    animation: none;
+  }
+  .handout-btn {
+    transition: none;
+  }
+}

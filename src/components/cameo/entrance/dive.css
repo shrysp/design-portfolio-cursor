@@ -1,0 +1,59 @@
+/* The library dive: the tour's photos in depth around PIP, flown through on the way in and on landing. */
+.entrance-dive {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  perspective: 900px;
+  pointer-events: none;
+}
+.entrance-dive-origin {
+  position: absolute;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+/*
+ * Framed as the tour's cards are in the dark room, from the first moment —
+ * the same teal over the same pale card behind it (tour.css: .tour-card,
+ * .tour-card--float, .tour-stage--dark), the width and glow set per photo —
+ * so the frame a photo flies in with is the one it rests in.
+ */
+.entrance-dive-photo {
+  --dive-glow: rgba(33, 187, 171, 0.1);
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 4px solid rgba(33, 187, 171, 0.22);
+  background: #d7dbe0;
+  will-change: transform, opacity;
+}
+.entrance-dive-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/*
+ * Each picture on its own little tube — the very overlay the tour's cards
+ * wear (tour.css, .tour-card::after, at the stage's 0.7), so a photo looks the
+ * same flying in, landing, and at rest on the stage.
+ */
+.entrance-dive-photo::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.7;
+  background:
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 40, 40, 0.07) 0 1px,
+      rgba(40, 255, 90, 0.05) 1px 2px,
+      rgba(60, 90, 255, 0.07) 2px 3px
+    ),
+    radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, 0.38) 100%);
+}
+

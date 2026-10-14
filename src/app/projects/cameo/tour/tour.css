@@ -455,22 +455,6 @@
   color: var(--foreground);
 }
 
-.tour-scan {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  z-index: 30;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    rgba(75, 119, 251, 0.3) 0px,
-    rgba(75, 119, 251, 0.3) 2px,
-    transparent 2px,
-    transparent 4px
-  );
-  mix-blend-mode: color-burn;
-  opacity: 0.35;
-}
-
 .tour-vignette {
   pointer-events: none;
   position: absolute;
@@ -564,7 +548,8 @@
  */
 .tour-card--focus {
   left: 50%;
-  top: 38%;
+  /* The middle of the room over PIP's column (tour-stage's --focus-cy). */
+  top: var(--focus-cy, 38%);
   z-index: 12;
   border-radius: 29px;
   border: 7px solid var(--tour-teal);
@@ -615,12 +600,24 @@
 
 .tour-dock {
   position: absolute;
-  left: 50%;
-  bottom: max(24px, 6.7dvh);
+  left: 0;
+  /* Standing on the bar, which is always there (TourBar), so this never has to move. */
+  bottom: var(--dock-bottom);
   z-index: 40;
+  /* One centred column: PIP at the foot, what is being said over it. */
   display: flex;
-  align-items: flex-end;
-  translate: -50% 0;
+  flex-direction: column-reverse;
+  align-items: center;
+  /*
+   * The column is tall and sits over the start card's buttons, so its own box
+   * must never take the pointer; only what is in it does (below).
+   */
+  pointer-events: none;
+  translate: calc(50vw - 50%) 0;
+  /* Rising and settling with what the bar opens: the bar's own clock (BAR_IN, BAR_EASE in TourStage). */
+  transition:
+    translate calc(720ms / var(--motion, 1)) cubic-bezier(0.16, 1, 0.3, 1),
+    bottom calc(300ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 /*
@@ -658,7 +655,12 @@
 }
 
 .tour-dock--intro .tour-pip-body {
-  translate: calc((min(52vw, 560px) + 24px) / 2) calc(max(24px, 6.7dvh) - 61dvh);
+  /* What in the dock can be pointed at: PIP, the suggestions, and words being said. */
+.tour-dock > :is(.tour-pip, .tour-chips--dock, .tour-caption:not(.tour-caption--closed)) {
+  pointer-events: auto;
+}
+/* Straight up from its place in the dock: PIP is centred in both. */
+  translate: 0 calc(var(--dock-bottom) - 61dvh);
   scale: 1.4;
 }
 
@@ -675,26 +677,40 @@
  */
 .tour-caption {
   display: flex;
-  width: min(52vw, 560px);
+  width: var(--caption-w);
+  /* Fixed, whatever is said: three lines and whose turn it is. The room over PIP's column is worked out from it. */
+  height: var(--caption-h);
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-end;
   gap: 6px;
-  margin-left: 24px;
+  margin-bottom: 10px;
   overflow: hidden;
   padding-bottom: 6px;
-  /* Comes up once PIP has landed beside it — see .tour-pip. */
-  transition: opacity 400ms ease 800ms;
+  text-align: center;
+  /*
+   * Comes up with PIP as it lands beside it: the same arrival as the rest of
+   * the site, out of a blur and a little low (page.tsx, globals.css page-blur-in).
+   */
+  transition:
+    opacity calc(480ms / var(--motion, 1)) cubic-bezier(0.2, 0.8, 0.2, 1) calc(420ms / var(--motion, 1)),
+    filter calc(480ms / var(--motion, 1)) cubic-bezier(0.2, 0.8, 0.2, 1) calc(420ms / var(--motion, 1)),
+    transform calc(480ms / var(--motion, 1)) cubic-bezier(0.2, 0.8, 0.2, 1) calc(420ms / var(--motion, 1)),
+    width calc(720ms / var(--motion, 1)) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tour-caption--closed {
   pointer-events: none;
   opacity: 0;
+  filter: blur(8px);
+  transform: translateY(14px);
   transition: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tour-caption {
+  .tour-caption,
+  .tour-dock,
+  .tour-controls {
     transition: none;
   }
 }
@@ -728,47 +744,6 @@
   color: var(--control-ink);
 }
 
-
-/* Drops from its button in the top bar, over a side band rather than the photo. */
-.tour-history {
-  position: absolute;
-  right: 20px;
-  top: 68px;
-  z-index: 60;
-  display: flex;
-  max-height: min(64dvh, 560px);
-  width: min(calc(100vw - 40px), 400px);
-  flex-direction: column;
-  border-radius: 20px;
-  box-shadow: 0 0 0 4px var(--tour-teal-glow);
-  border: 1px solid var(--hairline);
-  background: var(--tour-panel);
-  backdrop-filter: blur(12px);
-}
-
-.tour-history-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--hairline);
-  padding: 10px 12px 10px 18px;
-  font-size: 12px;
-  color: var(--control-ink);
-}
-
-.tour-history-lines {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overflow-y: auto;
-  padding: 16px 18px;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.tour-history-you {
-  color: var(--control-ink);
-}
 
 /* The way in, where the first photo will land. */
 .tour-start {
@@ -908,7 +883,8 @@
   pointer-events: none;
   position: absolute;
   left: 50%;
-  top: 38%;
+  /* Behind a photo in the centre, wherever that is (--focus-cy). */
+  top: var(--focus-cy, 38%);
   z-index: 1;
   translate: -50% -50%;
   scale: 14;
@@ -921,8 +897,8 @@
  * Every photo is shown on a tube, like PIP's own face: scanlines, a faint
  * red-green-blue phosphor grain, and corners that fall away into the glass.
  * One painted layer per card and nothing animated, so 38 of them cost a
- * texture each and no frames. The line pitch is the stage's own (.tour-scan,
- * 4px), so the two sets of lines never beat against each other.
+ * texture each and no frames. The stage's own lines are now the CRT glass's
+ * (CrtLayer, about 3px), over these; turn this down if the two beat.
  * --tour-crt is the Photo Crt dial.
  */
 .tour-card::after {
@@ -974,11 +950,6 @@
   }
 }
 
-/* The light stage's scanlines burn into a pale ground; on a dark one they have to add. */
-.tour-stage--dark .tour-scan {
-  mix-blend-mode: screen;
-  opacity: 0.07;
-}
 .tour-stage--dark .tour-vignette {
   background:
     radial-gradient(ellipse 78% 62% at 50% 40%, transparent 45%, rgba(0, 0, 0, 0.35) 100%),
@@ -1038,20 +1009,6 @@
   opacity: 0.4;
 }
 
-.tour-chapter {
-  pointer-events: none;
-  position: absolute;
-  z-index: 20;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted-ink);
-  transition: color 400ms ease;
-}
-.tour-chapter--on {
-  color: var(--tour-teal);
-}
-
 /*
  * Asleep — dozing, or paused mid-visit. The photos lose their colour and sink
  * back, and in the dark room the lights go down with them.
@@ -1079,72 +1036,148 @@
   }
 }
 
-/* ---------------------------------------------------------------- buttons
+/* ---------------------------------------------------------------- controls
  *
- * One button for the whole stage, cut from the same cloth as the photo
- * casings: a rounded shell with a hairline edge that turns teal when it is
- * the live thing, and the small tracked capitals of the title beside it.
- * The primary one — the way into the tour — wears the casing outright: a
- * teal body with the same soft halo a photo in the centre has.
+ * What is ON the screen — PIP's face, the photos, the words — is the tube, and
+ * keeps its scanlines and glow. What you PRESS is plastic in front of it: Aqua
+ * gel, built like the site's own `aqua` pill (globals.css), and cut out of the
+ * CRT glass with data-crt-clear so the scanlines never cross it.
+ *
+ *   graphite  smoked plastic, for anything that sits on the dark glass
+ *   pip       PIP's own face green, lit: the way in, and the mode you are in
+ *   wells     where the plastic dips in: the microphone readout, the field
  */
+.tour-stage {
+  --pip-1: #bcdf9d;
+  --pip-2: #72c13f;
+  --pip-3: #82c953;
+  --pip-edge: #3e7322;
+  --pip-ink: #1d3a0b;
+  --pip-lcd: #95d06b;
+
+  --graphite-1: #5d646d;
+  --graphite-2: #2b3037;
+  --graphite-3: #3b414a;
+  --graphite-edge: #0b0d10;
+  --graphite-ink: #eef1f4;
+
+  --gel-shadow:
+    0 2px 3px -1px rgb(0 0 0 / 0.55),
+    inset 0 4px 8px 1px rgb(0 0 0 / 0.18),
+    inset 0 -2px 2px 0 rgb(0 0 0 / 0.2);
+  --well-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 0.7),
+    0 1px 0 rgb(255 255 255 / 0.07);
+}
+
+/* Gel: a radial body, a dark edge, a gloss across the top half. */
+:is(.tour-btn, .tour-chip, .tour-pill-btn, .tour-pill-end, .tour-pill-ask, .tour-mode-thumb) {
+  --gel-1: var(--graphite-1);
+  --gel-2: var(--graphite-2);
+  --gel-3: var(--graphite-3);
+  --gel-edge: var(--graphite-edge);
+  --gel-ink: var(--graphite-ink);
+  --gel-gloss: 0.42;
+  position: relative;
+  isolation: isolate;
+  border: 1px solid var(--gel-edge);
+  background: radial-gradient(at 50% 75%, var(--gel-1), var(--gel-2), var(--gel-3));
+  color: var(--gel-ink);
+  box-shadow: var(--gel-shadow);
+}
+:is(.tour-btn, .tour-chip, .tour-pill-btn, .tour-pill-end, .tour-pill-ask, .tour-mode-thumb)::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  right: 3px;
+  height: 50%;
+  border-radius: 999px 999px 6px 6px;
+  background: linear-gradient(to bottom, rgb(255 255 255 / var(--gel-gloss)), rgb(255 255 255 / calc(var(--gel-gloss) * 0.15)));
+  pointer-events: none;
+  transition: opacity 150ms ease-out;
+}
+:is(.tour-btn, .tour-chip, .tour-pill-btn, .tour-pill-end, .tour-pill-ask):active:not(:disabled) {
+  scale: 0.96;
+}
+:is(.tour-btn, .tour-chip, .tour-pill-btn, .tour-pill-end, .tour-pill-ask):active:not(:disabled)::after {
+  opacity: 0.75;
+}
+@media (hover: hover) {
+  :is(.tour-btn, .tour-chip, .tour-pill-btn, .tour-pill-end, .tour-pill-ask):hover:not(:disabled) {
+    filter: brightness(1.12);
+  }
+}
+/* Pressable, and says so. */
+:is(.tour-btn, .tour-chip, .tour-pill-btn, .tour-pill-end, .tour-pill-ask, .tour-mode-btn) {
+  cursor: pointer;
+}
+:is(.tour-btn, .tour-chip, .tour-pill-btn, .tour-pill-end, .tour-pill-ask, .tour-mode-btn):disabled {
+  cursor: default;
+}
+:is(.tour-btn, .tour-chip, .tour-pill-btn, .tour-pill-end, .tour-pill-ask, .tour-mode-btn):focus-visible {
+  outline: 2px solid var(--pip-lcd);
+  outline-offset: 3px;
+}
+:is(.tour-btn, .tour-pill-ask):disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Lit in PIP's green: light coming through the gel, not a ring round it. */
+:is(.tour-btn--primary, .tour-pill-ask, .tour-mode-thumb) {
+  --gel-1: var(--pip-1);
+  --gel-2: var(--pip-2);
+  --gel-3: var(--pip-3);
+  --gel-edge: var(--pip-edge);
+  --gel-ink: var(--pip-ink);
+  --gel-gloss: 0.7;
+  font-weight: 600;
+}
+.tour-btn--primary {
+  box-shadow:
+    var(--gel-shadow),
+    0 0 22px rgb(114 193 63 / 0.35);
+}
+@media (hover: hover) {
+  .tour-btn--primary:hover:not(:disabled) {
+    box-shadow:
+      var(--gel-shadow),
+      0 0 30px rgb(114 193 63 / 0.5);
+  }
+}
+
 .tour-btn {
   display: inline-flex;
   height: 34px;
   align-items: center;
   gap: 7px;
   border-radius: 999px;
-  border: 1px solid var(--hairline);
-  background: var(--tour-panel);
-  padding: 0 14px;
-  font-size: 11px;
+  padding: 0 15px;
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
   white-space: nowrap;
-  color: var(--control-ink);
-  backdrop-filter: blur(10px);
   transition:
-    border-color 180ms ease-out,
-    color 180ms ease-out,
+    filter 180ms ease-out,
     box-shadow 180ms ease-out,
-    scale 120ms ease-out;
+    scale 150ms ease-out;
 }
-.tour-btn:hover,
-.tour-btn[aria-pressed='true'] {
-  border-color: var(--tour-teal);
-  color: var(--foreground);
-}
-.tour-btn:active {
-  scale: 0.97;
-}
-.tour-btn:focus-visible {
-  outline: 2px solid var(--tour-teal);
-  outline-offset: 3px;
-}
-.tour-btn:disabled {
-  opacity: 0.5;
-}
-
-.tour-btn--primary {
-  border-color: var(--tour-teal);
-  background: var(--tour-teal);
-  color: #06201d;
-  box-shadow: 0 0 0 4px var(--tour-teal-glow);
-}
-.tour-btn--primary:hover {
-  color: #06201d;
-  box-shadow: 0 0 0 7px var(--tour-teal-glow);
-}
-
 .tour-btn--large {
   height: 46px;
   margin-top: 6px;
-  padding: 0 26px;
-  font-size: 12px;
+  padding: 0 24px;
+  font-size: 14px;
+}
+
+/* Wells: where the plastic dips in. */
+:is(.tour-mic, .tour-type-input) {
+  border: 1px solid #07090b;
+  background: linear-gradient(to bottom, #111418, #1b1f24);
+  box-shadow: var(--well-shadow);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tour-btn {
+  :is(.tour-btn, .tour-chip, .tour-pill-btn, .tour-pill-end, .tour-pill-ask) {
     transition: none;
   }
 }
@@ -1159,330 +1192,7 @@
   scale: var(--fs, 1);
 }
 
-/*
- * Handouts — the cards PIP puts in the centre (TourHandout.tsx).
- *
- * A card is a screen, not a panel: built like the photo that comes forward —
- * the same thin casing, the same tube over it, lit from inside and throwing
- * its own colours onto the dark behind it. Two ways of being a screen:
- *
- *   photo   led by a picture, its colours tinting the glass and the glow
- *   screen  PIP's own display: green phosphor, monospaced, one colour of light
- *
- * --handout-w, --handout-top and --handout-crt are the Tour cards dials.
- */
-.tour-handout {
-  --handout-ink: #eef1f4;
-  --handout-soft: rgb(238 241 244 / 0.7);
-  --handout-faint: rgb(238 241 244 / 0.45);
-  --handout-line: rgb(255 255 255 / 0.16);
-  --handout-fill: rgb(255 255 255 / 0.07);
-  --handout-accent: var(--tour-teal);
-  --handout-on-accent: #06201d;
-  position: absolute;
-  left: 50%;
-  top: var(--handout-top, 38%);
-  z-index: 40;
-  width: min(88vw, var(--handout-w, 400px));
-  translate: -50% -50%;
-  color: var(--handout-ink);
-  animation: tour-handout-in 420ms cubic-bezier(0.2, 1.3, 0.4, 1) both;
-}
-.tour-handout--leaving {
-  pointer-events: none;
-  animation: tour-handout-out 180ms ease-in both;
-}
-@keyframes tour-handout-in {
-  from {
-    opacity: 0;
-    scale: 0.6;
-    rotate: -4deg;
-  }
-}
-@keyframes tour-handout-out {
-  to {
-    opacity: 0;
-    scale: 0.9;
-  }
-}
-
-/* The light a card throws: a blurred copy of what it shows, behind it. */
-.tour-handout-halo {
-  pointer-events: none;
-  position: absolute;
-  inset: 4%;
-  z-index: -1;
-  overflow: hidden;
-  border-radius: 40px;
-  opacity: 0.75;
-  filter: blur(46px) saturate(1.6);
-  background: radial-gradient(closest-side, var(--handout-accent), transparent);
-}
-.tour-handout-halo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.tour-handout-screen {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border-radius: 29px;
-  border: 3px solid var(--handout-accent);
-  background: #0b0d10;
-  box-shadow: 0 0 4px 4px var(--tour-teal-glow);
-}
-
-/* The tube: the photos' own scanlines, grain and falling-away corners. */
-.tour-handout-screen::after {
-  content: '';
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  opacity: var(--handout-crt, 0.7);
-  background:
-    linear-gradient(168deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 26%, transparent 46%),
-    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 4px),
-    repeating-linear-gradient(
-      to right,
-      rgba(255, 40, 40, 0.07) 0 1px,
-      rgba(40, 255, 90, 0.05) 1px 2px,
-      rgba(60, 90, 255, 0.07) 2px 3px
-    ),
-    radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, 0.38) 100%);
-}
-/* Switched on: the slow band of light that rolls down the photo in the centre. */
-.tour-handout-screen::before {
-  content: '';
-  pointer-events: none;
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  z-index: 3;
-  height: 28%;
-  opacity: var(--handout-crt, 0.7);
-  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.09), transparent);
-  translate: 0 -100%;
-  animation: tour-crt-roll 7s linear infinite;
-}
-
-/* The picture again, out of focus, as the glass the words sit on. */
-.tour-handout-tint {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  scale: 1.4;
-  filter: blur(34px) saturate(1.5) brightness(0.42);
-}
-
-.tour-handout-shot {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: #d7dbe0;
-}
-.tour-handout-shot img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: var(--shot-at, center);
-  filter: saturate(1.1) contrast(1.04);
-}
-
-/* No picture to show: the name of the thing, on the tube. */
-.tour-handout-poster {
-  position: relative;
-  display: flex;
-  aspect-ratio: 16 / 8;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  padding: 0 24px;
-  background: radial-gradient(120% 120% at 50% 0%, #1f5a1d 0%, #0e2c12 48%, #06130a 100%);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 15px;
-  letter-spacing: 0.02em;
-  color: #c9ffbf;
-  text-shadow: 0 0 10px rgba(120, 255, 110, 0.6);
-}
-.tour-handout-poster::before {
-  content: '>';
-  margin-right: 0.6em;
-  opacity: 0.6;
-}
-
-.tour-handout-close {
-  position: absolute;
-  right: 13px;
-  top: 13px;
-  z-index: 4;
-  display: grid;
-  width: 30px;
-  height: 30px;
-  place-items: center;
-  border-radius: 999px;
-  border: 1px solid rgb(255 255 255 / 0.25);
-  background: rgb(11 13 16 / 0.6);
-  color: rgb(255 255 255 / 0.8);
-  backdrop-filter: blur(8px);
-  transition:
-    color 150ms ease-out,
-    border-color 150ms ease-out;
-}
-.tour-handout-close:hover {
-  border-color: var(--handout-accent);
-  color: #fff;
-}
-.tour-handout-close:focus-visible {
-  outline: 2px solid var(--handout-accent);
-  outline-offset: 2px;
-}
-
-.tour-handout-text {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  padding: 20px 24px 24px;
-}
-
-.tour-handout-eyebrow {
-  display: flex;
-  gap: 10px;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--handout-accent);
-}
-.tour-handout-eyebrow span {
-  color: var(--handout-faint);
-}
-
-.tour-handout-title {
-  /* The site sets headings in its serif; the stage speaks in one face. */
-  font-family: inherit;
-  font-size: 26px;
-  font-weight: 600;
-  line-height: 1.12;
-  letter-spacing: -0.015em;
-  text-wrap: balance;
-}
-
-.tour-handout-body {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  font-size: 14px;
-  line-height: 1.5;
-  text-wrap: pretty;
-  color: var(--handout-soft);
-}
-
-.tour-handout-meta {
-  font-size: 12px;
-  color: var(--handout-faint);
-}
-
-/* Selectable, so it can be taken without the button. */
-.tour-handout-address {
-  overflow-wrap: anywhere;
-  border-radius: 12px;
-  border: 1px solid var(--handout-line);
-  background: var(--handout-fill);
-  padding: 10px 12px;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 13px;
-  user-select: all;
-}
-
-.tour-handout-actions {
-  position: relative;
-  z-index: 4;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-.tour-handout .tour-btn {
-  border-color: var(--handout-line);
-  background: var(--handout-fill);
-  color: var(--handout-soft);
-}
-.tour-handout .tour-btn:hover {
-  border-color: var(--handout-accent);
-  color: var(--handout-ink);
-}
-.tour-handout .tour-btn--primary,
-.tour-handout .tour-btn--primary:hover {
-  border-color: var(--handout-accent);
-  background: var(--handout-accent);
-  color: var(--handout-on-accent);
-}
-
-/*
- * PIP's own display. One colour of light, like the face it comes from: the
- * picture is shown in it too, and the letters glow a little into the glass.
- */
-.tour-handout--screen {
-  --handout-ink: #d3ffca;
-  --handout-soft: rgb(190 255 178 / 0.78);
-  --handout-faint: rgb(190 255 178 / 0.5);
-  --handout-line: rgb(150 255 130 / 0.28);
-  --handout-fill: rgb(150 255 130 / 0.08);
-  --handout-accent: #8ff07c;
-  --handout-on-accent: #06200a;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  text-shadow: 0 0 9px rgba(120, 255, 110, 0.4);
-}
-.tour-handout--screen .tour-handout-screen {
-  background: radial-gradient(130% 100% at 50% 0%, #1b4d1a 0%, #0d2a11 46%, #06130a 100%);
-  box-shadow:
-    0 0 4px 4px rgba(120, 255, 110, 0.18),
-    inset 0 0 60px rgba(0, 0, 0, 0.5);
-}
-.tour-handout--screen .tour-handout-halo {
-  background: radial-gradient(closest-side, #4fd03c, transparent);
-}
-.tour-handout--screen .tour-handout-halo img,
-.tour-handout--screen .tour-handout-tint {
-  display: none;
-}
-.tour-handout--screen .tour-handout-shot {
-  background: #0d2a11;
-}
-.tour-handout--screen .tour-handout-shot img {
-  mix-blend-mode: screen;
-  filter: grayscale(1) contrast(1.25) brightness(0.9) sepia(1) hue-rotate(65deg) saturate(2.4);
-}
-.tour-handout--screen .tour-handout-title {
-  font-size: 22px;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
-.tour-handout--screen .tour-handout-body {
-  font-size: 13px;
-}
-.tour-handout--screen .tour-btn {
-  text-shadow: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tour-handout,
-  .tour-handout--leaving {
-    animation-duration: 1ms;
-  }
-  .tour-handout-screen::before {
-    display: none;
-  }
-}
+/* Handouts, the cards PIP puts in the centre, have their own stylesheet: handout.css. */
 
 /*
  * Suggested questions: chips, not a card — small things to pick up, offered
@@ -1505,35 +1215,14 @@
 }
 .tour-chip {
   display: inline-flex;
-  height: 36px;
+  height: 34px;
   align-items: center;
   border-radius: 999px;
-  border: 1px solid var(--tour-teal-soft);
-  background: var(--tour-panel);
   padding: 0 15px;
   font-size: 13px;
-  color: var(--control-ink);
-  box-shadow: 0 0 0 0 var(--tour-teal-glow);
-  backdrop-filter: blur(10px);
   transition:
-    border-color 180ms ease-out,
-    color 180ms ease-out,
-    box-shadow 180ms ease-out,
-    translate 180ms ease-out,
-    scale 120ms ease-out;
-}
-.tour-chip:hover {
-  border-color: var(--tour-teal);
-  color: var(--foreground);
-  box-shadow: 0 0 0 4px var(--tour-teal-glow);
-  translate: 0 -1px;
-}
-.tour-chip:active {
-  scale: 0.97;
-}
-.tour-chip:focus-visible {
-  outline: 2px solid var(--tour-teal);
-  outline-offset: 3px;
+    filter 180ms ease-out,
+    scale 150ms ease-out;
 }
 .tour-chip:disabled {
   opacity: 0.5;
@@ -1542,18 +1231,19 @@
 /* Above PIP and its caption, lined up with the dock's left edge. Each one rises in after the last. */
 .tour-chips--dock {
   position: absolute;
-  left: 0;
-  bottom: calc(100% + 18px);
-  width: max-content;
-  max-width: min(92vw, 760px);
-  justify-content: flex-start;
+  left: 50%;
+  /* The caption's foot: over PIP and the caption's margin and padding. */
+  bottom: calc(var(--pip-h, 112px) + 16px);
+  translate: -50% 0;
+  width: var(--caption-w);
+  justify-content: center;
 }
 .tour-chips--dock .tour-chips-label {
   width: auto;
   margin-right: 4px;
 }
 .tour-chips--dock .tour-chip {
-  animation: tour-chip-in 360ms cubic-bezier(0.2, 1.2, 0.4, 1) both;
+  animation: tour-chip-in calc(420ms / var(--motion, 1)) cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 .tour-chips--dock .tour-chip:nth-of-type(2) {
   animation-delay: 70ms;
@@ -1564,8 +1254,8 @@
 @keyframes tour-chip-in {
   from {
     opacity: 0;
-    translate: 0 8px;
-    scale: 0.94;
+    filter: blur(6px);
+    translate: 0 12px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1574,4 +1264,904 @@
     animation: none;
     transition: none;
   }
+}
+
+/* ------------------------------------------------------------------ the room
+ *
+ * The stage the entrance's dive arrives in is the room it was flying through:
+ * the same tube, powered on (field.ts, the `screen` look), under everything.
+ * The CRT glass over the top (CrtLayer) draws the scanlines this stage used
+ * to draw for itself.
+ */
+.tour-room {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  transition: opacity calc(1400ms / var(--motion, 1)) ease;
+}
+.tour-stage--asleep .tour-room {
+  opacity: 0.5;
+}
+
+/*
+ * The resting photos float a little, each on its own clock, as if still
+ * hanging in the space the dive came through. Through `translate`, which no
+ * one else moves (the FLIP travel is `transform`, the honeycomb lens `scale`).
+ */
+@property --drift-x {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --drift-y {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+/*
+ * How much of the drift shows. Nothing while the entrance's stream is still
+ * over the stage landing these photos (data-landing): each card then sits
+ * exactly where its photo came to rest, and only starts to float, slowly,
+ * once the takeover has gone.
+ */
+@property --drift-amp {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+.tour-card--float {
+  translate: calc(-50% + var(--drift-x) * var(--drift-amp)) calc(-50% + var(--drift-y) * var(--drift-amp));
+  animation: tour-drift calc(var(--drift-period, 11s) / var(--motion, 1)) ease-in-out infinite alternate;
+  animation-delay: var(--drift-delay, 0s);
+}
+.tour-cards {
+  /* With the dozing fade's own transitions (above), which this would otherwise replace. */
+  transition:
+    filter 1400ms ease,
+    opacity 1400ms ease,
+    --drift-amp calc(3s / var(--motion, 1)) ease-in-out;
+}
+/*
+ * Arriving without the entrance, the stage flies the stream in itself
+ * (TourStage, selfDive): its photos stand in for the cards, in the card
+ * layer's place, until each has come to rest exactly over its card.
+ */
+.tour-self-dive {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  pointer-events: none;
+}
+.tour-stage[data-self-dive] .tour-cards {
+  visibility: hidden;
+}
+.tour-stage[data-landing] .tour-cards {
+  --drift-amp: 0;
+  /* Off at once (the card layer is there before the landing starts); only the coming back is eased. */
+  transition:
+    filter 1400ms ease,
+    opacity 1400ms ease;
+}
+@keyframes tour-drift {
+  0% {
+    --drift-x: -3px;
+    --drift-y: 2px;
+  }
+  50% {
+    --drift-x: 2px;
+    --drift-y: -4px;
+  }
+  100% {
+    --drift-x: 4px;
+    --drift-y: 3px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour-card--float {
+    animation: none;
+  }
+}
+
+/*
+ * The drift layout: a photo further back (--depth toward 1, set per card) is
+ * dimmer and softer, and comes up sharp under the cursor. On the card, so it
+ * sits on top of whatever the tone rules do to the picture inside.
+ */
+.tour-stage--drift .tour-card--float {
+  filter: brightness(calc(1 - var(--depth, 0) * 0.45)) blur(calc(var(--depth, 0) * 1.3px));
+  transition: filter calc(250ms / var(--motion, 1)) ease-out;
+}
+.tour-stage--drift .tour-card--float:hover,
+.tour-stage--drift .tour-card--float:focus-visible {
+  filter: none;
+}
+
+/*
+ * Arriving. While the stream is still landing, the stage's own words are not
+ * there yet. Once it has gone they come in the way the rest of the site does
+ * — faded, a little low, out of a blur, one after another (page.tsx slideIn,
+ * and the page's own blur in globals.css) — the bar, then each line of the
+ * welcome. The same arrival plays whenever a piece appears later: the type
+ * field, the controls, a notice, the transcript.
+ * `data-reveal` stays on, so a piece only arrives as it mounts.
+ */
+.tour-stage[data-landing] :is(.tour-chrome, .tour-start, .tour-caption) {
+  opacity: 0;
+  pointer-events: none;
+}
+@keyframes tour-arrive {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(16px);
+  }
+}
+.tour-stage[data-reveal] :is(.tour-chrome, .tour-start, .tour-controls) > *,
+.tour-stage[data-reveal] :is(.tour-mic-ask--live, .tour-mic-note-live) {
+  animation: tour-arrive calc(480ms / var(--motion, 1)) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.tour-stage[data-reveal] :is(.tour-chrome, .tour-start) > *:nth-child(2) {
+  animation-delay: calc(80ms / var(--motion, 1));
+}
+.tour-stage[data-reveal] .tour-start > *:nth-child(3) {
+  animation-delay: calc(160ms / var(--motion, 1));
+}
+.tour-stage[data-reveal] .tour-start > *:nth-child(4) {
+  animation-delay: calc(240ms / var(--motion, 1));
+}
+.tour-stage[data-reveal] .tour-start > *:nth-child(5) {
+  animation-delay: calc(320ms / var(--motion, 1));
+}
+/* After the field, when both appear together. Stable, so the pill doesn't arrive twice. */
+.tour-stage[data-reveal] .tour-controls > .tour-console {
+  animation-delay: calc(90ms / var(--motion, 1));
+}
+/* The panel arrives as one piece; its lines don't each arrive again inside it. */
+.tour-stage[data-reveal] .tour-mic-ask--live > * {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour-stage[data-reveal] :is(.tour-chrome, .tour-start, .tour-controls) > *,
+  .tour-stage[data-reveal] :is(.tour-mic-ask--live, .tour-mic-note-live),
+  .tour-handout {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------ welcome
+ *
+ * The start screen: who it is for, the microphone proved before anything is
+ * spent, and two ways in — talking, or typing instead.
+ */
+.tour-start--intro .tour-start-title {
+  font-size: clamp(28px, 2.6vw, 36px);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* Which microphone, a live level, and whether it can hear. */
+.tour-mic {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  margin-top: 4px;
+  padding: 0 14px 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--control-ink);
+}
+.tour-mic-icon {
+  color: var(--pip-lcd);
+  flex-shrink: 0;
+}
+.tour-mic-name {
+  max-width: 180px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.tour-mic-level {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 14px;
+}
+.tour-mic-level span {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--pip-lcd);
+  transform: scaleY(0.21);
+  transition: transform 80ms linear;
+}
+.tour-mic-note {
+  color: var(--muted-ink);
+}
+.tour-mic[data-access='granted'] .tour-mic-note {
+  color: var(--pip-lcd);
+}
+.tour-mic[data-access='denied'] .tour-mic-note {
+  color: #ff9a85;
+}
+
+.tour-start-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+/* The typing side of the start screen's talk/type swap: laid out as the card's own rows were. */
+.tour-start-swap {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Typing instead, on the start screen: one field and Ask. */
+.tour-type {
+  display: flex;
+  gap: 8px;
+  width: min(100%, 440px);
+  margin-top: 6px;
+}
+.tour-type-input {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--foreground);
+}
+.tour-type-input::placeholder {
+  color: var(--muted-ink);
+}
+.tour-type-input:focus-visible {
+  outline: none;
+  box-shadow:
+    var(--well-shadow),
+    0 0 0 2px var(--pip-edge);
+}
+.tour-type .tour-btn--large {
+  margin-top: 0;
+}
+
+/* Back from typing to talking, under the field on the start screen. */
+.tour-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted-ink);
+  transition: color 150ms ease;
+}
+.tour-switch:hover,
+.tour-switch:focus-visible {
+  color: var(--pip-lcd);
+  outline: none;
+}
+
+/*
+ * Our ask for the microphone, before the browser's. On the start screen it
+ * takes the start card's place; asked mid-tour, it sits over the controls.
+ */
+.tour-mic-ask-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(33, 187, 171, 0.14);
+  color: var(--tour-teal);
+}
+.tour-mic-ask-icon svg {
+  width: 20px;
+  height: 20px;
+}
+.tour-mic-ask--live {
+  top: auto;
+  bottom: calc(max(16px, 3dvh) + 72px + env(safe-area-inset-bottom, 0px));
+  z-index: 50;
+  translate: -50% 0;
+  padding: 24px 24px 20px;
+  border-radius: 24px;
+  border: 1px solid var(--hairline);
+  background: var(--tour-panel);
+  backdrop-filter: blur(16px);
+}
+
+/* Talk or type, the first thing in the controls: two icons in a well, the one you are in lit. */
+.tour-mode {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, #111418, #1b1f24);
+  box-shadow: inset 0 2px 3px rgb(0 0 0 / 0.6);
+}
+.tour-mode-btn {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  width: 40px;
+  height: 34px;
+  place-items: center;
+  border-radius: 999px;
+  color: rgb(255 255 255 / 0.5);
+  transition: color 250ms ease;
+}
+.tour-mode-btn[aria-checked='true'] {
+  color: var(--pip-ink);
+}
+.tour-mode-btn[aria-checked='false']:hover {
+  color: var(--graphite-ink);
+}
+/*
+ * The Talk switch's waveform (VoiceBars): five bars at the icon's own
+ * heights, each scaled from its middle. Whose turn it is sets how they move;
+ * continuous motion on screen, so ease-in-out throughout. Still while typing.
+ */
+.tour-voice rect {
+  fill: currentColor;
+  transform-box: fill-box;
+  transform-origin: center;
+  /* The resting icon: short at the ends, tall in the middle. */
+  --s: 0.2;
+  transform: scaleY(var(--s));
+}
+.tour-voice rect:nth-child(2),
+.tour-voice rect:nth-child(4) {
+  --s: 0.5;
+}
+.tour-voice rect:nth-child(3) {
+  --s: 0.85;
+}
+/* PIP talking: each bar on its own beat, so it reads as speech rather than a meter. */
+.tour-voice[data-turn='talking'] rect {
+  animation: tour-voice-talk calc((420ms + var(--i) * 70ms) / var(--motion, 1)) ease-in-out infinite alternate;
+  animation-delay: calc(var(--i) * -130ms);
+}
+@keyframes tour-voice-talk {
+  from {
+    transform: scaleY(0.18);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+/* You talking: the same, smaller and quicker — a ripple, not a voice of its own. */
+.tour-voice[data-turn='you'] rect {
+  animation: tour-voice-you calc((300ms + var(--i) * 50ms) / var(--motion, 1)) ease-in-out infinite alternate;
+  animation-delay: calc(var(--i) * -90ms);
+}
+@keyframes tour-voice-you {
+  from {
+    transform: scaleY(calc(var(--s) * 0.6));
+  }
+  to {
+    transform: scaleY(calc(var(--s) * 1.15));
+  }
+}
+/* Listening: one slow breath, all together. */
+.tour-voice[data-turn='listening'] rect {
+  animation: tour-voice-breathe calc(2400ms / var(--motion, 1)) ease-in-out infinite;
+}
+@keyframes tour-voice-breathe {
+  0%,
+  100% {
+    transform: scaleY(calc(var(--s) * 0.7));
+  }
+  50% {
+    transform: scaleY(var(--s));
+  }
+}
+/* Thinking: a light passing along the bars, left to right. */
+.tour-voice[data-turn='thinking'] rect {
+  animation: tour-voice-think calc(1100ms / var(--motion, 1)) ease-in-out infinite;
+  animation-delay: calc(var(--i) * 140ms);
+}
+@keyframes tour-voice-think {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour-voice rect {
+    animation: none !important;
+  }
+}
+
+/* The lit gel behind the mode you are in; it slides to the other (layoutId in TourBar). */
+.tour-mode-thumb {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 999px;
+}
+.tour-pill-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.tour-mic-note-live {
+  max-width: 460px;
+  font-size: 12px;
+  text-align: center;
+  color: #ff9a85;
+}
+
+/* ------------------------------------------------------------------ while live
+ *
+ * Whose turn it is, over the caption, and the controls in one pill under PIP.
+ */
+.tour-turn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--tour-teal);
+}
+.tour-turn[data-turn='listening'],
+.tour-turn[data-turn='you'] {
+  color: var(--muted-ink);
+}
+.tour-turn-hint {
+  color: var(--muted-ink);
+  font-weight: 400;
+}
+.tour-turn-bars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 10px;
+}
+.tour-turn-bars span {
+  width: 2px;
+  height: 4px;
+  border-radius: 1px;
+  background: currentColor;
+}
+.tour-turn[data-turn='talking'] .tour-turn-bars span {
+  animation: tour-turn-bar calc(700ms / var(--motion, 1)) ease-in-out infinite alternate;
+}
+.tour-turn[data-turn='talking'] .tour-turn-bars span:nth-child(2) {
+  animation-delay: -200ms;
+}
+.tour-turn[data-turn='talking'] .tour-turn-bars span:nth-child(3) {
+  animation-delay: -450ms;
+}
+.tour-turn[data-turn='talking'] .tour-turn-bars span:nth-child(4) {
+  animation-delay: -100ms;
+}
+.tour-turn[data-turn='thinking'] .tour-turn-bars span {
+  animation: tour-turn-dot calc(1200ms / var(--motion, 1)) ease-in-out infinite;
+}
+.tour-turn[data-turn='thinking'] .tour-turn-bars span:nth-child(2) {
+  animation-delay: 150ms;
+}
+.tour-turn[data-turn='thinking'] .tour-turn-bars span:nth-child(3) {
+  animation-delay: 300ms;
+}
+.tour-turn[data-turn='thinking'] .tour-turn-bars span:nth-child(4) {
+  animation-delay: 450ms;
+}
+@keyframes tour-turn-bar {
+  from {
+    height: 3px;
+  }
+  to {
+    height: 10px;
+  }
+}
+@keyframes tour-turn-dot {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/*
+ * PIP, what it says and the bar are one centred column at the foot of the
+ * stage: the bar on the bottom edge, PIP standing on it, the caption over
+ * PIP. The bar is there in every state (TourBar), so none of them moves
+ * between states; only what is inside the bar comes and goes.
+ *
+ * --pip-w is charSize in TourStage; --caption-w is openBarWidth() there too,
+ * so the bar opens for typing to the caption's width exactly.
+ */
+.tour-stage {
+  --pip-w: 152px;
+  --bar-h: 54px;
+  --bar-bottom: calc(max(16px, 3dvh) + env(safe-area-inset-bottom, 0px));
+  --caption-w: min(52vw, 560px);
+  --transcript-h: min(26dvh, 240px);
+  /* What the bar has opened over itself (TourBar's layers), and the microphone note over that. */
+  --field-h: 0px;
+  --log-h: 0px;
+  --note-h: 0px;
+  --dock-bottom: calc(var(--bar-bottom) + var(--bar-h) + var(--field-h) + var(--log-h) + var(--note-h) + 10px);
+  /* Three lines of caption (.tour-caption-text), whose turn it is over them, and the caption's padding. */
+  --caption-h: calc(3 * 1.35 * clamp(16px, 1.45vw, 21px) + 40px);
+  /*
+   * A photo in the centre has the band between the top bar (64px) and the top
+   * of PIP's column, and sits in the middle of it, as tall as it can be with
+   * 16px clear above and below. --pip-h is set on the stage from charHeight;
+   * focusPoint() in TourStage reads the centre off .tour-focus-probe.
+   */
+  --column-top: calc(var(--bar-bottom) + var(--bar-h) + 10px + var(--pip-h, 112px) + var(--caption-h) + 10px);
+  --focus-band: calc(100dvh - var(--column-top) - 64px);
+  --focus-cy: calc(64px + var(--focus-band) / 2);
+  --focus-h-max: calc(var(--focus-band) - 32px);
+}
+.tour-focus-probe {
+  position: absolute;
+  left: 50%;
+  top: var(--focus-cy);
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+/*
+ * Typing over a photo in the centre: PIP rises for the field into the
+ * caption's place, so the caption steps out rather than climbing into the
+ * photo. What PIP says is still in the transcript.
+ */
+.tour-stage[data-focus][data-field] .tour-caption {
+  opacity: 0;
+  filter: blur(8px);
+  transition:
+    opacity 200ms ease,
+    filter 200ms ease;
+}
+/* PIP rides up on top of whatever the bar opens, eased with it (the transition is on .tour-dock). */
+.tour-stage[data-field] {
+  --field-h: 46px;
+}
+.tour-stage[data-transcript] {
+  --log-h: calc(var(--transcript-h) + 6px);
+}
+/* Over a photo in the centre there is no room above the transcript, so it covers PIP instead. */
+.tour-stage[data-focus][data-transcript] {
+  --log-h: 0px;
+}
+.tour-stage:has(.tour-mic-note-live) {
+  --note-h: 30px;
+}
+/* The transcript has the sentence PIP is on as its newest line, so the caption steps out while it is open. */
+.tour-stage[data-transcript] .tour-caption {
+  opacity: 0;
+  filter: blur(8px);
+  transition:
+    opacity 250ms ease,
+    filter 250ms ease;
+}
+/*
+ * Nothing busy behind the words: the photos drift under the caption and PIP,
+ * so a soft pool of the room's dark sits behind them, and blurs what passes
+ * through it. Feathered on every side, so it reads as light falling off
+ * rather than a panel. Gone while PIP is up in the start card.
+ */
+.tour-dock::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  bottom: -20px;
+  /* Not much wider or taller than the words, so it reaches neither the photos at the sides nor one in the centre. */
+  width: calc(var(--caption-w) + 120px);
+  height: calc(100% + 40px);
+  translate: -50% 0;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgb(11 13 16 / 0.78), rgb(11 13 16 / 0.5) 60%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  -webkit-mask-image: radial-gradient(closest-side, #000 50%, transparent);
+  mask-image: radial-gradient(closest-side, #000 50%, transparent);
+  transition: opacity calc(600ms / var(--motion, 1)) ease;
+}
+.tour-dock--intro::before {
+  opacity: 0;
+}
+/* A photo in the centre is the thing to look at: only the dark stays, no blur over its edge. */
+.tour-stage[data-focus] .tour-dock::before {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+/*
+ * The suggestions take the caption's place while PIP is quiet, rather than
+ * stacking over it, so the column never reaches higher for them. The caption
+ * steps out under them; the chips arrive on their own (tour-chip-in).
+ */
+.tour-dock:has(> .tour-chips--dock) .tour-caption {
+  opacity: 0;
+  filter: blur(8px);
+  transition:
+    opacity 200ms ease,
+    filter 200ms ease;
+}
+.tour-controls {
+  position: absolute;
+  left: 0;
+  bottom: var(--bar-bottom);
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  translate: calc(50vw - 50%) 0;
+}
+/*
+ * The bar's shell: smoked plastic, the switches set into it. It grows upward
+ * for the field and the transcript (TourBar), and its corners ease from a
+ * pill's to a panel's as it does; Framer Motion drives the width and radius.
+ */
+.tour-console {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: calc(100vw - 32px);
+  overflow: hidden;
+  border-radius: 27px;
+  transition: border-radius calc(300ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1);
+  border: 1px solid #07090b;
+  background: linear-gradient(to bottom, #363b42, #262a30 60%, #1c1f23);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    inset 0 -1px 0 rgb(0 0 0 / 0.4),
+    0 10px 28px -6px rgb(0 0 0 / 0.6);
+}
+/* Open for typing or the transcript: as wide as the caption, and a panel's corners rather than a pill's. */
+.tour-console--wide {
+  min-width: min(var(--caption-w), calc(100vw - 32px));
+  border-radius: 24px;
+}
+/*
+ * Opening or shutting: the minimum width eases between the row's width
+ * (written by TourBar) and the caption's. Only then — as switches come and go
+ * the bar follows its row at once, so it never trails behind it.
+ */
+.tour-console--morph {
+  transition:
+    min-width calc(300ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1),
+    border-radius calc(300ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour-console {
+    transition: none;
+  }
+}
+/*
+ * A layer over the row: the field, or the transcript. No width of its own, so
+ * it never props the bar open, and no padding, so its height really reaches
+ * nothing as it shuts; the padding is on the box inside it.
+ */
+.tour-console-layer {
+  display: flex;
+  flex-shrink: 0;
+  /* Centred, and wider than the layer while the bar is still widening: the bar uncovers it from the middle out. */
+  justify-content: center;
+  overflow: hidden;
+  contain: inline-size;
+}
+/*
+ * Always the open bar's width inside its 1px borders (.tour-console--wide),
+ * however wide the bar is right now, so the transcript's lines never re-wrap
+ * while the bar eases open or shut.
+ */
+.tour-console-layer-in {
+  flex-shrink: 0;
+  width: calc(min(var(--caption-w), calc(100vw - 32px)) - 2px);
+  padding: 6px 6px 0;
+}
+/* The row of switches, always the bottom of the bar and never changing size for what opens over it. */
+.tour-pill {
+  display: flex;
+  flex-shrink: 0;
+  /* Its own width, centred in the bar however wide the bar is: TourBar reads it. */
+  align-self: center;
+  width: max-content;
+  align-items: center;
+  justify-content: center;
+  /* No gap: each switch brings its own space in with it (Slot), so one coming or going never jumps. */
+  padding: 6px 3px;
+}
+
+/*
+ * The transcript, Granola's way: a well over the switches, the conversation
+ * as bubbles — PIP on the left, you on the right in PIP's green — anchored to
+ * the newest line at the bottom and fading out at the top.
+ */
+.tour-transcript {
+  display: flex;
+  height: var(--transcript-h);
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding: 14px 14px 10px;
+  border-radius: 18px;
+  background: linear-gradient(to bottom, #111418, #1b1f24);
+  box-shadow: var(--well-shadow);
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.15) transparent;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 20px);
+  mask-image: linear-gradient(to bottom, transparent, #000 20px);
+}
+.tour-transcript > :first-child {
+  margin-top: auto;
+}
+.tour-transcript-line {
+  max-width: 85%;
+  padding: 7px 12px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  text-wrap: pretty;
+  color: var(--control-ink);
+}
+.tour-transcript-line--pip {
+  align-self: flex-start;
+  border-bottom-left-radius: 5px;
+  background: rgb(255 255 255 / 0.055);
+}
+.tour-transcript-line--you {
+  align-self: flex-end;
+  border-bottom-right-radius: 5px;
+  background: rgb(149 208 107 / 0.14);
+  color: #dcefc9;
+}
+.tour-pill-slot {
+  display: flex;
+  flex-shrink: 0;
+  /* Room above and below for the gel's shadow, taken back from the row. */
+  margin-block: -4px;
+  overflow: hidden;
+}
+/* Half the 6px between switches on each side, and the shadow's room. */
+.tour-pill-slot-in {
+  display: flex;
+  align-items: center;
+  padding: 4px 3px;
+}
+/*
+ * Carry on, or Start the tour, when there is no session: it leads the row.
+ * Lit from inside rather than glowing out: the bar clips anything outside it,
+ * and a halo cut off at the bar's edge reads as a mistake.
+ */
+.tour-pill-go.tour-btn--primary {
+  height: 40px;
+  padding: 0 18px;
+  box-shadow:
+    var(--gel-shadow),
+    inset 0 0 10px rgb(196 240 150 / 0.45);
+}
+@media (hover: hover) {
+  .tour-pill-go.tour-btn--primary:hover:not(:disabled) {
+    box-shadow:
+      var(--gel-shadow),
+      inset 0 0 14px rgb(214 250 176 / 0.6);
+  }
+}
+.tour-pill-field-inner {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 4px;
+  padding: 2px;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, #111418, #1b1f24);
+  box-shadow: var(--well-shadow);
+  transition: box-shadow 150ms ease;
+}
+.tour-pill-field-inner:focus-within {
+  box-shadow:
+    var(--well-shadow),
+    inset 0 0 0 1px var(--pip-edge);
+}
+.tour-pill-input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 8px 0 12px;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  color: var(--foreground);
+}
+.tour-pill-input::placeholder {
+  color: var(--muted-ink);
+}
+.tour-pill-input:focus-visible {
+  outline: none;
+}
+.tour-pill-ask {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+.tour-pill-btn {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 50%;
+  transition:
+    filter 150ms ease,
+    scale 150ms ease;
+}
+/* Latched (muted, sound off, the transcript open): held in, like a latching button. */
+:is(.tour-pill-btn, .tour-btn)[aria-pressed='true'] {
+  --gel-1: var(--graphite-2);
+  --gel-2: #1f2328;
+  --gel-3: var(--graphite-2);
+  --gel-gloss: 0.18;
+  --gel-ink: rgb(255 255 255 / 0.55);
+  box-shadow:
+    inset 0 3px 6px rgb(0 0 0 / 0.55),
+    0 1px 0 rgb(255 255 255 / 0.06);
+  scale: 0.96;
+}
+.tour-pill-end {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/*
+ * The time left, on a seven-segment LCD set into the strip — green on dark,
+ * like PIP's face. The unlit segments of every digit show faintly behind the
+ * lit ones (Countdown), as they do on a real one.
+ */
+.tour-pill-time {
+  display: inline-grid;
+  height: 30px;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1px solid #07090b;
+  background: linear-gradient(to bottom, #0b1507, #12210a);
+  box-shadow: var(--well-shadow);
+  font-family: var(--font-lcd), ui-monospace, monospace;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--pip-lcd);
+  transition: color 300ms ease-out;
+}
+.tour-pill-time > span {
+  grid-area: 1 / 1;
+  text-align: right;
+}
+.tour-pill-time-ghost {
+  opacity: 0.09;
+}
+.tour-pill-time-lit {
+  text-shadow: 0 0 6px rgb(149 208 107 / 0.55);
+}
+.tour-pill-time--low {
+  color: #ffb13a;
+}
+.tour-pill-time--low .tour-pill-time-lit {
+  text-shadow: 0 0 6px rgb(255 177 58 / 0.55);
 }

@@ -1,0 +1,346 @@
+{
+ "recorded": "2026-10-14",
+ "note": "Times are seconds into each clip. transcriptAt: the sentence is complete in the live transcript. readAt: the mood reading came back and the face reacted. heardBy: the sentence finished playing.",
+ "clips": [
+  {
+   "question": "Tell me the Mission Peak story.",
+   "src": "/audio/cameo/tour-mission-peak.m4a",
+   "sentences": [
+    {
+     "text": "Oh, that's a good one.",
+     "transcriptAt": 0.5,
+     "heardBy": 1.38,
+     "readAt": 0.93,
+     "mood": "excited",
+     "p": 0.6,
+     "photos": []
+    },
+    {
+     "text": "Soon after arriving in the Bay Area, Shreyas spotted Mission Peak and assumed it would be a casual one-hour walk.",
+     "transcriptAt": 6.37,
+     "heardBy": 7.48,
+     "readAt": 6.71,
+     "mood": "neutral",
+     "p": 0.52,
+     "photos": [
+      "mission-peak-landscape"
+     ]
+    },
+    {
+     "text": "A quarter of the way in, it was a punishing climb, and he nearly turned back.",
+     "transcriptAt": 11.19,
+     "heardBy": 12.36,
+     "readAt": 11.52,
+     "mood": "calm",
+     "p": 0.65,
+     "photos": []
+    },
+    {
+     "text": "But he kept going without knowing how much trail was left, and reached the summit just before dark.",
+     "transcriptAt": 16.86,
+     "heardBy": null,
+     "readAt": 17.23,
+     "mood": "calm",
+     "p": 0.65,
+     "photos": [
+      "mission-peak-silhouette"
+     ]
+    },
+    {
+     "text": "It's still one of the moments he's proudest of.",
+     "transcriptAt": 18.95,
+     "heardBy": 19.77,
+     "readAt": 19.28,
+     "mood": "calm",
+     "p": 0.68,
+     "photos": []
+    }
+   ]
+  },
+  {
+   "question": "What did he love about San Francisco?",
+   "src": "/audio/cameo/tour-san-francisco.m4a",
+   "sentences": [
+    {
+     "text": "Oh, that's a good one.",
+     "transcriptAt": 0.68,
+     "heardBy": 1.47,
+     "readAt": 1.02,
+     "mood": "excited",
+     "p": 0.86,
+     "photos": []
+    },
+    {
+     "text": "He loved the energy of the Bay Area and the generosity of its design community.",
+     "transcriptAt": 4.35,
+     "heardBy": 5.46,
+     "readAt": 4.67,
+     "mood": "calm",
+     "p": 0.45,
+     "photos": []
+    },
+    {
+     "text": "He also really valued that balance you can find there, serious tech work, and then a hike, a beach, or the Golden Gate waterfront all within an hour.",
+     "transcriptAt": 13.15,
+     "heardBy": 14.17,
+     "readAt": 13.58,
+     "mood": "calm",
+     "p": 0.73,
+     "photos": [
+      "golden-gate-bridge"
+     ]
+    },
+    {
+     "text": "San Francisco is still his favorite city to live in.",
+     "transcriptAt": 16.49,
+     "heardBy": 17.39,
+     "readAt": 16.84,
+     "mood": "neutral",
+     "p": 0.74,
+     "photos": [
+      "golden-gate-bridge"
+     ]
+    }
+   ]
+  },
+  {
+   "question": "How did he get into design?",
+   "src": "/audio/cameo/tour-into-design.m4a",
+   "sentences": [
+    {
+     "text": "Oh, that's a good one.",
+     "transcriptAt": 0.49,
+     "heardBy": 1.25,
+     "readAt": 0.92,
+     "mood": "excited",
+     "p": 0.81,
+     "photos": []
+    },
+    {
+     "text": "He started in electronics and machine learning, building models as a research intern.",
+     "transcriptAt": 4.8,
+     "heardBy": 5.82,
+     "readAt": 5.13,
+     "mood": "neutral",
+     "p": 0.88,
+     "photos": []
+    },
+    {
+     "text": "But he kept coming back to a tougher question, whether people actually needed, understood, or benefited from what he was making.",
+     "transcriptAt": 11.41,
+     "heardBy": 12.4,
+     "readAt": 11.74,
+     "mood": "calm",
+     "p": 0.42,
+     "photos": []
+    },
+    {
+     "text": "That pulled him toward human computer interaction at RIT.",
+     "transcriptAt": 14.76,
+     "heardBy": 15.87,
+     "readAt": 15.06,
+     "mood": "neutral",
+     "p": 0.75,
+     "photos": [
+      "rit-winter-with-ritchie",
+      "rit-graduation-with-mascot",
+      "rit-graduation-cap-throw"
+     ]
+    },
+    {
+     "text": "He learned to pair technical rigor with empathy and make products people genuinely enjoy using.",
+     "transcriptAt": 20.0,
+     "heardBy": 21.3,
+     "readAt": 20.37,
+     "mood": "calm",
+     "p": 0.62,
+     "photos": []
+    }
+   ]
+  },
+  {
+   "question": "What is he building for fun?",
+   "src": "/audio/cameo/tour-building-for-fun.m4a",
+   "sentences": [
+    {
+     "text": "Oh, that's a good one.",
+     "transcriptAt": 0.45,
+     "heardBy": 1.32,
+     "readAt": 0.82,
+     "mood": "excited",
+     "p": 0.8,
+     "photos": []
+    },
+    {
+     "text": "He's building a customizable character library that gives AI a face, personality, and visible reactions.",
+     "transcriptAt": 6.09,
+     "heardBy": 7.55,
+     "readAt": 6.42,
+     "mood": "neutral",
+     "p": 0.65,
+     "photos": []
+    },
+    {
+     "text": "It started as an idea just sitting in Figma, and then he brought it to life after seeing Benji Taylor share a character experiment.",
+     "transcriptAt": 13.13,
+     "heardBy": 14.42,
+     "readAt": 13.49,
+     "mood": "calm",
+     "p": 0.52,
+     "photos": []
+    },
+    {
+     "text": "The little character speaking with you now is the library in action.",
+     "transcriptAt": 17.06,
+     "heardBy": 18.11,
+     "readAt": 17.37,
+     "mood": "neutral",
+     "p": 0.58,
+     "photos": []
+    }
+   ]
+  },
+  {
+   "line": "error",
+   "src": "/audio/cameo/mood-error.m4a",
+   "sentences": [
+    {
+     "text": "Oh no, something went wrong.",
+     "transcriptAt": 1.41,
+     "readAt": 1.96,
+     "heardBy": null,
+     "mood": "concerned",
+     "p": 1
+    },
+    {
+     "text": "I couldn't save your changes, and I'm really sorry about that.",
+     "transcriptAt": 4.45,
+     "readAt": 4.78,
+     "heardBy": 5.32,
+     "mood": "concerned",
+     "p": 1
+    },
+    {
+     "text": "Let's try that again.",
+     "transcriptAt": 5.74,
+     "readAt": 6.08,
+     "heardBy": 6.78,
+     "mood": "neutral",
+     "p": 0.41
+    }
+   ]
+  },
+  {
+   "line": "angry",
+   "src": "/audio/cameo/mood-angry.m4a",
+   "sentences": [
+    {
+     "text": "No, that is not okay.",
+     "transcriptAt": 0.84,
+     "readAt": 1.2,
+     "heardBy": 1.75,
+     "mood": "neutral",
+     "p": 0.46
+    },
+    {
+     "text": "This is the third time it has crashed today, and I am fed up with it.",
+     "transcriptAt": 4.37,
+     "readAt": 4.68,
+     "heardBy": 4.57,
+     "mood": "concerned",
+     "p": 1
+    },
+    {
+     "text": "Somebody needs to fix this right now.",
+     "transcriptAt": 6.79,
+     "readAt": 7.11,
+     "heardBy": 8.01,
+     "mood": "concerned",
+     "p": 1
+    }
+   ]
+  },
+  {
+   "line": "excited",
+   "src": "/audio/cameo/mood-excited.m4a",
+   "sentences": [
+    {
+     "text": "Wait, it worked!",
+     "transcriptAt": 0.07,
+     "readAt": 0.43,
+     "heardBy": 0.36,
+     "mood": "excited",
+     "p": 1
+    },
+    {
+     "text": "I can't believe it worked on the first try.",
+     "transcriptAt": 2.21,
+     "readAt": 2.53,
+     "heardBy": null,
+     "mood": "excited",
+     "p": 1
+    },
+    {
+     "text": "This is the best thing I've seen all week!",
+     "transcriptAt": 4.02,
+     "readAt": 4.34,
+     "heardBy": 4.92,
+     "mood": "excited",
+     "p": 1
+    }
+   ]
+  },
+  {
+   "line": "curious",
+   "src": "/audio/cameo/mood-curious.m4a",
+   "sentences": [
+    {
+     "text": "Hmm, that's strange.",
+     "transcriptAt": 0.46,
+     "readAt": 0.91,
+     "heardBy": 0.59,
+     "mood": "concerned",
+     "p": 0.55
+    },
+    {
+     "text": "Why would the total be different from yesterday?",
+     "transcriptAt": 2.81,
+     "readAt": 3.21,
+     "heardBy": 3.86,
+     "mood": "curious",
+     "p": 0.88
+    },
+    {
+     "text": "I wonder what changed overnight.",
+     "transcriptAt": 4.41,
+     "readAt": 4.79,
+     "heardBy": 5.57,
+     "mood": "curious",
+     "p": 1
+    }
+   ]
+  },
+  {
+   "line": "sad",
+   "src": "/audio/cameo/mood-sad.m4a",
+   "sentences": [
+    {
+     "text": "I'm sorry to say the project was cancelled.",
+     "transcriptAt": 1.04,
+     "readAt": 1.38,
+     "heardBy": 2.11,
+     "mood": "concerned",
+     "p": 0.95
+    },
+    {
+     "text": "We put so much into it, and it hurts to let it go.",
+     "transcriptAt": 3.99,
+     "readAt": 4.3,
+     "heardBy": 4.95,
+     "mood": "concerned",
+     "p": 0.95
+    }
+   ]
+  }
+ ]
+}

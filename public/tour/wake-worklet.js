@@ -8,10 +8,10 @@
  * to them:
  *
  *   pass  — live. Audio goes straight through.
- *   ring  — asleep. Sends silence, remembers the last second, and listens
+ *   ring  — asleep. Sends silence, remembers the last two seconds, and listens
  *           for a voice. Hearing one moves to `hold` and says so.
  *   hold  — waking. Still sends silence (nothing is connected yet) and keeps
- *           everything from a second before the voice onwards.
+ *           everything from two seconds before the voice onwards.
  *
  * Going back to `pass` with audio still held plays it out first, so the model
  * hears the question from its first word. That leaves the output running a
@@ -22,7 +22,11 @@
  * A worklet file rather than a module import: it runs on the audio thread.
  */
 
-const RING_SECONDS = 1;
+/**
+ * Long enough to reach back past the start of a question: a voice at arm's
+ * length takes up to 1.6 s to be sure of, in a room with a fan or a TV on.
+ */
+const RING_SECONDS = 2;
 /** Longest a wake may take before the oldest held audio starts to go. */
 const HOLD_SECONDS = 12;
 /** How much speech, net of gaps, counts as someone talking. */

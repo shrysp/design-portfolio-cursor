@@ -8,7 +8,7 @@
 
 import { NextResponse } from 'next/server';
 import { unlock } from '@/lib/tour/server/access';
-import { ACCESS_COOKIE, ACCESS_TTL_SECONDS, signAccess } from '@/lib/tour/server/auth';
+import { ACCESS_COOKIE, ACCESS_TTL_SECONDS, accessFrom, signAccess } from '@/lib/tour/server/auth';
 
 export async function POST(request: Request) {
   const { code } = await request.json().catch(() => ({}));
@@ -46,6 +46,15 @@ export async function POST(request: Request) {
     console.error('[tour/unlock]', err);
     return NextResponse.json({ error: 'The tour is not available right now.' }, { status: 503 });
   }
+}
+
+/**
+ * Whether this browser's cookie still opens the tour. For the entrance, when
+ * the way in does not land: a stale page in the browser's router cache and a
+ * spent cookie look the same from there, and need different answers.
+ */
+export async function GET(request: Request) {
+  return NextResponse.json({ unlocked: Boolean(await accessFrom(request)) }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
 /** Locks this browser again. */

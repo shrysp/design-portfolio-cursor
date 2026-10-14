@@ -19,7 +19,8 @@
  * that never says goodbye simply keeps what it reserved.
  */
 
-import { MIN_CODE_LENGTH, type NotionVisitor, getVisitor, listVisitors, notionConfigured, reportUsage } from './notion';
+import { MIN_CODE_LENGTH, type NotionVisitor, appendExchange, getVisitor, listVisitors, notionConfigured, reportUsage } from './notion';
+import { type ResponsesUsage, backendMicros, voiceMicros } from './costs';
 import { getStore, hasRealStore, toRecord } from './store';
 
 /** The longest one session may run. */
@@ -97,8 +98,30 @@ async function saveFromNotion(id: string, row: NotionVisitor) {
     'photos', row.photos.join(','),
     'page', row.page,
     'revoked', row.active ? '0' : '1',
+    'invite', row.invite ? '1' : '0',
+    'inviteNo', row.inviteNo ?? '',
+    'inviteNote', row.inviteNote.slice(0, MAX_INVITE_NOTE),
     'synced', Date.now(),
   );
+}
+
+/** Long enough for a few lines in his hand on the ticket; no longer, or it is a letter. */
+const MAX_INVITE_NOTE = 280;
+
+/** An invitation, as its ticket shows it. */
+export type Invitation = { name: string; number: number; note?: string };
+
+/**
+ * The ticket for a code whose Notion row is ticked Invite, from the saved
+ * copy of that row; null for a code without one. The name is what PIP calls
+ * them, or the row's own title when that is empty.
+ */
+export async function invitationFor(id: string): Promise<Invitation | null> {
+  const rec = toRecord(await getStore().cmd<string[]>('HGETALL', codeKey(id)));
+  if (rec.invite !== '1' || rec.revoked === '1') return null;
+  const name = (rec.name || rec.label || '').trim().split(/\s+/)[0];
+  if (!name) return null;
+  return { name, number: Number(rec.inviteNo) || 0, note: rec.inviteNote?.trim() || undefined };
 }
 
 /** Whether a Notion row is the one this code id was made from. */
@@ -127,15 +150,107 @@ export async function refreshVisitor(id: string, timeoutMs?: number): Promise<vo
   }
 }
 
+/**
+ * The visitor's first name, for the tour's welcome — from the saved copy of
+ * their Notion row, so it costs no call to Notion. Empty when there is none.
+ */
+export async function visitorFirstName(id: string): Promise<string> {
+  try {
+    const rec = toRecord(await getStore().cmd<string[]>('HGETALL', codeKey(id)));
+    return (rec.name ?? '').trim().split(/\s+/)[0] ?? '';
+  } catch {
+    return '';
+  }
+}
+
+/** Adds the price of a token-billed call made for this code to what it has cost. */
+export async function chargeApi(id: string, micros: number): Promise<void> {
+  if (micros > 0) await getStore().cmd('HINCRBY', codeKey(id), 'apiMicros', micros);
+}
+
+const RESPONSES = 'https://api.openai.com/v1/responses';
+/** More answers than one session could hold is not a session's list. */
+const MAX_RESPONSES = 60;
+const RESPONSE_ID = /^resp_[A-Za-z0-9]{8,120}$/;
+/** Seen response ids, so none is charged twice. */
+const CHARGED = 'tour:charged';
+
+/**
+ * Charges the answers the backend model wrote during a session. The browser
+ * sees their ids go past and hands them in when the session ends; what each
+ * one cost is then asked of OpenAI, not taken from the browser. An id is
+ * charged once, to whoever hands it in first, and one that is not this
+ * account's simply is not found.
+ */
+export async function chargeResponses(id: string, ids: unknown): Promise<void> {
+  const key = process.env.OPENAI_API_KEY;
+  if (!key || !Array.isArray(ids)) return;
+  const store = getStore();
+  const fresh: string[] = [];
+  for (const r of ids.slice(0, MAX_RESPONSES)) {
+    if (typeof r !== 'string' || !RESPONSE_ID.test(r)) continue;
+    if ((await store.cmd<number>('HINCRBY', CHARGED, r, 1)) === 1) fresh.push(r);
+  }
+  const costs = await Promise.all(
+    fresh.map(async (r) => {
+      try {
+        const res = await fetch(`${RESPONSES}/${r}`, {
+          headers: { Authorization: `Bearer ${key}` },
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!res.ok) return 0;
+        return backendMicros(((await res.json()) as { usage?: ResponsesUsage }).usage);
+      } catch {
+        return 0;
+      }
+    }),
+  );
+  await chargeApi(id, costs.reduce((a, b) => a + b, 0));
+}
+
 /** Tells the person's Notion row what they have used. Best effort: the tour does not depend on it. */
 export async function reportVisit(id: string): Promise<void> {
   if (!notionConfigured()) return;
   const rec = toRecord(await getStore().cmd<string[]>('HGETALL', codeKey(id)));
   if (!rec.page) return;
+  const used = Number(rec.used ?? 0);
+  const cost = (voiceMicros(used) + Number(rec.apiMicros ?? 0)) / 1e6;
   try {
-    await reportUsage(rec.page, Math.round((Number(rec.used ?? 0) / 60) * 10) / 10, new Date(Number(rec.lastUsed) || Date.now()));
+    await reportUsage(rec.page, {
+      minutesUsed: Math.round((used / 60) * 10) / 10,
+      lastVisit: new Date(Number(rec.lastUsed) || Date.now()),
+      cost: Math.round(cost * 100) / 100,
+    });
   } catch (err) {
     console.error('[tour] Could not write usage back to Notion.', err);
+  }
+}
+
+/** What a session's conversation may be, as the browser reports it: kept to a sane size. */
+const MAX_EXCHANGE_LINES = 200;
+const MAX_EXCHANGE_LINE = 2000;
+
+/**
+ * Saves a session's conversation to the visitor's page in Notion (see
+ * appendExchange). Reported by their own browser at the session's end — the
+ * voice runs between the browser and the model, so the server never hears
+ * it — and only for a code that has a page. A session where the visitor said
+ * nothing is not saved.
+ */
+export async function saveExchange(id: string, raw: unknown): Promise<void> {
+  if (!notionConfigured() || !Array.isArray(raw)) return;
+  const lines = raw
+    .filter((l): l is { who: 'you' | 'pip'; text: string } => (l?.who === 'you' || l?.who === 'pip') && typeof l?.text === 'string')
+    .map((l) => ({ who: l.who, text: l.text.trim().slice(0, MAX_EXCHANGE_LINE) }))
+    .filter((l) => l.text)
+    .slice(0, MAX_EXCHANGE_LINES);
+  if (!lines.some((l) => l.who === 'you')) return;
+  const rec = toRecord(await getStore().cmd<string[]>('HGETALL', codeKey(id)));
+  if (!rec.page) return;
+  try {
+    await appendExchange(rec.page, lines, new Date());
+  } catch (err) {
+    console.error('[tour] Could not save the conversation to Notion.', err);
   }
 }
 
@@ -152,10 +267,11 @@ export async function unlock(code: string, address: string): Promise<UnlockResul
   const id = await hashCode(code);
   let rec = toRecord(await store.cmd<string[]>('HGETALL', codeKey(id)));
   if (notionConfigured()) {
-    if (rec.page) {
-      // Someone coming back: pick up whatever has changed about them since.
-      await refreshVisitor(id);
-    } else if (!rec.label) {
+    // Someone coming back is let in on the saved copy, not kept waiting on
+    // Notion: the tour page refreshes their row from Notion as soon as it has
+    // been sent (refreshVisitor, page.tsx), and a session will not start for a
+    // row that has since been switched off (startSession).
+    if (!rec.label) {
       // A code this store has not seen. It may be a row added in Notion since
       // — the one moment the whole table is read, and it is behind the
       // attempt limit above.
