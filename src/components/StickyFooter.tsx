@@ -138,6 +138,10 @@ export default function StickyFooter() {
 
   const showProjectNav = isProjectPage && isNearBottom;
 
+  // The tour and an invitation are the whole screen from the first frame: no
+  // dock to show and then slide away from under them.
+  if (pathname === '/projects/cameo/tour' || pathname === '/projects/cameo/invite') return null;
+
   return (
       <motion.div
         data-site-dock

@@ -124,6 +124,8 @@ const DISSOLVE_FROM = 180;
 /** How long the CRT glass takes to come up over the case study (EntranceHost mounts it). */
 export const GLASS_APPEAR = SCREEN.off * 0.6;
 const LAND_SURGE = 1.5;
+/** The glitch on the way in, in ms: a wrong code's (submit), seen on its own before the dive. */
+const ENTER_GLITCH = 360;
 const REDUCED = 250;
 
 type Step = 'opening' | 'code' | 'checking' | 'entering' | 'closing';
@@ -406,10 +408,16 @@ export function Takeover({
     setError(null);
     setMood('happy');
     // Going in is a change of channel: the same burst of interference as a
-    // wrong code (submit), at the same strength and length, without its warm
-    // flicker, which says "wrong". crtGlitch does nothing for reduced motion.
-    crtGlitch(1, 360);
+    // wrong code (submit) — the room's flicker and torn lines and the glass's
+    // glitch, at the same strength and length — seen on its own before the
+    // dive starts. crtGlitch does nothing for reduced motion.
     const calm = reduced() || !field.current;
+    if (!calm) {
+      if (field.current) field.current.uniforms.error = 1;
+      crtGlitch(1, ENTER_GLITCH);
+      await wait(ENTER_GLITCH);
+      if (!alive.current) return;
+    }
     if (screen && !calm) {
       // Through the library: the stream builds up to cruising speed and keeps
       // going — through the route change, for as long as the tour page takes
@@ -540,7 +548,12 @@ export function Takeover({
       void wakeUp(0, 150, REDUCED);
     } else if (theme === 'screen') {
       void (async () => {
-        await tween(SCREEN.off, easeIn, setOff, live);
+        // The page under it squeezes to a line and goes out. With no page under
+        // it (an invitation's own page, which is already dark) there is nothing
+        // to switch off, and that line would only flash on an empty screen:
+        // it starts off.
+        const page = document.querySelector('[data-case-study]');
+        await tween(page ? SCREEN.off : 0, easeIn, setOff, live);
         if (!live()) return;
         await wait(SCREEN.onAt - SCREEN.off);
         if (!live()) return;

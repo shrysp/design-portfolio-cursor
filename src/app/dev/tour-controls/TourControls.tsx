@@ -147,6 +147,7 @@ export default function TourControls() {
                   setSilent={setSilent}
                   timeLeft={low ? 48 : 222}
                   session
+                  canType={false}
                   resume={null}
                   turn={turn}
                   lines={SAMPLE_LINES}

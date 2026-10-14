@@ -997,6 +997,7 @@ function Slot({ show, children }: { show: boolean; children: React.ReactNode }) 
  */
 export function TourBar({
   session,
+  canType,
   resume,
   turn,
   typing,
@@ -1015,6 +1016,12 @@ export function TourBar({
   timeLeft,
   onEnd,
 }: {
+  /**
+   * Typing can begin here without a session: the start screen, where a typed
+   * question is what starts one. Its field opens in this bar, as it does in a
+   * session, with the switch back to talking beside it.
+   */
+  canType: boolean;
   /** A session is open (or typing to wake one): the session's switches are in the bar. */
   session: boolean;
   /** No session, but one to start or go back to: its button leads the row. */
@@ -1042,7 +1049,7 @@ export function TourBar({
   const inputRef = useRef<HTMLInputElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const t = useBarTiming();
-  const open = session && typing;
+  const open = typing && (session || canType);
   const reading = history && lines.length > 0;
   const wide = open || reading;
 
@@ -1160,7 +1167,8 @@ export function TourBar({
             {resume?.label}
           </button>
         </Slot>
-        <Slot show={session}>
+        {/* In a session; and on the start screen while typing, as the way back to talking. */}
+        <Slot show={session || (canType && typing)}>
           <div className="tour-mode" role="radiogroup" aria-label="How you ask PIP">
             {/* A voice, not a microphone: the microphone is the mute button beside it. */}
             <button role="radio" aria-checked={!typing} aria-label="Talk" title="Talk" className="tour-mode-btn" onClick={onTalk}>
@@ -2354,13 +2362,6 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     else void bringMicIn();
   }, [bringMicIn]);
 
-  /** From the start screen's type field: straight into talking, not back to the choice. */
-  const startTalking = () => {
-    switchToVoice();
-    modeRef.current = 'voice';
-    void connect();
-  };
-
   /** Our ask for the microphone, answered: on to the browser's own. */
   const allowMic = () => {
     const why = askMic;
@@ -3215,29 +3216,10 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
           {/* Talk or type swaps through a blur, the one going before the other comes. */}
           <AnimatePresence mode="wait" initial={false}>
           {typing ? (
-            <fm.div key="type" className="tour-start-swap" {...START_SWAP}>
-              <form className="tour-type" onSubmit={submitTyped}>
-                <input
-                  className="tour-type-input" data-crt-clear
-                  value={typed}
-                  onChange={(e) => setTyped(e.target.value)}
-                  onKeyDown={(e) => {
-                    e.stopPropagation();
-                    if (e.key === 'Escape') switchToVoice();
-                  }}
-                  placeholder="Ask PIP about Shreyas"
-                  aria-label="Ask PIP about Shreyas"
-                  autoFocus
-                />
-                <button className="tour-btn tour-btn--primary tour-btn--large" data-crt-clear disabled={!typed.trim()}>
-                  Ask
-                </button>
-              </form>
-              <button className="tour-switch" onClick={startTalking} onKeyDown={(e) => e.stopPropagation()}>
-                <Icon d={MIC_ICON} />
-                Talk instead
-              </button>
-            </fm.div>
+            // Typing happens in the bar at the foot (TourBar), as it does in a session.
+            <fm.p key="type" className="tour-start-hint tour-start-typing" {...START_SWAP}>
+              Type your question below, or point at a photo.
+            </fm.p>
           ) : (
             <fm.div key="talk" className="tour-start-actions" {...START_SWAP}>
               <button className="tour-btn tour-btn--primary tour-btn--large" data-crt-clear onClick={() => void connect()} disabled={v.state === 'connecting'}>
@@ -3390,6 +3372,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         {typing && micNote && <p className="tour-mic-note-live">{micNote}</p>}
         <TourBar
             session={v.live || (v.dozing && typing)}
+            canType={startCard}
             turn={shownTurn}
             // With the start card closed (a photo open, a notice read) the way into the tour is here.
             resume={
