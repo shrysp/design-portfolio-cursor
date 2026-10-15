@@ -375,6 +375,11 @@ const SPOTLIGHT_HOLD_MS = 1800;
  * onRemoteStream), not from when its words arrived as text, which is earlier.
  */
 const IDLE_LIMIT = 15;
+/**
+ * The idle clock also waits while PIP is thinking up an answer, but only this
+ * long: a backend that never answers must not keep a session open, and billed.
+ */
+const THINKING_HOLD_MS = 30_000;
 
 /**
  * How long PIP dozes after the conversation goes quiet. The session is closed
@@ -2607,7 +2612,14 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     // No setState here: the readout is only shown while live, so clearing it
     // on teardown would be a cascading render for something invisible.
     if (!live) return;
+    /** When the current spell of thinking began, so it can only hold the idle clock so long. */
+    let thinkingSince: number | null = null;
     const id = window.setInterval(() => {
+      // Working on an answer is not quiet: the idle clock waits, as it does while PIP talks.
+      if (thinking.current) {
+        thinkingSince ??= performance.now();
+        if (performance.now() - thinkingSince < THINKING_HOLD_MS) lastVoice.current = performance.now();
+      } else thinkingSince = null;
       const left = Math.round(
         idleSecondsLeft({
           now: performance.now(),
