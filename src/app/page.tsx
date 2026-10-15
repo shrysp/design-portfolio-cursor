@@ -11,6 +11,7 @@ import HandNote from '@/components/HandNote';
 import SectionTitle from '@/components/SectionTitle';
 import { ExpandableJournal } from '@/components/journal/ExpandableJournal';
 import { clearReturningFrom, peekReturningFrom } from '@/lib/routeTransition';
+import { useSitePath } from '@/lib/sitePath';
 
 
 // ── Animation timeline ──
@@ -44,13 +45,16 @@ export default function Home() {
   // page then opens on that project's card with no entrance animation, so the
   // project's hero and title can morph straight back into it.
   const [returnSlug] = useState(peekReturningFrom);
+  // The home page is also the review copy's, at /dive, where its cards link under /dive
+  const { to } = useSitePath();
 
   useLayoutEffect(() => {
     if (!returnSlug) return;
     // A project's card, or the section that leads to the page being returned from
-    const card = document.querySelector(`a[href="/projects/${returnSlug}"], [data-return="${returnSlug}"]`);
+    const card = document.querySelector(`a[href="${to(`/projects/${returnSlug}`)}"], [data-return="${returnSlug}"]`);
     if (!card) return;
     window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - RETURN_OFFSET, behavior: 'instant' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [returnSlug]);
 
   useEffect(() => clearReturningFrom(), []);

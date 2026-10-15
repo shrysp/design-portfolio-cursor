@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { IconArrowRight } from 'nucleo-micro-bold-essential';
 import { startRouteTransition } from '@/lib/routeTransition';
+import { useSitePath } from '@/lib/sitePath';
 
 interface ProjectThumbnailCardProps {
   name: string;
@@ -14,17 +15,19 @@ interface ProjectThumbnailCardProps {
 
 export default function ProjectThumbnailCard({ name, link, children }: ProjectThumbnailCardProps) {
   const router = useRouter();
+  // Under /dive the card opens the review copy of the project
+  const href = useSitePath().to(link);
 
   // A plain click morphs the thumbnail into the project's hero. Anything
   // else (new tab, new window) is left to the link.
   const openWithTransition = (event: React.MouseEvent<HTMLAnchorElement>) => {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    startRouteTransition(() => router.push(link));
+    startRouteTransition(() => router.push(href));
   };
 
   return (
-    <Link href={link} onClick={openWithTransition} className="isolate group w-full flex flex-col gap-4 cursor-pointer relative active:scale-[0.98] md:active:scale-100 transition-transform duration-100">
+    <Link href={href} onClick={openWithTransition} className="isolate group w-full flex flex-col gap-4 cursor-pointer relative active:scale-[0.98] md:active:scale-100 transition-transform duration-100">
       {/* Header */}
       <div className="column flex justify-between items-center">
         {/* Shares a name with the title on the project page, so one becomes the other */}

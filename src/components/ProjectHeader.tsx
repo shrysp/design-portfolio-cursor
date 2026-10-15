@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { IconArrowLeft } from 'nucleo-micro-bold-essential';
 import { Button } from '@/components/ui/button';
 import { markReturningFrom, startRouteTransition } from '@/lib/routeTransition';
+import { useSitePath } from '@/lib/sitePath';
 
 interface ProjectHeaderProps {
   title: string;
@@ -25,6 +26,7 @@ export default function ProjectHeader({
 }: ProjectHeaderProps) {
   const router = useRouter();
   const slug = usePathname()?.split('/').filter(Boolean).pop();
+  const { to } = useSitePath();
 
   return (
     <div className={`column flex items-center gap-4 ${className}`}>
@@ -36,7 +38,7 @@ export default function ProjectHeader({
           // The home page lands on this project's card, so the hero and
           // title can morph back into it
           if (slug) markReturningFrom(slug);
-          startRouteTransition(() => router.push('/', { scroll: false }));
+          startRouteTransition(() => router.push(to('/'), { scroll: false }));
         }}
         className="size-8 shrink-0 xl:fixed xl:z-40 xl:top-24 xl:left-[calc(max(1.5rem,50%-var(--column)/2-13rem)+1rem-2px)]"
       >

@@ -1,5 +1,6 @@
 "use client";
 
+import { useSitePath } from '@/lib/sitePath';
 import React, { useState, useEffect, useRef } from 'react';
 import { XLogo } from '@phosphor-icons/react';
 import { IconFile, IconArrowUp } from 'nucleo-micro-bold-essential';
@@ -44,8 +45,10 @@ export default function StickyFooter() {
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
 
   // Determine if we're on a project page
-  const isProjectPage = pathname?.startsWith('/projects/') && pathname !== '/projects';
-  const currentSlug = isProjectPage ? pathname.split('/')[2] : null;
+  // Under /dive, the same page of the review copy
+  const { path, to } = useSitePath();
+  const isProjectPage = path.startsWith('/projects/') && path !== '/projects';
+  const currentSlug = isProjectPage ? path.split('/')[2] : null;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -188,7 +191,7 @@ export default function StickyFooter() {
                 return (
                   <button
                     key={project.slug}
-                    onClick={() => router.push(`/projects/${project.slug}`)}
+                    onClick={() => router.push(to(`/projects/${project.slug}`))}
                     disabled={isCurrentProject}
                     className={`aqua shrink-0 h-8 px-2.5 md:px-3 text-[13px] md:text-sm font-medium ${isCurrentProject ? 'aqua-blue' : 'aqua-to-blue [--aqua-ink:var(--color-stone-600)]'}`}
                     aria-label={isCurrentProject ? `Current project: ${project.name}` : `Go to ${project.name}`}
