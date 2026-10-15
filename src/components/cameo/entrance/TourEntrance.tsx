@@ -870,12 +870,12 @@ export function Takeover({
           </p>
           <p className="entrance-body">
             <span className="entrance-invite-long">
-              This is PIP, Shreyas{'\u2019'}s guide to himself. Ask it anything out loud, and it answers with photos from his
+              This is PIP, Shreyas{'\u2019'}s guide to himself. Ask it anything, and it answers with photos from his
               life. You{'\u2019'}ll need your microphone.
             </span>
             {/* On a short screen there is room for one line over PIP. */}
             <span className="entrance-invite-short" aria-hidden="true">
-              PIP is Shreyas{'\u2019'}s guide. Talk to it out loud.
+              PIP is Shreyas{'\u2019'}s guide. Ask it anything.
             </span>
           </p>
         </div>
