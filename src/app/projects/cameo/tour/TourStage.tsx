@@ -358,14 +358,22 @@ const TAIL_FLUSH_MS = 1500;
  * on it.
  */
 const TAIL_MIN_WORDS = 4;
+/** How long after PIP starts answering the end of the visitor's own transcript may still arrive. */
+const TRANSCRIPT_TRAIL_MS = 2000;
 const TAIL_GIVE_UP_MS = 4000;
 
 /**
- * How long each photo holds the centre when one sentence mentions several —
- * long enough to register, short enough that three fit inside the sentence
- * or two it takes PIP to move on.
+ * The least a photo holds the centre before another may take it. About one
+ * spoken sentence (16 characters a second): long enough to be looked at, not
+ * just seen. It was 1.8 s, so that three fitted inside one sentence, and the
+ * centre read as a slideshow.
  */
-const SPOTLIGHT_HOLD_MS = 1800;
+const HOLD_MS = 4500;
+/**
+ * A photo already shown this visit, with no unseen photo of the same moment
+ * to show instead, comes back only for a sentence this plainly about it.
+ */
+const REPEAT_P = 0.85;
 
 /**
  * Seconds of quiet before the session closes. Longer than /live's 5s on
@@ -1629,6 +1637,13 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       lastQuestion.current = question;
       userUtterance.current = '';
       lastVoice.current = performance.now();
+      // As for a spoken question: the last answer's photos, readings and card
+      // are over (see the spoken question in handleEvent).
+      tourModel.current.cancel();
+      window.clearTimeout(spotlightTimer.current);
+      pending.current = [];
+      if (handoutRef.current && !handoutWriting.current) closeHandoutRef.current();
+      answerStartedAt.current = 0;
       thinking.current ??= char.current?.hold('thinking', { key: 'tour' }) ?? null;
       // The voice model answers a note like this by itself, from nothing, so
       // the answer is written on the server from his story (see api/tour/ask)
@@ -1692,6 +1707,11 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     lastQuestion.current = text;
     userUtterance.current = '';
     lastVoice.current = performance.now();
+    tourModel.current.cancel();
+    window.clearTimeout(spotlightTimer.current);
+    pending.current = [];
+    if (handoutRef.current && !handoutWriting.current) closeHandoutRef.current();
+    answerStartedAt.current = 0;
     thinking.current ??= char.current?.hold('thinking', { key: 'tour' }) ?? null;
     setVoiceTurn('thinking');
     s.send({ type: 'conversation.item.create', item: { type: 'message', role: 'user', content: [{ type: 'input_text', text }] } });
@@ -1720,6 +1740,11 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   const historyRef = useRef(false);
   const handoutRef = useRef(false);
   const closeHandoutRef = useRef<() => void>(() => {});
+  /** A message is being written in the card (TourHandout's onWriting). */
+  const handoutWriting = useRef(false);
+  const onHandoutWriting = useCallback((writing: boolean) => {
+    handoutWriting.current = writing;
+  }, []);
 
   const audio = useRef<HTMLAudioElement>(null);
   const listening = useRef<(() => void) | null>(null);
@@ -1744,6 +1769,13 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   const lastModelDelta = useRef(0);
   /** The visitor's last full question, giving a lone answer-sentence its context. */
   const lastQuestion = useRef('');
+  /**
+   * When PIP began answering the visitor's latest question, or 0 before it
+   * has. The visitor's words can still be arriving once it has: the end of
+   * their transcript sometimes lands after the answer starts, and that is
+   * the question the answer is for, not a new one.
+   */
+  const answerStartedAt = useRef(0);
   const lastVoice = useRef(0);
   const startedAt = useRef(0);
   /** How long the server allows this session to run — see api/tour/session. */
@@ -1802,28 +1834,78 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   }, []);
 
   /**
-   * Spotlights a sentence's photos in turn: each travels from its spot in the
-   * cloud to the centre, holds for SPOTLIGHT_HOLD_MS, then hands the centre
-   * to the next — the one before travelling back to its own spot. The last
-   * stays until the next match. Every photo is already on stage, so this
-   * never adds or evicts one — it only moves the focus.
+   * Which of a sentence's photos takes the centre, and when. Each travels
+   * from its spot in the cloud to the centre and back; every photo is already
+   * on stage, so this never adds or evicts one — it only moves the focus.
    *
-   * A newer sentence's photos replace whatever of an older one's run hasn't
-   * played yet: they're about what PIP is saying now.
+   * One at a time, best first, and each holds for at least HOLD_MS. A photo
+   * that arrives sooner waits, and only the newest sentence's photos wait: a
+   * newer sentence replaces them, since they're about what PIP is saying now,
+   * and the stage never falls behind playing a backlog. The last photo stays
+   * until the next.
+   *
+   * A sentence that is still on the subject in the centre — the same photo,
+   * or another of the same moment — leaves it there rather than swapping
+   * aurora for aurora. And a photo already shown this visit gives way to an
+   * unseen one of the same moment, so the second mention of the northern
+   * lights shows another of that night.
    */
   const spotlightTimer = useRef<number | undefined>(undefined);
-  const emitImages = useCallback((ids: string[]) => {
-    const queue = ids.filter((id) => IMAGE_BY_ID.has(id));
-    if (queue.length === 0 || point.current) return;
+  /** Photos waiting for the centre, best first: only ever the newest sentence's. */
+  const pending = useRef<string[]>([]);
+  /** When the photo now in the centre got there. */
+  const focusedAt = useRef(0);
+  /** Every photo that has been in the centre this visit. */
+  const shown = useRef(new Set<string>());
+
+  const stopSpotlight = useCallback(() => {
     window.clearTimeout(spotlightTimer.current);
-    const step = (i: number) => {
-      setFocusId(queue[i]);
-      if (i + 1 < queue.length) {
-        spotlightTimer.current = window.setTimeout(() => step(i + 1), SPOTLIGHT_HOLD_MS);
-      }
-    };
-    step(0);
+    pending.current = [];
   }, []);
+
+  const pumpSpotlight = useCallback(function pump() {
+    window.clearTimeout(spotlightTimer.current);
+    const next = pending.current[0];
+    if (!next || point.current) return;
+    const wait = focusRef.current ? focusedAt.current + HOLD_MS - performance.now() : 0;
+    if (wait > 0) {
+      spotlightTimer.current = window.setTimeout(pump, wait);
+      return;
+    }
+    pending.current.shift();
+    shown.current.add(next);
+    focusedAt.current = performance.now();
+    setFocusId(next);
+    setLog((l) => [`tour.spotlight ${next}${pending.current.length ? ` (then ${pending.current.join(', ')})` : ''}`, ...l].slice(0, 40));
+    if (pending.current.length) spotlightTimer.current = window.setTimeout(pump, HOLD_MS);
+  }, []);
+
+  const emitImages = useCallback(
+    (images: { id: string; p: number }[]) => {
+      if (point.current) return;
+      const moment = (id: string) => IMAGE_BY_ID.get(id)?.group ?? id;
+      const fresh = (id: string, p: number) => {
+        if (!shown.current.has(id)) return id;
+        const group = IMAGE_BY_ID.get(id)?.group;
+        const unseen = group && TOUR_IMAGES.find((img) => img.group === group && !shown.current.has(img.id));
+        if (unseen) return unseen.id;
+        return p >= REPEAT_P ? id : null;
+      };
+      const current = focusRef.current;
+      const picks: string[] = [];
+      for (const { id, p } of images) {
+        if (!IMAGE_BY_ID.has(id)) continue;
+        if (current && moment(id) === moment(current)) continue;
+        const pick = fresh(id, p);
+        if (pick && !picks.includes(pick)) picks.push(pick);
+      }
+      if (picks.length === 0) return;
+      if (pending.current.length) setLog((l) => [`tour.spotlight skipped ${pending.current.join(', ')}`, ...l].slice(0, 40));
+      pending.current = picks;
+      pumpSpotlight();
+    },
+    [pumpSpotlight],
+  );
 
   const releasePoint = useCallback(() => {
     point.current = null;
@@ -1864,8 +1946,9 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       const img = IMAGE_BY_ID.get(id);
       if (!img) return;
 
-      window.clearTimeout(spotlightTimer.current);
+      stopSpotlight();
       point.current = { id, answered: false };
+      shown.current.add(id);
       setPointedId(id);
       setFocusId(id);
       setLog((l) => [`tour.point ${id}`, ...l].slice(0, 40));
@@ -1891,7 +1974,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         );
       }, POINT_ASK_MS);
     },
-    [releasePoint, sharePoint],
+    [releasePoint, sharePoint, stopSpotlight],
   );
 
   const glanceAt = useCallback((el: Element) => {
@@ -1922,12 +2005,14 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       if (card === 'contact') showHandout({ kind: 'contact' });
       else if (HANDOUT_PROJECTS.includes(card)) showHandout({ kind: 'project', project: card });
       else return;
-      window.clearTimeout(spotlightTimer.current);
+      stopSpotlight();
       if (!point.current) setFocusId(null);
     },
-    [showHandout],
+    [showHandout, stopSpotlight],
   );
 
+  /** The newest sentence whose photos have gone to the stage. */
+  const photoSeq = useRef(0);
   const classifySentence = useCallback(
     (said: string) => {
       const text = said.trim();
@@ -1935,17 +2020,25 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       const question = lastQuestion.current;
       void tourModel.current.classify(text, question).then((read) => {
         if (!read) return;
-        emitMood(read.mood, read.moodP);
+        // A reading that came back after a newer one's is too late for the
+        // face and for a card, which are about what PIP is saying now. Its
+        // photos still count unless a newer sentence has already asked for some.
+        if (!read.stale) emitMood(read.mood, read.moodP);
+        const card = read.stale ? null : read.card;
+        const photosAreNewest = read.images.length > 0 && read.seq > photoSeq.current;
         // Not before the visitor has said something. The greeting lists what
         // PIP can talk about — "his background, how he works, the moments in
         // the photos" — and that sentence matched two or three photos at
         // random, which came to the centre before anyone had asked anything.
         // A card in the centre is what PIP is talking about, so photos wait for it to go.
-        if (heardVisitor.current && read.card) handOver(read.card.id, question);
-        else if (heardVisitor.current && !handoutRef.current) emitImages(read.images.map((img) => img.id));
+        if (heardVisitor.current && card) handOver(card.id, question);
+        else if (heardVisitor.current && !handoutRef.current && photosAreNewest) {
+          photoSeq.current = read.seq;
+          emitImages(read.images);
+        }
         setLog((l) =>
           [
-            `tour.answer mood=${read.mood} images=${read.images.map((img) => `${img.id}(${img.p.toFixed(2)})`).join(',') || 'none'} card=${read.card ? `${read.card.id}(${read.card.p.toFixed(2)})` : 'none'} "${text.slice(0, 60)}"`,
+            `tour.answer${read.stale ? ' (late)' : ''} mood=${read.mood} images=${read.images.map((img) => `${img.id}(${img.p.toFixed(2)})`).join(',') || 'none'} card=${read.card ? `${read.card.id}(${read.card.p.toFixed(2)})` : 'none'} "${text.slice(0, 60)}"`,
             ...l,
           ].slice(0, 40),
         );
@@ -2005,7 +2098,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       if (type === 'session.started' && welcomePhotos.current.length) {
         const ids = welcomePhotos.current;
         welcomePhotos.current = [];
-        window.setTimeout(() => emitImages(ids), 1800);
+        window.setTimeout(() => emitImages(ids.map((id) => ({ id, p: 1 }))), 1800);
       }
 
       // The line went down under a live session. Not 'disconnected', which
@@ -2016,6 +2109,45 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         return;
       }
 
+      /**
+       * The visitor has asked something: what they said becomes the question
+       * PIP's sentences are read against, and the last answer is over.
+       *
+       * A spoken question ends at its punctuation, but a transcript does not
+       * always have any, so it also ends when PIP starts on the answer. Before
+       * that, a question with no full stop never ended at all: the card the
+       * last answer handed over stayed out, and so did the photos it kept
+       * from the centre, and a card already handed over for that "question"
+       * could not come back.
+       */
+      const finishQuestion = () => {
+        const question = userUtterance.current.trim();
+        if (!question) return;
+        lastQuestion.current = question;
+        userUtterance.current = '';
+        setLog((l) => [`tour.question "${question.slice(0, 80)}"`, ...l].slice(0, 40));
+        // The late end of the question this answer is already for.
+        if (answerStartedAt.current) return;
+
+        // PIP has already talked about the pointed photo; a new question
+        // is the visitor moving on, so its answer may spotlight again.
+        if (point.current?.answered) releasePoint();
+
+        // Photos from the last answer stay on stage — only that answer's
+        // in-flight sentence calls are dropped, since its sentences no
+        // longer supersede each other on their own. Same for a tail still
+        // held in the buffer: it belongs to an answer that's over.
+        tourModel.current.cancel();
+        stopSpotlight();
+        // The card the last answer handed over goes too, so this answer's
+        // photos can have the centre: photos wait while a card is out. Not
+        // while they are writing to him in it — asking PIP something
+        // mid-message must not lose the message.
+        if (handoutRef.current && !handoutWriting.current) closeHandoutRef.current();
+        window.clearTimeout(modelFlushTimer.current);
+        modelUtterance.current = '';
+      };
+
       const intent = interpret(event);
       if (!intent) return;
 
@@ -2025,32 +2157,20 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
           appendLine('you', intent.delta);
           heardVisitor.current = true;
           pointAsked.current = true;
+          // Words well into an answer are the visitor speaking again, not the
+          // tail of the question it answers.
+          if (answerStartedAt.current && performance.now() - answerStartedAt.current > TRANSCRIPT_TRAIL_MS) {
+            answerStartedAt.current = 0;
+          }
           userUtterance.current += intent.delta;
           lastVoice.current = performance.now();
-          if (/[.!?]\s*$/.test(userUtterance.current) || userUtterance.current.length > 140) {
-            const question = userUtterance.current.trim();
-            lastQuestion.current = question;
-            userUtterance.current = '';
-
-            setLog((l) => [`tour.question "${question.slice(0, 80)}"`, ...l].slice(0, 40));
-
-            // PIP has already talked about the pointed photo; a new question
-            // is the visitor moving on, so its answer may spotlight again.
-            if (point.current?.answered) releasePoint();
-
-            // Photos from the last answer stay on stage — only that answer's
-            // in-flight sentence calls are dropped, since its sentences no
-            // longer supersede each other on their own. Same for a tail still
-            // held in the buffer: it belongs to an answer that's over.
-            tourModel.current.cancel();
-    window.clearTimeout(spotlightTimer.current);
-            window.clearTimeout(modelFlushTimer.current);
-            modelUtterance.current = '';
-          }
+          if (/[.!?]\s*$/.test(userUtterance.current) || userUtterance.current.length > 140) finishQuestion();
           break;
         }
 
         case 'model-active': {
+          finishQuestion();
+          if (!answerStartedAt.current) answerStartedAt.current = performance.now();
           release(thinking);
           release(listening);
           appendLine('pip', intent.delta);
@@ -2095,6 +2215,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
           break;
 
         case 'thinking':
+          if (intent.active) finishQuestion();
           if (intent.active && !speaking.current) {
             thinking.current ??= char.current!.hold('thinking', { key: 'tour' });
             setVoiceTurn('thinking');
@@ -2142,7 +2263,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
           break;
       }
     },
-    [appendLine, classifySentence, endOnce, emitImages, flushModelTail, releasePoint, sharePoint],
+    [appendLine, classifySentence, endOnce, emitImages, flushModelTail, releasePoint, sharePoint, stopSpotlight],
   );
 
   /**
@@ -2357,10 +2478,10 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     session.current = null;
     // An answer arriving after the session ends would pull a face at nobody.
     tourModel.current.cancel();
-    window.clearTimeout(spotlightTimer.current);
+    stopSpotlight();
     window.clearTimeout(modelFlushTimer.current);
     window.clearTimeout(pointOfferTimer.current);
-  }, [endOnce]);
+  }, [endOnce, stopSpotlight]);
 
   /** Into a tour begun by typing, the real microphone, in place of the silence it was sending. */
   const bringMicIn = useCallback(async () => {
@@ -3328,6 +3449,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
           handout={handout}
           leaving={handoutLeaving}
           onClose={closeHandout}
+          onWriting={onHandoutWriting}
           style={{ '--handout-w': `${cards.width}px` } as React.CSSProperties}
         />
       )}

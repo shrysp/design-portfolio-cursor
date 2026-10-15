@@ -233,6 +233,7 @@ export function TourHandout({
   writing: startWriting = false,
   draft = '',
   where = 'tour',
+  onWriting,
   className = '',
   style,
 }: {
@@ -246,6 +247,8 @@ export function TourHandout({
   draft?: string;
   /** Where the card is, for the message it sends. */
   where?: 'tour' | 'entrance';
+  /** Whether a message is being written in it, unsent — the stage keeps the card for that. */
+  onWriting?: (writing: boolean) => void;
   className?: string;
   style?: CSSProperties;
 }) {
@@ -256,6 +259,12 @@ export function TourHandout({
   const [message, setMessage] = useState(draft);
   const [note, setNote] = useState<string | null>(null);
   const honey = useRef<HTMLInputElement>(null);
+
+  const composing = writing && status !== 'sent';
+  useEffect(() => {
+    onWriting?.(composing);
+  }, [composing, onWriting]);
+  useEffect(() => () => onWriting?.(false), [onWriting]);
 
   const mailto = `mailto:${HANDOUT_EMAIL}?body=${encodeURIComponent(message)}`;
   const send = async () => {
