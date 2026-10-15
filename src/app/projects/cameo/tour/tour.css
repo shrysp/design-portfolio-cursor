@@ -654,14 +654,20 @@
   transition-duration: 90ms;
 }
 
-.tour-dock--intro .tour-pip-body {
-  /* What in the dock can be pointed at: PIP, the suggestions, and words being said. */
-.tour-dock > :is(.tour-pip, .tour-chips--dock, .tour-caption:not(.tour-caption--closed)) {
-  pointer-events: auto;
-}
 /* Straight up from its place in the dock: PIP is centred in both. */
+.tour-dock--intro .tour-pip-body {
   translate: 0 calc(var(--dock-bottom) - 61dvh);
   scale: 1.4;
+}
+
+/*
+ * What in the dock can be pointed at: PIP, the suggestions, and words being
+ * said. The dock itself lets the pointer through to the stage. This rule
+ * once sat inside the one above, by a slip, where as nested CSS it matched
+ * nothing — and the chips could not be clicked or hovered.
+ */
+.tour-dock > :is(.tour-pip, .tour-chips--dock, .tour-caption:not(.tour-caption--closed)) {
+  pointer-events: auto;
 }
 
 /* The start card when PIP is sitting above it: hung below PIP rather than centred. */
@@ -1237,6 +1243,12 @@
   translate: -50% 0;
   width: var(--caption-w);
   justify-content: center;
+  /*
+   * Over the caption, which comes after it and is a fixed three lines tall
+   * whatever is said: its empty top sits where the chips are, and took the
+   * pointer from them.
+   */
+  z-index: 1;
 }
 .tour-chips--dock .tour-chips-label {
   width: auto;
