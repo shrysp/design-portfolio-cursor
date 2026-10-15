@@ -84,6 +84,8 @@ export type Visitor = {
   photos: string[];
   /** Who they are and what to bring out for them — for PIP to know, not to recite. */
   context?: string;
+  /** This tour is his application to their team. */
+  application?: boolean;
 };
 
 /** Copies a Notion row into this code's record. Never touches what the code has spent. */
@@ -101,6 +103,7 @@ async function saveFromNotion(id: string, row: NotionVisitor) {
     'invite', row.invite ? '1' : '0',
     'inviteNo', row.inviteNo ?? '',
     'inviteNote', row.inviteNote.slice(0, MAX_INVITE_NOTE),
+    'application', row.application ? '1' : '0',
     'synced', Date.now(),
   );
 }
@@ -328,6 +331,7 @@ export async function startSession(id: string): Promise<StartResult> {
       note: rec.note || undefined,
       photos: (rec.photos ?? '').split(',').map((p) => p.trim()).filter(Boolean),
       context: rec.context || undefined,
+      application: rec.application === '1',
     },
   };
 }

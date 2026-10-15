@@ -25,6 +25,8 @@
  *   Invite no.      number    the number printed on their ticket ("No. 07")
  *   Invite note     text      a line from Shreyas, in his hand on the ticket, to them —
  *                             not the Greeting note, which is PIP's to say about them
+ *   Application     checkbox  sent as his application to a team that is hiring: PIP may answer why
+ *                             to hire him, from his story (applicationInstructions in context.ts)
  *   Minutes used    number    written back by the site
  *   Last visit      date      written back by the site
  *   Cost            number    written back by the site: dollars spent on them so far (see costs.ts)
@@ -50,6 +52,8 @@ export type NotionVisitor = {
   invite: boolean;
   inviteNo: number | null;
   inviteNote: string;
+  /** Sent as his application to a team that is hiring: PIP may make his case (applicationInstructions). */
+  application: boolean;
 };
 
 export const notionConfigured = () => Boolean(process.env.NOTION_TOKEN && process.env.NOTION_VISITORS_DB);
@@ -110,6 +114,7 @@ function read(page: Page): NotionVisitor {
     invite: props['Invite']?.checkbox === true,
     inviteNo: typeof props['Invite no.']?.number === 'number' ? props['Invite no.'].number : null,
     inviteNote: text(props['Invite note']),
+    application: props['Application']?.checkbox === true,
   };
 }
 

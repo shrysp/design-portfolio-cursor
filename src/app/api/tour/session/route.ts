@@ -16,6 +16,7 @@ import { after } from 'next/server';
 import { MIN_SESSION_SECONDS, endSession, refreshVisitor, sessionOpened, startSession } from '@/lib/tour/server/access';
 import { accessFrom } from '@/lib/tour/server/auth';
 import {
+  applicationInstructions,
   backendInstructions,
   TOUR_BACKEND_MODEL,
   TOUR_VOICE_INSTRUCTIONS,
@@ -126,7 +127,12 @@ export async function POST(request: Request) {
       responses: {
         // The reasoning model behind the voice. See the delegation note above.
         model: TOUR_BACKEND_MODEL,
-        instructions: [backendInstructions(story), visitorContext(started.visitor.context), earlier]
+        instructions: [
+          backendInstructions(story),
+          visitorContext(started.visitor.context, started.visitor.note),
+          applicationInstructions(started.visitor.application),
+          earlier,
+        ]
           .filter(Boolean)
           .join('\n\n'),
       },

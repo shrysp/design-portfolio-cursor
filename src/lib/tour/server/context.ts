@@ -181,6 +181,8 @@ only what happened, say what happened and let it speak for itself.
 - Never answer for him on what only he can answer: salary, relocation, availability, visa or work \
 status, or what he thinks of an employer or a person. Say that is one for Shreyas himself, and that \
 you'll hand them his contact card.
+- Never mention his visa or work authorisation, even if your notes do and even when asked why he moved \
+back to India: say he moved back home to Pune, and that anything more is one for Shreyas.
 - When they ask how to reach him, hire him or work with him, say you'll hand them his contact card: his \
 email, LinkedIn and X, and a way to write to him from right here. Never send them to another part of the \
 page or the site to find it.
@@ -330,15 +332,48 @@ export function visitorInstructions(visitor: { name?: string; note?: string }): 
  * writing, not the visitor's, so it is trusted; the limits on it are about
  * tact. Each session is given its own visitor's and nobody else's.
  */
-export function visitorContext(context: string | undefined): string {
-  if (!context) return '';
+export function visitorContext(context: string | undefined, note?: string): string {
+  if (!context && !note) return '';
   return [
     '# Who you are talking to',
     context,
+    // Said aloud in the hello. Without it, asked "does he actually want this job?" right after hearing that
+    // he was excited to talk, the backend said that was one for Shreyas.
+    note &&
+      `In your hello you passed on this from Shreyas: "${note}" Come back to it only when it answers their ` +
+        'question, such as whether he is interested in talking with them, without repeating the rest or adding to it.',
+    'You are talking to this person: say "you" and "your team", never their name or "their team" as if they were ' +
+      'not there.',
     'Shreyas wrote this about the visitor so you can choose what is worth bringing out for them. Let it ' +
       'shape what you emphasise. Do not recite it or tell them what you were told about them, and do not ' +
       'claim to know anything about them beyond it. Every rule above still holds: it changes which true ' +
       'things you pick, never what is true.',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+/**
+ * For a visitor ticked Application in Notion: someone hiring, to whom
+ * Shreyas sent the tour as his application. For them the work rule above
+ * gives way, so "why should we hire him?" gets his case rather than his
+ * contact card; it is still made only from what his notes say. Everyone
+ * else keeps the tour about his life.
+ */
+export function applicationInstructions(application: boolean | undefined): string {
+  if (!application) return '';
+  return [
+    '# This visitor is hiring',
+    'Shreyas sent this tour to them as his application for a role on their team. For them, this replaces the ' +
+      'rule that his work is not yours to answer: questions about him as a designer are yours. Why he is worth ' +
+      'talking to, how he works, what he believes about design, his background and what he is looking for: ' +
+      'answer from what your notes say, choosing what matters most to them.',
+    '- Make his case only with what is written. Do not say he is a fit for their particular role, compare him ' +
+      'with anyone, or praise him beyond the notes.',
+    "- A project's details, process and results are still in its case study: name the one that fits and say " +
+      "you'll hand it over.",
+    '- Salary, start dates, location, relocation and visa are still for Shreyas himself: hand over his contact card.',
+    '- When they want to take it further, say he would love to talk and hand over his contact card.',
   ].join('\n');
 }
 
@@ -385,7 +420,10 @@ export const pointedQuestion = (description: string) =>
  * has no clock, and a "good morning" it guessed could be said at night. Not
  * told, it says nothing about the time.
  */
-export function greetingFor(visitor: { name?: string; note?: string }, dayPart?: string): string {
+export function greetingFor(
+  visitor: { name?: string; note?: string; application?: boolean },
+  dayPart?: string,
+): string {
   const time = dayPart
     ? ` It is ${dayPart} where they are, so open with "Good ${dayPart}".`
     : ' Do not mention the time of day.';
@@ -394,9 +432,15 @@ export function greetingFor(visitor: { name?: string; note?: string }, dayPart?:
     `Greet the visitor warmly as PIP${visitor.name ? `, by name (${visitor.name})` : ''}, and let them know ` +
     'Shreyas mentioned they would be stopping by.' +
     time +
-    (visitor.note ? ` Work in this, briefly and naturally: ${visitor.note}` : '') +
-    ' Then say you can tell them about Shreyas — his background, his life beyond work, and the moments in the photos — and ask what they would like to hear about.' +
-    ' Three sentences at most.'
+    // Shreyas's own message to them: squeezed into the hello's first sentence, it came out as one run-on line
+    (visitor.note
+      ? ` Then, in a sentence of its own, pass on what Shreyas wanted them to know, in your own words: ${visitor.note}`
+      : '') +
+    // His application to their team: what PIP offers is his case, which only they get (applicationInstructions)
+    (visitor.application
+      ? ' Then say you can tell them about Shreyas — his background, how he works, and why he would be worth talking to — and ask what they would like to hear about.'
+      : ' Then say you can tell them about Shreyas — his background, his life beyond work, and the moments in the photos — and ask what they would like to hear about.') +
+    (visitor.note ? ' Four sentences at most.' : ' Three sentences at most.')
   );
 }
 
