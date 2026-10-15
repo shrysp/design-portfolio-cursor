@@ -3431,7 +3431,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         <div className="tour-start tour-start--intro">
           <p className="tour-start-title">{visitor ? `${dayGreeting}, ${visitor}` : 'Meet PIP'}</p>
           <p className="tour-start-body">
-            PIP is Shreyas{'\u2019'}s guide. Ask about him out loud, and it answers with the photos around you.
+            PIP is Shreyas{'\u2019'}s guide. Ask about him, and it answers with the photos around you.
           </p>
           <MicCheck ready={settled} />
           {/* Talk or type swaps through a blur, the one going before the other comes. */}
