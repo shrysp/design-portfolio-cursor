@@ -1558,9 +1558,9 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   const honey = look.honeycomb && !drift;
 
   /**
-   * The card in the centre, if PIP has handed one over (see TourHandout). For
-   * now only the panel below can show one: the designs come first, and what
-   * in a conversation calls for a card comes after.
+   * The card in the centre, if PIP has handed one over (see TourHandout).
+   * PIP hands one over when a sentence of its answer calls for it (see
+   * handOver, by classifySentence); the panel below can show any of them.
    */
   const [handout, setHandout] = useState<Handout | null>(null);
   const [handoutLeaving, setHandoutLeaving] = useState(false);
@@ -1900,27 +1900,51 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
    * since output deltas are not guaranteed to land as tidy per-sentence
    * chunks with trailing punctuation the way a written reply would.
    */
+  /**
+   * Hands over the card a sentence called for. Once per card per question:
+   * an answer about a project names it sentence after sentence, and a card
+   * the visitor has just put away must not come straight back. The card
+   * takes the centre, so whichever photo was there steps back to the cloud.
+   */
+  const handed = useRef<{ question: string; cards: Set<string> }>({ question: '', cards: new Set() });
+  const handOver = useCallback(
+    (card: string, question: string) => {
+      if (handed.current.question !== question) handed.current = { question, cards: new Set() };
+      if (handed.current.cards.has(card)) return;
+      handed.current.cards.add(card);
+      if (card === 'contact') showHandout({ kind: 'contact' });
+      else if (HANDOUT_PROJECTS.includes(card)) showHandout({ kind: 'project', project: card });
+      else return;
+      window.clearTimeout(spotlightTimer.current);
+      if (!point.current) setFocusId(null);
+    },
+    [showHandout],
+  );
+
   const classifySentence = useCallback(
     (said: string) => {
       const text = said.trim();
       if (!text) return;
-      void tourModel.current.classify(text, lastQuestion.current).then((read) => {
+      const question = lastQuestion.current;
+      void tourModel.current.classify(text, question).then((read) => {
         if (!read) return;
         emitMood(read.mood, read.moodP);
         // Not before the visitor has said something. The greeting lists what
         // PIP can talk about — "his background, how he works, the moments in
         // the photos" — and that sentence matched two or three photos at
         // random, which came to the centre before anyone had asked anything.
-        if (heardVisitor.current) emitImages(read.images.map((img) => img.id));
+        // A card in the centre is what PIP is talking about, so photos wait for it to go.
+        if (heardVisitor.current && read.card) handOver(read.card.id, question);
+        else if (heardVisitor.current && !handoutRef.current) emitImages(read.images.map((img) => img.id));
         setLog((l) =>
           [
-            `tour.answer mood=${read.mood} images=${read.images.map((img) => `${img.id}(${img.p.toFixed(2)})`).join(',') || 'none'} "${text.slice(0, 60)}"`,
+            `tour.answer mood=${read.mood} images=${read.images.map((img) => `${img.id}(${img.p.toFixed(2)})`).join(',') || 'none'} card=${read.card ? `${read.card.id}(${read.card.p.toFixed(2)})` : 'none'} "${text.slice(0, 60)}"`,
             ...l,
           ].slice(0, 40),
         );
       });
     },
-    [emitMood, emitImages],
+    [emitMood, emitImages, handOver],
   );
 
   /**

@@ -17,6 +17,7 @@
 
 import type { Mood } from '@/components/cameo/moods';
 import { TOUR_IMAGES, type TourImage } from '@/data/tour-images';
+import { projectsData } from '@/data/projectsData';
 
 const SYSTEMONE = 'https://api.typesafe.ai/v1/systemone';
 const MODEL = 'jev-latest';
@@ -79,6 +80,35 @@ const PHOTO_INSTRUCTIONS = (description: string) =>
   'person, or thing? A loose or merely thematic connection is no. A sentence that lists several things, ' +
   'one of which this photo shows, is yes.';
 
+/**
+ * Whether the sentence calls for a card (TourHandout) — one of the site's
+ * own projects, or the way to reach him. A choice rather than a yes/no per
+ * card: only one card is ever handed over at a time, and `none` sharing the
+ * mass is the point here, since most sentences call for nothing.
+ *
+ * The card names are the site's project titles and `contact`, which is all
+ * the stage knows how to show; a card is never something the model wrote.
+ */
+const CARD_INSTRUCTIONS = [
+  "The state gives the visitor's question and one sentence the guide just spoke.",
+  'Should the guide hand the visitor a card right now, so they can open it?',
+  'A project card only when THIS SENTENCE is about that particular project of his — what it is, how it was made, ' +
+    'what came of it. A passing mention in a list of projects is none.',
+  'The contact card only when the sentence is about getting in touch with him — emailing him, hiring him, working ' +
+    'with him, finding him online, or being handed on to him for what the guide cannot answer.',
+  'Prefer none over a weak guess.',
+].join(' ');
+
+const CARDS: Record<string, string> = {
+  none: 'No card. The default: most sentences call for nothing to open.',
+  contact: 'The contact card: his email, X and LinkedIn, and a way to write to him from here.',
+  ...Object.fromEntries(
+    projectsData.map((p) => [p.title, `The case study for ${p.title}, one of his projects: ${p.description[0]}`]),
+  ),
+};
+/** A card is clickable and takes the centre, so it needs a clearer yes than a photo does. */
+const CARD_THRESHOLD = 0.6;
+
 type Answers = Record<string, { choice?: string; noul?: number; probabilities?: Record<string, number> }>;
 
 async function ask(
@@ -106,9 +136,19 @@ export type SentenceReading = {
   mood: string;
   moodP: number;
   images: { id: string; p: number }[];
+  /** The card this sentence calls for — a project's title, or `contact` — or null for none. */
+  card: { id: string; p: number } | null;
   /** Jev input tokens the reading took, for what it cost (see costs.ts). */
   inputTokens: number;
 };
+
+/** The card answer, if it is a known card with a clear enough yes. An odd answer is no card, not a failure. */
+function readCard(answer: Answers[string] | undefined): SentenceReading['card'] {
+  const id = answer?.choice;
+  if (typeof id !== 'string' || id === 'none' || !(id in CARDS)) return null;
+  const p = answer?.probabilities?.[id] ?? 1;
+  return p >= CARD_THRESHOLD ? { id, p } : null;
+}
 
 /** The cutoffs are arguments so the bench can try others; the tour uses the defaults. */
 export async function readSentence(
@@ -127,7 +167,10 @@ export async function readSentence(
   const replies = await Promise.all(
     slices.map((slice, i) => {
       const questions: Record<string, unknown> = {};
-      if (i === 0) questions.mood = { type: 'choice', instructions: MOOD_INSTRUCTIONS, criteria: MOODS };
+      if (i === 0) {
+        questions.mood = { type: 'choice', instructions: MOOD_INSTRUCTIONS, criteria: MOODS };
+        questions.card = { type: 'choice', instructions: CARD_INSTRUCTIONS, criteria: CARDS };
+      }
       for (const img of slice) questions[img.id] = { type: 'noul', instructions: PHOTO_INSTRUCTIONS(img.description) };
       return ask(key, state, questions);
     }),
@@ -161,6 +204,7 @@ export async function readSentence(
     moodP: moodAnswer?.probabilities?.[mood] ?? 1,
     // Best first. Empty is a real, common answer — most sentences name nothing photographed.
     images,
+    card: readCard(answers[0].card),
     inputTokens: replies.reduce((sum, r) => sum + r.input, 0),
   };
 }

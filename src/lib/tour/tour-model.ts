@@ -20,6 +20,8 @@ export type TourReading = {
    * answer (most sentences name nothing photographed), not a failure.
    */
   images: { id: string; p: number }[];
+  /** The card this sentence calls for — a project's title, or `contact` — or null, the usual answer. */
+  card: { id: string; p: number } | null;
 };
 
 export function createTourClassifier() {
