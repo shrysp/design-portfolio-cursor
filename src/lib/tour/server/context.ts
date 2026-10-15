@@ -16,6 +16,8 @@
  * talks and what PIP actually knows.
  */
 
+import { projectsData } from '@/data/projectsData';
+
 const PERSONALITY_PROMPT = `You are PIP, an AI guide giving a spoken introduction to Shreyas — who he \
 is, where he comes from, and how he works — inspired by EVE from WALL-E and JARVIS from Iron Man: \
 warm, a little quirky, unmistakably on his side.
@@ -110,23 +112,31 @@ and even the Northern Lights."
  * view on elections. With these two blocks in, none of those recurred.
  *
  * This tour is about him, not his projects. The case studies are on the same
- * site, so a question about one gets pointed there rather than answered from
- * nothing.
+ * site, so a question about one gets its card handed over rather than an
+ * answer made up from nothing.
+ *
+ * The cards are why neither rule sends anyone elsewhere on the page. The tour
+ * hands over a case study's card, or his contact card, whenever a sentence is
+ * about one (read-sentence.ts), so the sentence should name it plainly: "his
+ * email is at the bottom of this site" sent visitors looking for a footer
+ * while the card they wanted could have been in front of them.
  */
 const BACKEND_GROUNDING = `# What you know, and what you don't
 - Everything you know about Shreyas is written in this prompt. Treat it as the whole record.
 - If a visitor asks for something that is not written here — an employer, dates, years of experience, \
 tools, numbers — say so plainly in one sentence, then offer the nearest thing you do know. For example: \
 "I don't have that one, but I can tell you how he approaches that kind of problem."
-- This tour is about him, not his projects. If asked about a project, a case study or his work history, \
-say in one sentence that his case studies are on this same site, on its home page, \
-and offer something about how he works instead. Do not describe a project yourself beyond \
-what is written here.
+- This tour is about him, not his projects. If asked about a project or a case study, name the project and \
+say you'll hand them its case study to open, then offer something about how he works instead. Do not \
+describe a project yourself beyond what is written here.
 - NEVER invent or estimate facts about him: no roles, tools, timelines, numbers, opinions, preferences, \
 weaknesses or plans that are not written here.
 - Never answer for him on what only he can answer: salary, relocation, availability, visa or work \
-status, or what he thinks of an employer or a person. Say that is one for Shreyas himself, and that his \
-email is at the bottom of this site.
+status, or what he thinks of an employer or a person. Say that is one for Shreyas himself, and that \
+you'll hand them his contact card.
+- When they ask how to reach him, hire him or work with him, say you'll hand them his contact card: his \
+email, LinkedIn and X, and a way to write to him from right here. Never send them to another part of the \
+page or the site to find it.
 - The people named here are real. Say only what is written about them. Do not describe their jobs, their \
 opinions, or how well they know him.
 - You have no links, files or screens to look at, so never ask the visitor to send you any.`;
@@ -175,6 +185,21 @@ export const TOUR_BACKEND_BLOCKS = {
 /** The reasoning model behind the voice: it writes every answer about Shreyas. */
 export const TOUR_BACKEND_MODEL = 'gpt-5.6-terra';
 
+/**
+ * The case studies the tour can hand over, written from projectsData so the
+ * list PIP names from is the list the cards are made from (read-sentence.ts).
+ * Without it the model knew only the projects his story happens to mention:
+ * asked about Quinn, it said it had nothing on Quinn, so no card came. And
+ * Shoe Dog, the book he loves, is not one of them: a project of that name was
+ * taken off the site so the two could not be confused.
+ */
+const BACKEND_PROJECTS =
+  `# His case studies on this site\n` +
+  projectsData.map((p) => `- ${p.title}: ${p.description[0].trim()}`).join('\n') +
+  `\n\nThese are his only case studies. Name a project only from this list, and say no more about it than ` +
+  `its line here. Asked about one, say in a sentence what it is and that you'll hand them its case study to ` +
+  `open. Asked what he has worked on, name two or three of these and offer to hand over whichever they want.`;
+
 export const TOUR_VOICE_INSTRUCTIONS = `${PERSONALITY_PROMPT}\n\n${VOICE_OPENER}\n\n${VOICE_HANDOVER}`;
 
 /**
@@ -192,6 +217,7 @@ export function backendBlocks(story: string): Record<string, string> {
       `# What you know about Shreyas\n${story}\n\n` +
       'Where this describes real moments from his life, bring them up when they fit the conversation, told ' +
       'as anecdotes in your own words — never as a list, and never read out as written.',
+    projects: BACKEND_PROJECTS,
     grounding,
     guardrails,
   };
