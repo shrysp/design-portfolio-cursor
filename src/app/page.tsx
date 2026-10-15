@@ -120,14 +120,14 @@ export default function Home() {
                   <div className="absolute text-stone-500 text-left left-[15%] top-20 whitespace-nowrap"><HandNote {...note} delay={noteDelay(0)}>Mission Peak</HandNote></div>
                 </div>
 
-                {/* Shaniwar Wada: wide and low, laid over the foot of the Mission Peak sticker, as Ritchie is over the cricket one */}
-                <div className="hidden md:flex z-[0] absolute top-[86%] left-[17%] -translate-x-1/2 -translate-y-1/2 gap-2">
-                  <div className="absolute z-10 text-stone-500 text-left whitespace-nowrap -rotate-3 -bottom-7 left-[30%]"><HandNote {...note} delay={noteDelay(1)}>Based in Pune</HandNote></div>
+                {/* Shaniwar Wada: from Mission Peak's summit post to under the journal, which covers its right half */}
+                <div className="hidden md:flex z-[0] absolute top-[60%] left-[33%] -translate-x-1/2 -translate-y-1/2 gap-2">
+                  <div className="absolute z-10 text-stone-500 text-left whitespace-nowrap -rotate-3 -bottom-8 left-[14%]"><HandNote {...note} delay={noteDelay(1)}>Based in Pune</HandNote></div>
                   <StickOnSticker
                     src="/images/About/Pune Sticker.webp"
                     alt="Shaniwar Wada, Pune, sticker"
                     aspect={865 / 440}
-                    imgClassName="w-[19rem] h-auto object-contain"
+                    imgClassName="w-[26rem] h-auto object-contain"
                     delay={stickerDelay(1)}
                     instant={isReturning}
                     {...stickOn}
