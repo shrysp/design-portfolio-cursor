@@ -21,6 +21,9 @@ const projectOrder = [
   
 ];
 
+// How often, at most, the dock looks for an overlay covering the page
+const CHECK_MS = 150;
+
 // The dock's glass, as tuned in the browser
 const glass = { blur: 2, saturate: 2, tint: 1, refraction: 26, bezel: 10 };
 
@@ -102,8 +105,20 @@ export default function StickyFooter() {
     // Initial check
     checkOverlay();
 
+    // At most one look every CHECK_MS, however much is changing: the look
+    // reads the computed style of every element on the page, and run on each
+    // change it ran every frame while anything animated — the tour's dive
+    // moves sixty photos a frame, and the page could not keep up.
+    let queued = 0;
+    const checkSoon = () => {
+      if (!queued) queued = window.setTimeout(() => {
+        queued = 0;
+        checkOverlay();
+      }, CHECK_MS);
+    };
+
     // Use MutationObserver to watch for overlay changes
-    const observer = new MutationObserver(checkOverlay);
+    const observer = new MutationObserver(checkSoon);
     observer.observe(document.body, {
       childList: true,
       subtree: true,
@@ -112,11 +127,12 @@ export default function StickyFooter() {
     });
 
     // Also check periodically as a fallback
-    const interval = setInterval(checkOverlay, 150);
+    const interval = setInterval(checkSoon, CHECK_MS);
 
     return () => {
       observer.disconnect();
       clearInterval(interval);
+      window.clearTimeout(queued);
     };
   }, []);
 

@@ -5,6 +5,7 @@ import StickyFooter from "@/components/StickyFooter";
 import MotionProvider from "@/components/MotionProvider";
 import DevFeedback from "@/components/DevFeedback";
 import RouteTransitionSettler from "@/components/RouteTransitionSettler";
+import EntranceHost from "@/components/cameo/entrance/EntranceHost";
 import "dialkit/styles.css";
 import { DialRoot } from "dialkit";
 
@@ -75,7 +76,8 @@ export default function RootLayout({
         <DevFeedback />
         <RouteTransitionSettler />
         <MotionProvider>
-          {children}
+          {/* The way into the PIP tour, from any page: its takeover, glass and toast. */}
+          <EntranceHost>{children}</EntranceHost>
           <StickyFooter />
         </MotionProvider>
         {/* The tuning panel: for building with, never for visitors. */}

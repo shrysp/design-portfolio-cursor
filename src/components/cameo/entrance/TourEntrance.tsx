@@ -13,7 +13,7 @@ import PosterDepth from './PosterDepth';
 import { DoorBody, type Open } from './PosterConcepts';
 import { sessionSeed, STREAM_CRUISE } from './library';
 import { crtGlitch, crtRoll } from '../crt/CrtLayer';
-import { LANDED, useEntrance } from './context';
+import { LANDED, TOUR, useEntrance } from './context';
 import { markArrival, takeArrival } from '../crt/arrival';
 import { CODE_REQUEST, TourHandout } from '@/app/projects/cameo/tour/TourHandout';
 import InviteTicket, { type Invite } from './InviteTicket';
@@ -22,7 +22,7 @@ import '@shrysp/cameo/styles.css';
 import './entrance.css';
 import './poster.css';
 
-export const TOUR = '/projects/cameo/tour';
+export { TOUR };
 
 /**
  * A dot-matrix LCD, for the code and the line while the tour loads: letters
@@ -126,8 +126,7 @@ const SCREEN = {
  * as a double over the tour's own card for it, waiting there.
  */
 const DISSOLVE_FROM = 30;
-/** How long the CRT glass takes to come up over the case study (EntranceHost mounts it). */
-export const GLASS_APPEAR = SCREEN.off * 0.6;
+// The CRT glass comes up over the page in GLASS_APPEAR (context.ts): SCREEN.off × 0.6.
 /**
  * How much the landing quickens once the tour is underneath. 1: the photos
  * slow out of the stream's own speed (LibraryDive's landing), and a surge on
@@ -137,6 +136,9 @@ const LAND_SURGE = 1;
 /** The glitch on the way in, in ms: a wrong code's (submit), seen on its own before the dive. */
 const ENTER_GLITCH = 360;
 const REDUCED = 250;
+/** When the way in starts to wonder whether the tour is coming, and when it stops waiting for one still loading, in ms. */
+const BACKSTOP_MS = 30_000;
+const BACKSTOP_MAX_MS = 120_000;
 /** How often the arrival is written again while the stream waits for the tour, in ms. */
 const ARRIVAL_EVERY = 1000;
 
@@ -178,7 +180,7 @@ export const wait = (ms: number) => new Promise((r) => setTimeout(r, slowed(ms))
  * the shader draws its line with, so the page and the glow stay together.
  */
 function squeezePage(off: number) {
-  squeeze(document.querySelector<HTMLElement>('[data-case-study]'), off);
+  squeeze(document.querySelector<HTMLElement>('[data-crt-page]'), off);
 }
 
 /** Any page on the glass, squeezed to a line and a dot about the middle of the window (also the tour, leaving: TourExit). */
@@ -336,6 +338,8 @@ export function Takeover({
   origin,
   theme,
   invite,
+  back = 'Case study',
+  onPageAsleep,
   onClosed,
 }: {
   unlocked: boolean;
@@ -347,6 +351,10 @@ export function Takeover({
    * again instead of going in.
    */
   invite?: Invite & { preview?: boolean };
+  /** Its back button's label: the page under it. */
+  back?: string;
+  /** Puts the page under it to sleep for the move into the tour, and wakes it if that fails (EntranceHost). */
+  onPageAsleep?: (asleep: boolean) => void;
   onClosed: () => void;
 }) {
   const router = useRouter();
@@ -449,9 +457,13 @@ export function Takeover({
   }, []);
 
   const [pending, startNavigation] = useTransition();
+  /** Whether the move into the tour is still under way, for the backstop's loop. */
+  const pendingRef = useRef(false);
+  pendingRef.current = pending;
   const navigating = useRef(false);
   const wasPending = useRef(false);
   const failEntry = useCallback((why: 'expired' | 'unreachable') => {
+    onPageAsleep?.(false);
     stopWaiting();
     navigating.current = false;
     wasPending.current = false;
@@ -470,7 +482,7 @@ export function Takeover({
     setStep('code');
     // The card behind still thinks there is a code; let it see there isn't.
     if (why === 'expired') router.refresh();
-  }, [router, stopWaiting]);
+  }, [onPageAsleep, router, stopWaiting]);
 
   /**
    * The way in did not land: the tour sent the visitor back, or never
@@ -592,6 +604,10 @@ export function Takeover({
     // it finishes and this is still here, the tour sent the visitor back.
     // The tour is one fixed screen: nothing to scroll to.
     navigating.current = true;
+    // The page under the takeover, hidden now, would otherwise go on drawing
+    // every frame — its characters, figures and stickers — and each of those
+    // renders starts the tour's own over: on a fast screen it never finished.
+    onPageAsleep?.(true);
     startNavigation(() => router.push(TOUR, { scroll: false }));
     // Say something only if the page is slow to come.
     window.clearTimeout(waitTimer.current);
@@ -601,10 +617,15 @@ export function Takeover({
       setWaitingSince(at);
       setWaitClock(at);
     }, slowed(WAIT_AFTER_MS));
-    // A backstop for a request that never answers at all.
-    await wait(30_000);
+    // A backstop for a request that never answers at all. A slow one is
+    // waited for: while the move is still under way it is loading (a first
+    // compile, the Notion reads), and a full load here would end the stream
+    // and have the tour fly a second one of its own from the start.
+    await wait(BACKSTOP_MS);
+    const gaveUpAt = performance.now() + slowed(BACKSTOP_MAX_MS - BACKSTOP_MS);
+    while (alive.current && navigating.current && pendingRef.current && performance.now() < gaveUpAt) await wait(1000);
     if (alive.current && navigating.current) void recoverEntry('timed out');
-  }, [isAlive, onClosed, recoverEntry, router, screen, seed, startNavigation, uniform]);
+  }, [isAlive, onClosed, onPageAsleep, recoverEntry, router, screen, seed, startNavigation, uniform]);
 
   // The tour page is in place underneath: land the stream on it (or, with
   // no stream, simply fade away), and let the lines slow to a stop.
@@ -676,7 +697,7 @@ export function Takeover({
         // it (an invitation's own page, which is already dark) there is nothing
         // to switch off, and that line would only flash on an empty screen:
         // it starts off.
-        const page = document.querySelector('[data-case-study]');
+        const page = document.querySelector('[data-crt-page]');
         await tween(page ? SCREEN.off : 0, easeIn, setOff, live);
         if (!live()) return;
         await wait(SCREEN.onAt - SCREEN.off);
@@ -830,7 +851,7 @@ export function Takeover({
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M10 3 5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        Case study
+        {back}
       </button>
 
       <div

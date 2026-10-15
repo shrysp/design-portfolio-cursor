@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useEntrance } from "@/components/cameo/entrance/context";
-import { TOUR } from "@/components/cameo/entrance/TourEntrance";
+import { TOUR } from "@/components/cameo/entrance/context";
 import type { Invitation } from "@/lib/tour/server/access";
 
 /**

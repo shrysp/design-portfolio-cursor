@@ -67,7 +67,7 @@ export default function TourExit({ onDone }: { onDone: () => void }) {
       if (!alive.current) return;
       // At the tour's section, before it opens: the dot opens on where they left from.
       document.getElementById(SECTION)?.scrollIntoView({ block: 'start', behavior: 'instant' });
-      const page = document.querySelector<HTMLElement>('[data-case-study]');
+      const page = document.querySelector<HTMLElement>('[data-crt-page]');
       setOff(1, page);
       await wait(HOLD_MS);
       await tween(ON_MS, easeOut, (k) => setOff(1 - k, page), isAlive);
@@ -79,7 +79,7 @@ export default function TourExit({ onDone }: { onDone: () => void }) {
     return () => {
       alive.current = false;
       document.documentElement.style.background = '';
-      squeeze(document.querySelector<HTMLElement>('[data-case-study]'), 0);
+      squeeze(document.querySelector<HTMLElement>('[data-crt-page]'), 0);
       f?.destroy();
     };
     // Runs once per exit.
