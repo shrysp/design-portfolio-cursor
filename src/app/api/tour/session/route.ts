@@ -13,7 +13,7 @@
  */
 
 import { after } from 'next/server';
-import { MIN_SESSION_SECONDS, endSession, refreshVisitor, startSession } from '@/lib/tour/server/access';
+import { MIN_SESSION_SECONDS, endSession, refreshVisitor, sessionOpened, startSession } from '@/lib/tour/server/access';
 import { accessFrom } from '@/lib/tour/server/auth';
 import {
   backendInstructions,
@@ -153,6 +153,10 @@ export async function POST(request: Request) {
     console.error(`[tour/session] OpenAI ${res.status}:`, body.slice(0, 1500));
     return Response.json({ error: `The voice model returned ${res.status}.` }, { status: 502 });
   }
+
+  // Connected time starts here: the story, the reservation and the model's
+  // answer were the wait, and the wait is not charged.
+  await sessionOpened(id);
 
   // Once the answer is on its way: check this person's Notion row, so an edit
   // or a switched-off code is in place for their next session without this

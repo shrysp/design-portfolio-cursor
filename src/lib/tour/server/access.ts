@@ -333,6 +333,20 @@ export async function startSession(id: string): Promise<StartResult> {
 }
 
 /**
+ * Starts a session's clock once the voice model has answered. The allowance
+ * was reserved before, so a code cannot overspend while the connection is
+ * made, but the time that took is not charged: only connected time costs
+ * anything.
+ */
+export async function sessionOpened(id: string): Promise<void> {
+  const store = getStore();
+  const key = codeKey(id);
+  // Not if it has already been ended (or refunded) in the meantime.
+  const rec = toRecord(await store.cmd<string[]>('HGETALL', key));
+  if (rec.openAt) await store.cmd('HSET', key, 'openAt', Date.now());
+}
+
+/**
  * Hands back what an ended session did not use. `refundAll` is for a session
  * that never opened — the model refused it — and so cost nothing.
  */

@@ -368,11 +368,13 @@ const TAIL_GIVE_UP_MS = 4000;
 const SPOTLIGHT_HOLD_MS = 1800;
 
 /**
- * Longer than /live's 5s on purpose. That limit is tuned for fast back-and-forth
- * turn-taking; a visitor here is often just listening quietly to a full answer,
- * and silence while listening is not the same signal as silence in a chat.
+ * Seconds of quiet before the session closes. Longer than /live's 5s on
+ * purpose: a visitor here is often still taking in an answer, and silence
+ * while thinking of the next question is not the same signal as silence in a
+ * chat. Counted from when PIP's voice actually stops (see the envelope in
+ * onRemoteStream), not from when its words arrived as text, which is earlier.
  */
-const IDLE_LIMIT = 25;
+const IDLE_LIMIT = 15;
 
 /**
  * How long PIP dozes after the conversation goes quiet. The session is closed
@@ -2184,6 +2186,10 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         setState(next);
         if (next === 'live' || next === 'error') setRenewing(false);
         if (next !== 'live') return;
+        // The countdown and the idle clock start now, not at the click: the
+        // wait for a connection is not the visitor's time (nor billed as it).
+        startedAt.current = performance.now();
+        lastVoice.current = startedAt.current;
         setDozing(false);
         release(drowsy);
       },
@@ -2261,7 +2267,11 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         let on = false;
         const watch = () => {
           const now = performance.now();
-          if (env.level() > PIP_AUDIBLE_LEVEL) heard = now;
+          if (env.level() > PIP_AUDIBLE_LEVEL) {
+            heard = now;
+            // Still talking, whatever the transcript says: its text runs ahead of the voice.
+            lastVoice.current = now;
+          }
           const next = now - heard < PIP_QUIET_MS;
           if (next !== on) {
             on = next;
