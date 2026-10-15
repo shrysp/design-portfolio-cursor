@@ -16,8 +16,11 @@ const dots = Doto({ subsets: ['latin'], axes: ['ROND'], variable: '--font-dot', 
 const DISMISSED = 'tour.toast';
 /** A beat after the page, so it arrives rather than being part of the load. */
 const SHOW_AFTER_MS = 1200;
-/** Pages it never shows on: the tour itself, the invitation's own way in, the bench. */
-const NOT_ON = [TOUR, '/projects/cameo/invite', '/dev'];
+/**
+ * Pages it never shows on: the tour itself, the invitation's own way in, the bench, and the review copy
+ * at /dive, where Inflight's reviewer panel takes the same corner.
+ */
+const NOT_ON = [TOUR, '/projects/cameo/invite', '/dev', '/dive'];
 /** Phones: the tour is made for a laptop (LaptopOnly), so there is nothing here to open. */
 const PHONE = /Mobi|iPhone|Android.+Mobile/i;
 
