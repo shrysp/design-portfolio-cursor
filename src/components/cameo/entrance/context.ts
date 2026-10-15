@@ -22,3 +22,13 @@ export function useEntrance() {
   if (!open) throw new Error('useEntrance needs an EntranceHost above it (src/app/projects/cameo/layout.tsx).');
   return open;
 }
+
+/**
+ * Leaves the tour for the case study with the tube switching off (TourExit,
+ * in EntranceHost). Null where there is no host, and the link goes the plain way.
+ */
+export const LeaveContext = createContext<(() => void) | null>(null);
+
+export function useLeaveTour() {
+  return useContext(LeaveContext);
+}

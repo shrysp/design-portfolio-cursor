@@ -8,7 +8,7 @@ import ControlsFigure from '@/components/figures/controls/ControlsFigure';
 import TapeFigure from '@/components/figures/tape/TapeFigure';
 import DiscFigure from '@/components/figures/disc/DiscFigure';
 import TourEntrance from '@/components/cameo/entrance/TourEntrance';
-import { CaseStudy, Hero, Meta, Section, SubSection, Points, Callout } from '@/components/case-study/CaseStudy';
+import { CaseStudy, Hero, Meta, Section, SubSection, Points } from '@/components/case-study/CaseStudy';
 
 // Import the project data
 import { projectsData } from '@/data/projectsData';
@@ -266,15 +266,10 @@ export default function CameoCaseStudy({ unlocked, phone }: { unlocked: boolean;
           Walkthrough video coming soon
         </div>
 
-        <Callout title="Try it yourself">
-          <p className="text-body mx-0">
-            The live tour runs on voice models that are billed by the minute, so it is open by invitation.
-            If you have an access code, start the tour and PIP will ask for it. You will need a microphone.
-          </p>
-          <div className="pt-2">
-            <TourEntrance unlocked={unlocked} phone={phone} />
-          </div>
-        </Callout>
+        {/* The way in looks like the tour itself: PIP's dark room, the photos, the green gel */}
+        <div className="column my-3">
+          <TourEntrance unlocked={unlocked} phone={phone} />
+        </div>
       </Section>
     </CaseStudy>
   );

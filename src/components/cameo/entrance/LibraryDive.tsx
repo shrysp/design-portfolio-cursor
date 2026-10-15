@@ -17,10 +17,21 @@ import {
 } from './library';
 import './dive.css';
 
-/** How far out a cruising photo starts to brake, in px of depth. */
-const BRAKE_FROM = 1600;
+/** How far out a landing photo starts to take on its resting look, in px of depth. */
+const REST_FROM = 1600;
 /** How long the ring takes to fly off and fade once the landing begins. */
-const RING_OUT_MS = 900;
+const RING_OUT_MS = 1400;
+/**
+ * How long a photo takes to come to rest once the landing begins, in s: as
+ * long as easing out from the speed it was flying at takes over the depth it
+ * still has to cover, within these. A photo near its place settles quickly,
+ * one far back takes longer — so the stream slows into the stage as one
+ * motion, rather than braking hard at the last moment.
+ */
+const LAND_MIN = 0.6;
+const LAND_MAX = 2.6;
+/** Out of the speed it had, slowing to a stop: its starting speed is 3 × depth ÷ time. */
+const easeOutCubic = (k: number) => 1 - (1 - k) ** 3;
 
 /**
  * The stream the entrance flies through, in two groups at the same perspective:
@@ -83,9 +94,10 @@ export type DiveHandle = {
   fade: (opacity: number) => void;
   preload: () => void;
   /**
-   * The landing: from where the stream last was, each landing photo brakes
-   * evenly to a stop where its line meets the screen — its resting place on
-   * the stage — while the ring flies on and fades. Call once a frame with the
+   * The landing: from where the stream last was, each landing photo eases
+   * out of the speed it was flying at to a stop where its line meets the
+   * screen — its resting place on the stage — while the ring flies on and
+   * fades. One already at or past the screen goes round once more. Call once a frame with the
    * frame's time in seconds (already scaled for Motion) and the stream's
    * speed when the landing began. Returns how far the furthest photo still
    * has to come, in px of depth (Infinity while the ring is still going), and
@@ -127,7 +139,7 @@ const LibraryDive = forwardRef<DiveHandle, { focus: [number, number]; seed: numb
   /** Where the stream was last placed, so the landing starts exactly there. */
   const lastTravel = useRef(0);
   /** Each layer's depth, speed and brake once the landing has begun. */
-  const landing = useRef<{ z: number; v: number; brake: number; passing: boolean; done: boolean }[] | null>(null);
+  const landing = useRef<{ from: number; depth: number; time: number; t: number; z: number; v: number; done: boolean }[] | null>(null);
   const ringClock = useRef(0);
 
   const layers = useMemo<Layer[]>(() => {
@@ -172,7 +184,10 @@ const LibraryDive = forwardRef<DiveHandle, { focus: [number, number]; seed: numb
         if (!landing.current) {
           landing.current = layers.map((l) => {
             const z = streamZ(l.z, lastTravel.current);
-            return { z, v: velocity, brake: 0, passing: z > -60, done: false };
+            // To the screen ahead of it; round once more if it is at or past the screen.
+            const depth = z > -60 ? STREAM_LOOP - z : -z;
+            const time = Math.min(LAND_MAX, Math.max(LAND_MIN, (3 * depth) / Math.max(1, velocity)));
+            return { from: z, depth, time, t: 0, z, v: velocity, done: false };
           });
           ringClock.current = 0;
         }
@@ -193,26 +208,23 @@ const LibraryDive = forwardRef<DiveHandle, { focus: [number, number]; seed: numb
             return;
           }
           if (!st.done) {
-            const d = -st.z;
-            // Within braking distance: brake evenly from here to the screen. One
-            // already at or past the screen has gone by, and comes round again.
-            if (!st.brake && d > 0 && d <= BRAKE_FROM && !(st.passing && st.z > -STREAM_CAMERA)) {
-              st.brake = (st.v * st.v) / (2 * d);
-            }
-            if (st.brake) st.v = Math.max(0, st.v - st.brake * dt);
-            st.z += st.v * dt;
-            if (!st.brake && st.z > STREAM_CAMERA) st.z -= STREAM_LOOP;
-            if (st.brake && (st.v <= 0 || st.z >= 0)) {
+            st.t += dt;
+            const k = Math.min(1, st.t / st.time);
+            const travelled = st.depth * easeOutCubic(k);
+            const z = st.from + travelled;
+            // Past the camera it loops to the back, as the stream does, and comes on from there.
+            st.z = z > STREAM_CAMERA ? z - STREAM_LOOP : z;
+            if (k >= 1) {
               st.z = 0;
               st.done = true;
             }
-            furthest = Math.max(furthest, st.done ? 0 : st.brake ? -st.z : Infinity);
+            furthest = Math.max(furthest, st.done ? 0 : st.depth - travelled);
           }
           const { opacity, brightness } = streamPresence(st.z);
           // Coming to rest, it takes on the look of the tour's card waiting
           // there (tour.css, the dark room): the picture dimmed and greyed a
           // little, set back by its depth, in the stage's teal frame.
-          const rest = st.brake ? Math.max(0, 1 - -st.z / BRAKE_FROM) : 0;
+          const rest = st.z <= 0 ? Math.max(0, 1 - -st.z / REST_FROM) : 0;
           el.style.opacity = String(st.done ? 1 : opacity);
           el.style.transform = `translate3d(${l.x - l.w / 2}px, ${l.y - l.h / 2}px, ${st.z}px) rotate(${l.tilt}deg)`;
           el.style.filter = `brightness(${brightness * (1 - l.depth * 0.45 * rest)}) blur(${(l.depth * 1.3 * rest).toFixed(2)}px)`;

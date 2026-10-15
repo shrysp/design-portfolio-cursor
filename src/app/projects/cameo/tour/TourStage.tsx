@@ -31,6 +31,7 @@ import { LANDED } from '@/components/cameo/entrance/context';
 import LibraryDive, { type DiveHandle } from '@/components/cameo/entrance/LibraryDive';
 import { pipCentre } from '@/components/cameo/entrance/TourEntrance';
 import { createField, type Field } from '@/components/cameo/entrance/field';
+import { useLeaveTour } from '@/components/cameo/entrance/context';
 import { playRecipe } from '@shrysp/cameo/sound';
 import '@shrysp/cameo/styles.css';
 import './tour.css';
@@ -1519,6 +1520,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   const pointAsked = useRef(false);
   const pointOfferTimer = useRef<number | undefined>(undefined);
   const stageRef = useRef<HTMLElement>(null);
+  const leave = useLeaveTour();
   const [silent, setSilent] = useState(false);
   const [spent, setSpent] = useState(0);
   const [liveSeconds, setLive_] = useState(0);
@@ -3151,9 +3153,19 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         style={process.env.NODE_ENV !== 'production' ? { paddingRight: 72 } : undefined}
       >
         <div className="flex items-center gap-3">
-          <Link href="/projects/cameo" className="tour-btn" data-crt-clear>
+          <Link
+            href="/projects/cameo#tour"
+            className="tour-btn"
+            data-crt-clear
+            onClick={(e) => {
+              // The tube switches off on the way out (TourExit); a new tab, or no host, goes the plain way.
+              if (!leave || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+              e.preventDefault();
+              leave();
+            }}
+          >
             <Icon d="M10 3 5 8l5 5" />
-            Back
+            Case study
           </Link>
           {/* Not shown — the stage says what it is — but still the page's heading for a screen reader. */}
           <h1 className="sr-only">PIP &mdash; an interactive tour</h1>

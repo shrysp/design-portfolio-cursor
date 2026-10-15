@@ -3,21 +3,24 @@
 import { Fragment, useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { Doto } from 'next/font/google';
 import { usePathname, useRouter } from 'next/navigation';
+import { useDialKit } from 'dialkit';
 import { PrefetchKind } from 'next/dist/client/components/router-reducer/router-reducer-types';
 import { HOUSING_W, housingHeight, PIP, type MoodId } from '@shrysp/cameo';
 import { Character, type CharacterHandle } from '@shrysp/cameo/react';
-import { Button } from '@/components/ui/button';
 import { createField, OFF_SPLIT, type Field, type FieldUniforms, type Theme } from './field';
 import LibraryDive, { type DiveHandle } from './LibraryDive';
+import PosterDepth from './PosterDepth';
+import { DoorBody, type Open } from './PosterConcepts';
 import { sessionSeed, STREAM_CRUISE } from './library';
 import { crtGlitch, crtRoll } from '../crt/CrtLayer';
 import { LANDED, useEntrance } from './context';
-import { markArrival } from '../crt/arrival';
+import { markArrival, takeArrival } from '../crt/arrival';
 import { CODE_REQUEST, TourHandout } from '@/app/projects/cameo/tour/TourHandout';
 import InviteTicket, { type Invite } from './InviteTicket';
 import { motion, slowed } from '../crt/motion';
 import '@shrysp/cameo/styles.css';
 import './entrance.css';
+import './poster.css';
 
 export const TOUR = '/projects/cameo/tour';
 
@@ -30,13 +33,13 @@ export const TOUR = '/projects/cameo/tour';
 const lcd = Doto({ subsets: ['latin'], axes: ['ROND'], variable: '--font-dot', display: 'block' });
 
 /** Codes are 8 letters and digits (MIN_CODE_LENGTH in notion.ts), shown in two fours. */
-const CODE_LENGTH = 8;
+export const CODE_LENGTH = 8;
 /**
  * A code as the server reads it: letters and digits, upper case, and never
  * more than a code's length, typed or pasted. Dashes and spaces are only for
  * people, so a pasted "K7QM-2ABC" is still eight.
  */
-const normalCode = (raw: string) => raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, CODE_LENGTH);
+export const normalCode = (raw: string) => raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, CODE_LENGTH);
 /** The time of day, for a greeting: as the tour's own start screen says it. */
 const dayPart = () => {
   const h = new Date().getHours();
@@ -118,28 +121,37 @@ const SCREEN = {
 /**
  * How close, in px of depth, the last photo is to its place when the
  * takeover starts to dissolve: the reveal of the tour happens as the photos
- * arrive, not as a second step after they have.
+ * arrive, not as a second step after they have. Close, since the landing
+ * eases out: further back, a photo still a little short of its place showed
+ * as a double over the tour's own card for it, waiting there.
  */
-const DISSOLVE_FROM = 180;
+const DISSOLVE_FROM = 30;
 /** How long the CRT glass takes to come up over the case study (EntranceHost mounts it). */
 export const GLASS_APPEAR = SCREEN.off * 0.6;
-const LAND_SURGE = 1.5;
+/**
+ * How much the landing quickens once the tour is underneath. 1: the photos
+ * slow out of the stream's own speed (LibraryDive's landing), and a surge on
+ * top of that read as a second, different animation after a long wait.
+ */
+const LAND_SURGE = 1;
 /** The glitch on the way in, in ms: a wrong code's (submit), seen on its own before the dive. */
 const ENTER_GLITCH = 360;
 const REDUCED = 250;
+/** How often the arrival is written again while the stream waits for the tour, in ms. */
+const ARRIVAL_EVERY = 1000;
 
 type Step = 'opening' | 'code' | 'checking' | 'entering' | 'closing';
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 /** Slow to start, then pulled open: the opening gathers before it gives. */
-const easeIn = (t: number) => t * t * t * t;
-const easeOut = (t: number) => 1 - (1 - t) * (1 - t);
-const smoothstep = (a: number, b: number, x: number) => {
+export const easeIn = (t: number) => t * t * t * t;
+export const easeOut = (t: number) => 1 - (1 - t) * (1 - t);
+export const smoothstep = (a: number, b: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
   return t * t * (3 - 2 * t);
 };
 
-function tween(ms: number, ease: (t: number) => number, fn: (k: number) => void, alive: () => boolean) {
+export function tween(ms: number, ease: (t: number) => number, fn: (k: number) => void, alive: () => boolean) {
   return new Promise<void>((resolve) => {
     if (ms <= 0) {
       fn(1);
@@ -159,14 +171,18 @@ function tween(ms: number, ease: (t: number) => number, fn: (k: number) => void,
     requestAnimationFrame(step);
   });
 }
-const wait = (ms: number) => new Promise((r) => setTimeout(r, slowed(ms)));
+export const wait = (ms: number) => new Promise((r) => setTimeout(r, slowed(ms)));
 
 /**
  * The case study itself, squeezed as the tube switches off — the same curve
  * the shader draws its line with, so the page and the glow stay together.
  */
 function squeezePage(off: number) {
-  const el = document.querySelector<HTMLElement>('[data-case-study]');
+  squeeze(document.querySelector<HTMLElement>('[data-case-study]'), off);
+}
+
+/** Any page on the glass, squeezed to a line and a dot about the middle of the window (also the tour, leaving: TourExit). */
+export function squeeze(el: HTMLElement | null, off: number) {
   if (!el) return;
   if (off <= 0) {
     el.style.transform = el.style.transformOrigin = el.style.filter = '';
@@ -174,28 +190,58 @@ function squeezePage(off: number) {
   }
   const v = smoothstep(0, OFF_SPLIT, off);
   const h = smoothstep(OFF_SPLIT, 1, off);
-  el.style.transformOrigin = `50% ${window.scrollY + window.innerHeight / 2 - el.offsetTop}px`;
+  // About the middle of the window: for a page that scrolls, wherever it has been scrolled to.
+  const fixed = getComputedStyle(el).position === 'fixed';
+  el.style.transformOrigin = `50% ${fixed ? window.innerHeight / 2 : window.scrollY + window.innerHeight / 2 - el.offsetTop}px`;
   el.style.transform = `scale(${Math.max(0.002, 1 - h)}, ${Math.max(0.002, 1 - v)})`;
   el.style.filter = `brightness(${1 + v * 1.4})`;
 }
 
 /**
- * The way into the tour. On the page it is one button; pressing it lets the
- * tour take over the window, and the access code is asked for inside, once
- * PIP is awake. The code is checked on the server, which answers with a cookie
- * this script cannot read; nothing here decides who gets in.
+ * The way into the tour. On the page it is a small piece of the tour itself
+ * (poster.css): PIP in its dark room with the photos round it, and one button.
+ * Pressing it lets the tour take over the window, and the access code is
+ * asked for inside, once PIP is awake. The code is checked on the server,
+ * which answers with a cookie this script cannot read; nothing here decides
+ * who gets in.
  */
-export default function TourEntrance({ unlocked, phone }: { unlocked: boolean; phone: boolean }) {
+export default function TourEntrance({ unlocked: realUnlocked, phone: realPhone }: { unlocked: boolean; phone: boolean }) {
   const router = useRouter();
   const trigger = useRef<HTMLButtonElement>(null);
   const openTakeover = useEntrance();
+  /** PIP perks up as the pointer comes to the button. */
+  const [eager, setEager] = useState(false);
+  // For trying the card in development; the panel is dev-only.
+  const dial = useDialKit('Tour card', {
+    // Two ideas of what the way in is: a preview of the dive, or the code itself.
+    concept: { type: 'select', options: ['Tunnel', 'Door'], default: 'Tunnel' },
+    tunnel: {
+      // Px of depth a second at rest, and with the pointer at the button.
+      speed: [0, 0, 600, 10],
+      warp: [900, 200, 4200, 100],
+      lit: { type: 'select', options: ['On hover', 'Always', 'Never'], default: 'On hover' },
+      photos: true,
+    },
+    height: [340, 260, 520, 10],
+    visitor: { type: 'select', options: ['As it is', 'New', 'Has a code', 'On a phone'], default: 'Has a code' },
+    mood: { type: 'select', options: ['As it is', 'idle', 'excited', 'happy', 'curious', 'sleeping', 'thinking', 'love', 'starstruck', 'sad'], default: 'As it is' },
+  });
+  // The live site always shows the visitor's own state, whatever the panel's default.
+  const visitor = process.env.NODE_ENV === 'production' ? 'As it is' : dial.visitor;
+  /** Let go of the code here: over the panel's "Has a code" too, until the panel is changed. */
+  const [released, setReleased] = useState<string | null>(null);
+  const unlocked = released === visitor ? false : visitor === 'As it is' ? realUnlocked : visitor === 'Has a code';
+  const phone = visitor === 'As it is' ? realPhone : visitor === 'On a phone';
+  const held = dial.mood === 'As it is' ? null : (dial.mood as MoodId);
+  const { concept, tunnel } = dial;
 
   /** Settled on the screen look (the tube) over the aurora; it was the Tour entrance panel's. */
   const look = useRef<Theme>('screen');
 
-  const openAt = (origin: [number, number]) => {
-    openTakeover({ origin, theme: look.current, unlocked, onClosed: () => trigger.current?.focus() });
-    if (unlocked) prefetchTour(router);
+  const openAt: Open = (origin, justUnlocked) => {
+    const inside = unlocked || !!justUnlocked;
+    openTakeover({ origin, theme: look.current, unlocked: inside, onClosed: () => trigger.current?.focus() });
+    if (inside) prefetchTour(router);
   };
 
   const open = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -203,35 +249,79 @@ export default function TourEntrance({ unlocked, phone }: { unlocked: boolean; p
     openAt([r.left + r.width / 2, r.top + r.height / 2]);
   };
 
+  /**
+   * Coming in with another code: the takeover, on its code screen, whatever
+   * this browser holds. The code kept here stays until a new one is accepted,
+   * so backing out of it changes nothing.
+   */
+  const askCode = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    openTakeover({ origin: [r.left + r.width / 2, r.top + r.height / 2], theme: look.current, unlocked: false });
+  };
+
   // A browser stays unlocked for a week, so there has to be a way back to the
   // code — for a shared computer, or to come in as someone else.
   const lock = async () => {
+    setReleased(visitor);
     await fetch('/api/tour/unlock', { method: 'DELETE' }).catch(() => {});
     router.refresh();
   };
 
-  // No way in on a phone: the tour needs room around PIP for the photos (see LaptopOnly).
-  if (phone) {
-    return (
-      <p className="text-sm text-stone-500">
-        The tour is made for a laptop. Open this page on one to start it.
-      </p>
-    );
-  }
+  const wake = {
+    onPointerEnter: () => setEager(true),
+    onPointerLeave: () => setEager(false),
+    onFocus: () => setEager(true),
+    onBlur: () => setEager(false),
+  };
 
-  return (
+  const body = phone ? (
+    // No way in on a phone: the tour needs room around PIP for the photos (see LaptopOnly).
     <>
-      <div className="flex flex-wrap items-center gap-4">
-        <Button ref={trigger} onClick={open}>
-          {unlocked ? 'Open the tour' : 'Start the tour'}
-        </Button>
+      <span className="tour-poster-tag">BY INVITATION</span>
+      <div className="tour-poster-pip" aria-hidden="true">
+        <Character preset={PIP} size={88} state={held} />
+      </div>
+      <p className="tour-poster-title">Try it yourself</p>
+      <p className="tour-poster-text">Ask PIP about my work, out loud. Open this page on a laptop to start it.</p>
+    </>
+  ) : concept === 'Door' ? (
+    <DoorBody unlocked={unlocked} open={openAt} lock={lock} mood={held} length={CODE_LENGTH} normal={normalCode} />
+  ) : (
+    <>
+      <div className="tour-poster-pip" aria-hidden="true">
+        <Character preset={PIP} size={88} state={held ?? (eager ? 'excited' : null)} />
+      </div>
+      <p className="tour-poster-title">Try it yourself</p>
+      <p className="tour-poster-text">Ask PIP about my work.</p>
+      <div className="tour-poster-actions">
+        {/* With a code kept here this goes straight in; without one, to the code screen. */}
+        <button ref={trigger} type="button" onClick={open} className="entrance-btn entrance-btn--primary tour-poster-go" {...wake}>
+          Start the tour
+        </button>
         {unlocked && (
-          <button type="button" onClick={lock} className="text-sm text-stone-500 underline underline-offset-4 hover:text-stone-800">
+          <button type="button" onClick={askCode} className="tour-poster-link">
             Use a different code
           </button>
         )}
       </div>
     </>
+  );
+
+  return (
+    <div
+      className={`tour-poster ${lcd.variable}`}
+      data-concept={phone ? undefined : concept}
+      data-lit={tunnel.lit === 'On hover' ? undefined : tunnel.lit === 'Always'}
+    >
+      <div className="tour-poster-screen" style={{ minHeight: dial.height }}>
+        {concept === 'Tunnel' && tunnel.photos && (
+          <PosterDepth speed={tunnel.speed} warp={tunnel.warp} rush={eager && tunnel.lit !== 'Never'} lit={tunnel.lit === 'Always'} />
+        )}
+        {/* In the corner, out of the column: the card says who it is for once. */}
+        {concept === 'Tunnel' && !phone && <span className="tour-poster-tag tour-poster-tag--corner">BY INVITATION</span>}
+        <div className="tour-poster-body">{body}</div>
+      </div>
+    </div>
   );
 }
 
@@ -267,6 +357,13 @@ export function Takeover({
   const dive = useRef<DiveHandle>(null);
   /** The stream's state while it runs. */
   const stream = useRef({ travel: 0, velocity: 0 });
+  /**
+   * Which run of the dive's frame loop is current. Bumped when the way in
+   * fails or the takeover closes, so a loop still going stops drawing: left
+   * running, it faded the photos back in over the code screen, and they hung
+   * there in front of the tube as it switched off.
+   */
+  const diveRun = useRef(0);
   /** Set once the tour page is in place underneath: when the landing began, and how fast the stream was going. */
   const landing = useRef<{ started: number; velocity: number } | null>(null);
   const pathname = usePathname();
@@ -359,6 +456,7 @@ export function Takeover({
     navigating.current = false;
     wasPending.current = false;
     if (field.current) field.current.uniforms.bloom = 0;
+    diveRun.current++;
     stream.current = { travel: 0, velocity: 0 };
     landing.current = null;
     dive.current?.fade(0);
@@ -370,7 +468,9 @@ export function Takeover({
         : 'The tour didn’t open. Check your connection, then try again.',
     );
     setStep('code');
-  }, [stopWaiting]);
+    // The card behind still thinks there is a code; let it see there isn't.
+    if (why === 'expired') router.refresh();
+  }, [router, stopWaiting]);
 
   /**
    * The way in did not land: the tour sent the visitor back, or never
@@ -390,6 +490,8 @@ export function Takeover({
         .catch(() => null);
       if (!alive.current) return;
       if (status?.unlocked) {
+        // A full load ends the takeover: the tour flies its own stream in, not waiting for this one.
+        takeArrival();
         window.location.assign(TOUR);
         return;
       }
@@ -413,6 +515,8 @@ export function Takeover({
   }, [isAlive, onClosed]);
 
   const enter = useCallback(async () => {
+    /** When the arrival was last written for the tour; 0 until the first, at pushAt. */
+    let marked = 0;
     setStep('entering');
     setError(null);
     setMood('happy');
@@ -435,8 +539,9 @@ export function Takeover({
       // tour is the same room.
       const start = performance.now();
       let last = start;
+      const run = ++diveRun.current;
       const step = (now: number) => {
-        if (!alive.current) return;
+        if (!alive.current || diveRun.current !== run) return;
         const dt = (Math.min(50, now - last) / 1000) * motion();
         last = now;
         const land = landing.current;
@@ -458,6 +563,13 @@ export function Takeover({
           stream.current.travel += stream.current.velocity * dt;
           dive.current?.set(stream.current.travel);
           dive.current?.fade(Math.min(1, k / 0.15));
+          // Kept fresh for as long as the tour takes to come: read stale
+          // (arrival.ts), the tour took itself for a direct visit and flew a
+          // second stream of its own under this one, from the start.
+          if (marked && now - marked > ARRIVAL_EVERY) {
+            marked = now;
+            markArrival({ how: 'dive', seed, ...stream.current });
+          }
         }
         requestAnimationFrame(step);
       };
@@ -471,7 +583,10 @@ export function Takeover({
     if (!alive.current) return;
     // The tour lays its photos out from the same seed, so its cards wait
     // exactly where the stream will land them.
-    if (screen && !calm) markArrival({ how: 'dive', seed, ...stream.current });
+    if (screen && !calm) {
+      markArrival({ how: 'dive', seed, ...stream.current });
+      marked = performance.now();
+    }
     // In a transition, so it can be watched: pending while the tour page
     // loads, however long that takes (a first compile, the Notion reads). If
     // it finishes and this is still here, the tour sent the visitor back.
@@ -615,6 +730,8 @@ export function Takeover({
     if (step === 'entering' || step === 'closing') return;
     setStep('closing');
     setAwake(false);
+    diveRun.current++;
+    dive.current?.fade(0);
     const f = field.current;
     if (reduced() || !f) {
       await tween(REDUCED, easeOut, (k) => rootEl.current && (rootEl.current.style.opacity = String(1 - k)), isAlive);
@@ -713,7 +830,7 @@ export function Takeover({
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M10 3 5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        Back to the case study
+        Case study
       </button>
 
       <div
