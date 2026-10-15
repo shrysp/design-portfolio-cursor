@@ -15,7 +15,7 @@ import { projectsData } from '@/data/projectsData';
 
 const link = 'underline underline-offset-4 hover:text-stone-800';
 
-export default function CameoCaseStudy({ unlocked }: { unlocked: boolean }) {
+export default function CameoCaseStudy({ unlocked, phone }: { unlocked: boolean; phone: boolean }) {
   const project = projectsData.find((p) => p.title === 'Cameo')!; // by title, so the list can be reordered
 
   return (
@@ -272,7 +272,7 @@ export default function CameoCaseStudy({ unlocked }: { unlocked: boolean }) {
             If you have an access code, start the tour and PIP will ask for it. You will need a microphone.
           </p>
           <div className="pt-2">
-            <TourEntrance unlocked={unlocked} />
+            <TourEntrance unlocked={unlocked} phone={phone} />
           </div>
         </Callout>
       </Section>

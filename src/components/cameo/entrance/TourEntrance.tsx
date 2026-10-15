@@ -185,7 +185,7 @@ function squeezePage(off: number) {
  * PIP is awake. The code is checked on the server, which answers with a cookie
  * this script cannot read; nothing here decides who gets in.
  */
-export default function TourEntrance({ unlocked }: { unlocked: boolean }) {
+export default function TourEntrance({ unlocked, phone }: { unlocked: boolean; phone: boolean }) {
   const router = useRouter();
   const trigger = useRef<HTMLButtonElement>(null);
   const openTakeover = useEntrance();
@@ -209,6 +209,15 @@ export default function TourEntrance({ unlocked }: { unlocked: boolean }) {
     await fetch('/api/tour/unlock', { method: 'DELETE' }).catch(() => {});
     router.refresh();
   };
+
+  // No way in on a phone: the tour needs room around PIP for the photos (see LaptopOnly).
+  if (phone) {
+    return (
+      <p className="text-sm text-stone-500">
+        The tour is made for a laptop. Open this page on one to start it.
+      </p>
+    );
+  }
 
   return (
     <>

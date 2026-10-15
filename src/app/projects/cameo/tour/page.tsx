@@ -5,6 +5,8 @@ import { after } from 'next/server';
 import { refreshVisitor, visitorFirstName } from '@/lib/tour/server/access';
 import { refreshStory } from '@/lib/tour/server/story';
 import { ACCESS_COOKIE, verifyAccess } from '@/lib/tour/server/auth';
+import { onPhone } from '@/lib/tour/server/phone';
+import LaptopOnly from '@/components/cameo/entrance/LaptopOnly';
 import TourStage from './TourStage';
 
 export const metadata: Metadata = {
@@ -20,6 +22,8 @@ export default async function TourPage() {
   const token = (await cookies()).get(ACCESS_COOKIE)?.value;
   const id = await verifyAccess(token);
   if (!id) redirect('/projects/cameo#tour');
+  // Before Notion is read: a phone gets the laptop screen, not a session.
+  if (await onPhone()) return <LaptopOnly />;
   // Opening the tour is when Notion is read again — this person's row, and
   // the story if it is due — so the session they are about to start has the
   // latest of both. After the page is sent, not before: nothing on it is
