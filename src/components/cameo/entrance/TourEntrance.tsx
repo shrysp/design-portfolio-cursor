@@ -1,5 +1,6 @@
 'use client';
 
+import { useGreeting } from '@/lib/tour/day-part';
 import { Fragment, useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { Doto } from 'next/font/google';
 import { usePathname, useRouter } from 'next/navigation';
@@ -40,11 +41,6 @@ export const CODE_LENGTH = 8;
  * people, so a pasted "K7QM-2ABC" is still eight.
  */
 export const normalCode = (raw: string) => raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, CODE_LENGTH);
-/** The time of day, for a greeting: as the tour's own start screen says it. */
-const dayPart = () => {
-  const h = new Date().getHours();
-  return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
-};
 
 /** A paste lights its characters one after another, this far apart. */
 const PASTE_STAGGER_MS = 35;
@@ -360,6 +356,8 @@ export function Takeover({
   const router = useRouter();
   const canvas = useRef<HTMLCanvasElement>(null);
   const veil = useRef<HTMLDivElement>(null);
+  // By the visitor's clock, not the server's (day-part.ts)
+  const greeting = useGreeting();
   const input = useRef<HTMLInputElement>(null);
   const char = useRef<CharacterHandle>(null);
   const dive = useRef<DiveHandle>(null);
@@ -868,7 +866,7 @@ export function Takeover({
         // the code card has its title and its line, and in the same type. Their ticket prints under it.
         <div ref={greetRef} className="entrance-invite-head" data-show={step === 'code'}>
           <p className="entrance-title">
-            {dayPart()}, {invite.name.charAt(0).toUpperCase() + invite.name.slice(1)}
+            {greeting}, {invite.name.charAt(0).toUpperCase() + invite.name.slice(1)}
           </p>
           <p className="entrance-body">
             <span className="entrance-invite-long">

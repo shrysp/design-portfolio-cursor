@@ -20,7 +20,8 @@ import { type WakeMic, createSilentMic, createWakeMic } from '@/lib/tour/wake-mi
 import { NOTICES, type NoticeId, noticeClip, noticeFor } from '@/lib/tour/notices';
 import { createTourClassifier } from '@/lib/tour/tour-model';
 import { CHAPTERS, type ChapterId, TOUR_IMAGES, chapterOf } from '@/data/tour-images';
-import { SUGGESTIONS } from '@/lib/tour/suggestions';
+import { SUGGESTIONS, pickChips, type TopicId } from '@/lib/tour/suggestions';
+import { dayPartNow, useGreeting } from '@/lib/tour/day-part';
 import { useDialKit } from 'dialkit';
 import { PHOTO_POP } from '@/lib/tour/tour-sounds';
 import { crtGlitch } from '@/components/cameo/crt/CrtLayer';
@@ -1359,12 +1360,8 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   const micAsked = useRef(false);
   /** Said under the type field when the microphone could not be brought in. */
   const [micNote, setMicNote] = useState<string | null>(null);
-  /** Good morning / afternoon / evening, by the visitor's own clock — so only once mounted. */
-  const [dayPart, setDayPart] = useState('');
-  useEffect(() => {
-    const h = new Date().getHours();
-    setDayPart(h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening');
-  }, []);
+  /** Good morning / afternoon / evening, by the visitor's own clock (day-part.ts). */
+  const dayGreeting = useGreeting();
   /** The entrance's takeover is still over the stage, landing its stream on these cards. */
   const [landingOver, setLandingOver] = useState(false);
   /**
@@ -1557,6 +1554,11 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   const [quiet, setQuiet] = useState(false);
   /** Suggestions already taken, so the same three are not offered again. */
   const [asked, setAsked] = useState<string[]>([]);
+  /**
+   * What the conversation is on, as Jev reads PIP's sentences, and every part
+   * of his life it has been on so far. The chips follow these (pickChips).
+   */
+  const [topics, setTopics] = useState<{ current: TopicId | null; visited: TopicId[] }>({ current: null, visited: [] });
   /** A suggestion picked before the tour was running: put to PIP once it has said hello. */
   const pendingAsk = useRef<string | null>(null);
   const askRef = useRef<(question: string) => void>(() => {});
@@ -1653,7 +1655,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       void fetch('/api/tour/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ index: SUGGESTIONS.indexOf(question) }),
+        body: JSON.stringify({ index: SUGGESTIONS.findIndex((s) => s.q === question) }),
       })
         .then(async (res) => {
           const { answer } = await res.json();
@@ -1667,8 +1669,8 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
             lastVoice.current = performance.now();
             s.speak(
               `The visitor picked a question on screen instead of saying it aloud: "${question}" ` +
-                'The backend has answered it. Say this answer to them now, in your own voice. Keep every fact ' +
-                `in it and add none of your own:\n\n${answer}`,
+                'The backend has answered it. Say this answer to them now, as it is written, sentence for ' +
+                `sentence, adding nothing of your own:\n\n${answer}`,
             );
           },
           () => {
@@ -1728,7 +1730,8 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     // The field stays: typing is the mode they are in, not a one-off.
     setTyped('');
   };
-  const chips = SUGGESTIONS.filter((q) => !asked.includes(q)).slice(0, CHIPS_SHOWN);
+  // Rotated by how far the conversation has gone, so each quiet spell offers somewhere new.
+  const chips = pickChips(asked, topics.current, topics.visited, CHIPS_SHOWN, topics.visited.length + asked.length);
 
   const cardsRef = useRef(cards);
   useEffect(() => {
@@ -1924,7 +1927,8 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     if (!img || session.current?.state !== 'live') return;
     session.current.think(
       `The visitor is pointing at a photo on screen: ${img.description}. ` +
-        `When they say "this", "that", "here" or "who's that", this photo is what they mean.`,
+        `When they say "this", "that", "here" or "who's that", this photo is what they mean. When you hand ` +
+        'their question to the backend, say which photo they are pointing at, in those words, so it can answer.',
     );
   }, []);
 
@@ -1970,10 +1974,36 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       pointOfferTimer.current = window.setTimeout(() => {
         if (pointAsked.current || point.current?.id !== id) return;
         setLog((l) => [`tour.point offer ${id}`, ...l].slice(0, 40));
-        session.current?.speak(
-          `The visitor just pointed at a photo without saying anything: ${img.description}. ` +
-            'Tell them the story behind it in a sentence or two, then invite them to ask more.',
-        );
+        // Written on the server from his story, as a clicked question is: the
+        // voice knows no facts of its own, and from a caption alone it either
+        // read the caption out or made a story up.
+        const s = session.current;
+        thinking.current ??= char.current?.hold('thinking', { key: 'tour' }) ?? null;
+        void fetch('/api/tour/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photo: id }),
+        })
+          .then(async (res) => {
+            const { answer } = await res.json();
+            if (!res.ok || typeof answer !== 'string') throw new Error(`HTTP ${res.status}`);
+            return answer;
+          })
+          .then(
+            (answer) => {
+              // Ended, replaced, or the visitor spoke or let go while it was being written.
+              if (session.current !== s || s?.state !== 'live' || pointAsked.current || point.current?.id !== id) {
+                release(thinking);
+                return;
+              }
+              lastVoice.current = performance.now();
+              s.speak(
+                'The visitor pointed at a photo on screen without saying anything. The backend has written what ' +
+                  `to say about it. Say this to them now, as it is written, adding nothing of your own:\n\n${answer}`,
+              );
+            },
+            () => release(thinking),
+          );
       }, POINT_ASK_MS);
     },
     [releasePoint, sharePoint, stopSpotlight],
@@ -2026,6 +2056,16 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         // face and for a card, which are about what PIP is saying now. Its
         // photos still count unless a newer sentence has already asked for some.
         if (!read.stale) emitMood(read.mood, read.moodP);
+        // Only once the visitor has said something: the greeting touches on
+        // everything and is about none of it.
+        const topic = read.topic;
+        if (!read.stale && topic && heardVisitor.current) {
+          setTopics((t) =>
+            t.current === topic && t.visited.includes(topic)
+              ? t
+              : { current: topic, visited: t.visited.includes(topic) ? t.visited : [...t.visited, topic] },
+          );
+        }
         const card = read.stale ? null : read.card;
         const photosAreNewest = read.images.length > 0 && read.seq > photoSeq.current;
         // Not before the visitor has said something. The greeting lists what
@@ -2040,7 +2080,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         }
         setLog((l) =>
           [
-            `tour.answer${read.stale ? ' (late)' : ''} mood=${read.mood} images=${read.images.map((img) => `${img.id}(${img.p.toFixed(2)})`).join(',') || 'none'} card=${read.card ? `${read.card.id}(${read.card.p.toFixed(2)})` : 'none'} "${text.slice(0, 60)}"`,
+            `tour.answer${read.stale ? ' (late)' : ''} mood=${read.mood} topic=${read.topic ?? 'none'} images=${read.images.map((img) => `${img.id}(${img.p.toFixed(2)})`).join(',') || 'none'} card=${read.card ? `${read.card.id}(${read.card.p.toFixed(2)})` : 'none'} "${text.slice(0, 60)}"`,
             ...l,
           ].slice(0, 40),
         );
@@ -2305,6 +2345,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     if (remembered !== micId) setMicId(remembered);
 
     const s = createLiveSession({
+      dayPart: dayPartNow,
       onEvent: (event) => handleEvent(event, s),
       onStateChange: (next) => {
         // A session being replaced confirms its close after the new one is
@@ -2793,7 +2834,8 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         saidGoodbye.current = true;
         s?.speak(
           'The tour is out of time. In one or two short sentences, warmly say goodbye, thank them for ' +
-            'coming, and say Shreyas would love to hear from them by email. Do not start anything new.',
+            'coming, and say you are handing them his contact card so they can write to him. Do not start ' +
+            'anything new.',
         );
       }
       if (sessionLeft <= 0) {
@@ -3387,7 +3429,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       )}
       {startCard && !v.paused && (
         <div className="tour-start tour-start--intro">
-          <p className="tour-start-title">{visitor ? `${dayPart || 'Hello'}, ${visitor}` : 'Meet PIP'}</p>
+          <p className="tour-start-title">{visitor ? `${dayGreeting}, ${visitor}` : 'Meet PIP'}</p>
           <p className="tour-start-body">
             PIP is Shreyas{'\u2019'}s guide. Ask about him out loud, and it answers with the photos around you.
           </p>

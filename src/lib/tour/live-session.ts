@@ -33,6 +33,8 @@ export type LiveSessionOptions = {
    * starting over; the server decides how much of it to use.
    */
   history?: () => { who: 'you' | 'pip'; text: string }[];
+  /** Morning, afternoon or evening where the visitor is, for the hello: the server has no clock of theirs. */
+  dayPart?: () => string;
   /**
    * Spoken once the session is ready, before anyone has said anything.
    *
@@ -207,7 +209,7 @@ export function createLiveSession(options: LiveSessionOptions): LiveSession {
       const res = await fetch(options.endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sdp: connection.localDescription?.sdp, history: options.history?.() }),
+        body: JSON.stringify({ sdp: connection.localDescription?.sdp, history: options.history?.(), dayPart: options.dayPart?.() }),
       });
 
       const result = await res.json();

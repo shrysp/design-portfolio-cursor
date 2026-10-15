@@ -11,25 +11,35 @@
  *
  * It takes a place in the list, never a question: nothing a browser sends
  * becomes part of a prompt. And since the list is short and the same for
- * everyone, each answer is written once per version of the story and kept —
+ * everyone, each answer is written once per version of the prompt and kept —
  * a click costs a model call only the first time anyone makes it.
+ *
+ * A photo pointed at in silence is asked the same way, by its id. The voice
+ * used to be told to "tell the story behind it" from the caption alone,
+ * which is the one thing its instructions forbid: it knows no facts, so it
+ * either read the caption out or made a story up.
  */
 
 import { after } from 'next/server';
 import { chargeApi } from '@/lib/tour/server/access';
 import { accessFrom } from '@/lib/tour/server/auth';
 import { backendMicros } from '@/lib/tour/server/costs';
-import { TOUR_BACKEND_MODEL, backendInstructions } from '@/lib/tour/server/context';
+import { TOUR_BACKEND_MODEL, backendInstructions, pointedQuestion } from '@/lib/tour/server/context';
 import { getStore, toRecord } from '@/lib/tour/server/store';
 import { currentStory, refreshStory } from '@/lib/tour/server/story';
 import { SUGGESTIONS } from '@/lib/tour/suggestions';
+import { TOUR_IMAGES } from '@/data/tour-images';
 
 const RESPONSES = 'https://api.openai.com/v1/responses';
 
 type OutputItem = { type?: string; content?: { type?: string; text?: string }[] };
 
-async function versionOf(story: string): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(story));
+/**
+ * Of the whole prompt, not just the story: keyed to the story alone, a change
+ * to the instructions never reached an answer already kept.
+ */
+async function versionOf(instructions: string, question: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${instructions}\n${question}`));
   return [...new Uint8Array(digest)].slice(0, 8).map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
@@ -39,8 +49,13 @@ export async function POST(request: Request) {
     return Response.json({ error: 'An access code is required.' }, { status: 401 });
   }
 
-  const { index } = await request.json().catch(() => ({}));
-  const question = Number.isInteger(index) ? SUGGESTIONS[index as number] : undefined;
+  const { index, photo } = await request.json().catch(() => ({}));
+  const image = typeof photo === 'string' ? TOUR_IMAGES.find((img) => img.id === photo) : undefined;
+  const question = image
+    ? pointedQuestion(image.description)
+    : Number.isInteger(index)
+      ? SUGGESTIONS[index as number]?.q
+      : undefined;
   if (!question) return Response.json({ error: 'No such question.' }, { status: 400 });
 
   const key = process.env.OPENAI_API_KEY;
@@ -53,8 +68,9 @@ export async function POST(request: Request) {
     if (!key || !story) throw new Error(key ? 'There is no story to answer from.' : 'OPENAI_API_KEY is not set.');
 
     const store = getStore();
-    const kept = `tour:answer:${index}`;
-    const version = await versionOf(story);
+    const kept = image ? `tour:photo:${image.id}` : `tour:answer:${index}`;
+    const instructions = backendInstructions(story);
+    const version = await versionOf(instructions, question);
     const rec = toRecord(await store.cmd<string[]>('HGETALL', kept));
     if (rec.text && rec.version === version) return Response.json({ answer: rec.text });
 
@@ -64,7 +80,7 @@ export async function POST(request: Request) {
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: TOUR_BACKEND_MODEL,
-        instructions: backendInstructions(story),
+        instructions,
         input: question,
         store: false,
       }),

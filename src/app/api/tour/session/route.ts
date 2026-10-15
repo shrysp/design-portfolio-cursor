@@ -27,6 +27,7 @@ import {
 } from '@/lib/tour/server/context';
 import { currentStory, refreshStory } from '@/lib/tour/server/story';
 import { TOUR_IMAGES } from '@/data/tour-images';
+import { DAY_PARTS } from '@/lib/tour/day-part';
 
 const LIVE_SESSIONS = 'https://api.openai.com/v1/live/sessions';
 const MODEL = 'gpt-live-1';
@@ -63,7 +64,9 @@ export async function POST(request: Request) {
     return Response.json({ error: 'The tour is not available right now.' }, { status: 503 });
   }
 
-  const { sdp, history } = await request.json().catch(() => ({}));
+  const { sdp, history, dayPart: rawDayPart } = await request.json().catch(() => ({}));
+  // One of three words or nothing: it goes into the greeting, so nothing else a browser sends gets in
+  const dayPart = DAY_PARTS.find((p) => p === rawDayPart);
   if (typeof sdp !== 'string' || !sdp || sdp.length > 20_000) {
     return Response.json({ error: 'Missing SDP offer.' }, { status: 400 });
   }
@@ -174,7 +177,7 @@ export async function POST(request: Request) {
     last: started.remaining < MIN_SESSION_SECONDS,
     // Someone coming back from a pause has already been greeted, and pressed
     // the key because they have something to say: PIP wakes and listens.
-    greeting: earlier ? '' : greetingFor(started.visitor),
+    greeting: earlier ? '' : greetingFor(started.visitor, dayPart),
     // Photos chosen for this visitor, shown as PIP says hello.
     spotlight: earlier
       ? []

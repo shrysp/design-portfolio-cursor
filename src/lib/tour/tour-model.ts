@@ -15,6 +15,8 @@
  * sentence after it came back first. `seq` lets the stage tell.
  */
 
+import type { TopicId } from '@/lib/tour/suggestions';
+
 export type TourReading = {
   mood: string;
   moodP: number;
@@ -25,6 +27,8 @@ export type TourReading = {
   images: { id: string; p: number }[];
   /** The card this sentence calls for — a project's title, or `contact` — or null, the usual answer. */
   card: { id: string; p: number } | null;
+  /** The part of his life it is about (suggestions.ts TOPICS), or null. Drives which chips are offered. */
+  topic: TopicId | null;
   /** Which sentence this was, in the order PIP said them. */
   seq: number;
   /** A newer sentence's reading came back first. */

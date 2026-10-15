@@ -18,6 +18,7 @@
 import type { Mood } from '@/components/cameo/moods';
 import { TOUR_IMAGES, type TourImage } from '@/data/tour-images';
 import { projectsData } from '@/data/projectsData';
+import { TOPICS, type TopicId } from '@/lib/tour/suggestions';
 
 const SYSTEMONE = 'https://api.typesafe.ai/v1/systemone';
 /**
@@ -108,7 +109,8 @@ const photoQuestion = (description: string) => ({
     false:
       'The sentence is about something else. Shreyas appearing in the photo does not count, since he is in most of ' +
       'them; nor does sharing a setting, such as the same school, city or event, while the sentence talks about ' +
-      'another thing that happened there; nor a loose or only thematic link.',
+      'another thing that happened there; nor a loose or only thematic link; nor a sentence about the tour itself or ' +
+      'what it covers ("his path, the places he has lived, what he loves") that names no particular place or event.',
   },
 });
 
@@ -142,6 +144,22 @@ const CARDS: Record<string, string> = {
 /** A card is clickable and takes the centre, so it needs a clearer yes than a photo does. */
 const CARD_THRESHOLD = 0.6;
 
+/**
+ * Which part of his life the sentence is about, so the chips can follow the
+ * conversation (suggestions.ts). A choice with `none` sharing the mass, as for
+ * cards: a deflection, a greeting or a line about the tour is about nothing in
+ * particular, and should leave the chips where they were.
+ */
+const TOPIC_INSTRUCTIONS = [
+  "The state gives the visitor's question and one sentence the guide just spoke about Shreyas.",
+  'Which part of his life is THIS SENTENCE about?',
+  'None when it is about nothing in particular: a greeting, a line about what the tour covers, turning down a ' +
+    'question, his work or projects, or anything not about his life.',
+].join(' ');
+
+const TOPIC_CRITERIA: Record<string, string> = { none: 'Not about any one part of his life.', ...TOPICS };
+const TOPIC_THRESHOLD = 0.5;
+
 type Answers = Record<string, { choice?: string; noul?: number; probabilities?: Record<string, number> }>;
 
 async function ask(
@@ -172,6 +190,8 @@ export type SentenceReading = {
   images: { id: string; p: number }[];
   /** The card this sentence calls for — a project's title, or `contact` — or null for none. */
   card: { id: string; p: number } | null;
+  /** The part of his life it is about (suggestions.ts TOPICS), or null for none or unsure. */
+  topic: TopicId | null;
   /** Jev input tokens the reading took, for what it cost (see costs.ts). */
   inputTokens: number;
 };
@@ -182,6 +202,12 @@ function readCard(answer: Answers[string] | undefined): SentenceReading['card'] 
   if (typeof id !== 'string' || id === 'none' || !(id in CARDS)) return null;
   const p = answer?.probabilities?.[id] ?? 1;
   return p >= CARD_THRESHOLD ? { id, p } : null;
+}
+
+function readTopic(answer: Answers[string] | undefined): TopicId | null {
+  const id = answer?.choice;
+  if (typeof id !== 'string' || !(id in TOPICS)) return null;
+  return (answer?.probabilities?.[id] ?? 1) >= TOPIC_THRESHOLD ? (id as TopicId) : null;
 }
 
 /** The cutoffs and model are arguments so the bench and `npm run tour:eval` can try others; the tour uses the defaults. */
@@ -204,6 +230,7 @@ export async function readSentence(
       if (i === 0) {
         questions.mood = { type: 'choice', instructions: MOOD_INSTRUCTIONS, criteria: MOODS };
         questions.card = { type: 'choice', instructions: CARD_INSTRUCTIONS, criteria: CARDS };
+        questions.topic = { type: 'choice', instructions: TOPIC_INSTRUCTIONS, criteria: TOPIC_CRITERIA };
       }
       for (const img of slice) questions[img.id] = photoQuestion(img.description);
       return ask(key, model, state, questions);
@@ -240,6 +267,7 @@ export async function readSentence(
     // Best first. Empty is a real, common answer — most sentences name nothing photographed.
     images,
     card: readCard(answers[0].card),
+    topic: readTopic(answers[0].topic),
     inputTokens: replies.reduce((sum, r) => sum + r.input, 0),
   };
 }

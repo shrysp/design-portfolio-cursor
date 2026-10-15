@@ -32,7 +32,7 @@ const MIN_LENGTH = 400;
  * for about five thousand tokens, nearly all of them cached after a session's
  * first question. What does not fit is cut from the end of the page.
  */
-const MAX_LENGTH = 20_000;
+export const MAX_LENGTH = 20_000;
 
 export async function refreshStory(timeoutMs?: number): Promise<void> {
   if (!storyConfigured()) return;
