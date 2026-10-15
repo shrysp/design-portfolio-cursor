@@ -106,7 +106,7 @@ export default function TourToast() {
     <aside
       className={`tour-toast ${dots.variable}`}
       data-show={show}
-      aria-label="Meet PIP, my guide"
+      aria-label="Get to know me"
       inert={!show}
       // In development the DialKit button sits in this corner (as on the tour's own chrome).
       style={process.env.NODE_ENV !== 'production' ? { right: 76 } : undefined}
@@ -117,8 +117,8 @@ export default function TourToast() {
         </div>
         <div className="tour-toast-body">
           <span className="tour-toast-tag">BY INVITATION</span>
-          <p className="tour-toast-title">Meet PIP, my guide</p>
-          <p className="tour-toast-text">Ask it about me, out loud.</p>
+          <p className="tour-toast-title">Get to know me</p>
+          <p className="tour-toast-text">Ask PIP about me.</p>
         </div>
         <button
           ref={go}

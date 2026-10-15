@@ -280,7 +280,7 @@ export default function TourEntrance({ unlocked: realUnlocked, phone: realPhone 
         <Character preset={PIP} size={88} state={held} />
       </div>
       <p className="tour-poster-title">Try it yourself</p>
-      <p className="tour-poster-text">Ask PIP about my work, out loud. Open this page on a laptop to start it.</p>
+      <p className="tour-poster-text">Ask PIP about me. Open this page on a laptop to start it.</p>
     </>
   ) : concept === 'Door' ? (
     <DoorBody unlocked={unlocked} open={openAt} lock={lock} mood={held} length={CODE_LENGTH} normal={normalCode} />
@@ -290,7 +290,7 @@ export default function TourEntrance({ unlocked: realUnlocked, phone: realPhone 
         <Character preset={PIP} size={88} state={held ?? (eager ? 'excited' : null)} />
       </div>
       <p className="tour-poster-title">Try it yourself</p>
-      <p className="tour-poster-text">Ask PIP about my work.</p>
+      <p className="tour-poster-text">Ask PIP about me.</p>
       <div className="tour-poster-actions">
         {/* With a code kept here this goes straight in; without one, to the code screen. */}
         <button ref={trigger} type="button" onClick={open} className="entrance-btn entrance-btn--primary tour-poster-go" {...wake}>
