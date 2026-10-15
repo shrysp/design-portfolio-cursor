@@ -20,7 +20,12 @@ import { TOUR_IMAGES, type TourImage } from '@/data/tour-images';
 import { projectsData } from '@/data/projectsData';
 
 const SYSTEMONE = 'https://api.typesafe.ai/v1/systemone';
-const MODEL = 'jev-latest';
+/**
+ * Pinned, not `jev-latest`: that alias moves to 1.14 on TypeSafe's schedule,
+ * and on 1.14 the old photo question showed nearly twice as many wrong photos.
+ * A new version gets tried against the same sentences before it is let in.
+ */
+const MODEL = 'jev-1.13.0';
 
 /** Photos per parallel request. */
 const SLICE = 8;
@@ -28,6 +33,13 @@ const SLICE = 8;
 const THRESHOLD = 0.5;
 /** More than this per sentence stops being illustration and becomes a slideshow. */
 const MAX_PHOTOS = 3;
+/**
+ * What a photo after the first needs. The best match is the sentence's photo;
+ * another only rides along when the sentence names it as plainly — a list,
+ * "hiking, kayaking, even scuba diving". In the eval every wrong extra scored
+ * 0.51–0.70 and every real list item 0.87 or more, so this sits between.
+ */
+const EXTRA_THRESHOLD = 0.8;
 
 /**
  * What each mood means, for the reader. The names are the ones the page has a
@@ -74,11 +86,31 @@ const MOOD_INSTRUCTIONS = [
   'Prefer neutral over a weak guess.',
 ].join(' ');
 
-const PHOTO_INSTRUCTIONS = (description: string) =>
-  `Photo: "${description}". The state gives the visitor's question and one sentence the guide just ` +
-  'spoke. Does THIS SENTENCE specifically mention something this photo shows — the same place, event, ' +
-  'person, or thing? A loose or merely thematic connection is no. A sentence that lists several things, ' +
-  'one of which this photo shows, is yes.';
+/**
+ * The question asks whether the photo would illustrate the sentence, and the
+ * criteria draw the line, since that line is where it went wrong. Asked
+ * whether a sentence mentioned "the same place, event, person, or thing", Jev
+ * took a shared setting as enough: "he worked as a TA at RIT" brought up his
+ * graduation and the northern lights, because they too were at RIT. And
+ * Shreyas is in most of the photos, so "person" alone made "he's originally
+ * from India" a match for any photo of him.
+ */
+const photoQuestion = (description: string) => ({
+  type: 'noul',
+  instructions:
+    `Photo: "${description}". The state gives the visitor's question and one sentence the guide just spoke. ` +
+    'Would this photo illustrate what THIS SENTENCE is talking about?',
+  criteria: {
+    true:
+      'The sentence names or describes what this photo shows: its event, activity, place, landmark, scene or the ' +
+      'other people in it, even in passing or as one item in a list. ' +
+      "Also true when the visitor's question asks about the place or event in this photo and the sentence answers it.",
+    false:
+      'The sentence is about something else. Shreyas appearing in the photo does not count, since he is in most of ' +
+      'them; nor does sharing a setting, such as the same school, city or event, while the sentence talks about ' +
+      'another thing that happened there; nor a loose or only thematic link.',
+  },
+});
 
 /**
  * Whether the sentence calls for a card (TourHandout) — one of the site's
@@ -93,7 +125,8 @@ const CARD_INSTRUCTIONS = [
   "The state gives the visitor's question and one sentence the guide just spoke.",
   'Should the guide hand the visitor a card right now, so they can open it?',
   'A project card only when THIS SENTENCE is about that particular project of his — what it is, how it was made, ' +
-    'what came of it. A passing mention in a list of projects is none.',
+    'what came of it — or singles it out, as when it answers the visitor by recommending or picking that one project. ' +
+    'A passing mention in a list of projects is none.',
   'The contact card only when the sentence is about getting in touch with him — emailing him, hiring him, working ' +
     'with him, finding him online, or being handed on to him for what the guide cannot answer.',
   'Prefer none over a weak guess.',
@@ -113,13 +146,14 @@ type Answers = Record<string, { choice?: string; noul?: number; probabilities?: 
 
 async function ask(
   key: string,
+  model: string,
   state: string,
   questions: Record<string, unknown>,
 ): Promise<{ answers: Answers; input: number }> {
   const res = await fetch(SYSTEMONE, {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: MODEL, state, questions }),
+    body: JSON.stringify({ model, state, questions }),
     // A sentence-boundary call that outlives the sentence after it is dead weight.
     signal: AbortSignal.timeout(4000),
   });
@@ -150,12 +184,12 @@ function readCard(answer: Answers[string] | undefined): SentenceReading['card'] 
   return p >= CARD_THRESHOLD ? { id, p } : null;
 }
 
-/** The cutoffs are arguments so the bench can try others; the tour uses the defaults. */
+/** The cutoffs and model are arguments so the bench and `npm run tour:eval` can try others; the tour uses the defaults. */
 export async function readSentence(
   key: string,
   text: string,
   question: string | undefined,
-  { threshold = THRESHOLD, maxPhotos = MAX_PHOTOS } = {},
+  { threshold = THRESHOLD, maxPhotos = MAX_PHOTOS, model = MODEL } = {},
 ): Promise<SentenceReading> {
   const state = typeof question === 'string' && question.trim()
     ? `Visitor asked: "${question.trim()}"\nGuide just said: "${text.trim()}"`
@@ -171,8 +205,8 @@ export async function readSentence(
         questions.mood = { type: 'choice', instructions: MOOD_INSTRUCTIONS, criteria: MOODS };
         questions.card = { type: 'choice', instructions: CARD_INSTRUCTIONS, criteria: CARDS };
       }
-      for (const img of slice) questions[img.id] = { type: 'noul', instructions: PHOTO_INSTRUCTIONS(img.description) };
-      return ask(key, state, questions);
+      for (const img of slice) questions[img.id] = photoQuestion(img.description);
+      return ask(key, model, state, questions);
     }),
   );
   const answers = replies.map((r) => r.answers);
@@ -183,7 +217,7 @@ export async function readSentence(
     throw new Error(`Unexpected mood answer: ${JSON.stringify(moodAnswer).slice(0, 500)}`);
   }
 
-  // Best first; then only the best of each near-duplicate group, capped.
+  // Best first; then only the best of each near-duplicate group, extras only past EXTRA_THRESHOLD, capped.
   const merged = Object.assign({}, ...answers) as Answers;
   const seenGroups = new Set<string>();
   const images: { id: string; p: number }[] = [];
@@ -191,6 +225,7 @@ export async function readSentence(
     .filter((r) => r.p >= threshold)
     .sort((a, b) => b.p - a.p);
   for (const { img, p } of ranked) {
+    if (images.length > 0 && p < EXTRA_THRESHOLD) break;
     if (img.group) {
       if (seenGroups.has(img.group)) continue;
       seenGroups.add(img.group);
