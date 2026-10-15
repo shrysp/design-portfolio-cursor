@@ -1,6 +1,6 @@
 'use client';
 
-import { useGreeting } from '@/lib/tour/day-part';
+import { useGreeting } from '@/lib/tour/use-greeting';
 import { Fragment, useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { Doto } from 'next/font/google';
 import { usePathname, useRouter } from 'next/navigation';

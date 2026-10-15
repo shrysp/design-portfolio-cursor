@@ -21,7 +21,8 @@ import { NOTICES, type NoticeId, noticeClip, noticeFor } from '@/lib/tour/notice
 import { createTourClassifier } from '@/lib/tour/tour-model';
 import { CHAPTERS, type ChapterId, TOUR_IMAGES, chapterOf } from '@/data/tour-images';
 import { SUGGESTIONS, pickChips, type TopicId } from '@/lib/tour/suggestions';
-import { dayPartNow, useGreeting } from '@/lib/tour/day-part';
+import { dayPartNow } from '@/lib/tour/day-part';
+import { useGreeting } from '@/lib/tour/use-greeting';
 import { useDialKit } from 'dialkit';
 import { PHOTO_POP } from '@/lib/tour/tour-sounds';
 import { crtGlitch } from '@/components/cameo/crt/CrtLayer';
