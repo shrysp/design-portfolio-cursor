@@ -105,6 +105,8 @@ const slugOf = (piece: Piece) => piece.title.toLowerCase().replace(/[^a-z0-9]+/g
 
 // A tile on the wall is never narrower than this; wider screens get more columns
 const MIN_TILE_WIDTH = 360;
+// The wall stops growing here, so a big monitor gets bigger tiles, not more of them
+const WALL_MAX_WIDTH = 1512;
 
 // The space between tiles, across and down, and at the screen's edges
 const WALL_GAP = 8;
@@ -244,12 +246,22 @@ export function CraftWall() {
   }, []);
 
   return (
-    // Breaks out of whatever column it sits in to span the whole screen
-    <div ref={wallRef} className="relative left-1/2 -translate-x-1/2 w-screen flex" style={{ gap: WALL_GAP, paddingInline: WALL_GAP }}>
+    // Breaks out of whatever column it sits in to span the screen, up to its widest
+    <div
+      ref={wallRef}
+      className="relative flex"
+      style={{
+        width: `min(100vw, ${WALL_MAX_WIDTH}px)`,
+        // Centred on its column, however narrow, by equal margins that run past its edges
+        marginInline: `calc(50% - min(50vw, ${WALL_MAX_WIDTH / 2}px))`,
+        gap: WALL_GAP,
+        paddingInline: WALL_GAP,
+      }}
+    >
       {dealIntoColumns(pieces, columnCount).map((column, index) => (
         <div key={index} className="flex flex-1 min-w-0 flex-col" style={{ gap: WALL_GAP }}>
           {column.map((piece) => (
-            <CraftTile key={piece.title} piece={piece} sizes={`${Math.round(100 / columnCount)}vw`} onOpen={open} />
+            <CraftTile key={piece.title} piece={piece} sizes={`(min-width: ${WALL_MAX_WIDTH}px) ${Math.round(WALL_MAX_WIDTH / columnCount)}px, ${Math.round(100 / columnCount)}vw`} onOpen={open} />
           ))}
         </div>
       ))}
