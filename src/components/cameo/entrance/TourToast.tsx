@@ -106,7 +106,7 @@ export default function TourToast() {
     <aside
       className={`tour-toast ${dots.variable}`}
       data-show={show}
-      aria-label="The PIP tour"
+      aria-label="Meet PIP, my guide"
       inert={!show}
       // In development the DialKit button sits in this corner (as on the tour's own chrome).
       style={process.env.NODE_ENV !== 'production' ? { right: 76 } : undefined}
@@ -117,8 +117,8 @@ export default function TourToast() {
         </div>
         <div className="tour-toast-body">
           <span className="tour-toast-tag">BY INVITATION</span>
-          <p className="tour-toast-title">Try the PIP tour</p>
-          <p className="tour-toast-text">Ask PIP about my work.</p>
+          <p className="tour-toast-title">Meet PIP, my guide</p>
+          <p className="tour-toast-text">Ask it about me, out loud.</p>
         </div>
         <button
           ref={go}
@@ -130,7 +130,7 @@ export default function TourToast() {
           onFocus={() => setEager(true)}
           onBlur={() => setEager(false)}
         >
-          Start the tour
+          Say hello
         </button>
         <button type="button" className="tour-toast-close" onClick={dismiss} aria-label="Dismiss">
           <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
