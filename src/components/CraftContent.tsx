@@ -27,7 +27,7 @@ const CameoShape = dynamic(() => import('@/components/craft/CameoShape'), { ssr:
 //   open: something bigger. The tile shows a loop or a still, and its button
 //         opens the piece on a stage at full size.
 type Media =
-  | { media: 'video'; src: string; poster: string }
+  | { media: 'video'; src: string; poster: string; /** A lighter, silent cut for the tile; `src` is what opens */ preview?: string }
   | { media: 'image'; src: string }
   | { media: 'live'; render: () => React.ReactNode };
 
@@ -38,12 +38,13 @@ type Piece = { title: string; ratio: number } & Media & {
     link?: { label: string; href: string };
   };
 
-const video = (title: string, file: string, ratio: number, folder = '/videos'): Piece => ({
+const video = (title: string, file: string, ratio: number, folder = '/videos', preview?: string): Piece => ({
   media: 'video',
   title,
   ratio,
   src: `${folder}/${file}.mp4`,
   poster: `/videos/posters/${file}.jpg`,
+  preview,
 });
 
 const image = (title: string, file: string): Piece => ({
@@ -79,7 +80,8 @@ const pieces: Piece[] = [
   walkthrough(video('Themed navbar', 'Navbar-themes', 3096 / 2160)),
   video('Mobile tab bar', 'Mobile-Navbar', 1040 / 1000),
   walkthrough(video('iPad × Figma', 'iPadxFigma', 2880 / 2160)),
-  walkthrough(video('Image answer engine', 'Image-Answer-Engine-Prototype', 1996 / 1080)),
+  // The tile loops a silent 7 MB cut; the full recording, with PIP's voice, opens on the stage
+  walkthrough(video('Portfolio tour', 'Portfolio-Tour-Demo', 1712 / 1080, '/videos', '/videos/Portfolio-Tour-Demo-preview.mp4')),
   video('Aero', 'aero_recording', 3 / 4),
   walkthrough(video('ItinerAI build', 'ItinerAIbuild-1', 808 / 1080)),
   image('Delay plugin', 'BuiLD09'),
@@ -137,7 +139,7 @@ function CraftTile({ piece, sizes, onOpen }: { piece: Piece; sizes: string; onOp
         style={{ aspectRatio: piece.ratio }}
       >
         {piece.media === 'video' && (
-          <LazyVideo src={piece.src} poster={piece.poster} className="absolute inset-0 w-full h-full object-cover" />
+          <LazyVideo src={piece.preview ?? piece.src} poster={piece.poster} className="absolute inset-0 w-full h-full object-cover" />
         )}
         {piece.media === 'image' && <Image src={piece.src} alt={piece.title} fill sizes={sizes} className="object-cover" />}
         {piece.media === 'live' && piece.render()}

@@ -8,6 +8,7 @@ import ControlsFigure from '@/components/figures/controls/ControlsFigure';
 import TapeFigure from '@/components/figures/tape/TapeFigure';
 import DiscFigure from '@/components/figures/disc/DiscFigure';
 import TourEntrance from '@/components/cameo/entrance/TourEntrance';
+import VideoPlayer from '@/components/craft/VideoPlayer';
 import { CaseStudy, Hero, Meta, Section, SubSection, Points } from '@/components/case-study/CaseStudy';
 
 // Import the project data
@@ -261,9 +262,9 @@ export default function CameoCaseStudy({ unlocked, phone }: { unlocked: boolean;
           moment comes to the centre of the stage. Point at a photo and it tells you the story behind it.
         </p>
 
-        {/* The walkthrough video goes here: swap this block for a MediaCard with mediaType="video". */}
-        <div className="column my-3 aspect-video surface bg-stone-100 flex items-center justify-center text-sm text-stone-400">
-          Walkthrough video coming soon
+        {/* The walkthrough, in the shape it was recorded (1712 × 1080), with the craft page's controls */}
+        <div className="column my-3 surface relative overflow-hidden" style={{ aspectRatio: 1712 / 1080 }}>
+          <VideoPlayer inline src="/videos/Portfolio-Tour-Demo.mp4" poster="/videos/posters/Portfolio-Tour-Demo.jpg" />
         </div>
 
         {/* The way in looks like the tour itself: PIP's dark room, the photos, the green gel */}

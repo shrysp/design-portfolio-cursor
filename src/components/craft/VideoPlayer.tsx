@@ -15,6 +15,13 @@ import { useKeyFlash } from "@/lib/useKeyFlash";
 interface VideoPlayerProps {
   src: string;
   poster?: string;
+  /**
+   * In the flow of a page rather than alone on a stage: it plays, muted, only
+   * while it is in view (never for someone who has asked for less motion),
+   * and its keys work only once it has focus, so Space and the arrows still
+   * scroll the page.
+   */
+  inline?: boolean;
 }
 
 // The dock's glass
@@ -35,13 +42,15 @@ const clock = (seconds: number) => {
 // blue gel bead. Space plays and pauses, the arrows step through, M mutes and
 // F fills the screen; each shows on its button. The controls step back while
 // the video plays and nothing is moving.
-export default function VideoPlayer({ src, poster }: VideoPlayerProps) {
+export default function VideoPlayer({ src, poster, inline = false }: VideoPlayerProps) {
   const frameRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(!inline);
   const [isMuted, setIsMuted] = useState(true);
+  /** Paused by the visitor, inline: scrolling back to it must not start it again. */
+  const heldByVisitor = useRef(false);
   const [hasSound, setHasSound] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [time, setTime] = useState(0);
@@ -54,6 +63,7 @@ export default function VideoPlayer({ src, poster }: VideoPlayerProps) {
   const toggle = () => {
     const video = videoRef.current;
     if (!video) return;
+    heldByVisitor.current = !video.paused;
     if (video.paused) video.play().catch(() => {});
     else video.pause();
   };
@@ -80,6 +90,10 @@ export default function VideoPlayer({ src, poster }: VideoPlayerProps) {
   };
   useEffect(() => {
     wake();
+    // Rendered on the server, the video can know its length before React is
+    // listening for it, and the total would read 0:00
+    const video = videoRef.current;
+    if (video && video.readyState >= 1) setDuration(video.duration);
     return () => clearTimeout(idleTimer.current);
   }, []);
 
@@ -102,15 +116,40 @@ export default function VideoPlayer({ src, poster }: VideoPlayerProps) {
     return () => cancelAnimationFrame(frame);
   }, [isPlaying, isScrubbing]);
 
+  // Inline, it plays while at least half of it is on screen and pauses once it
+  // scrolls away, unless the visitor paused it themselves
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!inline || !video) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !heldByVisitor.current) {
+          // Starts silent, as autoplay must, unless the visitor has turned the sound on
+          if (!video.dataset.unmuted) video.muted = true;
+          video.play().catch(() => {});
+        } else if (!entry.isIntersecting && !video.paused) {
+          video.pause();
+        }
+      },
+      { threshold: 0.5 },
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, [inline]);
+
   useEffect(() => {
     const onChange = () => setIsFullscreen(document.fullscreenElement === frameRef.current);
     document.addEventListener("fullscreenchange", onChange);
     return () => document.removeEventListener("fullscreenchange", onChange);
   }, []);
 
-  // The keys work wherever focus is, since the stage shows nothing else. A
-  // focused button keeps Space for itself.
+  // On the stage the keys work wherever focus is, since it shows nothing
+  // else; inline, only once the player has focus. A focused button keeps
+  // Space for itself.
   useEffect(() => {
+    const target: HTMLElement | Window | null = inline ? frameRef.current : window;
+    if (!target) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
       const onControl = (event.target as HTMLElement | null)?.closest?.("button, [role='slider']");
@@ -132,10 +171,11 @@ export default function VideoPlayer({ src, poster }: VideoPlayerProps) {
       } else return;
       wake();
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    const listener = onKey as EventListener;
+    target.addEventListener("keydown", listener);
+    return () => target.removeEventListener("keydown", listener);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [duration, hasSound]);
+  }, [duration, hasSound, inline]);
 
   const seekFromPointer = (clientX: number) => {
     const track = trackRef.current?.getBoundingClientRect();
@@ -151,20 +191,27 @@ export default function VideoPlayer({ src, poster }: VideoPlayerProps) {
       ref={frameRef}
       onPointerMove={wake}
       onPointerLeave={() => isPlaying && setIsAwake(false)}
-      className={`absolute inset-0 bg-black select-none ${showControls ? "" : "cursor-none"}`}
+      tabIndex={inline ? 0 : undefined}
+      aria-label={inline ? "Video player" : undefined}
+      className={`absolute inset-0 bg-black select-none outline-none ${showControls ? "" : "cursor-none"}`}
     >
       <video
         ref={videoRef}
         src={src}
         poster={poster}
-        autoPlay
+        autoPlay={!inline}
         muted
         loop
+        preload={inline ? "metadata" : undefined}
         playsInline
         onClick={toggle}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
-        onVolumeChange={(event) => setIsMuted(event.currentTarget.muted)}
+        onVolumeChange={(event) => {
+          setIsMuted(event.currentTarget.muted);
+          // Sound turned on stays on when it scrolls out of view and back
+          if (!event.currentTarget.muted) event.currentTarget.dataset.unmuted = "1";
+        }}
         onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
         onDurationChange={(event) => setDuration(event.currentTarget.duration)}
         className="absolute inset-0 w-full h-full object-contain"
