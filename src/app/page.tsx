@@ -99,12 +99,7 @@ export default function Home() {
 
               {/* Journal — highest z-index, appears first */}
               <motion.div variants={journalVariants} className="relative z-20">
-                <ExpandableJournal
-                  collapsedWidth={240}
-                  collapsedHeight={320}
-                  expandedWidth={420}
-                  expandedHeight={560}
-                />
+                <ExpandableJournal collapsedWidth={240} collapsedHeight={320} />
               </motion.div>
 
               {/* Stickers. Each is stuck down in turn, left edge first, the same
@@ -125,13 +120,14 @@ export default function Home() {
                   <div className="absolute text-stone-500 text-left left-[15%] top-20 whitespace-nowrap"><HandNote {...note} delay={noteDelay(0)}>Mission Peak</HandNote></div>
                 </div>
 
-                <div className="hidden md:flex z-[0] absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 gap-2">
-                  <div className="absolute z-10 text-stone-500 text-left w-34 whitespace-nowrap -rotate-60 top-8 left-1/5"><HandNote {...note} delay={noteDelay(1)}>Based in Bay Area</HandNote></div>
+                {/* Shaniwar Wada: wide and low, laid over the foot of the Mission Peak sticker, as Ritchie is over the cricket one */}
+                <div className="hidden md:flex z-[0] absolute top-[86%] left-[17%] -translate-x-1/2 -translate-y-1/2 gap-2">
+                  <div className="absolute z-10 text-stone-500 text-left whitespace-nowrap -rotate-3 -bottom-7 left-[30%]"><HandNote {...note} delay={noteDelay(1)}>Based in Pune</HandNote></div>
                   <StickOnSticker
-                    src="/images/About/Golden-Gate-Bridge-sticker.webp"
-                    alt="Golden Gate Bridge sticker"
-                    aspect={1}
-                    imgClassName="size-100 object-contain"
+                    src="/images/About/Pune Sticker.webp"
+                    alt="Shaniwar Wada, Pune, sticker"
+                    aspect={865 / 440}
+                    imgClassName="w-[19rem] h-auto object-contain"
                     delay={stickerDelay(1)}
                     instant={isReturning}
                     {...stickOn}
@@ -184,7 +180,7 @@ export default function Home() {
                 Hey, I&apos;m Shreyas
               </div>
               <p className="text-important text-pretty text-stone-600!">
-                I&apos;m a Product Designer based in the Bay Area, I think about interaction, systems, and the details people feel before they notice.
+                I&apos;m a Product Designer based in Pune, India. I think about interaction, systems, and the details people feel before they notice.
               </p>
             </motion.div>
           </div>
@@ -209,28 +205,28 @@ export default function Home() {
               <ProjectThumbnailCard name="Quinn" link="/projects/quinn">
                 <div className="text-body text-pretty">AI-native relationship intelligence product focused on how executives manage and maintain their professional networks. Over three months, I shaped the product vision for the next 10–12 months: the system&apos;s foundations, long-term evolution, and growth direction.</div>
                 <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/HalftoneDots.webp')] bg-cover bg-center surface" style={{ viewTransitionName: 'project-quinn' }}>
-                  <Image src="/images/projects/Quinn/Masterlist.webp" alt="Quinn" fill className="object-cover object-center" />
+                  <Image src="/images/projects/Quinn/Masterlist.webp" alt="Quinn" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover object-center" />
                 </div>
               </ProjectThumbnailCard>
 
               <ProjectThumbnailCard name="ItinerAI" link="/projects/itinerai">
                 <div className="text-body text-pretty">ItinerAI is an experimental travel assistant where multiple AI agents, each with a distinct personality and focus area, collaborate to help you plan and coordinate trips effortlessly. From surfacing the best flight options to optimizing your itinerary around your schedule, these agents communicate with each other and with you, just like a well-aligned team.</div>
                 <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/ItinearAI-Thumbnail-Background.webp')] bg-cover bg-center surface" style={{ viewTransitionName: 'project-itinerai' }}>
-                  <Image src="/images/projects/ItinerAI/ItinerAI-Thumbnail.png" alt="ItinerAI" fill className="object-cover object-center" />
+                  <Image src="/images/projects/ItinerAI/ItinerAI-Thumbnail.png" alt="ItinerAI" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover object-center" />
                 </div>
               </ProjectThumbnailCard>
 
               <ProjectThumbnailCard name="Dashworks" link="/projects/dashworks">
                 <div className="text-body text-pretty">Dashworks is an AI-powered knowledge assistant that helps companies centralize their knowledge scattered across various apps. It provides accurate answers to employee questions by searching across the company&apos;s connected applications.</div>
                 <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/Dashworks-Thumbnail-Background.webp')] bg-cover bg-center surface" style={{ viewTransitionName: 'project-dashworks' }}>
-                  <Image src="/images/projects/Dashworks/Dashworks-Onboarding-1.png" alt="Dashworks" fill className="object-cover object-center" />
+                  <Image src="/images/projects/Dashworks/Dashworks-Onboarding-1.png" alt="Dashworks" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover object-center" />
                 </div>
               </ProjectThumbnailCard>
 
               <ProjectThumbnailCard name="WeatherWise" link="/projects/weatherwise">
                 <div className="text-body text-pretty">Improving Navigational Safety with Weather-Adaptive Routing in Google Maps.</div>
                 <div className="relative w-full aspect-4/3 mt-4 bg-[url('/images/projects/thumbnails/WeatherWiseThumbnail-Background.webp')] bg-cover bg-center surface" style={{ viewTransitionName: 'project-weatherwise' }}>
-                  <Image src="/images/projects/Weatherwise/WeatherWise-Thumbnail.webp" alt="WeatherWise" fill className="object-cover object-center" />
+                  <Image src="/images/projects/Weatherwise/WeatherWise-Thumbnail.webp" alt="WeatherWise" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover object-center" />
                 </div>
               </ProjectThumbnailCard>                  
               

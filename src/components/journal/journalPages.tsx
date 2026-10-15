@@ -86,7 +86,7 @@ export function getJournalPages({ copied = false, onCopyEmail }: JournalPageOpti
         />
         <div className="absolute inset-0 p-6">
         <div className=" text-left  text-stone-500 w-3/4">I grew up in Pune.
-<br />I live and work in the Bay Area now.<br />
+<br />After a few years in the US, I&apos;m back home.<br />
 <br />I studied engineering.<br />Somewhere along the way, I started paying more attention to how things felt.<br />
 <br />Most of what I make lives
 between people and systems.
