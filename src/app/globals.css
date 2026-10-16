@@ -615,10 +615,13 @@ body:has([data-not-found]) [data-site-dock] {
 }
 
 
-.font-handwriting {
-  font-family: var(--font-handwriting), cursive;
-  font-weight: 400;
-  font-style: normal;
+/* Regular unless a weight utility (font-light, font-bold) says otherwise */
+@layer components {
+  .font-handwriting {
+    font-family: var(--font-handwriting), cursive;
+    font-weight: 400;
+    font-style: normal;
+  }
 }
 /* 3D Transform utilities */
 .transform-3d {

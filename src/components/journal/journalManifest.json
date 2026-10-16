@@ -2,7 +2,7 @@
   "pageWidth": 420,
   "pageHeight": 560,
   "glossAlpha": 160,
-  "version": "mv9ola13",
+  "version": "mvahqloa",
   "sides": [
     "/images/journal/pages/00.webp",
     "/images/journal/pages/01.webp",
@@ -64,7 +64,7 @@
       "side": 19,
       "x": 0.1,
       "y": 0.48125,
-      "width": 0.5124627976190477,
+      "width": 0.5472842261904762,
       "height": 0.05,
       "action": "copy-email"
     },

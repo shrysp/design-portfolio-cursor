@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Indie_Flower } from "next/font/google";
+import { Geist, Kalam } from "next/font/google";
 import "./globals.css";
 import StickyFooter from "@/components/StickyFooter";
 import MotionProvider from "@/components/MotionProvider";
@@ -17,9 +17,9 @@ const geist = Geist({
 });
 
 // The journal's handwriting
-const indieFlower = Indie_Flower({
+const kalam = Kalam({
   variable: "--font-handwriting",
-  weight: "400",
+  weight: ["300", "400", "700"],
   subsets: ["latin"],
   display: "swap",
 });
@@ -71,7 +71,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth overflow-x-clip">
       <body
-        className={`${geist.variable} ${indieFlower.variable} antialiased bg-stone-50 text-stone-900 overflow-x-clip`}
+        className={`${geist.variable} ${kalam.variable} antialiased bg-stone-50 text-stone-900 overflow-x-clip`}
       >
         <DevFeedback />
         <RouteTransitionSettler />

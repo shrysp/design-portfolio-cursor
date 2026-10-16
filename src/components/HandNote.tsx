@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { TegakiRenderer } from "tegaki/react";
-import indieFlower from "@/fonts/indie-flower-tegaki/bundle";
+import kalam from "@/fonts/kalam-tegaki/bundle";
 
 interface HandNoteProps {
   children: string;
@@ -28,7 +28,7 @@ export default function HandNote({ children, delay = 0, speed = 1, instant = fal
 
   return (
     <TegakiRenderer
-      font={indieFlower}
+      font={kalam}
       className={className}
       time={instant ? "100%" : { mode: "uncontrolled", delay, speed }}
       reducedMotion="user"
