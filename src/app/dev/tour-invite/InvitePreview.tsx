@@ -8,7 +8,8 @@ import type { Invite } from "@/components/cameo/entrance/InviteTicket";
 const SAMPLE_NOTE =
   "You were the first person I told about Cameo. Come say hi to PIP, it has been waiting for you.";
 
-export default function InvitePreview() {
+/** `printOnly`: tearing always prints again, whatever the address says — for the live review copy. */
+export default function InvitePreview({ printOnly = false }: { printOnly?: boolean }) {
   const [invite, setInvite] = useState<(Invite & { preview: boolean }) | null>(
     null,
   );
@@ -20,9 +21,9 @@ export default function InvitePreview() {
       number: Number(q.get("no")) || 7,
       note: q.has("note") ? q.get("note") || undefined : SAMPLE_NOTE,
       // ?enter=1: tearing goes in for real (the glitch, the dive), rather than printing again.
-      preview: q.get("enter") !== "1",
+      preview: printOnly || q.get("enter") !== "1",
     });
-  }, []);
+  }, [printOnly]);
   if (!invite) return null;
   return (
     <>
