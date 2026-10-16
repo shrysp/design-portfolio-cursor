@@ -121,7 +121,7 @@ export default function Home() {
                 </div>
 
                 {/* Shaniwar Wada: from Mission Peak's summit post to under the journal, which covers its right half */}
-                <div className="hidden md:flex z-[0] absolute top-[60%] left-[33%] -translate-x-1/2 -translate-y-1/2 gap-2">
+                <div className="hidden md:flex z-[0] absolute top-[70%] left-[28%] -translate-x-1/2 -translate-y-1/2 gap-2">
                   <div className="absolute z-10 text-stone-500 text-left whitespace-nowrap -rotate-3 -bottom-8 left-[14%]"><HandNote {...note} delay={noteDelay(1)}>Based in Pune</HandNote></div>
                   <StickOnSticker
                     src="/images/About/Pune Sticker.webp"
