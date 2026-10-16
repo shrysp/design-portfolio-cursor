@@ -12,7 +12,7 @@ export const projectMeta = {
     description:
       "An expressive little face for AI interfaces, published as an npm package. It blinks, follows the cursor, and listens, thinks and speaks along with your product.",
     hero: "/images/projects/Cameo/Cameo-Hero.webp",
-    background: "/images/projects/thumbnails/Cameo-Thumbnail-Background.webp",
+    background: "/images/projects/thumbnails/Cameo-Thumbnail.webp",
   },
   quinn: {
     title: "Quinn",
