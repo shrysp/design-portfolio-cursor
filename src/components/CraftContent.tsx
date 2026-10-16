@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import Image from 'next/image';
 import ProjectHeader from '@/components/ProjectHeader';
@@ -11,7 +11,7 @@ import ImageToolbar from '@/components/craft/ImageToolbar';
 import TurfWaitlist from '@/components/craft/TurfWaitlist';
 import CraftStage from '@/components/craft/CraftStage';
 import VideoPlayer from '@/components/craft/VideoPlayer';
-import { IconArrowsExpandDiagonal3, IconArrowUpRight } from 'nucleo-micro-bold-essential';
+import { IconArrowsExpandDiagonal3, IconCursorDefaultFilled } from 'nucleo-micro-bold-essential';
 
 // Built prototypes stay out of the page until someone opens one
 const ModalGrid = dynamic(() => import('@/components/ModalGrid'), { ssr: false });
@@ -21,11 +21,12 @@ const CameoFaces = dynamic(() => import('@/components/craft/CameoFaces'), { ssr:
 const CameoShapeBlueprint = dynamic(() => import('@/components/craft/CameoShapeBlueprint'), { ssr: false });
 const CameoShape = dynamic(() => import('@/components/craft/CameoShape'), { ssr: false });
 
-// A craft piece is one of three kinds of card on the same frame:
-//   look: a still or a short loop. Nothing to do but look.
-//   play: a small live piece, used right there in the tile.
-//   open: something bigger. The tile shows a loop or a still, and its button
-//         opens the piece on a stage at full size.
+// A craft piece is one of four kinds of card on the same frame:
+//   try:       a small live piece, used right there in the tile.
+//   prototype: something built, bigger than its tile. The tile shows a loop or
+//              a drawing, and its button opens the real thing on a stage.
+//   watch:     a recording long enough to be worth watching at full size.
+//   look:      a still or a short loop. Nothing to do but look.
 type Media =
   | { media: 'video'; src: string; poster: string; /** A lighter, silent cut for the tile; `src` is what opens */ preview?: string }
   | { media: 'image'; src: string }
@@ -34,8 +35,10 @@ type Media =
 type Piece = { title: string; ratio: number } & Media & {
     /** Makes this an "open" card: the button's label, and what the stage shows */
     open?: { label: string; render?: () => React.ReactNode; /** Fetches what `render` needs ahead of time */ preload?: () => void };
-    /** Somewhere the piece lives outside the portfolio: its docs, its site */
-    link?: { label: string; href: string };
+    /** What it is, when the media's kind doesn't say it */
+    kind?: string;
+    /** The recording switches between light and dark, and its title follows it */
+    followsTheme?: boolean;
   };
 
 const video = (title: string, file: string, ratio: number, folder = '/videos', preview?: string): Piece => ({
@@ -57,7 +60,8 @@ const image = (title: string, file: string): Piece => ({
 // A recording long enough to be worth watching at full size
 const walkthrough = (piece: Piece): Piece => ({ ...piece, open: { label: 'Watch walkthrough' } });
 
-// Every craft piece, in reading order. `ratio` is width / height of the media.
+// Every craft piece. `ratio` is width / height of the media. The wall shows them
+// sorted by what you can do with them (see sortedPieces).
 const pieces: Piece[] = [
   { media: 'live', title: 'Turf waitlist', ratio: 2740 / 2160, render: () => <TurfWaitlist /> },
   { media: 'live', title: 'Image toolbar', ratio: 1496 / 1080, render: () => <ImageToolbar /> },
@@ -66,7 +70,6 @@ const pieces: Piece[] = [
     title: 'Cameo',
     ratio: 4 / 3,
     render: () => <CameoFaces />,
-    link: { label: 'Visit the Cameo site', href: 'https://usecameo.vercel.app/' },
   },
   {
     media: 'live',
@@ -74,7 +77,6 @@ const pieces: Piece[] = [
     ratio: 4 / 3,
     render: () => <CameoShapeBlueprint />,
     open: { label: 'Open the shape playground', render: () => <CameoShape />, preload: () => void import('@/components/craft/CameoShape') },
-    link: { label: 'Make your own on the Cameo site', href: 'https://usecameo.vercel.app/' },
   },
   video('Bento portfolio', 'Bento-Portfolio', 2862 / 2160),
   walkthrough(video('Themed navbar', 'Navbar-themes', 3096 / 2160)),
@@ -82,7 +84,7 @@ const pieces: Piece[] = [
   walkthrough(video('iPad × Figma', 'iPadxFigma', 2880 / 2160)),
   // The tile loops a silent 7 MB cut; the full recording, with PIP's voice, opens on the stage
   walkthrough(video('Portfolio tour', 'Portfolio-Tour-Demo', 1712 / 1080, '/videos', '/videos/Portfolio-Tour-Demo-preview.mp4')),
-  video('Aero', 'aero_recording', 3 / 4),
+  { ...video('Aero', 'aero_recording', 3 / 4), kind: 'AR prototype using Aero' },
   walkthrough(video('ItinerAI build', 'ItinerAIbuild-1', 808 / 1080)),
   image('Delay plugin', 'BuiLD09'),
   image('Instagram.exe', 'BuiLD11'),
@@ -92,6 +94,8 @@ const pieces: Piece[] = [
   image('Pocket synth', 'BuiLD10'),
   {
     ...video('Dashworks modal suite', 'Modals', 16 / 9, '/images/Craft'),
+    // Its recording flips the theme toggle partway through
+    followsTheme: true,
     // The real thing, built: it loads only when it's opened
     open: { label: 'View prototype', render: () => <ModalGrid />, preload: () => void import('@/components/ModalGrid') },
   },
@@ -114,19 +118,117 @@ const WALL_GAP = 8;
 // Columns are counted as if the gap were this, so the tight gap makes the
 // tiles bigger rather than squeezing in another column
 const COLUMN_FIT_GAP = 24;
-// A caption's height in units of a column's width, for balancing the columns
-const CAPTION_HEIGHT = 0.12;
 
-// One craft piece in its frame, with its name beneath. The name it carries for
-// page transitions is the same wherever the piece appears, so it can travel
-// between the home page and the wall, and between one arrangement and another.
-// What a piece is, in a word
+// What a piece is, in a word or two, for the top right of its tile
 const kindOf = (piece: Piece) =>
-  piece.open?.render ? 'Prototype' : piece.media === 'live' ? 'Live' : piece.media === 'video' ? 'Motion' : 'Visual';
+  piece.kind ?? (piece.open?.render ? 'Prototype' : piece.media === 'live' ? 'Live' : piece.media === 'video' ? 'Motion' : 'Visual');
 
+// What someone does with a piece
+type Role = 'try' | 'prototype' | 'watch' | 'look';
+const roleOf = (piece: Piece): Role =>
+  piece.open?.render ? 'prototype' : piece.media === 'live' ? 'try' : piece.open ? 'watch' : 'look';
+
+// The wall leads with the pieces you use, then prototypes, then walkthroughs,
+// then everything else, so what can be tried is the first thing seen
+const roleOrder: Role[] = ['try', 'prototype', 'watch', 'look'];
+// The walkthroughs to lead with, in order
+const leadWalkthroughs = ['Portfolio tour', 'ItinerAI build'];
+const leadRank = (piece: Piece) => (leadWalkthroughs.includes(piece.title) ? leadWalkthroughs.indexOf(piece.title) : leadWalkthroughs.length);
+const sortedPieces = [...pieces].sort(
+  (x, y) => roleOrder.indexOf(roleOf(x)) - roleOrder.indexOf(roleOf(y)) || leadRank(x) - leadRank(y),
+);
+
+// Pieces whose top edge is dark or busy, where the title reads in white
+const darkTops = new Set(['Themed navbar', 'Mobile tab bar', 'Portfolio tour', 'Aero', 'ItinerAI build', 'Instagram.exe', 'Perplexity Mindlab', 'Mail client', 'Whop join modal']);
+
+const PlayGlyph = () => (
+  <svg width={9} height={9} viewBox="0 0 10 10" aria-hidden>
+    <path d="M2 1.2v7.6a.6.6 0 0 0 .9.5l6.2-3.8a.6.6 0 0 0 0-1L2.9.7a.6.6 0 0 0-.9.5z" fill="currentColor" />
+  </svg>
+);
+
+// What a piece does, said in words in its tile's bottom right corner. Stills get
+// none. Buttons are grey gel that lights blue. "Try it" opens nothing, so it's a
+// flat tag rather than a button, and hovering it outlines the tile it means.
+function Action({ role, onOpen, onFrame }: { role: Role; onOpen: () => void; onFrame: (on: boolean) => void }) {
+  const base = 'absolute bottom-2.5 right-2.5 z-20 flex h-7 items-center gap-1.5 px-3 text-xs font-medium';
+  if (role === 'look') return null;
+  if (role === 'try') {
+    return (
+      <span
+        onPointerEnter={() => onFrame(true)}
+        onPointerLeave={() => onFrame(false)}
+        className={`${base} select-none cursor-default rounded-full border border-stone-300 bg-stone-200 text-stone-600`}
+      >
+        <IconCursorDefaultFilled size={11} />
+        Try it
+      </span>
+    );
+  }
+  return (
+    <button type="button" onClick={onOpen} className={`aqua aqua-to-blue ${base}`}>
+      {role === 'prototype' ? <IconArrowsExpandDiagonal3 size={11} /> : <PlayGlyph />}
+      {role === 'prototype' ? 'Open prototype' : 'Watch'}
+    </button>
+  );
+}
+
+// Whether a playing video is showing a dark frame right now, read a few times a
+// second from a tiny copy of it. Lets a title follow a recording that switches
+// theme partway, rather than guessing one ink for the whole loop.
+function useVideoIsDark(mediaRef: React.RefObject<HTMLDivElement | null>, enabled: boolean) {
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = 16;
+    canvas.height = 9;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    const timer = setInterval(() => {
+      const video = mediaRef.current?.querySelector('video');
+      if (!context || !video || video.paused || video.readyState < 2) return;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+      let light = 0;
+      for (let i = 0; i < pixels.length; i += 4) light += 0.2126 * pixels[i] + 0.7152 * pixels[i + 1] + 0.0722 * pixels[i + 2];
+      setDark(light / (pixels.length / 4) < 110);
+    }, 250);
+    return () => clearInterval(timer);
+  }, [mediaRef, enabled]);
+
+  return dark;
+}
+
+// The title top left and what it is top right, over the picture, on a soft shade
+// that matches the ink. `dark` is what's behind the title right now, for a piece
+// that follows its video's theme; otherwise it's the hand-picked list.
+function TileHeader({ piece, dark }: { piece: Piece; dark: boolean }) {
+  const ink = dark ? 'text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.35)]' : 'text-stone-800';
+  const text = `rounded-full px-1.5 py-1 transition-colors duration-300 ${ink}`;
+
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-3 p-2.5 text-sm">
+      {/* A gradient can't be transitioned, so the light and dark shades cross-fade */}
+      <span aria-hidden className={`absolute inset-x-0 top-0 -z-10 h-20 bg-gradient-to-b from-white/70 to-transparent transition-opacity duration-300 ${dark ? 'opacity-0' : ''}`} />
+      <span aria-hidden className={`absolute inset-x-0 top-0 -z-10 h-20 bg-gradient-to-b from-black/30 to-transparent transition-opacity duration-300 ${dark ? '' : 'opacity-0'}`} />
+      <span className={`${text} min-w-0 font-medium`}>{piece.title}</span>
+      <span className={`${text} shrink-0`}>
+        <span className="opacity-60">{kindOf(piece)}</span>
+      </span>
+    </div>
+  );
+}
+
+// One craft piece in its frame, with everything about it on the picture. The
+// name it carries for page transitions is the same wherever the piece appears,
+// so it can travel between the home page and the wall, and between one
+// arrangement and another.
 function CraftTile({ piece, sizes, onOpen }: { piece: Piece; sizes: string; onOpen: (piece: Piece) => void }) {
-  const label = piece.open?.label;
   const openIt = () => onOpen(piece);
+  const [framed, setFramed] = useState(false);
+  const mediaRef = useRef<HTMLDivElement>(null);
+  const videoDark = useVideoIsDark(mediaRef, Boolean(piece.followsTheme));
 
   return (
     <figure
@@ -137,6 +239,7 @@ function CraftTile({ piece, sizes, onOpen }: { piece: Piece; sizes: string; onOp
       onFocus={piece.open?.preload}
     >
       <div
+        ref={mediaRef}
         data-craft-media={slugOf(piece)}
         className="isolate relative overflow-hidden rounded-[calc(var(--surface-radius)-1px)] bg-white outline outline-stone-200"
         style={{ aspectRatio: piece.ratio }}
@@ -147,39 +250,11 @@ function CraftTile({ piece, sizes, onOpen }: { piece: Piece; sizes: string; onOp
         {piece.media === 'image' && <Image src={piece.src} alt={piece.title} fill sizes={sizes} className="object-cover" />}
         {piece.media === 'live' && piece.render()}
         {/* The whole picture opens the piece, as well as its button */}
-        {label && <button type="button" tabIndex={-1} aria-hidden onClick={openIt} className="absolute inset-0 z-10 cursor-expand" />}
+        {piece.open && <button type="button" tabIndex={-1} aria-hidden onClick={openIt} className="absolute inset-0 z-10 cursor-expand" />}
+        <TileHeader piece={piece} dark={piece.followsTheme ? videoDark : darkTops.has(piece.title)} />
+        <Action role={roleOf(piece)} onOpen={openIt} onFrame={setFramed} />
+        {framed && <span aria-hidden className="pointer-events-none absolute inset-0 z-20 rounded-[inherit] shadow-[inset_0_0_0_3px_var(--color-blue-400)]" />}
       </div>
-
-      <figcaption className="flex items-center justify-between gap-3 min-h-11 pl-4 pr-2 py-2 text-sm">
-        <span className="flex min-w-0 items-baseline gap-2">
-          <span className="font-medium text-stone-700">{piece.title}</span>
-          <span className="shrink-0 text-stone-400">{kindOf(piece)}</span>
-        </span>
-
-        {piece.media === 'live' && !label && (
-          <span className={`ml-auto flex shrink-0 items-center gap-1.5 text-stone-500 ${piece.link ? '' : 'pr-2'}`}>
-            <span aria-hidden className="size-2 rounded-full bg-blue-500 shadow-[0_0_0_1px_var(--color-blue-700),inset_0_1px_0_rgba(255,255,255,0.6)]" />
-            Try it
-          </span>
-        )}
-        {label && (
-          <button type="button" onClick={openIt} aria-label={label} title={label} className="aqua aqua-round aqua-to-blue ml-auto shrink-0 size-7">
-            <IconArrowsExpandDiagonal3 size={13} />
-          </button>
-        )}
-        {piece.link && (
-          <a
-            href={piece.link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={piece.link.label}
-            title={piece.link.label}
-            className="aqua aqua-round aqua-to-blue shrink-0 size-7"
-          >
-            <IconArrowUpRight size={13} />
-          </a>
-        )}
-      </figcaption>
     </figure>
   );
 }
@@ -191,7 +266,7 @@ function dealIntoColumns(items: Piece[], count: number) {
   for (const piece of items) {
     const shortest = columns.reduce((best, column) => (column.height < best.height ? column : best));
     shortest.items.push(piece);
-    shortest.height += 1 / piece.ratio + CAPTION_HEIGHT;
+    shortest.height += 1 / piece.ratio;
   }
   return columns.map((column) => column.items);
 }
@@ -259,7 +334,7 @@ export function CraftWall() {
         paddingInline: WALL_GAP,
       }}
     >
-      {dealIntoColumns(pieces, columnCount).map((column, index) => (
+      {dealIntoColumns(sortedPieces, columnCount).map((column, index) => (
         <div key={index} className="flex flex-1 min-w-0 flex-col" style={{ gap: WALL_GAP }}>
           {column.map((piece) => (
             <CraftTile key={piece.title} piece={piece} sizes={`(min-width: ${WALL_MAX_WIDTH}px) ${Math.round(WALL_MAX_WIDTH / columnCount)}px, ${Math.round(100 / columnCount)}vw`} onOpen={open} />

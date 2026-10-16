@@ -89,7 +89,7 @@ export default function TurfWaitlist() {
   };
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-white [container-type:inline-size] font-[Helvetica,Arial,sans-serif]">
+    <div className="absolute inset-0 flex items-center justify-center bg-[#f2f4f5] [container-type:inline-size] font-[Helvetica,Arial,sans-serif]">
       <form onSubmit={join} noValidate className="flex w-[min(78cqw,340px)] flex-col gap-3">
         <motion.div
           ref={fieldRef}
