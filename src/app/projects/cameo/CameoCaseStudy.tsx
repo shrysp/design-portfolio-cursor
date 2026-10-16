@@ -1,7 +1,7 @@
 'use client';
 
 import { IconClipboard, IconCode, IconCursorDefault, IconKeyboard, IconMicrophone, IconVolumeUp } from 'nucleo-micro-bold-essential';
-import CameoCharacters from '@/components/cameo/CameoCharacters';
+import TourThumbnail from '@/components/cameo/TourThumbnail';
 import { Face, Step, Term } from '@/components/cameo/Inline';
 import TankFigure from '@/components/figures/tank/TankFigure';
 import ControlsFigure from '@/components/figures/controls/ControlsFigure';
@@ -21,11 +21,11 @@ export default function CameoCaseStudy({ unlocked, phone }: { unlocked: boolean;
 
   return (
     <CaseStudy title={project.title}>
-      {/* The hero is the package itself, running, in place of a picture of it */}
+      {/* The same picture as the home page's card, so one becomes the other */}
       <Hero
         slug="cameo"
-        media={<CameoCharacters names={['JADE', 'NOVA', 'PIP', 'TIDE']} size={124} />}
-        caption="The four characters that ship with the package, live. Move the cursor near them."
+        media={<TourThumbnail />}
+        caption="PIP, built with Cameo, giving the spoken tour of this site."
       >
         <Meta
           items={[

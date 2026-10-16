@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import ProjectThumbnailCard from '@/components/ProjectThumbnailCard';
 import { CraftWall, craftCount } from '@/components/CraftContent';
-import CameoCharacters from '@/components/cameo/CameoCharacters';
+import TourThumbnail from '@/components/cameo/TourThumbnail';
 import StickOnSticker, { STICK_ON_DEFAULTS } from '@/components/StickOnSticker';
 import HandNote from '@/components/HandNote';
 import SectionTitle from '@/components/SectionTitle';
@@ -197,8 +197,8 @@ export default function Home() {
                   
               <ProjectThumbnailCard name="Cameo" link="/projects/cameo">
                 <div className="text-body text-pretty">An expressive little face for AI interfaces, published as an npm package. It blinks, follows the cursor, and listens, thinks and speaks along with whatever your product is doing. I designed and built it, and used it to make a spoken tour of my own work.</div>
-                <div className="relative w-full aspect-4/3 mt-4 bg-stone-100 surface" style={{ viewTransitionName: 'project-cameo' }}>
-                  <CameoCharacters names={['PIP']} size={200} />
+                <div className="relative w-full aspect-4/3 mt-4 surface" style={{ viewTransitionName: 'project-cameo' }}>
+                  <TourThumbnail />
                 </div>
               </ProjectThumbnailCard>
 
