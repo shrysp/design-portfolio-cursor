@@ -103,10 +103,11 @@ export const craftCount = pieces.length;
 
 const slugOf = (piece: Piece) => piece.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-// A tile on the wall is never narrower than this; wider screens get more columns
+// A tile on the wall is never narrower than this; wider screens get more columns, up to three
 const MIN_TILE_WIDTH = 360;
-// The wall stops growing here, so a big monitor gets bigger tiles, not more of them
-const WALL_MAX_WIDTH = 1512;
+const MAX_COLUMNS = 3;
+// The wall stops growing here; until then a wider screen gets bigger tiles, not more of them
+const WALL_MAX_WIDTH = 1920;
 
 // The space between tiles, across and down, and at the screen's edges
 const WALL_GAP = 8;
@@ -230,7 +231,7 @@ export function CraftWall() {
     if (!wall) return;
 
     const fit = () => {
-      const next = Math.max(1, Math.floor((wall.clientWidth - COLUMN_FIT_GAP) / (MIN_TILE_WIDTH + COLUMN_FIT_GAP)));
+      const next = Math.min(MAX_COLUMNS, Math.max(1, Math.floor((wall.clientWidth - COLUMN_FIT_GAP) / (MIN_TILE_WIDTH + COLUMN_FIT_GAP))));
       if (next === shownCount.current) return;
       // The first fit just sets the columns; later ones are a change worth animating
       const isFirstFit = shownCount.current === null;
