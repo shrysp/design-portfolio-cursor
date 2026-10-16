@@ -88,6 +88,10 @@ interface Zone {
 // spread spans x = -1..1.
 const CAMERA_DISTANCE = 4.6;
 const SPREAD_MARGIN_PX = 16;
+// The window height at which pages are drawn at their own size (a MacBook Pro's
+// browser window). The journal keeps that share of the window on any screen,
+// growing on a big monitor and shrinking on a short one.
+const REFERENCE_VIEWPORT_HEIGHT = 860;
 const MAX_CANVAS_PIXELS = 10e6;
 const SHEET_GAP = 0.004;
 const GUTTER_LIFT = 0.03;
@@ -1061,9 +1065,9 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
     viewportWidth = host.clientWidth || 1;
     viewportHeight = host.clientHeight || 1;
 
-    // Same fit as the page itself: shrink until an open spread fits the viewport.
+    // The same share of the window as on the reference screen, and never more than fits.
     const scale = Math.min(
-      1,
+      stageHost.clientHeight / REFERENCE_VIEWPORT_HEIGHT,
       (stageHost.clientWidth - SPREAD_MARGIN_PX) / (pageWidth * (single ? 1 + FOLD.margin : 2)),
       (stageHost.clientHeight - SPREAD_MARGIN_PX) / pageHeight
     );
