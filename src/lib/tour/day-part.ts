@@ -16,5 +16,6 @@ export type DayPart = (typeof DAY_PARTS)[number];
 
 export function dayPartNow(): DayPart {
   const h = new Date().getHours();
-  return h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
+  // Past midnight is still the night before: "Good morning" at 12:10 am was wrong.
+  return h < 5 ? 'evening' : h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
 }
