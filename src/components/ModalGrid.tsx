@@ -12,7 +12,8 @@ interface TabData {
   icon: React.ReactNode;
 }
 
-const animationEase = [0.9, -0.5, 0.64, 1] as const;
+// Starts fast and settles, so the new tab is moving the moment it's clicked
+const animationEase = [0.23, 1, 0.32, 1] as const;
 
 const tabs: TabData[] = [
   {
@@ -87,9 +88,8 @@ export default function ModalGrid() {
   };
 
   const transition: Transition = {
-    delay: 0.1,
     duration: 0.3,
-    ease: animationEase, // Custom cubic-bezier for smoother end
+    ease: animationEase,
   };
 
   const renderContent = (tabId: string) => {
@@ -133,8 +133,9 @@ export default function ModalGrid() {
       {/* Tab content area */}
       <div className="relative flex-1   items-center justify-center overflow-hidden rounded-lg">
         <div className="w-full h-full min-h-[600px] relative items-center justify-center">
+          {/* The old tab and the new one slide together, like pages side by side,
+              rather than the new one waiting for the old to leave */}
           <AnimatePresence
-            mode="wait"
             initial={false}
             custom={direction}
           >

@@ -44,6 +44,8 @@ export interface JournalSceneOptions {
   onReady: () => void;
   onError: (error: unknown) => void;
   onDismiss: () => void;
+  // The book was pressed while on its way home, and is coming back out.
+  onReopen: () => void;
   onHotspot: (hotspot: JournalHotspot) => void;
 }
 
@@ -54,8 +56,9 @@ export interface JournalScene {
   hover: (point: { x: number; y: number } | null) => void;
   open: () => void;
   // Closes the book and flies it back. `onReturn` fires once the pages are shut
-  // and the book starts travelling home; the promise resolves when it lands.
-  close: (onReturn: () => void) => Promise<void>;
+  // and the book starts travelling home. The promise resolves true when it lands,
+  // or false if the book is pressed on the way and opens again (see onReopen).
+  close: (onReturn: () => void) => Promise<boolean>;
   flipNext: () => void;
   flipPrev: () => void;
   dispose: () => void;
@@ -100,7 +103,8 @@ const COVER_CORNER_PX = 12;
 const COVER_FLEX = 0.3;
 
 const CURL = { arc: 0.6, maxAngleDeg: 40, cornerRollMax: 2.3, smoothTime: 0.4, directionSmoothTime: 0.4 };
-const FLIP = { time: 0.85, dragPages: 1.5, dragSmoothTime: 0.25, commitProgress: 0.2, clickSlopPx: 5 };
+// flickSpeed: px per ms, averaged over the drag, past which a short drag still turns the page.
+const FLIP = { time: 0.85, dragPages: 1.5, dragSmoothTime: 0.25, commitProgress: 0.2, flickSpeed: 0.11, clickSlopPx: 5 };
 const PEEK = { progress: 0.045, smoothTime: 0.9 };
 // The hovered page also lifts toward the cursor: evenly at mid-height, and more
 // at whichever end (top or bottom) the cursor is nearer.
@@ -109,7 +113,8 @@ const HOVER = { lift: 0.07, bias: 0.9, smoothTime: 0.35 };
 const HOLD = { delayMs: 350, firstGapMs: 300, fastestGapMs: 130, speedUpSheets: 8 };
 // Light catching the gutter side of the right-hand page.
 const CREASE = { glow: 0.22, glowWidth: 0.09, shade: 0.04, shadeCentre: 0.2, shadeWidth: 0.12 };
-const CLOSE = { time: 0.5, staggerMs: 70, maxStaggerTotalMs: 600 };
+// Closing is the visitor leaving, so it is quicker than turning a page.
+const CLOSE = { time: 0.35, staggerMs: 40, maxStaggerTotalMs: 250 };
 // In the single layout a turned page swings over to the left, then rolls round
 // the spine and under the book. The fold is deliberately loose: each page rolls
 // a little wider than the last and lands slightly askew, so the folded pages fan
@@ -669,7 +674,7 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
   let groundFade = 1;
   let returning = false;
   let onReturn: (() => void) | null = null;
-  let resolveClose: (() => void) | null = null;
+  let resolveClose: ((landed: boolean) => void) | null = null;
 
   let hostLeft = 0;
   let hostTop = 0;
@@ -682,6 +687,8 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
   let press: {
     x: number;
     y: number;
+    // When it went down, to tell a flick from a slow drag
+    at: number;
     zone: Zone | null;
     hotspot: JournalHotspot | null;
     moved: boolean;
@@ -900,13 +907,14 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
 
   // ── Turning ──
 
+  // With reduced motion a page doesn't swing over: it is simply turned, on the next frame.
   function startFlight(index: number, to: number, seconds: number, delayMs = 0, ease = easeInOut) {
     const sheet = sheets[index];
     sheet.flight = {
       from: null,
       to,
-      start: performance.now() + delayMs,
-      duration: seconds * 1000 * (reducedMotion ? 0.6 : 1),
+      start: performance.now() + (reducedMotion ? 0 : delayMs),
+      duration: reducedMotion ? 1 : seconds * 1000,
       ease,
     };
   }
@@ -974,11 +982,17 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
   }
 
   function onPointerDown(event: PointerEvent) {
+    // Pressed on the book itself on its way home. A press anywhere else does
+    // nothing, so a double click outside it can't close it and open it again.
+    if (event.button === 0 && phase === "closing") {
+      if (zoneAt(pointerToBook(event.clientX, event.clientY))) reopen();
+      return;
+    }
     if (event.button !== 0 || phase !== "open" || isComingFullCircle()) return;
     const point = pointerToBook(event.clientX, event.clientY);
     const zone = zoneAt(point);
     const hotspot = point && zone ? hotspotAt(point, zone) : null;
-    press = { x: event.clientX, y: event.clientY, zone, hotspot, moved: false, holding: false };
+    press = { x: event.clientX, y: event.clientY, at: performance.now(), zone, hotspot, moved: false, holding: false };
 
     if (point && zone && !hotspot) {
       const sheet = sheets[zone.sheet];
@@ -1019,6 +1033,8 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
   function releasePress(event: PointerEvent, cancelled: boolean) {
     if (!press) return;
     const { zone, hotspot, moved, holding } = press;
+    const travelledX = press.x - event.clientX;
+    const elapsed = Math.max(1, performance.now() - press.at);
     const held = drag;
     press = null;
     drag = null;
@@ -1042,9 +1058,12 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
       return;
     }
 
-    // A drag commits once it has carried the sheet far enough; otherwise it falls back.
+    // A drag commits once it has carried the sheet far enough, or was a quick
+    // flick the way the page turns; otherwise it falls back.
     const advanced = held.forward ? held.target - held.base : held.base - held.target;
-    const committed = !cancelled && advanced >= FLIP.commitProgress;
+    const speed = (held.forward ? travelledX : -travelledX) / elapsed;
+    const flicked = advanced > 0 && speed > FLIP.flickSpeed;
+    const committed = !cancelled && (advanced >= FLIP.commitProgress || flicked);
     const endsTurned = held.forward === committed;
     sheets[held.index].direction = endsTurned ? 1 : -1;
     current = endsTurned ? held.index + 1 : held.index;
@@ -1269,12 +1288,19 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
       ? -0.5 + 0.5 * FOLD.margin * smooth(sheets[0].progress) * looseness
       : -0.5 * (1 - smooth(sheets[0].progress)) + 0.5 * smooth(sheets[sheetCount - 1].progress);
 
-    // Travel between the page and the centre of the screen.
-    if (phase === "closing" && !returning && sheets[0].progress < 0.3) {
+    // Travel between the page and the centre of the screen. The book sets off
+    // home while the cover is still shutting, so the two overlap.
+    if (phase === "closing" && !returning && sheets[0].progress < 0.5) {
       returning = true;
       travel.target = 0;
       onReturn?.();
       onReturn = null;
+    }
+    // With reduced motion the book doesn't fly between the page and the stage; it
+    // is just there, and fades in where it lands (see mount).
+    if (reducedMotion) {
+      travel.value = travel.target;
+      travel.velocity = 0;
     }
     for (let step = dt; step > 0; step -= 1 / 120) {
       const h = Math.min(step, 1 / 120);
@@ -1303,7 +1329,7 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
 
     // At rest the cover swings the other way under the cursor, as the DOM cover did.
     if (resting) {
-      const wantRotation = pointer.inside && pointer.isMouse ? REST.hoverRotation : REST.rotation;
+      const wantRotation = pointer.inside && pointer.isMouse && !reducedMotion ? REST.hoverRotation : REST.rotation;
       origin.rotation += (wantRotation - origin.rotation) * (1 - Math.pow(0.001, dt / REST.rotationSmoothTime));
       if (Math.abs(wantRotation - origin.rotation) > SETTLE) active = true;
     }
@@ -1340,7 +1366,7 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
       pointer.inside = false;
       mount(restHost);
       lastTime = 0;
-      resolveClose?.();
+      resolveClose?.(true);
       resolveClose = null;
       return;
     }
@@ -1357,8 +1383,10 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
   // Moves the canvas into `next` and redraws before the browser paints, so the
   // book never appears to jump between the page and the stage.
   function mount(next: HTMLElement) {
+    const moving = host !== next;
     host = next;
     host.appendChild(canvas);
+    if (reducedMotion && moving) canvas.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing: "ease-out" });
     canvas.style.pointerEvents = host === stageHost ? "auto" : "none";
     resize();
     update(0, performance.now());
@@ -1397,7 +1425,7 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
   }
 
   function close(onReturnStart: () => void) {
-    if (phase === "rest" || phase === "closing") return Promise.resolve();
+    if (phase === "rest" || phase === "closing") return Promise.resolve(true);
     const to = restHost.getBoundingClientRect();
     const stage = stageHost.getBoundingClientRect();
     origin.x = to.left + to.width / 2 - stage.left;
@@ -1410,7 +1438,20 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
     returning = false;
     onReturn = onReturnStart;
     rewind();
-    return new Promise<void>((resolve) => { resolveClose = resolve; });
+    return new Promise<boolean>((resolve) => { resolveClose = resolve; });
+  }
+
+  // Changed its mind on the way home: back to the stage from wherever it has
+  // got to, on the same spring, so it turns round rather than starting over.
+  function reopen() {
+    phase = "opening";
+    returning = false;
+    onReturn = null;
+    travel.target = 1;
+    resolveClose?.(false);
+    resolveClose = null;
+    options.onReopen();
+    invalidate();
   }
 
   function onContextLost(event: Event) {
@@ -1463,7 +1504,7 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
     sun.shadow.map?.dispose();
     renderer.dispose();
     canvas.remove();
-    resolveClose?.();
+    resolveClose?.(true);
   }
 
   return { stickOn, hover, open, close, flipNext, flipPrev, dispose };

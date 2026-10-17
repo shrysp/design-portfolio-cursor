@@ -3,14 +3,14 @@
 import { useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createField, STAGE_BG } from './field';
-import { easeIn, easeOut, smoothstep, squeeze, tween, wait } from './TourEntrance';
+import { easeOut, smoothstep, squeeze, switchOff, tween, wait } from './TourEntrance';
 
 /** Where the tour's Back goes: the case study, at its section about the tour. */
 export const CASE_STUDY = '/projects/cameo';
 const SECTION = 'tour';
 
 /** How long the tour takes to squeeze to a dot, and the case study to open out of it. */
-const OFF_MS = 650;
+const OFF_MS = 400;
 const ON_MS = 600;
 /** The dot, held for a beat while the page changes underneath. */
 const HOLD_MS = 120;
@@ -57,7 +57,7 @@ export default function TourExit({ onDone }: { onDone: () => void }) {
         f.uniforms.glow = smoothstep(0.35, 1, k);
         squeeze(page, k);
       };
-      await tween(OFF_MS, easeIn, (k) => setOff(k, stage), isAlive);
+      await tween(OFF_MS, switchOff, (k) => setOff(k, stage), isAlive);
       if (!alive.current) return;
       // The case study, behind the dark; it opens once it is there.
       await new Promise<void>((resolve) => {

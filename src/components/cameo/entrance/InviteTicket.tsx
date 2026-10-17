@@ -29,6 +29,9 @@ const PRINT_MS = 1700;
 const FALL_MS = 680;
 /** How far the hand has to pull before the stub gives, in px. */
 const TEAR_AT = 55;
+/** A flick tears it short of TEAR_AT: down at least FLICK_AT px, averaging over TEAR_SPEED px per ms. */
+const FLICK_AT = 12;
+const TEAR_SPEED = 0.11;
 /** How quickly the stub catches up with the hand, per frame: under 1 is mass. */
 const FOLLOW = 0.28;
 /** The stub at rest: curled a little further than the paper (ticket.css). */
@@ -113,9 +116,14 @@ export default function InviteTicket({
     target: { dx: number; dy: number };
     at: { dx: number; dy: number };
     raf: number;
+    /** When it was grabbed, to tell a flick from a slow pull. */
+    since: number;
   } | null>(null);
   /** The pulled end: set by where the stub is grabbed. */
   const side = useRef<Side>(-1);
+  // Set when a pull is let go short of the tear, so the click that follows the
+  // release doesn't start a tug over the spring back.
+  const pulledJustNow = useRef(false);
   // A row with no number gets none printed, rather than "No. 00".
   const number =
     invite.number > 0 ? `No. ${String(invite.number).padStart(2, "0")}` : "";
@@ -243,6 +251,7 @@ export default function InviteTicket({
 
   const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (phase !== "ready" || e.button !== 0) return;
+    pulledJustNow.current = false;
     e.currentTarget.setPointerCapture(e.pointerId);
     e.currentTarget.dataset.pulling = "";
     // Grabbed on the left half, the left end is pulled; on the right, the right.
@@ -256,6 +265,7 @@ export default function InviteTicket({
       target: { dx: 0, dy: 0 },
       at: { dx: 0, dy: 0 },
       raf: 0,
+      since: performance.now(),
     };
     drag.current = d;
     // The stub follows the hand, catching up a share of the way each frame:
@@ -288,13 +298,27 @@ export default function InviteTicket({
     cancelAnimationFrame(d.raf);
     drag.current = null;
     delete e.currentTarget.dataset.pulling;
-    if (d.at.dy > 1) settle(d.at.dx, d.at.dy);
+    // Snatched down and let go: torn, though the stub hadn't caught up to the line.
+    const speed = d.target.dy / Math.max(1, performance.now() - d.since);
+    if (e.type === "pointerup" && d.target.dy > FLICK_AT && speed > TEAR_SPEED) {
+      pulledJustNow.current = true;
+      tear(d.at.dx, d.at.dy);
+      return;
+    }
+    if (d.at.dy > 1) {
+      pulledJustNow.current = true;
+      settle(d.at.dx, d.at.dy);
+    }
   };
   // Enter or Space (no pointer: detail is 0) tears it; a click without a pull tugs it, to show it pulls.
   const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (phase !== "ready") return;
     if (e.detail === 0) {
       tear(0, 0);
+      return;
+    }
+    if (pulledJustNow.current) {
+      pulledJustNow.current = false;
       return;
     }
     if (reduced() || drag.current) return;
