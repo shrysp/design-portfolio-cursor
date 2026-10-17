@@ -4,7 +4,7 @@
 .framework .fw-name {
   fill: var(--anatomy-lo);
   letter-spacing: 0.08em;
-  transition: fill 240ms ease-out;
+  transition: fill var(--fig-light-up) ease-out;
 }
 
 .framework .fw-name[data-on] {
@@ -28,7 +28,7 @@
 
 /* The feeder's lamp comes on while the group is adding a card */
 .framework .fw-lamp circle {
-  transition: fill 240ms ease-out, opacity 240ms ease-out;
+  transition: fill var(--fig-light-up) ease-out, opacity var(--fig-light-up) ease-out;
 }
 
 .framework .fw-lamp[data-on] circle {

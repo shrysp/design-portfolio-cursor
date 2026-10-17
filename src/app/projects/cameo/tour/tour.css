@@ -616,8 +616,8 @@
   translate: calc(50vw - 50%) 0;
   /* Rising and settling with what the bar opens: the bar's own clock (BAR_IN, BAR_EASE in TourStage). */
   transition:
-    translate calc(720ms / var(--motion, 1)) cubic-bezier(0.16, 1, 0.3, 1),
-    bottom calc(300ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1);
+    translate calc(720ms / var(--motion, 1)) var(--curve-out),
+    bottom calc(300ms / var(--motion, 1)) var(--curve-out);
 }
 
 /*
@@ -699,10 +699,10 @@
    * the site, out of a blur and a little low (page.tsx, globals.css page-blur-in).
    */
   transition:
-    opacity calc(480ms / var(--motion, 1)) cubic-bezier(0.2, 0.8, 0.2, 1) calc(420ms / var(--motion, 1)),
-    filter calc(480ms / var(--motion, 1)) cubic-bezier(0.2, 0.8, 0.2, 1) calc(420ms / var(--motion, 1)),
-    transform calc(480ms / var(--motion, 1)) cubic-bezier(0.2, 0.8, 0.2, 1) calc(420ms / var(--motion, 1)),
-    width calc(720ms / var(--motion, 1)) cubic-bezier(0.16, 1, 0.3, 1);
+    opacity calc(480ms / var(--motion, 1)) var(--curve-out-gentle) calc(420ms / var(--motion, 1)),
+    filter calc(480ms / var(--motion, 1)) var(--curve-out-gentle) calc(420ms / var(--motion, 1)),
+    transform calc(480ms / var(--motion, 1)) var(--curve-out-gentle) calc(420ms / var(--motion, 1)),
+    width calc(720ms / var(--motion, 1)) var(--curve-out);
 }
 
 .tour-caption--closed {
@@ -1106,6 +1106,13 @@
 :is(.tour-btn, .tour-chip, .tour-pill-btn, .tour-pill-end, .tour-pill-ask):active:not(:disabled) {
   scale: 0.96;
 }
+/* Pressed, they go down faster than they come back up (each one's own list, scale last) */
+:is(.tour-chip, .tour-pill-btn, .tour-pill-end, .tour-pill-ask):active:not(:disabled) {
+  transition-duration: 150ms, 100ms;
+}
+.tour-btn:active:not(:disabled) {
+  transition-duration: 180ms, 180ms, 100ms;
+}
 :is(.tour-btn, .tour-chip, .tour-pill-btn, .tour-pill-end, .tour-pill-ask):active:not(:disabled)::after {
   opacity: 0.75;
 }
@@ -1166,7 +1173,7 @@
   transition:
     filter 180ms ease-out,
     box-shadow 180ms ease-out,
-    scale 150ms ease-out;
+    scale 200ms ease-out;
 }
 .tour-btn--large {
   height: 46px;
@@ -1228,7 +1235,7 @@
   font-size: 13px;
   transition:
     filter 180ms ease-out,
-    scale 150ms ease-out;
+    scale 200ms ease-out;
 }
 .tour-chip:disabled {
   opacity: 0.5;
@@ -1254,14 +1261,15 @@
   width: auto;
   margin-right: 4px;
 }
+/* They come back every time the conversation goes quiet, so they arrive quickly */
 .tour-chips--dock .tour-chip {
-  animation: tour-chip-in calc(420ms / var(--motion, 1)) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: tour-chip-in calc(220ms / var(--motion, 1)) var(--curve-out) both;
 }
 .tour-chips--dock .tour-chip:nth-of-type(2) {
-  animation-delay: 70ms;
+  animation-delay: calc(40ms / var(--motion, 1));
 }
 .tour-chips--dock .tour-chip:nth-of-type(3) {
-  animation-delay: 140ms;
+  animation-delay: calc(80ms / var(--motion, 1));
 }
 @keyframes tour-chip-in {
   from {
@@ -1414,7 +1422,7 @@
 }
 .tour-stage[data-reveal] :is(.tour-chrome, .tour-start, .tour-controls) > *,
 .tour-stage[data-reveal] :is(.tour-mic-ask--live, .tour-mic-note-live) {
-  animation: tour-arrive calc(480ms / var(--motion, 1)) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: tour-arrive calc(480ms / var(--motion, 1)) var(--curve-out-gentle) both;
 }
 .tour-stage[data-reveal] :is(.tour-chrome, .tour-start) > *:nth-child(2) {
   animation-delay: calc(80ms / var(--motion, 1));
@@ -1933,7 +1941,7 @@
   max-width: calc(100vw - 32px);
   overflow: hidden;
   border-radius: 27px;
-  transition: border-radius calc(300ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1);
+  transition: border-radius calc(300ms / var(--motion, 1)) var(--curve-out);
   border: 1px solid #07090b;
   background: linear-gradient(to bottom, #363b42, #262a30 60%, #1c1f23);
   box-shadow:
@@ -1953,8 +1961,8 @@
  */
 .tour-console--morph {
   transition:
-    min-width calc(300ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1),
-    border-radius calc(300ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1);
+    min-width calc(300ms / var(--motion, 1)) var(--curve-out),
+    border-radius calc(300ms / var(--motion, 1)) var(--curve-out);
 }
 @media (prefers-reduced-motion: reduce) {
   .tour-console {
@@ -2110,6 +2118,9 @@
   padding: 0 16px;
   border-radius: 999px;
   font-size: 13px;
+  transition:
+    filter 150ms ease-out,
+    scale 200ms ease-out;
 }
 .tour-pill-btn {
   display: grid;
@@ -2119,7 +2130,7 @@
   border-radius: 50%;
   transition:
     filter 150ms ease,
-    scale 150ms ease;
+    scale 200ms ease-out;
 }
 /* Latched (muted, sound off, the transcript open): held in, like a latching button. */
 :is(.tour-pill-btn, .tour-btn)[aria-pressed='true'] {
@@ -2139,6 +2150,9 @@
   border-radius: 999px;
   font-size: 13px;
   font-weight: 500;
+  transition:
+    filter 150ms ease-out,
+    scale 200ms ease-out;
 }
 
 /*

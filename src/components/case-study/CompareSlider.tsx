@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { IconArrowsOppositeDirectionX } from "nucleo-micro-bold-essential";
 
@@ -14,8 +14,30 @@ interface CompareSliderProps {
 // Two versions of the same picture with a handle to drag between them
 export default function CompareSlider({ before, after }: CompareSliderProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const beforeRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [position, setPosition] = useState(50);
+  // Where the handle is, in percent. Written straight onto the clip and the
+  // handle as it's dragged, so the two pictures aren't re-rendered on every move.
+  const position = useRef(50);
+
+  const place = () => {
+    const box = containerRef.current?.getBoundingClientRect();
+    if (!box || !beforeRef.current || !handleRef.current) return;
+    beforeRef.current.style.clipPath = `inset(0 ${100 - position.current}% 0 0)`;
+    handleRef.current.style.left = "0";
+    handleRef.current.style.transform = `translateX(${(box.width * position.current) / 100}px) translateX(-50%)`;
+  };
+
+  // Placed in pixels, so placed again whenever the picture changes size
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    place();
+    const observer = new ResizeObserver(place);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!isDragging) return;
@@ -25,7 +47,8 @@ export default function CompareSlider({ before, after }: CompareSliderProps) {
       if (!container) return;
       const box = container.getBoundingClientRect();
       const clientX = "touches" in event ? event.touches[0].clientX : event.clientX;
-      setPosition(Math.max(0, Math.min(((clientX - box.left) / box.width) * 100, 100)));
+      position.current = Math.max(0, Math.min(((clientX - box.left) / box.width) * 100, 100));
+      place();
     };
     const stop = () => setIsDragging(false);
 
@@ -52,13 +75,14 @@ export default function CompareSlider({ before, after }: CompareSliderProps) {
         <Image src={after.src} alt={after.alt} fill className="object-cover" sizes="(min-width: 672px) 672px, 100vw" quality={90} />
 
         {/* The "before" picture, clipped to the left of the handle */}
-        <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}>
+        <div ref={beforeRef} className="absolute inset-0" style={{ clipPath: "inset(0 50% 0 0)" }}>
           <Image src={before.src} alt={before.alt} fill className="object-cover" sizes="(min-width: 672px) 672px, 100vw" quality={90} />
         </div>
 
         <div
+          ref={handleRef}
           className="absolute top-0 bottom-0 w-[2px] bg-linear-to-r from-slate-800/50 to-slate-100/50 cursor-ew-resize flex items-center justify-center z-10"
-          style={{ left: `${position}%`, transform: "translateX(-50%)" }}
+          style={{ left: "50%", transform: "translateX(-50%)" }}
           onMouseDown={startDrag}
           onTouchStart={startDrag}
         >

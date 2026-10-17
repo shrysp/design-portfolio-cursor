@@ -60,7 +60,7 @@
   filter: blur(12px) brightness(1.6);
   transition:
     opacity calc(1400ms / var(--motion, 1)) ease,
-    scale calc(1800ms / var(--motion, 1)) cubic-bezier(0.2, 0.8, 0.2, 1),
+    scale calc(1800ms / var(--motion, 1)) var(--curve-out-gentle),
     filter calc(1400ms / var(--motion, 1)) ease;
 }
 .entrance-pip[data-awake='true'] {
@@ -84,7 +84,7 @@
   pointer-events: none;
   transition:
     opacity calc(700ms / var(--motion, 1)) ease,
-    translate calc(900ms / var(--motion, 1)) cubic-bezier(0.2, 0.8, 0.2, 1);
+    translate calc(900ms / var(--motion, 1)) var(--curve-out-gentle);
 }
 .entrance-card[data-show='true'] {
   opacity: 1;
@@ -191,7 +191,7 @@
 .entrance-lcd-lit {
   text-shadow: 0 0 8px rgb(149 208 107 / 0.6);
   /* Out of a blur and a little bright, as phosphor catches: an ease-out, quick. */
-  animation: entrance-lcd-in calc(220ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation: entrance-lcd-in calc(220ms / var(--motion, 1)) var(--curve-out) both;
   animation-delay: calc(var(--burst, 0ms) / var(--motion, 1));
 }
 @keyframes entrance-lcd-in {
@@ -243,7 +243,7 @@
 }
 /* Right: every cell lights, left to right, and stays lit on the way in. */
 .entrance-lcd[data-state='open'] .entrance-lcd-lit {
-  animation: entrance-lcd-open calc(360ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation: entrance-lcd-open calc(360ms / var(--motion, 1)) var(--curve-out) both;
   animation-delay: calc(var(--i) * 40ms / var(--motion, 1));
 }
 @keyframes entrance-lcd-open {
@@ -315,7 +315,7 @@
     filter 180ms ease-out,
     box-shadow 180ms ease-out,
     opacity 200ms ease,
-    scale 150ms ease-out;
+    scale 200ms ease-out;
 }
 .entrance-btn::after {
   content: '';
@@ -335,6 +335,8 @@
 }
 .entrance-btn:active:not(:disabled) {
   scale: 0.96;
+  /* Down faster than it comes back up */
+  transition-duration: 180ms, 180ms, 200ms, 100ms;
 }
 .entrance-btn:focus-visible {
   outline: 2px solid var(--entrance-lcd);
@@ -404,9 +406,9 @@
   filter: blur(6px);
   pointer-events: none;
   transition:
-    opacity calc(300ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1),
-    filter calc(300ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1),
-    translate calc(300ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1);
+    opacity calc(300ms / var(--motion, 1)) var(--curve-out),
+    filter calc(300ms / var(--motion, 1)) var(--curve-out),
+    translate calc(300ms / var(--motion, 1)) var(--curve-out);
 }
 .entrance-wait[data-show='true'] {
   opacity: 1;
@@ -436,7 +438,7 @@
 .entrance-wait-lit {
   text-shadow: 0 0 7px rgb(149 208 107 / 0.6);
   animation:
-    entrance-lcd-in calc(220ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1) both,
+    entrance-lcd-in calc(220ms / var(--motion, 1)) var(--curve-out) both,
     entrance-wait-pulse calc(1400ms / var(--motion, 1)) ease-in-out infinite;
   animation-delay:
     calc(var(--i) * 30ms / var(--motion, 1)),
@@ -469,9 +471,9 @@
   filter: blur(6px);
   pointer-events: none;
   transition:
-    opacity calc(600ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1),
-    filter calc(600ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1),
-    translate calc(600ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1);
+    opacity calc(600ms / var(--motion, 1)) var(--curve-out),
+    filter calc(600ms / var(--motion, 1)) var(--curve-out),
+    translate calc(600ms / var(--motion, 1)) var(--curve-out);
 }
 .entrance-invite-head[data-show='true'] {
   opacity: 1;

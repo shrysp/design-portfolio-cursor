@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   IconFullScreen,
   IconMediaPauseFilled,
@@ -59,6 +59,20 @@ export default function VideoPlayer({ src, poster, inline = false }: VideoPlayer
   const [isAwake, setIsAwake] = useState(true);
   const [pressedKey, flashKey] = useKeyFlash<"play" | "mute" | "fullscreen">();
   const idleTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const fillRef = useRef<HTMLDivElement>(null);
+  const beadRef = useRef<HTMLDivElement>(null);
+
+  // Draws the scrubber at a share (0..1) of the video, straight onto the fill and
+  // the bead, so a playing video doesn't re-render the player every frame. The
+  // fill is clipped rather than sized and the bead translated rather than placed.
+  const paint = (share: number) => {
+    const fill = fillRef.current;
+    const bead = beadRef.current;
+    const groove = fill?.parentElement;
+    if (!fill || !bead || !groove) return;
+    fill.style.clipPath = `inset(0 ${(1 - share) * 100}% 0 0 round 999px)`;
+    bead.style.translate = `calc(${share * groove.clientWidth}px - 50%) -50%`;
+  };
 
   const toggle = () => {
     const video = videoRef.current;
@@ -80,6 +94,7 @@ export default function VideoPlayer({ src, poster, inline = false }: VideoPlayer
     if (!video || !duration) return;
     video.currentTime = Math.min(duration, Math.max(0, seconds));
     setTime(video.currentTime);
+    paint(video.currentTime / duration);
   };
 
   // Shows the controls, and lets them go again once things have been still
@@ -97,14 +112,16 @@ export default function VideoPlayer({ src, poster, inline = false }: VideoPlayer
     return () => clearTimeout(idleTimer.current);
   }, []);
 
-  // The time moves every frame, not at the few-times-a-second pace of the
-  // video's own time events, so the scrubber glides
+  // The scrubber moves every frame, not at the few-times-a-second pace of the
+  // video's own time events, so it glides. The clock only needs whole seconds.
   useEffect(() => {
     if (!isPlaying || isScrubbing) return;
     let frame = requestAnimationFrame(function tick() {
       const video = videoRef.current;
       if (video) {
-        setTime(video.currentTime);
+        if (video.duration) paint(Math.min(1, video.currentTime / video.duration));
+        const now = video.currentTime;
+        setTime((shown) => (Math.floor(shown) === Math.floor(now) ? shown : now));
         // A video gets a mute button once it turns out to carry sound, or
         // straight away in a browser that can't say either way
         const decoded = video as HTMLVideoElement & { webkitAudioDecodedByteCount?: number; mozHasAudio?: boolean };
@@ -183,6 +200,22 @@ export default function VideoPlayer({ src, poster, inline = false }: VideoPlayer
   };
 
   const progress = duration ? Math.min(1, time / duration) : 0;
+  // Drawn again whenever the time or length changes outside the frame loop, and
+  // when the groove changes size, since the bead is placed in pixels
+  useLayoutEffect(() => {
+    const video = videoRef.current;
+    paint(video && duration ? Math.min(1, video.currentTime / duration) : 0);
+  }, [time, duration]);
+  useEffect(() => {
+    const groove = fillRef.current?.parentElement;
+    if (!groove) return;
+    const observer = new ResizeObserver(() => {
+      const video = videoRef.current;
+      paint(video?.duration ? Math.min(1, video.currentTime / video.duration) : 0);
+    });
+    observer.observe(groove);
+    return () => observer.disconnect();
+  }, []);
   const showControls = isAwake || !isPlaying || isScrubbing;
   const pill = "aqua aqua-round aqua-to-blue size-8 shrink-0";
 
@@ -250,8 +283,9 @@ export default function VideoPlayer({ src, poster, inline = false }: VideoPlayer
             aria-valuenow={Math.round(time)}
             aria-valuetext={`${clock(time)} of ${clock(duration)}`}
             onKeyDown={(event) => {
-              if (event.key === "ArrowLeft") seekTo(time - SEEK_STEP);
-              else if (event.key === "ArrowRight") seekTo(time + SEEK_STEP);
+              const now = videoRef.current?.currentTime ?? time;
+              if (event.key === "ArrowLeft") seekTo(now - SEEK_STEP);
+              else if (event.key === "ArrowRight") seekTo(now + SEEK_STEP);
               else if (event.key === "Home") seekTo(0);
               else if (event.key === "End") seekTo(duration);
               else return;
@@ -269,12 +303,14 @@ export default function VideoPlayer({ src, poster, inline = false }: VideoPlayer
           >
             <div className="relative w-full h-1.5 rounded-full bg-stone-900/15 shadow-[inset_0_1px_1px_rgba(0,0,0,0.25),0_1px_0_rgba(255,255,255,0.7)]">
               <div
-                className="absolute inset-y-0 left-0 rounded-full bg-linear-to-b from-blue-400 to-blue-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]"
-                style={{ width: `${progress * 100}%` }}
+                ref={fillRef}
+                className="absolute inset-0 rounded-full bg-linear-to-b from-blue-400 to-blue-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]"
+                style={{ clipPath: `inset(0 ${(1 - progress) * 100}% 0 0 round 999px)` }}
               />
               <div
                 className={`absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-radial-[at_50%_75%] from-blue-400 to-blue-600 shadow-[0_0_0_1px_var(--color-blue-700),inset_0_1.5px_0.5px_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.3)] transition-transform duration-150 ease-out group-hover:scale-115 group-focus-visible:scale-115 ${isScrubbing ? "scale-125!" : ""}`}
-                style={{ left: `${progress * 100}%` }}
+                ref={beadRef}
+                style={{ left: 0 }}
               />
             </div>
           </div>

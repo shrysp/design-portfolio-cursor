@@ -3,7 +3,7 @@
 .disc .dc-name {
   fill: var(--anatomy-lo);
   letter-spacing: 0.08em;
-  transition: fill 200ms ease-out;
+  transition: fill var(--fig-light-up) ease-out;
 }
 
 .disc .dc-name[data-on] {
@@ -25,7 +25,7 @@
 }
 
 .disc .dc-lamp circle {
-  transition: fill 160ms ease-out, opacity 160ms ease-out;
+  transition: fill var(--fig-light-up) ease-out, opacity var(--fig-light-up) ease-out;
 }
 
 .disc .dc-lamp[data-on] circle {

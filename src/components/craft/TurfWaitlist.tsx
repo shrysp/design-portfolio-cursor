@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
-import { motion, useAnimationControls } from "framer-motion";
+import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
+import { EASE_OUT } from "@/lib/easing";
 
 // What counts as an email: something, an @, something, a dot, something
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -10,7 +11,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const THANKS_MS = 2200;
 
 // How the prompt travels: unhurried, and easing to a stop
-const travel = { duration: 0.45, ease: [0.22, 1, 0.36, 1] } as const;
+const travel = { duration: 0.45, ease: EASE_OUT } as const;
 const soft = { duration: 0.25, ease: "easeOut" } as const;
 
 // Where typing begins, from the field's inner edge, and the room the envelope
@@ -30,7 +31,10 @@ const ENVELOPE_ROOM = 24;
 //
 // Everything that moves is moved by transform, opacity or filter alone (Framer
 // Motion), which the browser can do without laying the tile out again: on a
-// wall with this much else in motion, anything heavier stutters.
+// wall with this much else in motion, anything heavier stutters. The moves are
+// whole transform strings, not Framer's `x`, so they run off the main thread.
+// Framer's reduced-motion setting only knows its own shorthands, so these
+// check it themselves: with reduced motion the words are just put in place.
 export default function TurfWaitlist() {
   const fieldRef = useRef<HTMLDivElement>(null);
   const wordsRef = useRef<HTMLSpanElement>(null);
@@ -69,6 +73,8 @@ export default function TurfWaitlist() {
 
   // The prompt sits in the middle only while the field is empty and untouched
   const isResting = !isFocused && value === "";
+  const reduce = useReducedMotion();
+  const slide = reduce ? { duration: 0 } : travel;
 
   const join = (event: FormEvent) => {
     event.preventDefault();
@@ -77,8 +83,12 @@ export default function TurfWaitlist() {
       setHasError(true);
       // The field keeps the focus, so the mistake is ready to be typed over
       inputRef.current?.focus();
-      // One soft sway, four pixels each way, and it comes to rest
-      shake.start({ x: [0, -4, 4, -2, 0], transition: { duration: 0.45, ease: "easeInOut" } });
+      // One soft sway, four pixels each way, and it comes to rest; with reduced
+      // motion the red outline says it alone
+      if (!reduce) shake.start({
+        transform: ["translateX(0px)", "translateX(-4px)", "translateX(4px)", "translateX(-2px)", "translateX(0px)"],
+        transition: { duration: 0.45, ease: "easeInOut" },
+      });
       return;
     }
     setHasError(false);
@@ -104,8 +114,8 @@ export default function TurfWaitlist() {
           <motion.span
             aria-hidden
             initial={false}
-            animate={{ x: isResting ? (restX ?? 0) : 0, opacity: hasJoined ? 0 : 1, filter: hasJoined ? "blur(4px)" : "blur(0px)" }}
-            transition={{ x: travel, opacity: soft, filter: soft }}
+            animate={{ transform: `translateX(${isResting ? (restX ?? 0) : 0}px)`, opacity: hasJoined ? 0 : 1, filter: hasJoined ? "blur(4px)" : "blur(0px)" }}
+            transition={{ transform: slide, opacity: soft, filter: soft }}
             className="pointer-events-none absolute inset-y-0 flex items-center whitespace-nowrap text-[15px] text-[#6e7476] will-change-transform"
             // Gone the moment there is something typed, and back the moment
             // there isn't, as a placeholder is: nothing eases in or out
@@ -134,12 +144,12 @@ export default function TurfWaitlist() {
             role="status"
             aria-hidden={!hasJoined}
             initial={false}
-            animate={{ x: hasJoined ? thanksX : 0, opacity: hasJoined ? 1 : 0, filter: hasJoined ? "blur(0px)" : "blur(4px)" }}
+            animate={{ transform: `translateX(${hasJoined ? thanksX : 0}px)`, opacity: hasJoined ? 1 : 0, filter: hasJoined ? "blur(0px)" : "blur(4px)" }}
             transition={
               hasJoined
-                ? { x: travel, opacity: { duration: 0 }, filter: { duration: 0 } }
+                ? { transform: slide, opacity: { duration: 0 }, filter: { duration: 0 } }
                 : // Fades where it stands, and only then goes back to its start
-                  { x: { duration: 0, delay: soft.duration }, opacity: soft, filter: soft }
+                  { transform: { duration: 0, delay: soft.duration }, opacity: soft, filter: soft }
             }
             className="pointer-events-none absolute inset-y-0 flex items-center whitespace-nowrap text-[15px] text-[#1f2328] will-change-transform"
             style={{ left: TEXT_START }}

@@ -140,7 +140,7 @@ export default function ImageToolbar() {
         ref={toolbarRef}
         role="toolbar"
         aria-label="Image tools"
-        className={`absolute bg-[#202020]/90 p-1.5 gap-1.5 flex items-center rounded-2xl shadow-[0px_16px_32px_-8px_rgba(0,0,0,0.24),0px_2px_0px_0px_rgba(0,0,0,0.07)] transition-opacity duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] backdrop-blur-[2px] ${isShown ? "opacity-100" : "opacity-0"} ${isGone ? "invisible pointer-events-none" : ""}`}
+        className={`absolute bg-[#202020]/90 p-1.5 gap-1.5 flex items-center rounded-2xl shadow-[0px_16px_32px_-8px_rgba(0,0,0,0.24),0px_2px_0px_0px_rgba(0,0,0,0.07)] transition-opacity duration-150 ease-(--curve-out) backdrop-blur-[2px] ${isShown ? "opacity-100" : "opacity-0"} ${isGone ? "invisible pointer-events-none" : ""}`}
         style={place ?? { left: "50%", top: "50%", transform: "translate(-50%, -50%)" }}
       >
         <div className="flex">

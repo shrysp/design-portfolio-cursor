@@ -5,12 +5,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { XLogo } from '@phosphor-icons/react';
 import { IconFile, IconArrowUp } from 'nucleo-micro-bold-essential';
 import { IconLinkedin  } from 'nucleo-social-media';
-import EmailCopyButton from './EmailCopyButton';
+import EmailCopyButton, { EMAIL } from './EmailCopyButton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
 import Glass, { canRefract } from './Glass';
 import { isRouteTransitioning, onRouteTransitionEnd } from '@/lib/routeTransition';
 import { DockTooltip, useDockTooltip } from './DockTooltip';
+import { EASE_OUT } from '@/lib/easing';
 
 // Project navigation order - defines the sequence of projects
 const projectOrder = [
@@ -24,6 +25,8 @@ const projectOrder = [
 
 // How often, at most, the dock looks for an overlay covering the page
 const CHECK_MS = 150;
+// How long the email button says it has copied before it offers to again
+const COPIED_MS = 2000;
 
 // The dock's glass, as tuned in the browser
 const glass = { blur: 2, saturate: 2, tint: 1, refraction: 26, bezel: 10 };
@@ -31,6 +34,7 @@ const glass = { blur: 2, saturate: 2, tint: 1, refraction: 26, bezel: 10 };
 const dockTips = {
   x: 'Follow on X',
   email: 'Copy email',
+  copied: 'Email copied',
   linkedin: 'Connect on LinkedIn',
   resume: 'Download resume',
   top: 'Back to top',
@@ -152,7 +156,22 @@ export default function StickyFooter() {
   }, []);
 
   const dockRef = useRef<HTMLDivElement>(null);
-  const { tip, tipFor } = useDockTooltip(dockRef);
+  const { tip, tipFor, relabel } = useDockTooltip(dockRef);
+
+  // The email button: copies, says so on its icon and its tooltip, then goes back
+  const [copied, setCopied] = useState(false);
+  const copiedTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(copiedTimer.current), []);
+  const copyEmail = () => {
+    navigator.clipboard?.writeText(EMAIL).catch(() => {});
+    setCopied(true);
+    relabel(dockTips.email, dockTips.copied);
+    clearTimeout(copiedTimer.current);
+    copiedTimer.current = setTimeout(() => {
+      setCopied(false);
+      relabel(dockTips.copied, dockTips.email);
+    }, COPIED_MS);
+  };
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -174,7 +193,7 @@ export default function StickyFooter() {
         }}
         transition={{ 
           duration: 0.3, 
-          ease: [0.4, 0, 0.2, 1] // Custom easing for smooth slide
+          ease: EASE_OUT
         }}
       >
         {/* Project navigation - only shows when at bottom on project pages.
@@ -228,9 +247,15 @@ export default function StickyFooter() {
                 <span aria-hidden className="absolute -inset-2" />
                 <XLogo size={16} weight="fill" />
               </a>
-              <button aria-label="Copy email" {...tipFor(dockTips.email)} className="aqua aqua-round size-8">
+              <button
+                type="button"
+                aria-label={copied ? dockTips.copied : dockTips.email}
+                onClick={copyEmail}
+                {...tipFor(copied ? dockTips.copied : dockTips.email)}
+                className="aqua aqua-round size-8"
+              >
                 <span aria-hidden className="absolute -inset-2" />
-                <EmailCopyButton />
+                <EmailCopyButton copied={copied} />
               </button>
               <a
                 href="https://www.linkedin.com/in/shreyastpatil/"

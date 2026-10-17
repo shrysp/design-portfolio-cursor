@@ -45,12 +45,12 @@
     0 24px 60px -16px rgb(0 0 0 / 0.75);
   color: var(--handout-ink);
   /* In: out of a slight blur and scale, an ease-out; the inside follows a beat after (below). */
-  animation: handout-in calc(320ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation: handout-in calc(320ms / var(--motion, 1)) var(--curve-out) both;
 }
 /* Out a little quicker than in (HANDOUT_OUT_MS in TourStage). */
 .tour-handout--leaving {
   pointer-events: none;
-  animation: handout-out calc(200ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation: handout-out calc(200ms / var(--motion, 1)) var(--curve-out) both;
 }
 /* On the way in: hung from where the code card is, under PIP. */
 .tour-handout--entrance {
@@ -73,9 +73,9 @@
   }
 }
 /* What is on the card arrives just after the card, in order. */
-.handout-face,
+.handout-face:not([data-swapped]),
 .handout-line > * {
-  animation: handout-part calc(280ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation: handout-part calc(280ms / var(--motion, 1)) var(--curve-out) both;
   animation-delay: calc((60ms + var(--n, 0) * 40ms) / var(--motion, 1));
 }
 .handout-line > :nth-child(1) { --n: 1; }
@@ -141,7 +141,7 @@
   text-shadow: 0 0 8px rgb(149 208 107 / 0.55);
 }
 .handout-poster span {
-  animation: handout-type calc(160ms / var(--motion, 1)) cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation: handout-type calc(160ms / var(--motion, 1)) var(--curve-out) both;
   animation-delay: calc((240ms + var(--i) * 30ms) / var(--motion, 1));
 }
 @keyframes handout-type {

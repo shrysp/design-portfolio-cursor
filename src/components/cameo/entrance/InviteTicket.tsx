@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { Doto } from "next/font/google";
 import "./ticket.css";
+import { EASE_OVERSHOOT, css } from "@/lib/easing";
 
 /** The code screen's dot-matrix, loaded here too: the ticket is drawn outside that screen (see the layer below). */
 const dots = Doto({
@@ -234,7 +235,7 @@ export default function InviteTicket({
     }
     const spring = {
       duration: 420,
-      easing: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+      easing: css(EASE_OVERSHOOT),
     };
     el?.animate(
       [{ transform: pulled(dx, dy, side.current) }, { transform: REST }],
@@ -330,7 +331,7 @@ export default function InviteTicket({
       ],
       {
         duration: 460,
-        easing: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        easing: css(EASE_OVERSHOOT),
       },
     );
   };

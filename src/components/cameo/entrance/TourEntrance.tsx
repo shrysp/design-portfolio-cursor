@@ -743,7 +743,24 @@ export function Takeover({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // `shake` remounts the field to replay its shake, so focus goes back to the new one.
+  // A wrong code shakes the field where it is. It used to be remounted to replay
+  // the shake, which also made every character blur in again.
+  const lcdField = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!shake || reduced()) return;
+    lcdField.current?.animate(
+      [
+        { translate: '0 0' },
+        { translate: '-8px 0', offset: 0.2 },
+        { translate: '7px 0', offset: 0.45 },
+        { translate: '-4px 0', offset: 0.7 },
+        { translate: '0 0' },
+      ],
+      { duration: slowed(380), easing: 'ease-out' },
+    );
+  }, [shake]);
+
+  // Focus goes back to the field after a wrong code, as well as when it first shows.
   useEffect(() => {
     if (step === 'code' && !writing) {
       input.current?.focus({ preventScroll: true });
@@ -907,8 +924,8 @@ export function Takeover({
            * phone's keyboard and a screen reader all work as they would.
            */}
           <div
-            key={shake}
-            className={`entrance-lcd ${shake ? 'entrance-lcd--shake' : ''}`}
+            ref={lcdField}
+            className="entrance-lcd"
             data-state={error ? 'error' : step === 'checking' ? 'checking' : step === 'entering' ? 'open' : undefined}
             data-crt-clear
           >

@@ -68,7 +68,8 @@
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
   pointer-events: none;
-  transition: left 500ms cubic-bezier(0.32, 0.72, 0, 1), top 500ms cubic-bezier(0.32, 0.72, 0, 1), opacity 200ms ease-out;
+  /* Its moves glide with a transform (moveTag.ts); only the fade is a transition */
+  transition: opacity var(--fig-light-up) ease-out;
 }
 
 .fig .fig-tag[data-off] {
