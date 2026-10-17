@@ -62,8 +62,12 @@ export default function Home() {
   const stickerDelay = (index: number) => index * STICKER_STAGGER;
   const stickOn = STICK_ON_DEFAULTS;
 
+  // Below md the stickers are hidden, so there is nothing there to wait for. Only
+  // the timings depend on this, not the markup, so the server's guess is harmless.
+  const [stickersShown] = useState(() => typeof window === "undefined" || window.matchMedia("(min-width: 768px)").matches);
+
   // The journal comes in as the last sticker starts going down
-  const journalDelay = stickerDelay(STICKER_SLOTS - 1) + 0.2;
+  const journalDelay = stickersShown ? stickerDelay(STICKER_SLOTS - 1) + 0.2 : 0;
   const journalVariants = {
     hidden: { opacity: 0, scale: 0.95 },
     visible: { opacity: 1, scale: 1, transition: { duration: 0.2, delay: journalDelay, ease: "easeOut" as const } },
@@ -72,8 +76,8 @@ export default function Home() {
     hidden: { opacity: 0, filter: "blur(4px)" },
     visible: { opacity: 1, filter: "blur(0px)", transition: { duration: 0.4, delay: journalDelay + 0.22, ease: "easeOut" as const } },
   };
-  const selectedWorkVariants = slideIn(journalDelay + 0.42);
-  const craftVariants = slideIn(journalDelay + 0.57);
+  const selectedWorkVariants = slideIn(journalDelay + 0.3);
+  const craftVariants = slideIn(journalDelay + 0.4);
 
   const isReturning = returnSlug !== null;
   const initial = isReturning ? false : "hidden";

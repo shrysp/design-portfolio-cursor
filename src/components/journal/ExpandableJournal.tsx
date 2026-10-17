@@ -76,6 +76,8 @@ export function ExpandableJournal({ collapsedWidth = 210, collapsedHeight = 280 
   const journal3DRef = useRef<Journal3DHandle | null>(null);
   const restHostRef = useRef<HTMLDivElement>(null);
   const isClosingRef = useRef(false);
+  // On its way home: the controls go at once, as the close starts
+  const [isClosing, setIsClosing] = useState(false);
 
   const isOpen = isExpanded || is3DActive;
 
@@ -181,12 +183,22 @@ export function ExpandableJournal({ collapsedWidth = 210, collapsedHeight = 280 
   const handleClose = useCallback(async () => {
     if (!isExpanded || isClosingRef.current) return;
     isClosingRef.current = true;
+    setIsClosing(true);
     // The book shuts, then flies home while the overlay fades behind it
-    await journal3DRef.current?.close(() => setIsExpanded(false));
+    const landed = await journal3DRef.current?.close(() => setIsExpanded(false));
+    isClosingRef.current = false;
+    setIsClosing(false);
+    // Pressed on its way home, it has come back out instead (handleReopen)
+    if (landed === false) return;
     setIs3DActive(false);
     setIsExpanded(false);
-    isClosingRef.current = false;
   }, [isExpanded]);
+
+  const handleReopen = useCallback(() => {
+    isClosingRef.current = false;
+    setIsClosing(false);
+    setIsExpanded(true);
+  }, []);
 
   const copyEmail = useCallback(async () => {
     try {
@@ -269,14 +281,17 @@ export function ExpandableJournal({ collapsedWidth = 210, collapsedHeight = 280 
               onClick={handleClose}
             />
 
-            {/* Controls - flip and close, for anyone not using the keyboard or the page itself */}
+            {/* Controls - flip and close, for anyone not using the keyboard or the page itself.
+                They wait for the book to arrive, but leave the moment it's closed. */}
+            <AnimatePresence>
+            {!isClosing && (
             <motion.div
               key="journal-controls"
               data-journal-controls=""
               className="fixed z-[10000] flex items-center gap-3 -translate-x-1/2 left-1/2 top-6 sm:top-10"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
+              exit={{ opacity: 0, y: 10, transition: { duration: 0.15, ease: [0.23, 1, 0.32, 1] } }}
               transition={{ delay: 0.3, duration: 0.3 }}
             >
               <Button
@@ -313,6 +328,8 @@ export function ExpandableJournal({ collapsedWidth = 210, collapsedHeight = 280 
                 Esc
               </Button>
             </motion.div>
+            )}
+            </AnimatePresence>
 
             {/* Confirms a copy made from a 3D page, which can't show its own "Copied!" */}
             {copied && (
@@ -342,6 +359,7 @@ export function ExpandableJournal({ collapsedWidth = 210, collapsedHeight = 280 
           onReady={() => setIs3DReady(true)}
           onError={handle3DError}
           onDismiss={handleClose}
+          onReopen={handleReopen}
           onHotspot={handleHotspot}
         />
       )}

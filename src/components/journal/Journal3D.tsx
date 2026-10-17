@@ -21,13 +21,14 @@ interface Journal3DProps {
   onReady: () => void;
   onError: (error: unknown) => void;
   onDismiss: () => void;
+  onReopen: () => void;
   onHotspot: (hotspot: JournalHotspot) => void;
 }
 
-export default function Journal3D({ apiRef, restHostRef, restWidth, active, onReady, onError, onDismiss, onHotspot }: Journal3DProps) {
+export default function Journal3D({ apiRef, restHostRef, restWidth, active, onReady, onError, onDismiss, onReopen, onHotspot }: Journal3DProps) {
   const stageRef = useRef<HTMLDivElement>(null);
-  const callbacks = useRef({ onReady, onError, onDismiss, onHotspot });
-  callbacks.current = { onReady, onError, onDismiss, onHotspot };
+  const callbacks = useRef({ onReady, onError, onDismiss, onReopen, onHotspot });
+  callbacks.current = { onReady, onError, onDismiss, onReopen, onHotspot };
 
   // The layout is fixed for as long as the journal is open, and re-checked when it's closed.
   const [layout, setLayout] = useState<"spread" | "single" | null>(null);
@@ -64,6 +65,7 @@ export default function Journal3D({ apiRef, restHostRef, restWidth, active, onRe
         onReady: () => callbacks.current.onReady(),
         onError: (error) => callbacks.current.onError(error),
         onDismiss: () => callbacks.current.onDismiss(),
+        onReopen: () => callbacks.current.onReopen(),
         onHotspot: (hotspot) => callbacks.current.onHotspot(hotspot),
       });
     } catch (error) {

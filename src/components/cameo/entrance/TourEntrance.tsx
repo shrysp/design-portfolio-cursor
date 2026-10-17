@@ -144,6 +144,12 @@ const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 
 /** Slow to start, then pulled open: the opening gathers before it gives. */
 export const easeIn = (t: number) => t * t * t * t;
 export const easeOut = (t: number) => 1 - (1 - t) * (1 - t);
+/**
+ * A tube switching off: the picture drops to a line at once, and the line
+ * shrinks to a dot more slowly, the way the deflection dies. Also what makes
+ * Escape answer the moment it's pressed.
+ */
+export const switchOff = (t: number) => 1 - (1 - t) ** 3;
 export const smoothstep = (a: number, b: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
   return t * t * (3 - 2 * t);
@@ -756,14 +762,14 @@ export function Takeover({
       await tween(REDUCED, easeOut, (k) => rootEl.current && (rootEl.current.style.opacity = String(1 - k)), isAlive);
     } else if (screen) {
       // The tube switches off to a dot, and the page comes back out of it.
-      await tween(450, easeIn, (k) => {
+      await tween(300, switchOff, (k) => {
         f.uniforms.on = 1 - k;
         f.uniforms.wake = Math.min(f.uniforms.wake, 1 - k);
       }, isAlive);
       f.uniforms.on = 0;
       setOff(1);
       await wait(120);
-      await tween(600, easeOut, (k) => setOff(1 - k), isAlive);
+      await tween(450, easeOut, (k) => setOff(1 - k), isAlive);
     } else {
       // Out the way Shopify's portal closes: quick at first, settling (easeOutQuad).
       await tween(650, easeOut, (k) => {

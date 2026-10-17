@@ -27,6 +27,10 @@ interface LightboxProps {
 }
 
 const SWIPE_DISTANCE = 60;
+// A quick flick counts as a swipe however short, if it averages faster than
+// this (px per ms) from start to release and moved more than a nudge
+const SWIPE_SPEED = 0.11;
+const FLICK_DISTANCE = 12;
 
 // How long Esc shows on its button before the view starts to close
 const CLOSE_KEY_DELAY = 120;
@@ -59,6 +63,8 @@ export default function Lightbox({ items, index, onIndexChange }: LightboxProps)
   const direction = useRef(0);
   // A swipe ends with a click on the backdrop; this keeps it from closing the view
   const justSwiped = useRef(false);
+  // When the current drag began, to tell a flick from a slow push
+  const dragStart = useRef(0);
   // Arrow keys and Esc show on their buttons
   const [pressedKey, flashKey] = useKeyFlash<"previous" | "next" | "close">();
   const isClosing = useRef(false);
@@ -168,8 +174,14 @@ export default function Lightbox({ items, index, onIndexChange }: LightboxProps)
                   drag={items.length > 1 ? "x" : false}
                   dragConstraints={{ left: 0, right: 0 }}
                   dragElastic={0.3}
+                  onDragStart={() => {
+                    dragStart.current = performance.now();
+                  }}
                   onDragEnd={(_, info) => {
-                    if (Math.abs(info.offset.x) < SWIPE_DISTANCE) return;
+                    const distance = Math.abs(info.offset.x);
+                    const speed = distance / Math.max(1, performance.now() - dragStart.current);
+                    const flicked = distance > FLICK_DISTANCE && speed > SWIPE_SPEED;
+                    if (distance < SWIPE_DISTANCE && !flicked) return;
                     justSwiped.current = true;
                     step(info.offset.x < 0 ? 1 : -1);
                   }}

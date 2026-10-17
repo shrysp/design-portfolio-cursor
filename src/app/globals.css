@@ -1,12 +1,16 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
-/* Accessibility: disable all animations for users who prefer reduced motion */
+/* Accessibility: for visitors who prefer reduced motion, nothing moves, but fades
+   and colour changes stay, since they say what changed without moving anything.
+   Transitions keep their own timing and only these properties are let through,
+   so a change of position, size, scale or blur lands at once. Keyframe
+   animations can't be split that way, so they still end at once. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-property: opacity, color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, box-shadow !important;
     scroll-behavior: auto !important;
   }
 }

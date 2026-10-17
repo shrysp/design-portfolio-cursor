@@ -81,9 +81,12 @@ export default function StickyFooter() {
     const checkOverlay = () => {
       // Check for overlay element - look for fixed positioned elements with high z-index
       // The ExpandableJournal overlay has: fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998]
-      const allElements = document.querySelectorAll('*');
+      // A layer covering the screen is under its centre, so only what's stacked
+      // there is looked at, not every element on the page. Layers that are hidden
+      // or let clicks through aren't hit there at all.
+      const allElements = document.elementsFromPoint(window.innerWidth / 2, window.innerHeight / 2);
       let hasOverlay = false;
-      
+
       for (const el of allElements) {
         const computedStyle = window.getComputedStyle(el);
         const zIndex = parseInt(computedStyle.zIndex);
@@ -108,10 +111,10 @@ export default function StickyFooter() {
     // Initial check
     checkOverlay();
 
-    // At most one look every CHECK_MS, however much is changing: the look
-    // reads the computed style of every element on the page, and run on each
-    // change it ran every frame while anything animated — the tour's dive
-    // moves sixty photos a frame, and the page could not keep up.
+    // At most one look every CHECK_MS, however much is changing: run on each
+    // change it would run every frame while anything animated (the tour's dive
+    // moves sixty photos a frame), and each look still makes the browser bring
+    // layout up to date.
     let queued = 0;
     const checkSoon = () => {
       if (!queued) queued = window.setTimeout(() => {

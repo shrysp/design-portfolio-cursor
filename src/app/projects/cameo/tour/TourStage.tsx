@@ -1253,7 +1253,6 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   const [state, setState] = useState('idle');
   const [log, setLog] = useState<string[]>([]);
   const [fault, setFault] = useState<string | null>(null);
-  const [micLevel, setMicLevel] = useState(0);
   const [mics, setMics] = useState<MediaDeviceInfo[]>([]);
   const [micId, setMicId] = useState('');
   const [mood, setMood] = useState('neutral');
@@ -1759,6 +1758,9 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   const detachHearing = useRef<(() => void) | null>(null);
   const detachVoice = useRef<(() => void) | null>(null);
   const micRaf = useRef(0);
+  /** The lab's mic meter. Its level is written straight onto it each frame, not
+   *  kept in state, so a visitor talking doesn't re-render the stage every frame. */
+  const micMeter = useRef<HTMLSpanElement>(null);
   /**
    * Whether PIP can be heard right now, from its own audio rather than the
    * session's events: the model finishes a reply (response.done) seconds
@@ -2408,7 +2410,9 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         const { createVoiceEnvelope } = await import('@shrysp/cameo/sound');
         const env = createVoiceEnvelope(stream);
         const tick = () => {
-          setMicLevel(Math.round(env.level() * 20) / 20);
+          // Only while the lab is open is there a meter to show it on
+          const meter = micMeter.current;
+          if (meter) meter.style.transform = `scaleX(${env.level()})`;
           micRaf.current = requestAnimationFrame(tick);
         };
         micRaf.current = requestAnimationFrame(tick);
@@ -2505,7 +2509,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     }
     connecting.current = false;
     cancelAnimationFrame(micRaf.current);
-    setMicLevel(0);
+    if (micMeter.current) micMeter.current.style.transform = 'scaleX(0)';
     cancelAnimationFrame(voiceRaf.current);
     voiceEnvelope.current?.stop();
     voiceEnvelope.current = null;
@@ -3261,10 +3265,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
               <span className="flex items-center gap-2 text-[11px] text-[var(--muted-ink)]">
                 mic
                 <span className="block h-[5px] w-[60px] overflow-hidden rounded-full bg-[var(--control)]">
-                  <span
-                    className="block h-full bg-sky-500/70 transition-[width]"
-                    style={{ width: `${micLevel * 100}%` }}
-                  />
+                  <span ref={micMeter} className="block h-full origin-left bg-sky-500/70" style={{ transform: 'scaleX(0)' }} />
                 </span>
               </span>
             </>
