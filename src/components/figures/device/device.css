@@ -35,10 +35,10 @@
   fill: var(--face-glass);
   stroke: var(--face-ink);
   stroke-width: 1px;
-  transition: fill 260ms ease-out, stroke 260ms ease-out;
+  transition: fill var(--fig-light-up) ease-out, stroke var(--fig-light-up) ease-out;
 }
 
 .fig .dv-eye {
   fill: var(--face-ink);
-  transition: fill 260ms ease-out;
+  transition: fill var(--fig-light-up) ease-out;
 }

@@ -15,7 +15,7 @@
 .answer .aw-name {
   fill: var(--anatomy-lo);
   letter-spacing: 0.08em;
-  transition: fill 240ms ease-out;
+  transition: fill var(--fig-light-up) ease-out;
 }
 
 .answer .aw-name[data-on] {
@@ -26,7 +26,7 @@
 .answer .aw-app {
   fill: var(--anatomy-mid);
   letter-spacing: 0.04em;
-  transition: fill 240ms ease-out;
+  transition: fill var(--fig-light-up) ease-out;
 }
 
 .answer .aw-app[data-on] {
@@ -48,7 +48,7 @@
 .answer .aw-flow {
   stroke-width: 1.6px;
   opacity: 0;
-  transition: opacity 200ms ease-out;
+  transition: opacity var(--fig-light-up) ease-out;
 }
 
 .answer .aw-flow[data-flow] {
@@ -57,7 +57,7 @@
 
 /* The reader's lamp, and the answer's reference marks */
 .answer .aw-lamp circle {
-  transition: fill 240ms ease-out, opacity 240ms ease-out;
+  transition: fill var(--fig-light-up) ease-out, opacity var(--fig-light-up) ease-out;
 }
 
 .answer .aw-lamp[data-on] circle,

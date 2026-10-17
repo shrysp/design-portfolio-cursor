@@ -26,6 +26,7 @@ import { AnimatePresence, motion as fm, useReducedMotion } from 'framer-motion';
 import { Doto } from 'next/font/google';
 import { projectsData } from '@/data/projectsData';
 import './handout.css';
+import { EASE_OUT } from '@/lib/easing';
 
 /** The dot-matrix LCD of the way in (TourEntrance), for a card's tag and its screen with no picture. */
 const dots = Doto({ subsets: ['latin'], axes: ['ROND'], variable: '--font-dot', display: 'swap' });
@@ -74,7 +75,7 @@ Thanks,
 const BLANK = /\[[^\]]*\]/;
 
 /** How the card's parts move: one quick ease-out, a little quicker out than in. */
-const EASE = [0.23, 1, 0.32, 1] as const;
+const EASE = EASE_OUT;
 
 const Arrow = () => (
   <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -381,6 +382,11 @@ export function TourHandout({
 
   // A change of what the window shows — writing, sent — swaps through a blur, not a cut.
   const face = handout.kind === 'contact' ? (writing ? status === 'sent' ? 'sent' : 'writing' : 'card') : 'card';
+  // The card's own arrival (handout.css) is for the face it arrives with; a face
+  // swapped in later comes in on the swap below alone, not on both at once.
+  const [firstFace] = useState(face);
+  const [swapped, setSwapped] = useState(false);
+  if (face !== firstFace && !swapped) setSwapped(true);
   const swap = reduce
     ? {}
     : {
@@ -403,7 +409,7 @@ export function TourHandout({
       }}
     >
       <AnimatePresence mode="wait" initial={false}>
-        <fm.div key={face} className="handout-face" {...swap}>
+        <fm.div key={face} className="handout-face" data-swapped={swapped || undefined} {...swap}>
           {sheet.window}
         </fm.div>
       </AnimatePresence>

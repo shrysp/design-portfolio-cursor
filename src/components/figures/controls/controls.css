@@ -4,7 +4,7 @@
 .controls .ct-name {
   fill: var(--anatomy-lo);
   letter-spacing: 0.08em;
-  transition: fill 200ms ease-out;
+  transition: fill var(--fig-light-up) ease-out;
 }
 
 .controls .ct-name[data-on] {
@@ -19,7 +19,7 @@
 .controls .ct-flow {
   stroke-width: 1.6px;
   opacity: 0;
-  transition: opacity 160ms ease-out;
+  transition: opacity var(--fig-light-up) ease-out;
 }
 
 .controls .ct-flow[data-flow] {
@@ -27,7 +27,7 @@
 }
 
 .controls .ct-lamp circle {
-  transition: fill 160ms ease-out, opacity 160ms ease-out;
+  transition: fill var(--fig-light-up) ease-out, opacity var(--fig-light-up) ease-out;
 }
 
 .controls .ct-lamp[data-on] circle {

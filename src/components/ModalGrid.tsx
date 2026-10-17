@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, type Transition, type Variants } from 'framer-motion';
 import { Code, Play, PencilLine, X, Info, Lightning, CaretDown, Copy } from '@phosphor-icons/react';
 import Image from 'next/image';
+import { EASE_OUT } from '@/lib/easing';
 
 // Tab data structure
 interface TabData {
@@ -13,7 +14,7 @@ interface TabData {
 }
 
 // Starts fast and settles, so the new tab is moving the moment it's clicked
-const animationEase = [0.23, 1, 0.32, 1] as const;
+const animationEase = EASE_OUT;
 
 const tabs: TabData[] = [
   {

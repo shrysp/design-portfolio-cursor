@@ -43,6 +43,7 @@ import {
   TourHandout,
 } from './TourHandout';
 import MicCheck, { useMicAccess } from './MicCheck';
+import { EASE_IN_OUT, EASE_OUT, EASE_OUT_GENTLE, EASE_OVERSHOOT, css } from '@/lib/easing';
 
 /** Seven segments, for the time left: the same kind of LCD as PIP's face (see Countdown). */
 const lcd = localFont({
@@ -546,8 +547,8 @@ function getCloud(): Placed[] {
 }
 
 /** A slight overshoot past full size — reads as a pop, not a fade. */
-const POP_EASE = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
-const TRAVEL_EASE = 'cubic-bezier(0.77, 0, 0.175, 1)';
+const POP_EASE = css(EASE_OVERSHOOT);
+const TRAVEL_EASE = css(EASE_IN_OUT);
 
 /**
  * A photo is one element for its whole life on stage, so changing place
@@ -908,16 +909,16 @@ const TURN_LABEL: Record<VoiceTurn, string> = {
  * what opens and closes, a touch quicker on the way out, and ease-in-out for
  * the one thing that travels across the bar, the mode's lit thumb.
  */
-const BAR_EASE = [0.23, 1, 0.32, 1] as const;
+const BAR_EASE = EASE_OUT;
 const BAR_IN = 0.3;
 const BAR_OUT = 0.24;
-const THUMB = { duration: 0.24, ease: [0.645, 0.045, 0.355, 1] as const };
+const THUMB = { duration: 0.24, ease: EASE_IN_OUT };
 
 /** The start screen's talk/type swap: out of focus and back, quickly, so it reads as one change. */
 const START_SWAP = {
   initial: { opacity: 0, filter: 'blur(8px)', y: 4 },
-  animate: { opacity: 1, filter: 'blur(0px)', y: 0, transition: { duration: 0.26, ease: [0.2, 0.8, 0.2, 1] } },
-  exit: { opacity: 0, filter: 'blur(8px)', y: -4, transition: { duration: 0.14, ease: [0.4, 0, 1, 1] } },
+  animate: { opacity: 1, filter: 'blur(0px)', y: 0, transition: { duration: 0.26, ease: EASE_OUT_GENTLE } },
+  exit: { opacity: 0, filter: 'blur(8px)', y: -4, transition: { duration: 0.14, ease: EASE_OUT } },
 } as const;
 const SOUND_ON_ICON = 'M3 6h2l3-2.5v9L5 10H3zM10.5 6a3 3 0 0 1 0 4M12.5 4.5a5.5 5.5 0 0 1 0 7';
 const SOUND_OFF_ICON = 'M3 6h2l3-2.5v9L5 10H3zM11 6.5l3 3M14 6.5l-3 3';

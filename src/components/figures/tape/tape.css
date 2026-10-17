@@ -4,7 +4,7 @@
 .tape .tp-name {
   fill: var(--anatomy-lo);
   letter-spacing: 0.08em;
-  transition: fill 200ms ease-out;
+  transition: fill var(--fig-light-up) ease-out;
 }
 
 .tape .tp-name[data-on] {
@@ -18,7 +18,7 @@
 
 .tape .tp-sentence {
   stroke-width: 1.6px;
-  transition: stroke 200ms ease-out;
+  transition: stroke var(--fig-light-up) ease-out;
 }
 
 .tape .tp-ribbon {
@@ -34,7 +34,7 @@
 .tape .tp-flow {
   stroke-width: 1.6px;
   opacity: 0;
-  transition: opacity 160ms ease-out;
+  transition: opacity var(--fig-light-up) ease-out;
 }
 
 .tape .tp-flow[data-flow] {
@@ -43,7 +43,7 @@
 
 /* Lamps: a head's while it is working, and the reader's one for the mood it read */
 .tape .tp-lamp circle {
-  transition: fill 160ms ease-out, opacity 160ms ease-out;
+  transition: fill var(--fig-light-up) ease-out, opacity var(--fig-light-up) ease-out;
 }
 
 .tape .tp-lamp[data-on] circle {
@@ -84,12 +84,12 @@
   fill: var(--face-glass);
   stroke: var(--face-ink);
   stroke-width: 1px;
-  transition: fill 260ms ease-out, stroke 260ms ease-out;
+  transition: fill var(--fig-light-up) ease-out, stroke var(--fig-light-up) ease-out;
 }
 
 .tape .tp-eye {
   fill: var(--face-ink);
-  transition: fill 260ms ease-out;
+  transition: fill var(--fig-light-up) ease-out;
 }
 
 .tape .tp-counter {

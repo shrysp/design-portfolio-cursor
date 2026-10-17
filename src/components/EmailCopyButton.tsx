@@ -1,55 +1,31 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IconEnvelopeFilled, IconEnvelopeOpenHeart } from 'nucleo-micro-bold-essential';
+import { EASE_OUT } from '@/lib/easing';
 
-export default function EmailCopyButton() {
-  const [copied, setCopied] = useState(false);
-  
-  useEffect(() => {
-    if (copied) {
-      const timer = setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [copied]);
+export const EMAIL = 'shreyaspatil.design@gmail.com';
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText('shreyaspatil.design@gmail.com');
-    setCopied(true);
-  };
-
+// The dock's email icon. The button around it does the copying, so the whole
+// button and its tap area copy, by pointer or keyboard; this only shows it.
+export default function EmailCopyButton({ copied }: { copied: boolean }) {
   return (
-    <div 
-      onClick={handleCopy}
-      className="w-full h-full flex items-center justify-center"
-    >
-      <AnimatePresence mode="wait" initial={false}>
-        {copied ? (
-          <motion.span
-            key="copied"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            transition={{ duration: 0.1 }}
-          >
-            <IconEnvelopeOpenHeart size={18}/>
-          </motion.span>
-        ) : (
-          <motion.span
-            key="at"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            transition={{ duration: 0.2 }}
-          >
-            
-            <IconEnvelopeFilled size={18} />
-          </motion.span>
-        )}
+    // The two icons cross in place: the new one grows the last tenth into view
+    // while the old one shrinks out, both over a small blur so the moment they
+    // overlap doesn't read as two icons
+    <span className="relative grid size-[18px] place-items-center">
+      <AnimatePresence initial={false}>
+        <motion.span
+          key={copied ? "copied" : "at"}
+          className="absolute inset-0 grid place-items-center"
+          initial={{ opacity: 0, scale: 0.9, filter: "blur(2px)" }}
+          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          exit={{ opacity: 0, scale: 0.9, filter: "blur(2px)" }}
+          transition={{ duration: 0.15, ease: EASE_OUT }}
+        >
+          {copied ? <IconEnvelopeOpenHeart size={18} /> : <IconEnvelopeFilled size={18} />}
+        </motion.span>
       </AnimatePresence>
-    </div>
+    </span>
   );
-} 
+}

@@ -11,6 +11,7 @@ import { JOURNAL_EMAIL } from "./journalPages";
 import manifest from "./journalManifest.json";
 import type { Journal3DHandle } from "./Journal3D";
 import type { JournalHotspot } from "./journalScene";
+import { EASE_OUT } from "@/lib/easing";
 
 /**
  * three.js stays out of the page bundle: the book's module is fetched once the
@@ -291,7 +292,7 @@ export function ExpandableJournal({ collapsedWidth = 210, collapsedHeight = 280 
               className="fixed z-[10000] flex items-center gap-3 -translate-x-1/2 left-1/2 top-6 sm:top-10"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10, transition: { duration: 0.15, ease: [0.23, 1, 0.32, 1] } }}
+              exit={{ opacity: 0, y: 10, transition: { duration: 0.15, ease: EASE_OUT } }}
               transition={{ delay: 0.3, duration: 0.3 }}
             >
               <Button
@@ -331,7 +332,9 @@ export function ExpandableJournal({ collapsedWidth = 210, collapsedHeight = 280 
             )}
             </AnimatePresence>
 
-            {/* Confirms a copy made from a 3D page, which can't show its own "Copied!" */}
+            {/* Confirms a copy made from a 3D page, which can't show its own "Copied!".
+                In its own presence, so it fades out when it's done rather than vanishing */}
+            <AnimatePresence>
             {copied && (
               <motion.div
                 key="copied"
@@ -345,6 +348,7 @@ export function ExpandableJournal({ collapsedWidth = 210, collapsedHeight = 280 
                 Email copied
               </motion.div>
             )}
+            </AnimatePresence>
           </>
         )}
       </AnimatePresence>

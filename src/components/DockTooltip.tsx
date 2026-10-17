@@ -21,6 +21,8 @@ export function useDockTooltip(dockRef: RefObject<HTMLElement | null>) {
   const [tip, setTip] = useState<Tip | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const isOpen = useRef(false);
+  // What a tooltip still waiting to appear will say
+  const pending = useRef("");
 
   const open = (label: string, item: HTMLElement) => {
     clearTimeout(timer.current);
@@ -29,9 +31,11 @@ export function useDockTooltip(dockRef: RefObject<HTMLElement | null>) {
     const dockBox = dock.getBoundingClientRect();
     const itemBox = item.getBoundingClientRect();
     const x = itemBox.left - dockBox.left + itemBox.width / 2;
+    pending.current = label;
     const show = () => {
       isOpen.current = true;
-      setTip((previous) => ({ label, x, direction: previous ? Math.sign(x - previous.x) : 0 }));
+      const words = pending.current;
+      setTip((previous) => ({ label: words, x, direction: previous ? Math.sign(x - previous.x) : 0 }));
     };
     if (isOpen.current) show();
     else timer.current = setTimeout(show, SHOW_DELAY);
@@ -58,7 +62,14 @@ export function useDockTooltip(dockRef: RefObject<HTMLElement | null>) {
     onBlur: close,
   });
 
-  return { tip, tipFor };
+  // Changes what the open tooltip says, if it is showing `from`: the new words
+  // swap in where the old ones were, as a label does between items
+  const relabel = (from: string, to: string) => {
+    if (pending.current === from) pending.current = to;
+    setTip((previous) => (previous && previous.label === from ? { ...previous, label: to, direction: 0 } : previous));
+  };
+
+  return { tip, tipFor, relabel };
 }
 
 const slide = { type: "spring", stiffness: 520, damping: 40, mass: 0.8 } as const;

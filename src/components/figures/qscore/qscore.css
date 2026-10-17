@@ -56,7 +56,7 @@
 .qscore .qs-needle,
 .qscore .qs-score,
 .qscore .qs-goal {
-  transition: fill 220ms ease-out, stroke 220ms ease-out, opacity 220ms ease-out;
+  transition: fill var(--fig-light-up) ease-out, stroke var(--fig-light-up) ease-out, opacity var(--fig-light-up) ease-out;
 }
 
 .qscore .qs-stage[data-active="0"] .qs-signal[data-goal="0"] .qs-signal-text,

@@ -74,12 +74,16 @@ interface Curve {
   angleDeg: number;
 }
 
+// A sheet on its way to `to`, pulled by a critically damped spring of the given
+// stiffness: it sets off at once, settles without overshoot, and when it's sent
+// somewhere else mid-turn it keeps the speed it had instead of starting over.
 interface Flight {
   from: number | null;
   to: number;
   start: number;
-  duration: number;
-  ease: (t: number) => number;
+  stiffness: number;
+  // Reduced motion: no swing, the page is just turned.
+  instant: boolean;
 }
 
 interface Zone {
@@ -104,7 +108,8 @@ const COVER_FLEX = 0.3;
 
 const CURL = { arc: 0.6, maxAngleDeg: 40, cornerRollMax: 2.3, smoothTime: 0.4, directionSmoothTime: 0.4 };
 // flickSpeed: px per ms, averaged over the drag, past which a short drag still turns the page.
-const FLIP = { time: 0.85, dragPages: 1.5, dragSmoothTime: 0.25, commitProgress: 0.2, flickSpeed: 0.11, clickSlopPx: 5 };
+// stiffness: the spring a page turns on; about 0.6 s to land from a standing start.
+const FLIP = { stiffness: 64, dragPages: 1.5, dragSmoothTime: 0.25, commitProgress: 0.2, flickSpeed: 0.11, clickSlopPx: 5 };
 const PEEK = { progress: 0.045, smoothTime: 0.9 };
 // The hovered page also lifts toward the cursor: evenly at mid-height, and more
 // at whichever end (top or bottom) the cursor is nearer.
@@ -114,7 +119,7 @@ const HOLD = { delayMs: 350, firstGapMs: 300, fastestGapMs: 130, speedUpSheets: 
 // Light catching the gutter side of the right-hand page.
 const CREASE = { glow: 0.22, glowWidth: 0.09, shade: 0.04, shadeCentre: 0.2, shadeWidth: 0.12 };
 // Closing is the visitor leaving, so it is quicker than turning a page.
-const CLOSE = { time: 0.35, staggerMs: 40, maxStaggerTotalMs: 250 };
+const CLOSE = { stiffness: 200, staggerMs: 40, maxStaggerTotalMs: 250 };
 // In the single layout a turned page swings over to the left, then rolls round
 // the spine and under the book. The fold is deliberately loose: each page rolls
 // a little wider than the last and lands slightly askew, so the folded pages fan
@@ -328,6 +333,8 @@ interface Sheet {
   uniforms: SheetUniforms;
   // 0 = lying on the right-hand stack, 1 = turned over onto the left.
   progress: number;
+  // Progress per second: carried from a drag or a turn into whatever comes next.
+  velocity: number;
   flight: Flight | null;
   direction: number;
   directionSmooth: number;
@@ -508,6 +515,7 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
       depthMaterial,
       uniforms,
       progress: 0,
+      velocity: 0,
       flight: null,
       direction: 1,
       directionSmooth: 1,
@@ -908,14 +916,14 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
   // ── Turning ──
 
   // With reduced motion a page doesn't swing over: it is simply turned, on the next frame.
-  function startFlight(index: number, to: number, seconds: number, delayMs = 0, ease = easeInOut) {
+  function startFlight(index: number, to: number, stiffness: number, delayMs = 0) {
     const sheet = sheets[index];
     sheet.flight = {
       from: null,
       to,
       start: performance.now() + (reducedMotion ? 0 : delayMs),
-      duration: reducedMotion ? 1 : seconds * 1000,
-      ease,
+      stiffness,
+      instant: reducedMotion,
     };
   }
 
@@ -925,7 +933,7 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
     setCurve(sheet, curveAt(point), resting);
     sheet.direction = forward ? 1 : -1;
     current = forward ? index + 1 : index;
-    startFlight(index, forward ? 1 : 0, FLIP.time);
+    startFlight(index, forward ? 1 : 0, FLIP.stiffness);
     updateTextureWindow();
     invalidate();
   }
@@ -936,11 +944,11 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
   }
 
   // Leafs every turned page back, top of the pile first, ending on the cover.
-  function rewind(seconds = CLOSE.time) {
+  function rewind(stiffness = CLOSE.stiffness) {
     const turned = current;
     const stagger = Math.min(CLOSE.staggerMs, CLOSE.maxStaggerTotalMs / Math.max(turned, 1));
     for (let index = turned - 1; index >= 0; index--) {
-      startFlight(index, 0, seconds, (turned - 1 - index) * stagger);
+      startFlight(index, 0, stiffness, (turned - 1 - index) * stagger);
     }
     current = 0;
     // The pages on their way back are still on screen, so nothing is unloaded here.
@@ -1067,7 +1075,8 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
     const endsTurned = held.forward === committed;
     sheets[held.index].direction = endsTurned ? 1 : -1;
     current = endsTurned ? held.index + 1 : held.index;
-    startFlight(held.index, endsTurned ? 1 : 0, FLIP.time * 0.8, 0, easeOut);
+    // On from the speed the hand gave it
+    startFlight(held.index, endsTurned ? 1 : 0, FLIP.stiffness);
     updateTextureWindow();
   }
 
@@ -1167,17 +1176,38 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
       active = true;
       if (now < flight.start) continue;
       flight.from ??= sheet.progress;
-      const span = Math.max(0.25, Math.abs(flight.to - flight.from));
-      const t = clamp((now - flight.start) / (flight.duration * span), 0, 1);
       sheet.direction = flight.to >= flight.from ? 1 : -1;
-      sheet.progress = lerp(flight.from, flight.to, flight.ease(t));
-      if (t >= 1) sheet.flight = null;
+      if (flight.instant) {
+        sheet.progress = flight.to;
+        sheet.velocity = 0;
+        sheet.flight = null;
+        continue;
+      }
+      const damping = 2 * Math.sqrt(flight.stiffness);
+      for (let step = dt; step > 0; step -= 1 / 120) {
+        const h = Math.min(step, 1 / 120);
+        sheet.velocity += (flight.stiffness * (flight.to - sheet.progress) - damping * sheet.velocity) * h;
+        sheet.progress += sheet.velocity * h;
+      }
+      // A page carried in fast lands on the stack rather than through it.
+      if (sheet.progress < 0 || sheet.progress > 1) {
+        sheet.progress = clamp(sheet.progress, 0, 1);
+        sheet.velocity = 0;
+      }
+      if (Math.abs(flight.to - sheet.progress) < SETTLE && Math.abs(sheet.velocity) < 0.01) {
+        sheet.progress = flight.to;
+        sheet.velocity = 0;
+        sheet.flight = null;
+      }
     }
 
     // The sheet under the pointer.
     if (drag) {
       const sheet = sheets[drag.index];
+      const before = sheet.progress;
       sheet.progress += (drag.target - sheet.progress) * (1 - Math.pow(0.01, dt / FLIP.dragSmoothTime));
+      // Kept for the spring that takes over when the hand lets go
+      if (dt > 0) sheet.velocity = (sheet.progress - before) / dt;
       active = true;
     }
 

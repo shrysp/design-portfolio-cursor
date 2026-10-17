@@ -16,6 +16,16 @@
 }
 
 :root {
+  /* Motion curves, one per job. Named --curve-* so they don't replace Tailwind's
+     own --ease-* (its ease-out and ease-in-out classes read those). The same
+     curves are in src/lib/easing.ts for Framer and the Web Animations API. */
+  --curve-out: cubic-bezier(0.23, 1, 0.32, 1); /* things arriving, leaving, answering */
+  --curve-out-gentle: cubic-bezier(0.2, 0.8, 0.2, 1); /* long, explanatory moves: page changes, PIP waking */
+  --curve-in-out: cubic-bezier(0.77, 0, 0.175, 1); /* something moving across the screen */
+  --curve-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1); /* a playful pop past the mark */
+  /* How long a part of a figure takes to light up or go out */
+  --fig-light-up: 200ms;
+
   --background: var(--color-stone-50);
   --foreground: #171717;
   --padding-pageMargin: 1rem; /* 16px default, adjust as needed */
@@ -255,7 +265,8 @@ body {
   background: radial-gradient(at 50% 75%, var(--aqua-1, var(--color-stone-100)), var(--aqua-2, var(--color-stone-200)), var(--aqua-3, var(--color-stone-300)));
   box-shadow: 0 2px 2px -1px rgb(0 0 0 / 0.25), inset 0 4px 8px 1px rgb(10 10 10 / 0.15), inset 0 -2px 2px 0 rgb(10 10 10 / 0.15);
   cursor: pointer;
-  transition: color 200ms ease-out, border-color 200ms ease-out, scale 150ms ease-out;
+  /* Let go, it eases back up; pressed, it goes down faster (below) */
+  transition: color 200ms ease-out, border-color 200ms ease-out, scale 200ms ease-out;
 
   /* The lit colour. A gradient can't be transitioned, so it fades in on its
      own layer, in step with the ink and the edge. */
@@ -294,6 +305,7 @@ body {
 
   &:active:not(:disabled) {
     scale: 0.96;
+    transition-duration: 200ms, 200ms, 100ms;
     &::after {
       opacity: 0.75;
     }
@@ -447,7 +459,7 @@ body {
    layer and stays put while the page changes beneath it. */
 ::view-transition-group(*) {
   animation-duration: 450ms;
-  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation-timing-function: var(--curve-out-gentle);
 }
 
 /* The rest of the page doesn't just appear around the travelling pieces: the
@@ -459,7 +471,7 @@ body {
 }
 
 :root[data-vt="route"]::view-transition-new(root) {
-  animation: page-blur-in 400ms cubic-bezier(0.2, 0.8, 0.2, 1) 100ms both;
+  animation: page-blur-in 400ms var(--curve-out-gentle) 100ms both;
   mix-blend-mode: normal;
 }
 
@@ -470,7 +482,7 @@ body {
 }
 
 :root[data-vt="route"]::view-transition-new(*):only-child {
-  animation: page-blur-in 400ms cubic-bezier(0.2, 0.8, 0.2, 1) 100ms both;
+  animation: page-blur-in 400ms var(--curve-out-gentle) 100ms both;
 }
 
 /* The dock is the same on both pages, so it shows one steady picture rather
@@ -556,7 +568,7 @@ body:has([data-not-found]) [data-site-dock] {
   border-radius: 9999px;
   -webkit-backdrop-filter: blur(2px) saturate(2);
   backdrop-filter: var(--dock-backdrop, blur(2px) saturate(2));
-  animation: dock-slide-down 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: dock-slide-down 300ms var(--curve-out) both;
 }
 
 :root[data-vt="zoom"]::view-transition-old(zoom-dock) {

@@ -7,6 +7,7 @@ import FigureCard from "../FigureCard";
 import { ANSWER_LIFT, ARRIVE, ASK_ART, BENCH_ART, DROP, HEIGHT, RANKS, RANK_ART, SOURCE_ART, TAG_AT, WIDTH, raise } from "./geometry";
 import { CAPTION, LAST, QUESTION, SOURCES, TRUSTED, spokenOf, statusOf, type Stage } from "./model";
 import "./answer.css";
+import { moveTag } from "../moveTag";
 
 // ── Motion ──
 // Cards rise on a spring with a little overshoot
@@ -148,9 +149,7 @@ function Bench() {
       tag.current.toggleAttribute("data-off", !status);
     }
     if (tag.current && s.stage) {
-      const place = TAG_AT[s.stage - 1];
-      tag.current.style.left = place.left;
-      tag.current.style.top = place.top;
+      moveTag(tag.current, TAG_AT[s.stage - 1]);
     }
     const flowing = searching && !calm && s.since < RETURN_AT + SOURCES.length * RETURN_EVERY + LAND_AFTER + 0.6;
     return (s.touring && !calm) || !settled || flowing || (!calm && s.since < 1.2);

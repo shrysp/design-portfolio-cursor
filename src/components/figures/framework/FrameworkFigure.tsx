@@ -27,6 +27,7 @@ import {
 } from "./geometry";
 import { GOAL, GROUP, MATCHES, QUERY, STAGES, spokenOf, statusOf, type Stage } from "./model";
 import "./framework.css";
+import { moveTag } from "../moveTag";
 
 // ── Motion ──
 // Cards rise on a spring with a little overshoot; the query glides along the rail
@@ -258,9 +259,7 @@ function Bench() {
       tag.current.toggleAttribute("data-off", !status);
     }
     if (tag.current && s.stage) {
-      const place = TAG_AT[s.stage - 1];
-      tag.current.style.left = place.left;
-      tag.current.style.top = place.top;
+      moveTag(tag.current, TAG_AT[s.stage - 1]);
     }
     return (s.touring && !calm) || !settled || s.returning || growing || sendingStill;
   }, visible);
