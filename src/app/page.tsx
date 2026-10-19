@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useAnimationControls } from 'framer-motion';
 import Image from 'next/image';
 import ProjectThumbnailCard from '@/components/ProjectThumbnailCard';
 import { CraftWall, craftCount } from '@/components/CraftContent';
 import TourThumbnail from '@/components/cameo/TourThumbnail';
-import StickOnSticker, { STICK_ON_DEFAULTS } from '@/components/StickOnSticker';
+import Sticker, { STICKER_ARRIVE } from '@/components/Sticker';
 import HandNote from '@/components/HandNote';
 import SectionTitle from '@/components/SectionTitle';
 import { ExpandableJournal } from '@/components/journal/ExpandableJournal';
@@ -15,7 +15,7 @@ import { useSitePath } from '@/lib/sitePath';
 
 
 // ── Animation timeline ──
-// Stickers are stuck on one by one, `stagger` apart. The journal appears as the
+// Stickers are slapped down one by one, `stagger` apart. The journal appears as the
 // last of them goes down, then the name, then the content. Everything after the
 // stickers is timed from them, so slowing the stickers slows the whole sequence.
 
@@ -40,6 +40,10 @@ const NOTE_SPEED = 6;
 // title on the project page, so the title barely has to move
 const RETURN_OFFSET = 88;
 
+// Scrolling during the entrance means the visitor has moved on: whatever is
+// still to come arrives at once, with just enough of a fade not to pop
+const SKIP_INTRO = { duration: 0.15, delay: 0, ease: "easeOut" as const };
+
 export default function Home() {
   // Set when the visitor arrives by the back button on a project page. The
   // page then opens on that project's card with no entrance animation, so the
@@ -60,7 +64,6 @@ export default function Home() {
   useEffect(() => clearReturningFrom(), []);
 
   const stickerDelay = (index: number) => index * STICKER_STAGGER;
-  const stickOn = STICK_ON_DEFAULTS;
 
   // Below md the stickers are hidden, so there is nothing there to wait for. Only
   // the timings depend on this, not the markup, so the server's guess is harmless.
@@ -82,9 +85,24 @@ export default function Home() {
   const isReturning = returnSlug !== null;
   const initial = isReturning ? false : "hidden";
 
-  // A sticker's handwritten note writes itself out once the sticker is pressed flat
-  const noteDelay = (index: number) => stickerDelay(index) + stickOn.arrive * 0.5 + stickOn.press;
-  const note = { instant: isReturning, speed: NOTE_SPEED, className: "font-normal text-[1rem] leading-[1.2]" };
+  const intro = useAnimationControls();
+  const [introSkipped, setIntroSkipped] = useState(false);
+  const instant = isReturning || introSkipped;
+
+  useEffect(() => {
+    if (isReturning) return;
+    intro.start("visible");
+    const skip = () => {
+      setIntroSkipped(true);
+      intro.start("visible", SKIP_INTRO);
+    };
+    window.addEventListener("scroll", skip, { once: true, passive: true });
+    return () => window.removeEventListener("scroll", skip);
+  }, [isReturning, intro]);
+
+  // A sticker's handwritten note writes itself out once the sticker has landed
+  const noteDelay = (index: number) => stickerDelay(index) + STICKER_ARRIVE;
+  const note = { instant, speed: NOTE_SPEED, className: "font-normal text-[1rem] leading-[1.2]" };
 
   return (
     <div className="min-h-screen flex justify-center">
@@ -93,7 +111,7 @@ export default function Home() {
         <motion.div
           className="relative flex flex-col gap-16 items-start md:pt-32 pt-16 md:px-0 px-4 md:pb-24 pb-24"
           initial={initial}
-          animate="visible"
+          animate={isReturning ? "visible" : intro}
         >
 
           <div className="w-full relative mb-0 md:gap-8 gap-12 items-center flex flex-col">
@@ -106,20 +124,17 @@ export default function Home() {
                 <ExpandableJournal collapsedWidth={240} collapsedHeight={320} />
               </motion.div>
 
-              {/* Stickers. Each is stuck down in turn, left edge first, the same
-                  way the name sticker goes onto the journal; its note fades in
-                  once it's flat. They overhang the section below, so they must
-                  not swallow its hovers and clicks. */}
+              {/* Stickers. Each is slapped down in turn, and its note writes
+                  itself out once it has landed. They overhang the section below,
+                  so they must not swallow its hovers and clicks. */}
               <div className="contents pointer-events-none">
                 <div className="hidden md:flex absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 gap-2">
-                  <StickOnSticker
+                  <Sticker
                     src="/images/About/Mission Peak Sticker.webp"
                     alt="Mission Peak sticker"
-                    aspect={1148 / 1536}
                     imgClassName="z-[0] size-100 object-contain"
                     delay={stickerDelay(0)}
-                    instant={isReturning}
-                    {...stickOn}
+                    instant={instant}
                   />
                   <div className="absolute text-stone-500 text-left left-[15%] top-20 whitespace-nowrap"><HandNote {...note} delay={noteDelay(0)}>Mission Peak</HandNote></div>
                 </div>
@@ -127,21 +142,20 @@ export default function Home() {
                 {/* Shaniwar Wada: from Mission Peak's summit post to under the journal, which covers its right half */}
                 <div className="hidden md:flex z-[0] absolute top-[70%] left-[28%] -translate-x-1/2 -translate-y-1/2 gap-2">
                   <div className="absolute z-10 text-stone-500 text-left whitespace-nowrap -rotate-3 -bottom-8 left-[14%]"><HandNote {...note} delay={noteDelay(1)}>Based in Pune</HandNote></div>
-                  <StickOnSticker
+                  <Sticker
                     src="/images/About/Pune Sticker.webp"
                     alt="Shaniwar Wada, Pune, sticker"
-                    aspect={865 / 440}
                     imgClassName="w-[26rem] h-auto object-contain"
                     delay={stickerDelay(1)}
-                    instant={isReturning}
-                    {...stickOn}
+                    instant={instant}
                   />
                 </div>
 
                 <motion.div
-                  initial={isReturning ? false : { opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3, ease: "easeOut", delay: noteDelay(4) }}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { duration: 0.3, ease: "easeOut", delay: noteDelay(4) } },
+                  }}
                   className="hidden md:flex absolute -top-10 left-2/3 gap-2 items-center"
                 >
                   <svg width="42" height="15" viewBox="0 0 42 15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: "scaleY(-1)" }}>
@@ -152,26 +166,22 @@ export default function Home() {
 
                 <div className="hidden md:flex absolute -z-[1] top-2/3 right-1/5 translate-x-1/2 -translate-y-1/2">
                   <div className="absolute z-10 text-stone-500 text-left w-34 mt-2 left-1/2 bottom-1/5"><HandNote {...note} delay={noteDelay(3)}>MS in HCI @ RIT</HandNote></div>
-                  <StickOnSticker
+                  <Sticker
                     src="/images/About/RIT Ritchie Sticker.webp"
                     alt="RIT Ritchie sticker"
-                    aspect={1536 / 1146}
                     imgClassName="size-140 object-contain"
                     delay={stickerDelay(3)}
-                    instant={isReturning}
-                    {...stickOn}
+                    instant={instant}
                   />
                 </div>
 
                 <div className="hidden md:flex -z-[2] absolute top-1/2 -right-15 translate-x-1/2 -translate-y-1/2">
-                  <StickOnSticker
+                  <Sticker
                     src="/images/About/Cricket Sticker.webp"
                     alt="Cricket sticker"
-                    aspect={1}
                     imgClassName="h-120 w-auto max-w-none object-contain"
                     delay={stickerDelay(4)}
-                    instant={isReturning}
-                    {...stickOn}
+                    instant={instant}
                   />
                 </div>
               </div>

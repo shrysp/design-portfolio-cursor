@@ -46,12 +46,20 @@ export function routeSettled() {
   settle = null;
 }
 
+// The transition on screen now. A click mid-transition starts a new one, which
+// cuts the old one short; only the newest may tidy up when it ends.
+let current: ViewTransition | null = null;
+
 export function startRouteTransition(navigate: () => void) {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!("startViewTransition" in document) || reduceMotion) {
     navigate();
     return;
   }
+
+  // The one being cut short stops waiting for its page, rather than holding
+  // on until its timeout and ending in the middle of this one
+  routeSettled();
 
   active = true;
   // Lets the stylesheet tell a page change from an image being enlarged
@@ -68,7 +76,13 @@ export function startRouteTransition(navigate: () => void) {
       })
   );
 
-  transition.finished.finally(() => {
+  current = transition;
+
+  // A transition cut short rejects `ready`; that's expected, not an error
+  transition.ready.catch(() => {});
+  transition.finished.catch(() => {}).finally(() => {
+    if (current !== transition) return;
+    current = null;
     active = false;
     delete document.documentElement.dataset.vt;
     endListeners.forEach((listener) => listener());
@@ -138,7 +152,8 @@ export function startZoomTransition(update: () => void, { dissolve = false } = {
     })
     .catch(() => {});
   transition.finished.catch(() => {}).finally(() => {
-    delete root.dataset.vt;
+    // A page change started meanwhile owns the flag now
+    if (root.dataset.vt === "zoom") delete root.dataset.vt;
     delete root.dataset.vtZoom;
     delete root.dataset.vtDissolve;
     document.querySelectorAll("[data-zoom-active='figure']").forEach((el) => el.removeAttribute("data-zoom-active"));
