@@ -832,6 +832,16 @@ function TourCard({
 
 /** How long PIP has to have stopped before a question picked on the way in is put to it. */
 const ASK_AFTER_HELLO_MS = 1800;
+/** How long a typed question has for PIP to start working on it, and then to start answering. */
+const TYPED_START_MS = 8000;
+const TYPED_ANSWER_MS = 30000;
+/**
+ * A gap in PIP's words long enough to mean the next ones are a new utterance;
+ * and how long after a typed question's answer is written PIP has to have
+ * started saying it, counted from when it last stopped talking.
+ */
+const TYPED_PAUSE_MS = 900;
+const TYPED_SAY_MS = 5000;
 /** How many are offered at once. */
 const CHIPS_SHOWN = 3;
 /** How long the conversation has to be silent before the chips come back. */
@@ -1347,7 +1357,35 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     localStream.current?.getAudioTracks().forEach((t) => (t.enabled = !micOff));
   }, [micOff]);
   const [typed, setTyped] = useState('');
-  const pendingTyped = useRef<string | null>(null);
+  /**
+   * Typed before the session was up: already in the transcript, put to PIP
+   * once it is ready (onGreeting), in the order they were sent.
+   */
+  const typedQueue = useRef<string[]>([]);
+  /** The same, for the caption to show while PIP joins. */
+  const [queued, setQueued] = useState<string[]>([]);
+  /**
+   * The session has started (session.started), not just connected: what is
+   * sent before then is dropped, since the channel may not be open yet.
+   */
+  const sessionReady = useRef(false);
+  /**
+   * Typed and sent, with no answer begun yet. If none begins, the question
+   * goes back into the field (typedFailed), rather than PIP thinking forever
+   * about something it never received.
+   */
+  const awaitingTyped = useRef<{
+    ids: string[];
+    texts: string[];
+    timer: number;
+    /** The delegation the backend opened for it (session.delegation.created). */
+    delegation?: string;
+    /** What the backend wrote, and when it finished: from then on, PIP has to say it. */
+    answer?: string;
+    doneAt?: number;
+    /** PIP's words have paused since, so the next ones are a new utterance, not the end of the last. */
+    paused?: boolean;
+  } | null>(null);
   /**
    * Our own ask for the microphone, before the browser's: what it is for,
    * with typing as the way round it. 'start' starts the tour once allowed;
@@ -1359,8 +1397,8 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   micAccessRef.current = micAccess;
   /** Asked once already this visit, by us or by the browser. */
   const micAsked = useRef(false);
-  /** Said under the type field when the microphone could not be brought in. */
-  const [micNote, setMicNote] = useState<string | null>(null);
+  /** Said under the type field: the microphone could not be brought in, or a typed question went unanswered. */
+  const [fieldNote, setFieldNote] = useState<string | null>(null);
   /** Good morning / afternoon / evening, by the visitor's own clock (day-part.ts). */
   const dayGreeting = useGreeting();
   /** The entrance's takeover is still over the stage, landing its stream on these cards. */
@@ -1691,25 +1729,17 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   }, [ask]);
 
   /**
-   * A question typed rather than said. It goes into the conversation as the
+   * Typed questions, put to PIP. They go into the conversation as the
    * visitor's own words — exactly what a spoken one becomes once transcribed —
-   * and PIP answers it the same way, from his story, out loud. Before the tour
-   * has started it starts it, and is put once PIP has said hello.
+   * and PIP answers them the same way, from his story, out loud. Several
+   * typed while the session was opening go in together, in order.
    */
-  const askTyped = useCallback((question: string) => {
-    const text = question.trim();
-    if (!text) return;
-    setQuiet(false);
-    const s = session.current;
-    if (s?.state !== 'live') {
-      pendingTyped.current = text;
-      void connectRef.current();
-      return;
-    }
-    setLines((prev) => [...prev, { who: 'you', text }]);
-    turn.current = { count: turn.current.count + 1, who: 'you', length: text.length };
+  const putTyped = useCallback((s: LiveSession, texts: string[]) => {
+    const last = texts[texts.length - 1];
+    setLines((prev) => [...prev, ...texts.map((text) => ({ who: 'you' as const, text }))]);
+    turn.current = { count: turn.current.count + texts.length, who: 'you', length: last.length };
     heardVisitor.current = true;
-    lastQuestion.current = text;
+    lastQuestion.current = last;
     userUtterance.current = '';
     lastVoice.current = performance.now();
     tourModel.current.cancel();
@@ -1719,11 +1749,60 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     answerStartedAt.current = 0;
     thinking.current ??= char.current?.hold('thinking', { key: 'tour' }) ?? null;
     setVoiceTurn('thinking');
-    s.send({ type: 'conversation.item.create', item: { type: 'message', role: 'user', content: [{ type: 'input_text', text }] } });
-    s.send({ type: 'response.create' });
+    const ids = s.type(texts.join('\n'));
+    // Asked again before the last one was answered: both wait on whatever comes next.
+    const before = awaitingTyped.current;
+    window.clearTimeout(before?.timer);
+    awaitingTyped.current = {
+      ids: [...(before?.ids ?? []), ...ids],
+      texts: [...(before?.texts ?? []), ...texts],
+      timer: window.setTimeout(() => typedFailedRef.current('the backend never took it up'), TYPED_START_MS),
+    };
   }, []);
-  const askTypedRef = useRef(askTyped);
-  askTypedRef.current = askTyped;
+  const putTypedRef = useRef(putTyped);
+  putTypedRef.current = putTyped;
+
+  /**
+   * A typed question nothing came of: PIP stops thinking about it, and the
+   * words go back into the field to send again. They stay in the transcript,
+   * whose turns the captions count.
+   */
+  const typedFailed = (why: string) => {
+    const a = awaitingTyped.current;
+    if (!a) return;
+    awaitingTyped.current = null;
+    window.clearTimeout(a.timer);
+    console.warn('[tour] A typed question went unanswered:', why);
+    thinking.current?.();
+    thinking.current = null;
+    setVoiceTurn('listening');
+    setTyped((now) => [a.texts.join(' '), now].filter(Boolean).join(' '));
+    setFieldNote('PIP didn’t get that. Try sending it again.');
+  };
+  const typedFailedRef = useRef(typedFailed);
+  typedFailedRef.current = typedFailed;
+
+  /**
+   * A question typed rather than said. Before PIP is ready to hear it, it
+   * waits (onGreeting puts it) — shown in the caption, but kept out of the
+   * transcript, where a line would read as a visit being resumed rather than
+   * begun. With no session at all, it starts one.
+   */
+  const askTyped = useCallback((question: string) => {
+    const text = question.trim();
+    if (!text) return;
+    setQuiet(false);
+    setFieldNote(null);
+    const s = session.current;
+    if (s?.state !== 'live' || !sessionReady.current) {
+      typedQueue.current.push(text);
+      setQueued([...typedQueue.current]);
+      // Unless one is opening, or about to be tried again.
+      if (!s && !retryTimer.current) void connectRef.current();
+      return;
+    }
+    putTyped(s, [text]);
+  }, [putTyped]);
   const submitTyped = (e: React.FormEvent) => {
     e.preventDefault();
     if (!typed.trim()) return;
@@ -2194,6 +2273,30 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         modelUtterance.current = '';
       };
 
+      /**
+       * A typed question, followed through the backend. Its delegation names
+       * our response.create; its answer arrives as that delegation's text.
+       * Written is not said, though — the voice can let it go, as it does
+       * when it lands mid-greeting — so the idle clock makes sure it is.
+       */
+      const typedFor = awaitingTyped.current;
+      if (type === 'session.delegation.created' && typedFor?.ids.includes(event.client_event_id as string)) {
+        typedFor.delegation = (event.delegation as { id?: string } | undefined)?.id ?? '';
+        window.clearTimeout(typedFor.timer);
+        typedFor.timer = window.setTimeout(() => typedFailedRef.current('the backend never answered'), TYPED_ANSWER_MS);
+      }
+      if (type === 'response.event' && typedFor?.delegation != null && event.delegation_id === typedFor.delegation) {
+        const done = event.event as { type?: string; text?: unknown } | undefined;
+        if (done?.type === 'response.output_text.done' && typeof done.text === 'string') {
+          typedFor.answer = [typedFor.answer, done.text].filter(Boolean).join(' ');
+        }
+        if (done?.type === 'response.completed') {
+          window.clearTimeout(typedFor.timer);
+          typedFor.doneAt = performance.now();
+          typedFor.paused = typedFor.doneAt - lastModelDelta.current > TYPED_PAUSE_MS;
+        }
+      }
+
       const intent = interpret(event);
       if (!intent) return;
 
@@ -2215,6 +2318,11 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         }
 
         case 'model-active': {
+          // A typed question is being answered — not the end of whatever PIP was already saying.
+          if (awaitingTyped.current?.paused) {
+            window.clearTimeout(awaitingTyped.current.timer);
+            awaitingTyped.current = null;
+          }
           finishQuestion();
           if (!answerStartedAt.current) answerStartedAt.current = performance.now();
           release(thinking);
@@ -2281,8 +2389,13 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
           break;
 
         case 'error':
+          // Only the lab shows the fault, so it is logged for everyone else.
+          console.warn('[tour] The session reported an error:', intent.message);
           setFault(intent.message);
           char.current?.emit({ type: 'action:error' });
+          if (intent.about && awaitingTyped.current?.ids.includes(intent.about)) {
+            typedFailedRef.current(intent.message);
+          }
           break;
 
         case 'usage':
@@ -2331,6 +2444,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     window.clearTimeout(dozeTimer.current);
     wokenByVoice.current = byVoice;
     greeted.current = false;
+    sessionReady.current = false;
     heardVisitor.current = false;
     setFault(null);
     setNotice(null);
@@ -2351,6 +2465,31 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     const s = createLiveSession({
       dayPart: dayPartNow,
       onEvent: (event) => handleEvent(event, s),
+      onGreeting: (greeting) => {
+        if (session.current !== s) return;
+        sessionReady.current = true;
+        const texts = typedQueue.current.splice(0);
+        setQueued([]);
+        if (!texts.length) {
+          if (!greeting) return;
+          s.speak(
+            modeRef.current === 'text'
+              ? `${greeting} They are typing rather than talking, so invite them to type what they would like to hear about.`
+              : greeting,
+          );
+          return;
+        }
+        // They asked before PIP could say hello: the question comes first, the hello folds into its answer.
+        if (greeting) {
+          s.think(
+            'The visitor typed a question before you had said hello, so there will be no separate greeting. ' +
+              'When you answer it, open with one short sentence of hello, in the spirit of the greeting below, ' +
+              'leaving out any offer of what you could talk about: they have already asked. Then answer.\n\n' +
+              `Greeting: ${greeting}`,
+          );
+        }
+        putTypedRef.current(s, texts);
+      },
       onStateChange: (next) => {
         // A session being replaced confirms its close after the new one is
         // live; its 'closed' is not the tour's. (Ended with nothing after it,
@@ -2461,11 +2600,16 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     try {
       await s.connect();
     } catch (err) {
-      // Not left half-awake with a microphone open.
+      // Not left half-awake with a microphone open — but what was typed meanwhile is still theirs.
+      const typedMeanwhile = typedQueue.current;
       if (session.current === s) disconnectRef.current();
+      typedQueue.current = typedMeanwhile;
+      setQueued([...typedMeanwhile]);
       // Out of time is an ending, shown as one — not a fault to report.
       if (overRef.current) {
         setFault(null);
+        typedQueue.current = [];
+        setQueued([]);
         return;
       }
       const message = String((err as { message?: unknown } | null)?.message ?? err);
@@ -2475,6 +2619,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         const delay = START_RETRIES_MS[startTries.current++];
         setRetrying(true);
         retryTimer.current = window.setTimeout(() => {
+          retryTimer.current = 0;
           setRetrying(false);
           void connectRef.current(opts);
         }, delay);
@@ -2483,6 +2628,10 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       startTries.current = 0;
       setRetrying(false);
       setNotice(noticeFor(err));
+      // Typed while it was opening: back into the field, to send once it can.
+      const texts = typedQueue.current.splice(0);
+      setQueued([]);
+      if (texts.length) setTyped((now) => [...texts, now].filter(Boolean).join(' '));
       return;
     } finally {
       connecting.current = false;
@@ -2500,6 +2649,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     if (opts?.keepMic !== true) {
       // Ended by the visitor: a start waiting to be retried is not.
       window.clearTimeout(retryTimer.current);
+      retryTimer.current = 0;
       setRetrying(false);
       window.clearTimeout(dozeTimer.current);
       wake.current?.close();
@@ -2507,8 +2657,13 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       emptyWakes.current = 0;
       setDozing(false);
       release(drowsy);
+      typedQueue.current = [];
+      setQueued([]);
     }
     connecting.current = false;
+    sessionReady.current = false;
+    window.clearTimeout(awaitingTyped.current?.timer);
+    awaitingTyped.current = null;
     cancelAnimationFrame(micRaf.current);
     if (micMeter.current) micMeter.current.style.transform = 'scaleX(0)';
     cancelAnimationFrame(voiceRaf.current);
@@ -2551,7 +2706,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       mic.pass(true);
     } catch (err) {
       setMode('text');
-      setMicNote(
+      setFieldNote(
         noticeFor(err) === 'mic-missing'
           ? 'No microphone found. Keep typing, or connect one and try again.'
           : 'Your browser is blocking the microphone. Allow it from the address bar, or keep typing.',
@@ -2559,12 +2714,18 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     }
   }, [micId]);
 
+  /**
+   * Opening the field starts the tour, as the talk button does: PIP joins
+   * while they type, rather than only once they have sent something.
+   */
   const switchToText = useCallback(() => {
-    setMicNote(null);
+    setFieldNote(null);
     setMode('text');
+    modeRef.current = 'text';
+    if (!session.current && !retryTimer.current && !overRef.current) void connectRef.current();
   }, []);
   const switchToVoice = useCallback(() => {
-    setMicNote(null);
+    setFieldNote(null);
     setMode('voice');
     if (!wake.current?.silent || session.current?.state !== 'live') return;
     if (!micAsked.current && micAccessRef.current !== 'granted') setAskMic('switch');
@@ -2585,13 +2746,13 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   useEffect(() => {
     if (askMic && micAccess === 'granted') allowMicRef.current();
   }, [askMic, micAccess]);
-  /** …or not: typing instead, and a question already chosen is put now. */
+  /** …or not: typing instead, which starts the tour as opening the field does. */
   const declineMic = () => {
     const why = askMic;
     setAskMic(null);
     setMode('text');
     modeRef.current = 'text';
-    if (why === 'start' && (pendingAsk.current || pendingTyped.current)) void connect();
+    if (why === 'start') void connect();
   };
 
   /**
@@ -2808,12 +2969,24 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         pendingAsk.current = null;
         askRef.current(question);
       }
-      if (pendingTyped.current && greeted.current && silentFor > ASK_AFTER_HELLO_MS) {
-        const question = pendingTyped.current;
-        pendingTyped.current = null;
-        askTypedRef.current(question);
+      setQuiet(silentFor > CHIPS_AFTER_MS && !thinking.current && !pendingAsk.current && !typedQueue.current.length);
+      // A typed question's answer, written and not yet said: once PIP has stopped, it says it as written.
+      const typedFor = awaitingTyped.current;
+      if (typedFor?.doneAt) {
+        const wordsStopped = performance.now() - Math.max(typedFor.doneAt, lastModelDelta.current);
+        if (wordsStopped > TYPED_PAUSE_MS) typedFor.paused = true;
+        if (wordsStopped > TYPED_SAY_MS) {
+          awaitingTyped.current = null;
+          if (!typedFor.answer) typedFailedRef.current('the backend wrote nothing');
+          else {
+            setLog((l) => ['tour.typed said by commentary', ...l].slice(0, 40));
+            session.current?.speak(
+              'The visitor typed a question, and the backend has written the answer, but it has not been said ' +
+                `yet. Say this to them now, as it is written, adding nothing of your own:\n\n${typedFor.answer}`,
+            );
+          }
+        }
       }
-      setQuiet(silentFor > CHIPS_AFTER_MS && !thinking.current && !pendingAsk.current && !pendingTyped.current);
       // The server charged this session for maxSeconds and no more; staying
       // connected past it would be time nobody budgeted for.
       const ranFor = (performance.now() - startedAt.current) / 1000;
@@ -3545,7 +3718,21 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
           // same place, so it never has to shuffle sideways afterwards.
           className={`tour-caption ${intro ? 'tour-caption--closed' : ''}`}
         >
-          {v.live && v.caption && v.lastLine ? (
+          {queued.length > 0 ? (
+            // Sent before PIP was there to hear it: shown, so it does not seem to have vanished.
+            <>
+              <span className="tour-turn" data-turn="thinking">
+                <span className="tour-turn-bars" aria-hidden>
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </span>
+                PIP is joining…
+              </span>
+              <p className="tour-caption-text tour-caption-text--you">{queued[queued.length - 1]}</p>
+            </>
+          ) : v.live && v.caption && v.lastLine ? (
             <>
               <span className="tour-turn" data-turn={shownTurn}>
                 <span className="tour-turn-bars" aria-hidden>
@@ -3594,7 +3781,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
        * the last so nothing in it has to move between states (see TourBar).
        */}
       <div className="tour-controls">
-        {typing && micNote && <p className="tour-mic-note-live">{micNote}</p>}
+        {typing && fieldNote && <p className="tour-mic-note-live">{fieldNote}</p>}
         <TourBar
             session={v.live || (v.dozing && typing)}
             canType={startCard}

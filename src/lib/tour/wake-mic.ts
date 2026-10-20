@@ -35,13 +35,24 @@ export type WakeMic = {
  * send, and this one carries silence, so starting by typing never asks the
  * browser for the microphone. Swapped for a real one if they start talking
  * (LiveSession.replaceMicrophone).
+ *
+ * The silence has to be sent, not just stood for. GPT-Live keeps time by the
+ * audio it receives: with no packets arriving it never took a turn — no hello,
+ * no answer to a typed question — and expired the session half a minute in.
+ * So `send` is fed by a source that is always playing, and is not the stream
+ * the page switches off while they type (`raw`, as with a real microphone).
  */
 export function createSilentMic(): WakeMic {
   const context = new AudioContext();
-  const silence = context.createMediaStreamDestination().stream;
+  const send = context.createMediaStreamDestination();
+  const source = context.createConstantSource();
+  source.offset.value = 0;
+  source.connect(send);
+  source.start();
+  void context.resume();
   return {
-    raw: silence,
-    send: silence,
+    raw: context.createMediaStreamDestination().stream,
+    send: send.stream,
     silent: true,
     pass() {},
     listen() {},

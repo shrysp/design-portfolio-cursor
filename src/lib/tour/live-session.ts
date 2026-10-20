@@ -44,6 +44,12 @@ export type LiveSessionOptions = {
    */
   greeting?: string;
   /**
+   * Says the greeting instead of speaking it as is, for a caller with
+   * something to fold into it — a question typed before the session was up.
+   * Called once, when the session is ready, with '' when there is no hello.
+   */
+  onGreeting?: (greeting: string) => void;
+  /**
    * Which microphone to capture. Worth exposing: the browser's default input
    * is whatever the OS says, which on a machine with Teams or Zoom installed
    * is often a virtual device that is enabled, unmuted, and completely silent.
@@ -76,6 +82,14 @@ export type LiveSession = {
    * are explicit that it never takes a turn on its own.
    */
   think: (content: string) => void;
+  /**
+   * The visitor's own typed words, answered as a spoken question is: by the
+   * delegated backend, re-spoken by the voice. Not Realtime's
+   * conversation.item.create, which GPT-Live does not have — that went
+   * nowhere, silently. Returns the ids of the events it sent, which an error
+   * about one names as its client_event_id.
+   */
+  type: (text: string) => string[];
   /**
    * Sends another microphone from now on, without a new session — a visitor
    * who started by typing and now wants to talk. Borrowed like `microphone`'s.
@@ -186,9 +200,11 @@ export function createLiveSession(options: LiveSessionOptions): LiveSession {
         }
         // Greet once the session is genuinely ready — sending before
         // session.started arrives is shouting into a socket nobody is reading.
-        if (parsed.type === 'session.started' && greeting && !greeted) {
+        if (parsed.type === 'session.started' && !greeted) {
           greeted = true;
-          queueMicrotask(() => api.speak(greeting!));
+          const hello = greeting ?? '';
+          if (options.onGreeting) queueMicrotask(() => options.onGreeting!(hello));
+          else if (hello) queueMicrotask(() => api.speak(hello));
         }
         // The acknowledgement we were asked to wait for. It carries the final
         // usage, so tearing down before it arrives loses the only confirmation
@@ -326,6 +342,17 @@ export function createLiveSession(options: LiveSessionOptions): LiveSession {
         content,
       });
     },
+    type(text) {
+      const ids = [crypto.randomUUID(), crypto.randomUUID()];
+      this.send({
+        type: 'response.item.create',
+        event_id: ids[0],
+        item: { type: 'message', role: 'user', content: [{ type: 'input_text', text }] },
+      });
+      // Queued text does not run the backend by itself.
+      this.send({ type: 'response.create', event_id: ids[1] });
+      return ids;
+    },
     async replaceMicrophone(next) {
       const track = next.send.getAudioTracks()[0];
       const sender = pc?.getSenders().find((s) => s.track?.kind === 'audio');
@@ -363,7 +390,8 @@ export type LiveIntent =
   | { kind: 'user-speaking'; active: boolean }
   | { kind: 'model-speaking'; active: boolean }
   | { kind: 'thinking'; active: boolean }
-  | { kind: 'error'; message: string }
+  /** `about` is the event id of the client command it rejects, when it names one. */
+  | { kind: 'error'; message: string; about?: string }
   | null;
 
 export function interpret(event: LiveEvent): LiveIntent {
@@ -399,8 +427,15 @@ export function interpret(event: LiveEvent): LiveIntent {
     const seconds = secondsIn(event);
     if (seconds != null) return { kind: 'usage', seconds };
   }
-  if (t === 'error' || t === 'client.error')
-    return { kind: 'error', message: String(event.message ?? JSON.stringify(event)) };
+  // GPT-Live nests the detail: { error: { message, code }, client_event_id }.
+  if (t === 'error' || t === 'client.error') {
+    const detail = event.error as { message?: unknown } | undefined;
+    return {
+      kind: 'error',
+      message: String(detail?.message ?? event.message ?? JSON.stringify(event)),
+      about: typeof event.client_event_id === 'string' ? event.client_event_id : undefined,
+    };
+  }
 
   const text = (event.delta ?? event.transcript ?? event.text ?? '') as string;
 
