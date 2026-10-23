@@ -24,7 +24,7 @@ import { SUGGESTIONS, pickChips, type TopicId } from '@/lib/tour/suggestions';
 import { dayPartNow } from '@/lib/tour/day-part';
 import { useGreeting } from '@/lib/tour/use-greeting';
 import { useDialKit } from 'dialkit';
-import { PHOTO_POP } from '@/lib/tour/tour-sounds';
+import { PHOTO_POP, SESSION_LIVE, THINKING, THINKING_AFTER_MS } from '@/lib/tour/tour-sounds';
 import { crtGlitch } from '@/components/cameo/crt/CrtLayer';
 import { type Arrival, takeArrival } from '@/components/cameo/crt/arrival';
 import { motion, slowed } from '@/components/cameo/crt/motion';
@@ -34,7 +34,7 @@ import LibraryDive, { type DiveHandle } from '@/components/cameo/entrance/Librar
 import { pipCentre } from '@/components/cameo/entrance/TourEntrance';
 import { createField, type Field } from '@/components/cameo/entrance/field';
 import { useLeaveTour } from '@/components/cameo/entrance/context';
-import { playRecipe } from '@shrysp/cameo/sound';
+import { playRecipe, playVocal, setSoundEnabled } from '@shrysp/cameo/sound';
 import '@shrysp/cameo/styles.css';
 import './tour.css';
 import {
@@ -2820,7 +2820,11 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   useEffect(() => {
     silentRef.current = silent;
     if (audio.current) audio.current.muted = silent;
+    // Sound off is every sound, not only the voice: the bloops and cues too.
+    setSoundEnabled(!silent);
   }, [silent]);
+  // The switch is the tour's; the rest of the site keeps its sound.
+  useEffect(() => () => setSoundEnabled(true), []);
 
   /**
    * Says a notice's line from its recording, PIP's mouth following the sound
@@ -3276,6 +3280,25 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   /** The welcome, or the resting card: up when nothing else is in the middle and no session is live. */
   /** Whose turn it reads as: while PIP can be heard, PIP is talking, whatever the session last said. */
   const shownTurn: VoiceTurn = pipAudible ? 'talking' : voiceTurn;
+
+  // The visit's own sounds: a chime as the session goes live (you can talk
+  // now), PIP nodding off as it ends — End, time up, or dozing when it goes
+  // quiet. Off the stage's `live`, which stays true through a renewal, so a
+  // session swapped underneath makes neither.
+  const wasLive = useRef(false);
+  useEffect(() => {
+    if (v.live === wasLive.current) return;
+    wasLive.current = v.live;
+    if (v.live) playRecipe(SESSION_LIVE);
+    else if (v.state !== 'error') playVocal('sleeping');
+  }, [v.live, v.state]);
+
+  // A long think gets one quiet tick, so the silence doesn't read as broken; a quick answer, none.
+  useEffect(() => {
+    if (shownTurn !== 'thinking') return;
+    const t = window.setTimeout(() => playRecipe(THINKING), THINKING_AFTER_MS);
+    return () => window.clearTimeout(t);
+  }, [shownTurn]);
   const startCard =
     !v.over && !v.notice && !askMic && !focusId && !handout && !v.live && !v.dozing && (v.paused || v.state !== 'connecting');
 

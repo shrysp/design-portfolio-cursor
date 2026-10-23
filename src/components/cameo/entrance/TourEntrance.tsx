@@ -8,6 +8,8 @@ import { useDialKit } from 'dialkit';
 import { PrefetchKind } from 'next/dist/client/components/router-reducer/router-reducer-types';
 import { HOUSING_W, housingHeight, PIP, type MoodId } from '@shrysp/cameo';
 import { Character, type CharacterHandle } from '@shrysp/cameo/react';
+import { playRecipe, playVocal } from '@shrysp/cameo/sound';
+import { CODE_OK, CODE_WRONG, DIVE, QUICK_OFF, QUICK_ON, TUBE_OFF, TUBE_ON } from '@/lib/tour/tour-sounds';
 import { createField, OFF_SPLIT, type Field, type FieldUniforms, type Theme } from './field';
 import LibraryDive, { type DiveHandle } from './LibraryDive';
 import PosterDepth from './PosterDepth';
@@ -548,6 +550,7 @@ export function Takeover({
       if (!alive.current) return;
     }
     if (screen && !calm) {
+      playRecipe(DIVE);
       // Through the library: the stream builds up to cruising speed and keeps
       // going — through the route change, for as long as the tour page takes
       // to arrive underneath — and then these same photos land, each in its
@@ -677,6 +680,8 @@ export function Takeover({
       // it on the beat — eyes open, looking at whoever woke it — until the ask.
       if (!calm) char.current?.setPose('stretch');
       setMood('curious');
+      // PIP's own voice, while it has no other: the real one starts with the session.
+      playVocal('curious');
       await wait(askAt - wakeAt);
       if (!live()) return;
       setMood((m) => (m === 'curious' ? null : m));
@@ -700,14 +705,29 @@ export function Takeover({
         // The page under it squeezes to a line and goes out. With no page under
         // it (an invitation's own page, which is already dark) there is nothing
         // to switch off, and that line would only flash on an empty screen:
-        // it starts off.
-        const page = document.querySelector('[data-crt-page]');
-        await tween(page ? SCREEN.off : 0, easeIn, setOff, live);
+        // it starts off. An invitation link is that too, though the layout's
+        // page is under it: its dark screen was just switched on (PowerOn), so
+        // the tube answers the press at once, not after a second of switching
+        // off. And that page is left alone: it is the dark under the tube until
+        // the shader's first frame (`data-dark-room`), and squeezed to a dot it
+        // left the site's white showing instead.
+        const page = invite || document.querySelector('[data-dark-room]') ? null : document.querySelector('[data-crt-page]');
+        if (page) {
+          // After Strict Mode's first pass has been put away, so it sounds once.
+          await Promise.resolve();
+          if (!live()) return;
+          playRecipe(TUBE_OFF);
+          await tween(SCREEN.off, easeIn, setOff, live);
+        } else {
+          f.uniforms.off = 1;
+          f.uniforms.glow = 1;
+        }
         if (!live()) return;
         await wait(SCREEN.onAt - SCREEN.off);
         if (!live()) return;
         // The tube covers the page from here; put the page back behind it.
         squeezePage(0);
+        playRecipe(TUBE_ON);
         await tween(SCREEN.on, easeIn, uniform('on'), live);
         if (!live()) return;
         f.uniforms.flash = 1;
@@ -779,6 +799,7 @@ export function Takeover({
       await tween(REDUCED, easeOut, (k) => rootEl.current && (rootEl.current.style.opacity = String(1 - k)), isAlive);
     } else if (screen) {
       // The tube switches off to a dot, and the page comes back out of it.
+      playRecipe(TUBE_OFF, { timeScale: QUICK_OFF });
       await tween(300, switchOff, (k) => {
         f.uniforms.on = 1 - k;
         f.uniforms.wake = Math.min(f.uniforms.wake, 1 - k);
@@ -786,6 +807,7 @@ export function Takeover({
       f.uniforms.on = 0;
       setOff(1);
       await wait(120);
+      playRecipe(TUBE_ON, { timeScale: QUICK_ON });
       await tween(450, easeOut, (k) => setOff(1 - k), isAlive);
     } else {
       // Out the way Shopify's portal closes: quick at first, settling (easeOutQuad).
@@ -828,6 +850,7 @@ export function Takeover({
       });
       if (!alive.current) return;
       if (res.ok) {
+        playRecipe(CODE_OK);
         prefetchTour(router);
         void enter();
         return;
@@ -839,6 +862,7 @@ export function Takeover({
     }
     if (field.current) field.current.uniforms.error = 1;
     crtGlitch(1, 360);
+    playRecipe(CODE_WRONG);
     setShake((s) => s + 1);
     setMood(null);
     char.current?.setPose('sad');

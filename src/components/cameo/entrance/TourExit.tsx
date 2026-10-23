@@ -4,6 +4,8 @@ import { useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createField, STAGE_BG } from './field';
 import { easeOut, smoothstep, squeeze, switchOff, tween, wait } from './TourEntrance';
+import { playRecipe } from '@shrysp/cameo/sound';
+import { QUICK_OFF, QUICK_ON, TUBE_OFF, TUBE_ON } from '@/lib/tour/tour-sounds';
 
 /** Where the tour's Back goes: the case study, at its section about the tour. */
 export const CASE_STUDY = '/projects/cameo';
@@ -57,6 +59,7 @@ export default function TourExit({ onDone }: { onDone: () => void }) {
         f.uniforms.glow = smoothstep(0.35, 1, k);
         squeeze(page, k);
       };
+      playRecipe(TUBE_OFF, { timeScale: QUICK_OFF });
       await tween(OFF_MS, switchOff, (k) => setOff(k, stage), isAlive);
       if (!alive.current) return;
       // The case study, behind the dark; it opens once it is there.
@@ -70,6 +73,7 @@ export default function TourExit({ onDone }: { onDone: () => void }) {
       const page = document.querySelector<HTMLElement>('[data-crt-page]');
       setOff(1, page);
       await wait(HOLD_MS);
+      playRecipe(TUBE_ON, { timeScale: QUICK_ON });
       await tween(ON_MS, easeOut, (k) => setOff(1 - k, page), isAlive);
       squeeze(page, 0);
       if (alive.current) onDone();

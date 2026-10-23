@@ -5,6 +5,8 @@ import { createPortal } from "react-dom";
 import { Doto } from "next/font/google";
 import "./ticket.css";
 import { EASE_OVERSHOOT, css } from "@/lib/easing";
+import { playRecipe } from "@shrysp/cameo/sound";
+import { TICKET_FEED, TICKET_TEAR } from "@/lib/tour/tour-sounds";
 
 /** The code screen's dot-matrix, loaded here too: the ticket is drawn outside that screen (see the layer below). */
 const dots = Doto({
@@ -125,6 +127,8 @@ export default function InviteTicket({
   // Set when a pull is let go short of the tear, so the click that follows the
   // release doesn't start a tug over the spring back.
   const pulledJustNow = useRef(false);
+  /** Whether this pull's rip has been heard: it sounds as the paper starts to go, not when it lets go. */
+  const ripHeard = useRef(false);
   // A row with no number gets none printed, rather than "No. 00".
   const number =
     invite.number > 0 ? `No. ${String(invite.number).padStart(2, "0")}` : "";
@@ -136,11 +140,17 @@ export default function InviteTicket({
       return;
     }
     setPhase("printing");
+    // A tick later, and only for the mount that stays: Strict Mode's first
+    // pass would otherwise print it twice over, and twice as loud.
+    const sound = reduced() ? 0 : window.setTimeout(() => playRecipe(TICKET_FEED));
     const done = window.setTimeout(
       () => setPhase("ready"),
       reduced() ? 0 : PRINT_MS + 100,
     );
-    return () => window.clearTimeout(done);
+    return () => {
+      window.clearTimeout(sound);
+      window.clearTimeout(done);
+    };
   }, [show]);
 
   // Ready to be torn: the stub has the keyboard, so Enter goes in.
@@ -168,6 +178,9 @@ export default function InviteTicket({
     drag.current = null;
     setRipped(true);
     setPhase("torn");
+    // Torn with no pull to start it (Enter): the rip is heard now.
+    if (!ripHeard.current) playRecipe(TICKET_TEAR);
+    ripHeard.current = true;
     const el = stub.current;
     const t = tug.current;
     if (el) delete el.dataset.pulling;
@@ -253,6 +266,7 @@ export default function InviteTicket({
   const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (phase !== "ready" || e.button !== 0) return;
     pulledJustNow.current = false;
+    ripHeard.current = false;
     e.currentTarget.setPointerCapture(e.pointerId);
     e.currentTarget.dataset.pulling = "";
     // Grabbed on the left half, the left end is pulled; on the right, the right.
@@ -292,6 +306,11 @@ export default function InviteTicket({
     d.target.dy = Math.max(0, e.clientY - d.y);
     // The rip starts with the pull: ragged from here on, open where the stub has come away.
     if (d.target.dy > 4 && !ripped) setRipped(true);
+    // And sounds as it starts, once a pull.
+    if (d.target.dy > 4 && !ripHeard.current) {
+      ripHeard.current = true;
+      playRecipe(TICKET_TEAR);
+    }
   };
   const onPointerEnd = (e: React.PointerEvent<HTMLButtonElement>) => {
     const d = drag.current;
