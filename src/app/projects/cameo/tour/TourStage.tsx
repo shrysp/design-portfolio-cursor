@@ -364,6 +364,12 @@ const TAIL_FLUSH_MS = 1500;
 const TAIL_MIN_WORDS = 4;
 /** How long after PIP starts answering the end of the visitor's own transcript may still arrive. */
 const TRANSCRIPT_TRAIL_MS = 2000;
+/**
+ * Said over PIP and no longer than this, it was a listening sound ("mm-hm",
+ * "yeah, right"), not a turn: PIP stopping just then was its answer ending,
+ * not PIP giving way.
+ */
+const BACKCHANNEL_MAX_WORDS = 3;
 const TAIL_GIVE_UP_MS = 4000;
 
 /**
@@ -1679,6 +1685,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       heardVisitor.current = true;
       lastQuestion.current = question;
       userUtterance.current = '';
+      overlapping.current = false;
       lastVoice.current = performance.now();
       // As for a spoken question: the last answer's photos, readings and card
       // are over (see the spoken question in handleEvent).
@@ -1741,6 +1748,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     heardVisitor.current = true;
     lastQuestion.current = last;
     userUtterance.current = '';
+    overlapping.current = false;
     lastVoice.current = performance.now();
     tourModel.current.cancel();
     window.clearTimeout(spotlightTimer.current);
@@ -1864,6 +1872,17 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
    * the question the answer is for, not a new one.
    */
   const answerStartedAt = useRef(0);
+  /**
+   * The visitor's words so far were said over PIP, well into an answer, and
+   * are not yet a question. GPT-Live hears overlap and decides for itself
+   * whether to keep talking or give way, so the page waits for that: if PIP's
+   * voice stops, they took the turn (see client.pip.quiet in handleEvent); if
+   * it carries on, it was a listening sound, and the answer's photos, card and
+   * readings are left alone.
+   */
+  const overlapping = useRef(false);
+  /** pipAudible, readable from inside the session's event handler. */
+  const pipAudibleNow = useRef(false);
   const lastVoice = useRef(0);
   const startedAt = useRef(0);
   /** How long the server allows this session to run — see api/tour/session. */
@@ -2250,6 +2269,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         if (!question) return;
         lastQuestion.current = question;
         userUtterance.current = '';
+        overlapping.current = false;
         setLog((l) => [`tour.question "${question.slice(0, 80)}"`, ...l].slice(0, 40));
         // The late end of the question this answer is already for.
         if (answerStartedAt.current) return;
@@ -2297,6 +2317,22 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         }
       }
 
+      // PIP's voice has stopped. If the visitor was talking over it, it gave
+      // way to them: what they said is a new question, and the answer it cut
+      // off is over. A listening sound that only happened to come as an answer
+      // ended is let go.
+      if (type === 'client.pip.quiet' && overlapping.current) {
+        overlapping.current = false;
+        const words = userUtterance.current.trim().split(/\s+/).filter(Boolean).length;
+        if (words <= BACKCHANNEL_MAX_WORDS) {
+          userUtterance.current = '';
+          return;
+        }
+        answerStartedAt.current = 0;
+        if (/[.!?]\s*$/.test(userUtterance.current)) finishQuestion();
+        return;
+      }
+
       const intent = interpret(event);
       if (!intent) return;
 
@@ -2307,12 +2343,15 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
           heardVisitor.current = true;
           pointAsked.current = true;
           // Words well into an answer are the visitor speaking again, not the
-          // tail of the question it answers.
+          // tail of the question it answers. Over PIP's voice they are held
+          // until PIP shows whether it is giving way (see overlapping).
           if (answerStartedAt.current && performance.now() - answerStartedAt.current > TRANSCRIPT_TRAIL_MS) {
-            answerStartedAt.current = 0;
+            if (pipAudibleNow.current) overlapping.current = true;
+            else answerStartedAt.current = 0;
           }
           userUtterance.current += intent.delta;
           lastVoice.current = performance.now();
+          if (overlapping.current) break;
           if (/[.!?]\s*$/.test(userUtterance.current) || userUtterance.current.length > 140) finishQuestion();
           break;
         }
@@ -2323,7 +2362,14 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
             window.clearTimeout(awaitingTyped.current.timer);
             awaitingTyped.current = null;
           }
-          finishQuestion();
+          // PIP talked on through what the visitor said over it: a listening
+          // sound, not a question, so it neither becomes one nor ends this answer.
+          // Anything longer is still waiting to see whether PIP gives way.
+          if (overlapping.current && userUtterance.current.trim().split(/\s+/).length <= BACKCHANNEL_MAX_WORDS) {
+            overlapping.current = false;
+            userUtterance.current = '';
+          }
+          if (!overlapping.current) finishQuestion();
           if (!answerStartedAt.current) answerStartedAt.current = performance.now();
           release(thinking);
           release(listening);
@@ -2456,6 +2502,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     // once the session starts (see handleEvent).
     if (!point.current) setFocusId(null);
     userUtterance.current = '';
+    overlapping.current = false;
     modelUtterance.current = '';
     lastQuestion.current = '';
     window.clearTimeout(modelFlushTimer.current);
@@ -2589,7 +2636,9 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
           const next = now - heard < PIP_QUIET_MS;
           if (next !== on) {
             on = next;
+            pipAudibleNow.current = next;
             setPipAudible(next);
+            if (!next) handleEvent({ type: 'client.pip.quiet' });
           }
           voiceRaf.current = requestAnimationFrame(watch);
         };
@@ -2670,6 +2719,8 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     voiceEnvelope.current?.stop();
     voiceEnvelope.current = null;
     setPipAudible(false);
+    pipAudibleNow.current = false;
+    overlapping.current = false;
     detachHearing.current?.();
     detachHearing.current = null;
     detachVoice.current?.();

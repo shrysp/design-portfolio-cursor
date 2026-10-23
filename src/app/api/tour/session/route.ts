@@ -139,6 +139,22 @@ export async function POST(request: Request) {
     },
     // No `audio` block: GPT-Live rejects `session.audio.input`. Turn detection
     // is native and not ours to configure.
+    //
+    // The browser's data channel is untrusted, and left unset it may send any
+    // client event — `session.update` and `session.instructions.append`
+    // included, which would let a visitor rewrite the instructions fixed
+    // above. It gets only the events live-session.ts actually sends.
+    client: {
+      data_channel: {
+        allowed_client_events: [
+          'session.commentary.append',
+          'session.thinking.append',
+          'response.item.create',
+          'response.create',
+          'session.close',
+        ],
+      },
+    },
   };
 
   let res: Response;
