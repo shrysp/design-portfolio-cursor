@@ -41,6 +41,9 @@ const dockTips = {
 };
 const dockTipLabels = Object.values(dockTips);
 
+/** Pages that are the whole screen, with no dock: the tour, and an invitation (with its preview and review copies). */
+const FULL_SCREEN = ['/projects/cameo/tour', '/projects/cameo/invite', '/dev/tour-invite', '/dive/invite'];
+
 export default function StickyFooter() {
   const router = useRouter();
   const pathname = usePathname();
@@ -180,8 +183,9 @@ export default function StickyFooter() {
   const showProjectNav = isProjectPage && isNearBottom;
 
   // The tour and an invitation are the whole screen from the first frame: no
-  // dock to show and then slide away from under them.
-  if (pathname === '/projects/cameo/tour' || pathname === '/projects/cameo/invite') return null;
+  // dock to show and then slide away from under them. The invitation's preview
+  // and review copies too, so they open as the real one does.
+  if (FULL_SCREEN.includes(pathname)) return null;
 
   return (
       <motion.div
