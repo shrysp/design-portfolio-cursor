@@ -110,7 +110,7 @@ function Filler() {
         <section key={i} className="flex flex-col gap-3">
           <div className="aspect-[16/9] w-full rounded-2xl bg-gradient-to-br from-stone-200 to-stone-100" />
           <p className="max-w-[60ch] text-stone-500">
-            Placeholder copy so there is something behind the glass. The dock's blur and the toast's smoked glass both need a page
+            Placeholder copy so there is something behind the glass. The dock&apos;s blur and the toast&apos;s smoked glass both need a page
             under them to read right, so this is long enough to scroll past a few images.
           </p>
         </section>
