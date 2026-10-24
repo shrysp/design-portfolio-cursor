@@ -46,9 +46,10 @@ export type LiveSessionOptions = {
   /**
    * Says the greeting instead of speaking it as is, for a caller with
    * something to fold into it — a question typed before the session was up.
-   * Called once, when the session is ready, with '' when there is no hello.
+   * Called once, when the session is ready, with '' when there is no hello,
+   * and with the same hello in two beats when the server sent one (openingFor).
    */
-  onGreeting?: (greeting: string) => void;
+  onGreeting?: (greeting: string, opening?: { hello: string; rest: string; note: string }) => void;
   /**
    * Which microphone to capture. Worth exposing: the browser's default input
    * is whatever the OS says, which on a machine with Teams or Zoom installed
@@ -118,6 +119,7 @@ export function createLiveSession(options: LiveSessionOptions): LiveSession {
   let greeted = false;
   /** The server's greeting wins: it arrives with the SDP answer, before session.started. */
   let greeting = options.greeting;
+  let opening: { hello: string; rest: string; note: string } | undefined;
   let closing: number | null = null;
 
   const setState = (next: LiveState) => {
@@ -203,7 +205,7 @@ export function createLiveSession(options: LiveSessionOptions): LiveSession {
         if (parsed.type === 'session.started' && !greeted) {
           greeted = true;
           const hello = greeting ?? '';
-          if (options.onGreeting) queueMicrotask(() => options.onGreeting!(hello));
+          if (options.onGreeting) queueMicrotask(() => options.onGreeting!(hello, opening));
           else if (hello) queueMicrotask(() => api.speak(hello));
         }
         // The acknowledgement we were asked to wait for. It carries the final
@@ -237,6 +239,9 @@ export function createLiveSession(options: LiveSessionOptions): LiveSession {
       // connection that no longer exists.
       if (pc !== connection) return;
       if (typeof result.greeting === 'string') greeting = result.greeting;
+      if (typeof result.opening?.hello === 'string' && typeof result.opening?.rest === 'string') {
+        opening = { hello: result.opening.hello, rest: result.opening.rest, note: String(result.opening.note ?? '') };
+      }
       options.onSession?.({
         maxSeconds: result.maxSeconds,
         remaining: typeof result.remaining === 'number' ? result.remaining : undefined,

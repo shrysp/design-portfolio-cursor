@@ -18,11 +18,13 @@ import { accessFrom } from '@/lib/tour/server/auth';
 import {
   applicationInstructions,
   backendInstructions,
+  BACKEND_MOOD_TAGS,
   TOUR_BACKEND_MODEL,
   TOUR_VOICE_INSTRUCTIONS,
   type Turn,
   greetingFor,
   historyInstructions,
+  openingFor,
   visitorContext,
   visitorInstructions,
 } from '@/lib/tour/server/context';
@@ -129,6 +131,7 @@ export async function POST(request: Request) {
         model: TOUR_BACKEND_MODEL,
         instructions: [
           backendInstructions(story),
+          BACKEND_MOOD_TAGS,
           visitorContext(started.visitor.context, started.visitor.note),
           applicationInstructions(started.visitor.application),
           earlier,
@@ -200,6 +203,8 @@ export async function POST(request: Request) {
     // Someone coming back from a pause has already been greeted, and pressed
     // the key because they have something to say: PIP wakes and listens.
     greeting: earlier ? '' : greetingFor(started.visitor, dayPart),
+    // The same hello in two beats, for a visitor who is talking (openingFor).
+    opening: earlier ? null : openingFor(started.visitor, dayPart),
     // Photos chosen for this visitor, shown as PIP says hello.
     spotlight: earlier
       ? []

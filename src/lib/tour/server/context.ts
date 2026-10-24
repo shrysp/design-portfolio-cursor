@@ -66,7 +66,8 @@ in the concrete whenever a real moment fits; don't recite either verbatim or ann
  * happened.
  */
 const VOICE_OPENER = `Open every real answer with one short, natural beat before the substance, the way \
-a person actually starts talking: warm, a few words, and different each time rather than one stock phrase. \
+a person actually starts talking: warm, a few real words (not a bare sound like "Mm-hmm" or "Ah"), and different \
+each time rather than one stock phrase. \
 Not a formal preamble, and NOT a stalling phrase that announces you are thinking or asks them to wait. \
 It is one breath of runway before the specific content, and it should read as warmth, not delay. Say \
 that beat once — when the full answer arrives, go straight into it without a second opener.`;
@@ -81,12 +82,17 @@ that beat once — when the full answer arrives, go straight into it without a s
 const VOICE_TURNS = `Backchannel policy:
 - Use moderate backchannels. While the visitor is talking, a brief listening sound now and then is \
 welcome; keep it short and never compete with what they are saying.
+- Listening sounds are only for while the visitor is talking. Never put one in your own answer: do not \
+start, pause or end what you are saying with "Mm-hmm", "Uh-huh", "Ah" or "Hmm".
 
 Interruption policy:
 - A brief listening sound, a quick reaction or a laugh from the visitor while you talk is not an \
 interruption. Keep going. If they laugh, let it land for a moment before your next sentence.
 - When the visitor starts a real turn of their own (a question, a correction, asking you to wait or \
 stop), stop your answer at once, mid-sentence if need be, and listen.
+- Short is not the same as a listening sound. A greeting back ("hi", "hey", "sup"), your name, or a \
+question, however few words it is, is a real turn: stop and answer it. That holds for everything you \
+say, including a greeting or anything else you were asked to say: none of it has to be finished.
 - Once they have taken over, the rest of what you were saying is dropped. Do not go back and finish it \
 unless they ask you to carry on, and then pick up from where you were cut off, briefly, not from the top.
 - If they ask you to go back or repeat something, repeat only the last point they heard, in a sentence \
@@ -135,7 +141,10 @@ While you wait and when the answer comes:
 words for your own: it has been checked against his record and a rewording has not. The opening beat \
 is the only thing you add.
 - The visitor may cut in while you are saying it. Then the interruption policy applies: the rest of \
-the answer can go unsaid.`;
+the answer can go unsaid.
+- The backend's answer may start some sentences with one word in square brackets, like [excited] or \
+[calm]. That is a stage direction for how the sentence feels. Never say it out loud; let it set the \
+tone you say that sentence in.`;
 
 /**
  * The voice had none of the backend's guardrails, so a request it took for
@@ -150,6 +159,31 @@ say in one friendly sentence that you are only here for the tour of him.
 - If they ask what they can ask about, say in a few words that the tour covers ${TOUR_SCOPE}. Never steer \
 them to one particular story they did not ask about.
 - Call yourself "I". Never refer to yourself as "PIP" in the third person.`;
+
+/**
+ * The mood of each sentence, written by the one who means it. Jev reads the
+ * mood back from the words once PIP has said them, so the face lands a beat
+ * late and from the words alone: "that first winter nearly broke me", said
+ * laughing, reads as sad. The backend's draft reaches the page before the
+ * voice says it, so a tag here can set the face as the sentence starts
+ * (TourStage, draftMoods). Only for the live session: chip answers
+ * (/api/tour/ask) are said by commentary and read by Jev as before.
+ *
+ * The names are the moods the face has (components/cameo/moods.ts).
+ */
+export const BACKEND_MOOD_TAGS = `# Mood tags
+Start your answer with one mood tag in square brackets: the feeling the whole answer is said with. Add \
+another tag before a later sentence only when the feeling clearly changes, which most answers never do. \
+The voice reads a tag as a stage direction and never says it. Use only these:
+[calm] settled and unhurried: the right tag for most answers
+[neutral] a plain statement
+[curious] wondering, or asking them something
+[excited] real delight, saved for something that truly is
+[surprised] caught off guard
+[sad] loss, regret or disappointment
+[frustrated] annoyed or fed up
+[error] something could not be done
+Tag the feeling it is said with, not only the subject. No other brackets anywhere in your answer.`;
 
 const BACKEND_OPENER = `The voice has already opened with a short beat of its own before your answer \
 is spoken, so start directly with the substance — no opening interjection, agreement word or praise \
@@ -482,6 +516,46 @@ export function greetingFor(
       : ' Then say you can tell them about Shreyas — his background, his life beyond work, and the moments in the photos — and ask what they would like to hear about.') +
     (visitor.note ? ' Four sentences at most.' : ' Three sentences at most.')
   );
+}
+
+/**
+ * The greeting in two beats, for a visitor who is talking.
+ *
+ * Said in one go, the greeting is up to four sentences that PIP does not stop
+ * for: Brian's "sup pip" came one sentence in and was answered only after the
+ * rest. So the hello is said alone, and the rest (the note, the offer) waits
+ * for the visitor. It is folded into PIP's reply to whatever they say back,
+ * or said by the page if they say nothing (TourStage, SECOND_BEAT_MS). A
+ * visitor who opens with a question gets it answered, with only the note
+ * kept from the greeting.
+ * greetingFor stays for the cases that still say it all at once.
+ */
+export function openingFor(
+  visitor: { name?: string; note?: string; application?: boolean },
+  dayPart?: string,
+): { hello: string; rest: string; note: string } {
+  const time = dayPart
+    ? ` It is ${dayPart} where they are, so open with "Good ${dayPart}".`
+    : ' Do not mention the time of day.';
+  const expected = visitor.name || visitor.note;
+  // A line, not a word: "Good evening, Jordan." alone was too short to feel like a welcome.
+  const hello =
+    `Greet the visitor warmly as PIP${visitor.name ? `, by name (${visitor.name})` : ''}, ` +
+    (expected
+      ? 'and let them know Shreyas mentioned they would be stopping by.'
+      : 'and say who you are: the guide to Shreyas.') +
+    time +
+    ' Two short sentences at most. Say only that, then stop and let them answer. Nothing else about Shreyas yet.';
+  const offer = visitor.application
+    ? 'say you can tell them about Shreyas — his background, how he works, and why he would be worth talking to — and ask what they would like to hear about.'
+    : 'say you can tell them about Shreyas — his background, his life beyond work, and the moments in the photos — and ask what they would like to hear about.';
+  // A note is written as a phrase as often as a sentence; unpunctuated, it ran into the "Then" after it.
+  const note = visitor.note?.trim().replace(/([^.!?])$/, '$1.');
+  const rest =
+    (note ? `In a sentence of its own, pass on what Shreyas wanted them to know, in your own words: ${note} Then ` : '') +
+    (note ? offer : offer[0].toUpperCase() + offer.slice(1)) +
+    (note ? ' Two sentences at most.' : ' One sentence.');
+  return { hello, rest, note: note ? `pass on what Shreyas wanted them to know, in your own words: ${note}` : '' };
 }
 
 /**

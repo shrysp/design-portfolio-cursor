@@ -6,7 +6,7 @@ import Link from 'next/link';
 import localFont from 'next/font/local';
 import { AnimatePresence, motion as fm, useReducedMotion } from 'framer-motion';
 import { HOUSING_W, housingHeight, lookAt, PIP, type Reaction } from '@shrysp/cameo';
-import { MOOD_REACTIONS } from '@/components/cameo/moods';
+import { MOOD_REACTIONS, MOODS, type Mood } from '@/components/cameo/moods';
 import { Character, type CharacterHandle } from '@shrysp/cameo/react';
 import {
   type LiveEvent,
@@ -838,6 +838,33 @@ function TourCard({
 
 /** How long PIP has to have stopped before a question picked on the way in is put to it. */
 const ASK_AFTER_HELLO_MS = 1800;
+/**
+ * How long a visitor who says nothing back to PIP's hello gets before PIP
+ * carries on with the rest of the greeting (openingFor). Long enough to
+ * answer, short enough that silence doesn't feel like PIP is waiting on them.
+ */
+const SECOND_BEAT_MS = 1500;
+/** How sure a mood tag counts as (strengthOf): the backend means it, but the face should not shout it. */
+const TAG_STRENGTH = 0.6;
+/** How long after the rest of the greeting is sent a visitor speaking still counts as cutting into it. */
+const SECOND_BEAT_HOLD_MS = 3000;
+
+/**
+ * The mood tag each sentence of the backend's draft opens with
+ * (BACKEND_MOOD_TAGS), null for a sentence without one. A sentence still
+ * arriving counts as soon as it is plain whether it has a tag.
+ */
+function draftMoods(text: string): (Mood | null)[] {
+  const moods: (Mood | null)[] = [];
+  for (const [piece] of text.matchAll(/[^.!?]+(?:[.!?]+|$)/g)) {
+    const start = piece.trimStart();
+    if (!start) continue;
+    if (start.startsWith('[') && !start.includes(']')) break;
+    const tag = /^\[(\w+)\]/.exec(start)?.[1] as Mood | undefined;
+    moods.push(tag && MOODS.includes(tag) ? tag : null);
+  }
+  return moods;
+}
 /** How long a typed question has for PIP to start working on it, and then to start answering. */
 const TYPED_START_MS = 8000;
 const TYPED_ANSWER_MS = 30000;
@@ -1609,6 +1636,23 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   const askRef = useRef<(question: string) => void>(() => {});
   /** PIP has said something in this session — its hello, when the session is new. */
   const greeted = useRef(false);
+  /**
+   * The rest of a two-beat greeting (openingFor): waiting for the visitor,
+   * then, once sent (saidAt), still there to be cut short.
+   */
+  const secondBeat = useRef<{ rest: string; note: string; saidAt: number } | null>(null);
+  /**
+   * The backend's draft of the answer being said, and how many of the
+   * voice's sentences have been matched against it so far: the voice says
+   * the draft sentence by sentence, so the nth sentence it says takes the
+   * nth draft sentence's mood tag (draftMoods).
+   */
+  const draft = useRef<{ id: string; text: string; said: number; mood?: Mood } | null>(null);
+  /** A spoken sentence has begun and not yet ended, and whether each begun sentence's mood came from a tag. */
+  const sentenceOpen = useRef(false);
+  const sentenceTagged = useRef<boolean[]>([]);
+  /** When PIP's voice last went quiet, as heard (client.pip.quiet): the transcript runs ahead of it. */
+  const pipQuietAt = useRef(0);
   /** The builder's readouts and event log — see LAB_KEY. */
   const [lab, setLab] = useState(false);
   /**
@@ -2148,7 +2192,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   /** The newest sentence whose photos have gone to the stage. */
   const photoSeq = useRef(0);
   const classifySentence = useCallback(
-    (said: string) => {
+    (said: string, tagged = false) => {
       const text = said.trim();
       if (!text) return;
       const question = lastQuestion.current;
@@ -2157,7 +2201,8 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         // A reading that came back after a newer one's is too late for the
         // face and for a card, which are about what PIP is saying now. Its
         // photos still count unless a newer sentence has already asked for some.
-        if (!read.stale) emitMood(read.mood, read.moodP);
+        // A sentence whose mood the backend wrote down already has its face.
+        if (!read.stale && !tagged) emitMood(read.mood, read.moodP);
         // Only once the visitor has said something: the greeting touches on
         // everything and is about none of it.
         const topic = read.topic;
@@ -2207,7 +2252,8 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       return;
     }
     modelUtterance.current = '';
-    classifySentence(said);
+    sentenceOpen.current = false;
+    classifySentence(said, sentenceTagged.current.shift());
   }, [classifySentence]);
 
   const handleEvent = useCallback(
@@ -2291,6 +2337,9 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         if (handoutRef.current && !handoutWriting.current) closeHandoutRef.current();
         window.clearTimeout(modelFlushTimer.current);
         modelUtterance.current = '';
+        draft.current = null;
+        sentenceOpen.current = false;
+        sentenceTagged.current = [];
       };
 
       /**
@@ -2321,6 +2370,21 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       // way to them: what they said is a new question, and the answer it cut
       // off is over. A listening sound that only happened to come as an answer
       // ended is let go.
+      // The backend's draft, ahead of the voice: only its mood tags are used (draftMoods).
+      if (type === 'response.event' && inner === 'response.output_text.delta') {
+        const delta = (event.event as { delta?: unknown }).delta;
+        const id = String(event.delegation_id ?? '');
+        if (typeof delta === 'string') {
+          if (draft.current?.id !== id) draft.current = { id, text: '', said: 0 };
+          draft.current.text += delta;
+        }
+      }
+
+      if (type === 'client.pip.quiet') {
+        pipQuietAt.current = performance.now();
+        // The rest of the greeting has been said: nothing left of it to cut short.
+        if (secondBeat.current?.saidAt && lastModelDelta.current > secondBeat.current.saidAt) secondBeat.current = null;
+      }
       if (type === 'client.pip.quiet' && overlapping.current) {
         overlapping.current = false;
         const words = userUtterance.current.trim().split(/\s+/).filter(Boolean).length;
@@ -2338,6 +2402,27 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
 
       switch (intent.kind) {
         case 'user-active': {
+          /**
+           * They are answering the hello, or cutting into the rest of it.
+           * Either way their turn comes first: a question is acknowledged and
+           * answered, and of the greeting only his note to them is kept.
+           */
+          const beat = secondBeat.current;
+          if (beat) {
+            secondBeat.current = null;
+            session.current?.think(
+              // Not the note again: told to fit it in "if you had not got to it yet", PIP said it twice (Jordan, 24 Oct).
+              beat.saidAt
+                ? 'The visitor has started talking while you were finishing your hello. If it is more than a ' +
+                    'listening sound, leave the rest of the hello unsaid and reply to what they said. Do not ' +
+                    'repeat anything you have already said.'
+                : 'The visitor is answering your hello. That is a real turn: reply to what they actually said. ' +
+                    'If they asked something, acknowledge it and answer it' +
+                    (beat.note ? `, and on the way, in one short sentence, ${beat.note}` : '') +
+                    '. Leave out the rest of the greeting. If they only said hello back, then, without greeting ' +
+                    `them again: ${beat.rest}`,
+            );
+          }
           release(thinking);
           appendLine('you', intent.delta);
           heardVisitor.current = true;
@@ -2378,6 +2463,25 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
           lastVoice.current = performance.now();
           if (point.current) point.current.answered = true;
 
+          /** A spoken sentence begins: with a draft behind it, its mood is the draft sentence's tag. */
+          const begin = () => {
+            sentenceOpen.current = true;
+            const d = draft.current;
+            const moods = d ? draftMoods(d.text) : [];
+            const i = d ? d.said++ : -1;
+            const tagged = i >= 0 && i < moods.length;
+            const mood = tagged ? moods[i] : null;
+            // Once per change of feeling, not once per sentence: each emit is a short burst of the
+            // pose, and a tag repeated on every sentence flashed "excited" at the start of each.
+            // Held to a firm reading's strength, not a certain one's, for the same reason.
+            if (d && mood && mood !== d.mood) {
+              d.mood = mood;
+              emitMood(mood, TAG_STRENGTH);
+              setLog((l) => [`tour.tag mood=${mood} sentence=${i + 1}`, ...l].slice(0, 40));
+            }
+            sentenceTagged.current.push(tagged);
+          };
+          if (!sentenceOpen.current && intent.delta.trim()) begin();
           modelUtterance.current += intent.delta;
 
           /**
@@ -2391,10 +2495,13 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
           const sentenceEnd = /[^.!?]*[.!?]+\s*/g;
           let cursor = 0;
           for (const m of modelUtterance.current.matchAll(sentenceEnd)) {
-            classifySentence(m[0]);
+            if (!sentenceOpen.current) begin();
+            classifySentence(m[0], sentenceTagged.current.shift());
+            sentenceOpen.current = false;
             cursor = (m.index ?? 0) + m[0].length;
           }
           modelUtterance.current = modelUtterance.current.slice(cursor);
+          if (!sentenceOpen.current && modelUtterance.current.trim()) begin();
 
           lastModelDelta.current = performance.now();
           window.clearTimeout(modelFlushTimer.current);
@@ -2468,7 +2575,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
           break;
       }
     },
-    [appendLine, classifySentence, endOnce, emitImages, flushModelTail, releasePoint, sharePoint, stopSpotlight],
+    [appendLine, classifySentence, emitMood, endOnce, emitImages, flushModelTail, releasePoint, sharePoint, stopSpotlight],
   );
 
   /**
@@ -2490,6 +2597,11 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     window.clearTimeout(dozeTimer.current);
     wokenByVoice.current = byVoice;
     greeted.current = false;
+    secondBeat.current = null;
+    pipQuietAt.current = 0;
+    draft.current = null;
+    sentenceOpen.current = false;
+    sentenceTagged.current = [];
     sessionReady.current = false;
     heardVisitor.current = false;
     setFault(null);
@@ -2512,13 +2624,20 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
     const s = createLiveSession({
       dayPart: dayPartNow,
       onEvent: (event) => handleEvent(event, s),
-      onGreeting: (greeting) => {
+      onGreeting: (greeting, opening) => {
         if (session.current !== s) return;
         sessionReady.current = true;
         const texts = typedQueue.current.splice(0);
         setQueued([]);
         if (!texts.length) {
           if (!greeting) return;
+          // A talking visitor gets the hello on its own, so a reply to it can come straight away.
+          // Typing, or with a question already picked to follow it, the whole greeting goes at once.
+          if (opening && modeRef.current !== 'text' && !pendingAsk.current) {
+            secondBeat.current = { rest: opening.rest, note: opening.note, saidAt: 0 };
+            s.speak(opening.hello);
+            return;
+          }
           s.speak(
             modeRef.current === 'text'
               ? `${greeting} They are typing rather than talking, so invite them to type what they would like to hear about.`
@@ -2970,7 +3089,8 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       if (el instanceof HTMLElement && el.matches('input, textarea, select, [contenteditable]')) {
         return;
       }
-      if (e.key === LAB_KEY && process.env.NODE_ENV !== 'production') {
+      // By key position too: on a layout where ` is a dead key, e.key is 'Dead'.
+      if ((e.key === LAB_KEY || e.code === 'Backquote') && process.env.NODE_ENV !== 'production') {
         setLab((on) => !on);
       } else if (e.code === 'Space') {
         e.preventDefault(); // or the page scrolls out from under them
@@ -3018,6 +3138,21 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       // Silence is read off the transcript: the voice model sends no reliable
       // "finished speaking", but words stop arriving when it has.
       const silentFor = performance.now() - lastVoice.current;
+      // Nothing said back to the hello: PIP carries on with the rest of the greeting.
+      const beat = secondBeat.current;
+      if (
+        beat &&
+        !beat.saidAt &&
+        greeted.current &&
+        !pipAudibleNow.current &&
+        silentFor > SECOND_BEAT_MS &&
+        performance.now() - pipQuietAt.current > SECOND_BEAT_MS
+      ) {
+        beat.saidAt = performance.now();
+        session.current?.speak(`Carry on from your hello, without greeting them again. ${beat.rest}`);
+      } else if (beat?.saidAt && performance.now() - beat.saidAt > SECOND_BEAT_HOLD_MS && silentFor > SECOND_BEAT_MS) {
+        secondBeat.current = null;
+      }
       // A question picked before the tour started goes in once the hello is over.
       if (pendingAsk.current && greeted.current && silentFor > ASK_AFTER_HELLO_MS) {
         const question = pendingAsk.current;
