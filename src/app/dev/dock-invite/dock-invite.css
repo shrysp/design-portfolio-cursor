@@ -1,0 +1,216 @@
+/*
+ * The bench for putting the tour's toast into the dock (/dev/dock-invite).
+ * The toast's own pieces (toast.css) are reused inside; what's here is the
+ * smoked glass they sit on, PIP's seat in the dock, and each variant's frame.
+ * --k is the bench's slow-motion dial.
+ */
+
+/* The toast's material (.tour-toast) without its corner placement. */
+.di-smoke {
+  --ink: #eef1f4;
+  --muted: rgb(238 241 244 / 0.6);
+  --lcd: #95d06b;
+  --entrance-lcd: var(--lcd);
+  position: relative;
+  border-radius: 20px;
+  color: var(--ink);
+  background: rgb(11 13 16 / 0.84);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow:
+    0 18px 40px -14px rgb(20 24 28 / 0.5),
+    0 2px 6px rgb(20 24 28 / 0.18);
+}
+.di-smoke::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.42),
+    rgb(255 255 255 / 0.12) 40%,
+    rgb(255 255 255 / 0.05) 70%,
+    rgb(255 255 255 / 0.14)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+/* PIP small, in the dock or the capsule. */
+.di-pip {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  pointer-events: none;
+}
+/* Off their own layers, so Chrome redraws PIP sharp at this size rather than stretching a picture of it (as in toast.css). */
+.di-pip .char-root,
+.di-pip .char-body {
+  will-change: auto;
+}
+.di-pip pattern rect + rect {
+  fill: transparent;
+}
+
+/* ── PIP's seat in the dock: PIP itself, at the height of the dock's buttons, no frame around it ── */
+.di-handle {
+  --lcd: #95d06b;
+  position: relative;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: scale 160ms var(--curve-out);
+}
+.di-handle:active {
+  scale: 0.94;
+}
+.di-handle:focus-visible {
+  outline: 2px solid var(--lcd);
+  outline-offset: 2px;
+}
+/* ── 1. Rise ── */
+.di-rise-card {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: calc(50% - 190px);
+  width: 380px;
+}
+/* Fills the gap down to the dock, so crossing it doesn't count as leaving. */
+.di-rise-card::after {
+  content: '';
+  position: absolute;
+  inset: 100% 0 auto;
+  height: 14px;
+}
+
+/*
+ * ── 2. Island: the dock grows upward like the tour's bar (TourBar, .tour-console) ──
+ * Shut, its minimum width is the row's (written by Island); open, the room's.
+ * Only while opening or shutting does that ease, so the shut glass follows
+ * the row ("Top" coming and going) at once.
+ */
+.di-island {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: calc(100vw - 32px);
+  overflow: hidden;
+  border-radius: 22px;
+}
+.di-island--wide {
+  min-width: 372px;
+}
+.di-island--morph {
+  transition: min-width calc(300ms * var(--k, 1)) var(--curve-out) var(--island-hold, 0s);
+}
+/* A layer over the row. No width of its own, so it never props the glass open, and no padding, so its height reaches nothing. */
+.di-island-layer {
+  display: flex;
+  flex-shrink: 0;
+  /* Centred, and wider than the layer while the glass is still widening: uncovered from the middle out. */
+  justify-content: center;
+  overflow: hidden;
+  contain: inline-size;
+}
+/* Always the open width, so nothing re-wraps while the glass eases. */
+.di-island-layer-in {
+  flex-shrink: 0;
+  width: 372px;
+  padding: 6px 6px 0;
+}
+/* The row of buttons: its own width, centred, never changing for what opens over it. */
+.di-island-row {
+  flex-shrink: 0;
+  align-self: center;
+  width: max-content;
+}
+.di-island-screen {
+  --ink: #eef1f4;
+  --muted: rgb(238 241 244 / 0.6);
+  --lcd: #95d06b;
+  --entrance-lcd: var(--lcd);
+  border-radius: 16px;
+  background: #0b0d10;
+  box-shadow:
+    inset 0 2px 6px rgb(0 0 0 / 0.6),
+    0 1px 0 rgb(255 255 255 / 0.7);
+}
+
+/* ── 3. Capsule: the toast's glass at the dock's height, growing away from it ── */
+.di-capsule {
+  position: absolute;
+  /* The dock's exact height, top and bottom lined up with it. */
+  top: 0;
+  bottom: 0;
+  right: calc(100% + 8px);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.di-capsule-pip {
+  display: grid;
+  height: 100%;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 999px;
+  background: radial-gradient(circle at 50% 45%, rgb(120 210 90 / 0.26), transparent 70%);
+  cursor: pointer;
+}
+.di-capsule-pip:focus-visible {
+  outline: 2px solid var(--lcd);
+  outline-offset: -3px;
+}
+.di-capsule-rest {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 6px;
+}
+.di-capsule-words {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-left: 2px;
+}
+.di-capsule-words .tour-toast-title { font-size: 13px; }
+.di-capsule-words .tour-toast-text { font-size: 12px; }
+.di-capsule-go.entrance-btn {
+  height: 32px;
+  min-width: 0;
+  padding: 0 14px;
+  font-size: 13px;
+}
+.di-capsule-tuck {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 999px;
+  color: rgb(238 241 244 / 0.45);
+  /* Pointing at the dock, where it goes */
+  rotate: -90deg;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+.di-capsule-tuck:hover {
+  color: var(--ink);
+  background: rgb(255 255 255 / 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .di-island--morph {
+    transition: none;
+  }
+}

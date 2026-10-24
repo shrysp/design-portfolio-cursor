@@ -25,13 +25,47 @@ export type Opening = {
   onClosed?: () => void;
 };
 
+/**
+ * Whether the takeover (or the way out) is over the page. PIP in the dock
+ * stops drawing under it: every frame it drew restarted the move into the tour.
+ */
+export const TakeoverUpContext = createContext(false);
+
 /** Announced once the takeover has landed its stream on the tour and is gone. */
 export const LANDED = 'tour:landed';
 
 /** Provided by EntranceHost, in the layout the case study and the tour share. */
 export const EntranceContext = createContext<((opening: Opening) => void) | null>(null);
 
-/** Opens the takeover. For the case study's card (TourEntrance) and the toast (TourToast). */
+/**
+ * Where the tour's Back goes: the page the visitor came into it from, where
+ * they were on it, and what to call it ("Home", "Quinn"). Kept for the visit
+ * (sessionStorage), so a reload of the tour still knows. None for a visit
+ * that began on the tour itself or from an invitation: Back goes to the case
+ * study, as it always did.
+ */
+export type WayBack = { path: string; label: string; scroll: number };
+const WAY_BACK = 'tour.from';
+
+export function rememberWayBack(way: WayBack | null) {
+  try {
+    if (way) sessionStorage.setItem(WAY_BACK, JSON.stringify(way));
+    else sessionStorage.removeItem(WAY_BACK);
+  } catch {
+    // No storage: Back goes to the case study.
+  }
+}
+
+export function wayBack(): WayBack | null {
+  try {
+    const way = JSON.parse(sessionStorage.getItem(WAY_BACK) ?? 'null') as WayBack | null;
+    return way && typeof way.path === 'string' && way.path.startsWith('/') ? way : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Opens the takeover. For the case study's card (TourEntrance) and PIP in the dock (DockInvite). */
 export function useEntrance() {
   const open = useContext(EntranceContext);
   if (!open) throw new Error('useEntrance needs an EntranceHost above it (the root layout).');

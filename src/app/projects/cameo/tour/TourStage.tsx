@@ -33,7 +33,7 @@ import { LANDED } from '@/components/cameo/entrance/context';
 import LibraryDive, { type DiveHandle } from '@/components/cameo/entrance/LibraryDive';
 import { pipCentre } from '@/components/cameo/entrance/TourEntrance';
 import { createField, type Field } from '@/components/cameo/entrance/field';
-import { useLeaveTour } from '@/components/cameo/entrance/context';
+import { useLeaveTour, wayBack } from '@/components/cameo/entrance/context';
 import { playRecipe, playVocal, setSoundEnabled } from '@shrysp/cameo/sound';
 import '@shrysp/cameo/styles.css';
 import './tour.css';
@@ -1590,6 +1590,12 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
   const pointOfferTimer = useRef<number | undefined>(undefined);
   const stageRef = useRef<HTMLElement>(null);
   const leave = useLeaveTour();
+  /** Back goes to the page the tour was entered from (wayBack), named for it; else to the case study. Read after mount: it's in sessionStorage. */
+  const [back, setBack] = useState({ href: '/projects/cameo#tour', label: 'Case study' });
+  useEffect(() => {
+    const way = wayBack();
+    if (way) setBack({ href: way.path, label: way.label });
+  }, []);
   const [silent, setSilent] = useState(false);
   const [spent, setSpent] = useState(0);
   const [liveSeconds, setLive_] = useState(0);
@@ -3584,7 +3590,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
       >
         <div className="flex items-center gap-3">
           <Link
-            href="/projects/cameo#tour"
+            href={back.href}
             className="tour-btn"
             data-crt-clear
             onClick={(e) => {
@@ -3595,7 +3601,7 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
             }}
           >
             <Icon d="M10 3 5 8l5 5" />
-            Case study
+            {back.label}
           </Link>
           {/* Not shown — the stage says what it is — but still the page's heading for a screen reader. */}
           <h1 className="sr-only">PIP &mdash; an interactive tour</h1>

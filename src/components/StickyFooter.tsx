@@ -1,17 +1,18 @@
 "use client";
 
 import { useSitePath } from '@/lib/sitePath';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { XLogo } from '@phosphor-icons/react';
 import { IconFile, IconArrowUp } from 'nucleo-micro-bold-essential';
 import { IconLinkedin  } from 'nucleo-social-media';
 import EmailCopyButton, { EMAIL } from './EmailCopyButton';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
 import Glass, { canRefract } from './Glass';
 import { isRouteTransitioning, onRouteTransitionEnd } from '@/lib/routeTransition';
 import { DockTooltip, useDockTooltip } from './DockTooltip';
 import { EASE_OUT } from '@/lib/easing';
+import { CARD_W, InviteCard, PipSeat, useDockInvite } from './cameo/entrance/DockInvite';
 
 // Project navigation order - defines the sequence of projects
 const projectOrder = [
@@ -41,12 +42,16 @@ const dockTips = {
 };
 const dockTipLabels = Object.values(dockTips);
 
-/** Pages that are the whole screen, with no dock: the tour, and an invitation (with its preview and review copies). */
-const FULL_SCREEN = ['/projects/cameo/tour', '/projects/cameo/invite', '/dev/tour-invite', '/dive/invite'];
+/**
+ * Pages that are the whole screen, with no dock: the tour, and an invitation (with its preview and review copies).
+ * And the bench for the dock's tour invitation, which draws its own dock.
+ */
+const FULL_SCREEN = ['/projects/cameo/tour', '/projects/cameo/invite', '/dev/tour-invite', '/dive/invite', '/dev/dock-invite'];
 
 export default function StickyFooter() {
   const router = useRouter();
   const pathname = usePathname();
+  const reduce = useReducedMotion();
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isNearBottom, setIsNearBottom] = useState(false);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
@@ -182,6 +187,17 @@ export default function StickyFooter() {
 
   const showProjectNav = isProjectPage && isNearBottom;
 
+  // The tour's way in: PIP at the start of the dock, and its card rising out of it (DockInvite).
+  const invite = useDockInvite();
+  const seatRef = useRef<HTMLButtonElement>(null);
+  // The card grows from PIP's seat and shrinks back into it: where the seat is across the card, centred over the dock.
+  const [originX, setOriginX] = useState(CARD_W / 2);
+  useLayoutEffect(() => {
+    const dock = dockRef.current?.getBoundingClientRect();
+    const seat = seatRef.current?.getBoundingClientRect();
+    if (dock && seat) setOriginX(seat.left + seat.width / 2 - (dock.left + dock.width / 2 - CARD_W / 2));
+  }, [invite.shown, invite.expanded, showScrollTop]);
+
   // The tour and an invitation are the whole screen from the first frame: no
   // dock to show and then slide away from under them. The invitation's preview
   // and review copies too, so they open as the real one does.
@@ -209,7 +225,7 @@ export default function StickyFooter() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 12 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
+              transition={{ duration: 0.25, ease: EASE_OUT }}
               className="pointer-events-auto flex items-center gap-1.5 p-1.5 max-w-full overflow-x-auto scrollbar-hide"
             >
               {projectOrder.map((project) => {
@@ -234,10 +250,42 @@ export default function StickyFooter() {
         {/* The tooltip sits beside the dock, not inside it: glass can't blur
             the page from within another pane of glass. */}
         <div ref={dockRef} className="relative pointer-events-auto">
+          {/* Stands clear of the project switcher when it's over the dock: its height and the gap. */}
+          <InviteCard
+            show={invite.expanded}
+            originX={originX}
+            raise={showProjectNav ? 56 : 0}
+            intro={invite.intro}
+            bind={invite.bind}
+            onStart={invite.start}
+            onTuck={invite.tuck}
+          />
           <DockTooltip tip={tip} labels={dockTipLabels} raised={showProjectNav} />
           {/* The page-transition name goes on the glass itself. On a wrapper it
               would wall the glass off from the page it's meant to blur. */}
           <Glass {...glass} filterId="dock-lens" data-dock style={{ viewTransitionName: 'dock' }} className="flex items-center p-1.5">
+            {/* PIP comes into the dock as "Top" does, a beat after the page, with a little more room at the
+                edge than the round buttons need: its housing is flatter. */}
+            <AnimatePresence initial={false}>
+              {invite.shown && (
+                <motion.div
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: "auto", opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  // Under reduced motion the dock takes its new width at once: it fades, it doesn't slide.
+                  transition={{
+                    width: { duration: reduce ? 0 : 0.25, ease: EASE_OUT },
+                    opacity: { duration: 0.25, ease: EASE_OUT },
+                  }}
+                  className="flex items-center overflow-hidden -my-1 py-1"
+                >
+                  <span {...invite.bind} className="inline-flex pl-1.5">
+                    <PipSeat ref={seatRef} expanded={invite.expanded} drawn={!invite.takeoverUp} onClick={invite.toggle} />
+                  </span>
+                  <div aria-hidden className="mx-2.5 h-5 w-px shrink-0 bg-stone-900/15 shadow-[1px_0_0_rgba(255,255,255,0.7)]" />
+                </motion.div>
+              )}
+            </AnimatePresence>
             <div className="flex items-center gap-1.5">
               <a
                 href="https://x.com/ShreyasPatil_"
@@ -296,7 +344,11 @@ export default function StickyFooter() {
                   initial={{ width: 0, opacity: 0 }}
                   animate={{ width: "auto", opacity: 1 }}
                   exit={{ width: 0, opacity: 0 }}
-                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  // Under reduced motion the dock takes its new width at once: it fades, it doesn't slide.
+                  transition={{
+                    width: { duration: reduce ? 0 : 0.25, ease: EASE_OUT },
+                    opacity: { duration: 0.25, ease: EASE_OUT },
+                  }}
                   className="overflow-hidden -my-1 py-1"
                 >
                   <button
