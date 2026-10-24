@@ -3,11 +3,12 @@
 import { useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createField, STAGE_BG } from './field';
+import { wayBack } from './context';
 import { easeOut, smoothstep, squeeze, switchOff, tween, wait } from './TourEntrance';
 import { playRecipe } from '@shrysp/cameo/sound';
 import { QUICK_OFF, QUICK_ON, TUBE_OFF, TUBE_ON } from '@/lib/tour/tour-sounds';
 
-/** Where the tour's Back goes: the case study, at its section about the tour. */
+/** Where the tour's Back goes when it wasn't entered from a page (wayBack): the case study, at its section about the tour. */
 export const CASE_STUDY = '/projects/cameo';
 const SECTION = 'tour';
 
@@ -20,7 +21,8 @@ const HOLD_MS = 120;
 /**
  * Leaving the tour: the tube switches off, the way the takeover closes. The
  * tour squeezes to a line and a dot, the page changes behind the dark, and
- * the case study opens back out of the same dot.
+ * the page the visitor came in from (wayBack) opens back out of the same dot,
+ * where they were on it — or the case study, at its tour section.
  *
  * Rendered by EntranceHost, in the layout both pages share, so the dark and
  * the dot stay up across the route change. The shader draws the dark and the
@@ -32,8 +34,12 @@ export default function TourExit({ onDone }: { onDone: () => void }) {
   const router = useRouter();
   const pathname = usePathname();
   const alive = useRef(true);
-  /** Set once the tour has gone to a dot and the case study has been asked for. */
+  /** Set once the tour has gone to a dot and the page behind it has been asked for. */
   const arrived = useRef<(() => void) | null>(null);
+  /** The way back, read once as the exit starts. */
+  const way = useRef(wayBack());
+  const to = way.current?.path ?? CASE_STUDY;
+  const toPath = to.split(/[?#]/)[0];
 
   useEffect(() => {
     alive.current = true;
@@ -44,7 +50,7 @@ export default function TourExit({ onDone }: { onDone: () => void }) {
 
     const run = async () => {
       if (reduced || !f) {
-        router.push(`${CASE_STUDY}#${SECTION}`);
+        router.push(way.current ? to : `${CASE_STUDY}#${SECTION}`);
         onDone();
         return;
       }
@@ -62,14 +68,15 @@ export default function TourExit({ onDone }: { onDone: () => void }) {
       playRecipe(TUBE_OFF, { timeScale: QUICK_OFF });
       await tween(OFF_MS, switchOff, (k) => setOff(k, stage), isAlive);
       if (!alive.current) return;
-      // The case study, behind the dark; it opens once it is there.
+      // The page they came from, behind the dark; it opens once it is there.
       await new Promise<void>((resolve) => {
         arrived.current = resolve;
-        router.push(CASE_STUDY, { scroll: false });
+        router.push(to, { scroll: false });
       });
       if (!alive.current) return;
-      // At the tour's section, before it opens: the dot opens on where they left from.
-      document.getElementById(SECTION)?.scrollIntoView({ block: 'start', behavior: 'instant' });
+      // Where they were, before it opens: the dot opens on where they left from.
+      if (way.current) window.scrollTo({ top: way.current.scroll, behavior: 'instant' });
+      else document.getElementById(SECTION)?.scrollIntoView({ block: 'start', behavior: 'instant' });
       const page = document.querySelector<HTMLElement>('[data-crt-page]');
       setOff(1, page);
       await wait(HOLD_MS);
@@ -90,12 +97,12 @@ export default function TourExit({ onDone }: { onDone: () => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // The route has changed: let the case study open.
+  // The route has changed: let the page open.
   useEffect(() => {
-    if (pathname !== CASE_STUDY || !arrived.current) return;
+    if (pathname !== toPath || !arrived.current) return;
     // A frame for the page to be in the document.
     requestAnimationFrame(() => arrived.current?.());
-  }, [pathname]);
+  }, [pathname, toPath]);
 
   return (
     <canvas

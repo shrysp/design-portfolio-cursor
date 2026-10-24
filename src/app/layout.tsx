@@ -76,9 +76,8 @@ export default function RootLayout({
         <DevFeedback />
         <RouteTransitionSettler />
         <MotionProvider>
-          {/* The way into the PIP tour, from any page: its takeover, glass and toast. */}
-          <EntranceHost>{children}</EntranceHost>
-          <StickyFooter />
+          {/* The way into the PIP tour, from any page: its takeover and glass, and PIP in the dock. */}
+          <EntranceHost dock={<StickyFooter />}>{children}</EntranceHost>
         </MotionProvider>
         {/* The tuning panel: for building with, never for visitors. */}
         {process.env.NODE_ENV !== 'production' && <DialRoot defaultOpen={false} position="bottom-right" />}

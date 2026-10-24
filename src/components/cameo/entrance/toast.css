@@ -1,20 +1,19 @@
 /*
- * The tour's toast (TourToast): the case study's card (poster.css) made
- * small. The dark room as smoked glass over the page — what is behind shows
- * through, blurred — with a bright edge where the light catches it, PIP lit
- * in it, the LCD tag, and the tour's green gel to press.
+ * The tour's invitation in the dock (DockInvite): the case study's card
+ * (poster.css) made small, standing over the dock. The dark room as smoked
+ * glass over the page — what is behind shows through, blurred — with a
+ * bright edge where the light catches it, PIP lit in it, the LCD tag, and
+ * the tour's green gel to press. Framer Motion brings it in and out.
  */
-.tour-toast {
+.tour-invite {
   --ink: #eef1f4;
   --muted: rgb(238 241 244 / 0.6);
   --lcd: #95d06b;
   --entrance-lcd: var(--lcd);
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  /* Under the overlay range (StickyFooter steps aside from 9990 up): this is not a covering layer. */
-  z-index: 9000;
-  width: min(calc(100vw - 32px), 380px);
+  position: absolute;
+  /* Centred over the dock; `bottom` is set by DockInvite, clear of the project switcher. */
+  left: calc(50% - 190px);
+  width: 380px;
   border-radius: 20px;
   background: rgb(11 13 16 / 0.84);
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
@@ -23,30 +22,20 @@
     0 18px 40px -14px rgb(20 24 28 / 0.5),
     0 2px 6px rgb(20 24 28 / 0.18);
   /* Its own piece in a page transition, like the dock (globals.css): it stays put and on top. */
-  view-transition-name: tour-toast;
-  /* In: up and out of a blur, an ease-out; out the same way, quicker. */
-  transition:
-    opacity 260ms var(--curve-out),
-    translate 360ms var(--curve-out),
-    filter 260ms var(--curve-out);
-  @starting-style {
-    opacity: 0;
-    translate: 0 12px;
-    filter: blur(6px);
-  }
+  view-transition-name: tour-invite;
 }
-.tour-toast[data-show='false'] {
-  opacity: 0;
-  translate: 0 12px;
-  filter: blur(6px);
-  pointer-events: none;
-  transition-duration: 180ms;
+/* Fills the gap down to the dock, so crossing from the card to PIP doesn't count as leaving. */
+.tour-invite::after {
+  content: '';
+  position: absolute;
+  inset: 100% 0 auto;
+  height: 14px;
 }
 /*
  * The edge: a hairline that is bright along the top, where the light falls
  * on the glass, and fades round the sides to almost nothing underneath.
  */
-.tour-toast::before {
+.tour-invite::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -102,11 +91,25 @@
 }
 
 .tour-toast-pip {
+  /* Over the glass's scanlines (.tour-toast-screen::after): drawn across PIP they striped its housing and read as blur. */
+  position: relative;
+  z-index: 1;
   align-self: flex-start;
   flex-shrink: 0;
   display: grid;
   width: 60px;
   place-items: center;
+}
+/*
+ * The package puts PIP on layers of its own (will-change: transform on
+ * .char-root and .char-body), and Chrome draws such a layer once, at the size
+ * it was when the layer was made, then only stretches it. Scaled to 52px —
+ * and inside a card that comes in scaled down — that left PIP soft. Drawn
+ * with the page instead, it is redrawn sharp at the size it is shown.
+ */
+.tour-toast-pip .char-root,
+.tour-toast-pip .char-body {
+  will-change: auto;
 }
 
 .tour-toast-body {
@@ -161,7 +164,7 @@
   font-size: 13px;
 }
 
-/* Put away: small, in the corner, out of the way of the rest. */
+/* Tuck into the dock: small, in the corner, out of the way of the rest. */
 .tour-toast-close {
   position: absolute;
   top: 6px;
@@ -187,30 +190,55 @@
   outline-offset: 1px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .tour-toast {
-    transition: opacity 150ms ease;
-    translate: none;
-    filter: none;
-  }
-}
-
 /*
- * Page transitions: the toast is the same on both pages, so it shows one
+ * Page transitions: the card is the same on both pages, so it shows one
  * steady picture above everything that moves — not a cross-fade, and not
  * carried along in the page's own blur. Its frame carries the glass backdrop
  * that a picture can't.
  */
-::view-transition-group(tour-toast) {
+::view-transition-group(tour-invite) {
   z-index: 100;
   border-radius: 20px;
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
   backdrop-filter: blur(18px) saturate(1.4);
 }
-::view-transition-old(tour-toast) {
+::view-transition-old(tour-invite) {
   display: none;
 }
-::view-transition-new(tour-toast) {
+::view-transition-new(tour-invite) {
   animation: none;
   mix-blend-mode: normal;
+}
+
+/*
+ * PIP's seat in the dock: PIP itself, a little under the height of the
+ * dock's buttons, with no frame around it — its own housing is the shape.
+ */
+.tour-seat {
+  position: relative;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: scale 160ms var(--curve-out);
+}
+.tour-seat:active {
+  scale: 0.96;
+  /* Down faster than it comes back up, as the gel buttons (entrance.css). */
+  transition-duration: 100ms;
+}
+.tour-seat:focus-visible {
+  outline: 2px solid #95d06b;
+  outline-offset: 2px;
+}
+.tour-seat-pip {
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+/* Drawn with the page, not stretched from a picture of itself (as .tour-toast-pip above). */
+.tour-seat-pip .char-root,
+.tour-seat-pip .char-body {
+  will-change: auto;
 }

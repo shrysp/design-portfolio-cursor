@@ -4,13 +4,12 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { createPortal } from 'react-dom';
 import { usePathname } from 'next/navigation';
 import CrtLayer from '../crt/CrtLayer';
-import { EntranceContext, GLASS_APPEAR, LeaveContext, TOUR, type Opening } from './context';
-import TourToast from './TourToast';
+import { EntranceContext, GLASS_APPEAR, LeaveContext, TakeoverUpContext, TOUR, rememberWayBack, type Opening } from './context';
 
 type Parts = { Takeover: typeof import('./TourEntrance').Takeover; TourExit: typeof import('./TourExit').default };
 /**
  * The takeover and the way out, loaded when first wanted: every page has a
- * host, few open it (the toast and the card fetch them ahead). By hand rather
+ * host, few open it (PIP in the dock and the card fetch them ahead). By hand rather
  * than next/dynamic, whose lazy wrapper was seen to stay suspended in
  * development after the module had arrived, with the glass up and no takeover.
  */
@@ -23,12 +22,14 @@ const loadParts = () =>
  * above all the one into the tour, from wherever the visitor started:
  *
  * - the takeover, once the visitor presses Start (the case study's card, or
- *   the toast on any page) — its stream keeps flying while the tour page
- *   loads underneath, then lands on it and fades away;
+ *   PIP in the dock on any page) — its stream keeps flying while the tour
+ *   page loads underneath, then lands on it and fades away;
  * - the CRT glass, from the moment the takeover opens to the end of the tour;
  * - the way out of the tour (TourExit): the tube switching off over the tour
- *   and opening again on the case study;
- * - the toast (TourToast) that offers the tour from any page.
+ *   and opening again on the page the visitor came in from;
+ * - the dock (`dock`, StickyFooter), which offers the tour from any page:
+ *   beside the page rather than in it, but inside the host, so it can open
+ *   the takeover.
  *
  * The page itself is wrapped once here (data-crt-page), so whichever page is
  * under the glass is the one squeezed to a line as the tube switches off.
@@ -36,10 +37,20 @@ const loadParts = () =>
  * Nothing is handed from one page to another mid-motion, so nothing jumps.
  */
 
-export default function EntranceHost({ children }: { children: React.ReactNode }) {
+export default function EntranceHost({ children, dock }: { children: React.ReactNode; dock?: React.ReactNode }) {
   const pathname = usePathname();
   const [opened, setOpened] = useState<Opening | null>(null);
-  const open = useCallback((opening: Opening) => setOpened((now) => now ?? opening), []);
+  const isOpen = useRef(false);
+  isOpen.current = !!opened;
+  const open = useCallback((opening: Opening) => {
+    if (isOpen.current) return;
+    isOpen.current = true;
+    // The tour's Back comes here, to this page where they were on it; an invitation's goes to the case study.
+    rememberWayBack(
+      opening.invite ? null : { path: window.location.pathname + window.location.search, label: opening.back ?? 'Case study', scroll: window.scrollY },
+    );
+    setOpened(opening);
+  }, []);
   const [leaving, setLeaving] = useState(false);
   const leave = useCallback(() => setLeaving(true), []);
   // The glass is up through the tour, over the case study while the screen look's takeover is, and on the way out.
@@ -78,8 +89,7 @@ export default function EntranceHost({ children }: { children: React.ReactNode }
       <LeaveContext.Provider value={leave}>
         <div data-crt-page>{asleep ? null : children}</div>
       </LeaveContext.Provider>
-      {/* Not while the takeover is up: under it, its PIP would go on drawing every frame for nothing. */}
-      {!opened && !leaving && <TourToast />}
+      <TakeoverUpContext.Provider value={!!opened || leaving}>{dock}</TakeoverUpContext.Provider>
       {opened &&
         Takeover &&
         createPortal(
