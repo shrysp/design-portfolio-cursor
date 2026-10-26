@@ -2427,8 +2427,8 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
                 : 'The visitor is answering your hello. That is a real turn: reply to what they actually said. ' +
                     'If they asked something, acknowledge it and answer it' +
                     (beat.note ? `, and on the way, in one short sentence, ${beat.note}` : '') +
-                    '. Leave out the rest of the greeting. If they only said hello back, then, without greeting ' +
-                    `them again: ${beat.rest}`,
+                    '. Leave out the rest of the greeting. If they only said hello back or told you how they are, ' +
+                    `reply to that in a few words, then, without greeting them again: ${beat.rest}`,
             );
           }
           release(thinking);
@@ -3157,7 +3157,10 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
         performance.now() - pipQuietAt.current > SECOND_BEAT_MS
       ) {
         beat.saidAt = performance.now();
-        session.current?.speak(`Carry on from your hello, without greeting them again. ${beat.rest}`);
+        session.current?.speak(
+          'They have not answered your question. Carry on from your hello lightly, without greeting them again ' +
+            `or remarking that they did not answer. ${beat.rest}`,
+        );
       } else if (beat?.saidAt && performance.now() - beat.saidAt > SECOND_BEAT_HOLD_MS && silentFor > SECOND_BEAT_MS) {
         secondBeat.current = null;
       }
