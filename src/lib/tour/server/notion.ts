@@ -13,7 +13,7 @@
  *
  * The properties, by name (the title column can be called anything):
  *
- *   Code            text      what they type in. At least MIN_CODE_LENGTH letters and digits.
+ *   Code            text      what they type in. At least MIN_CODE_LENGTH letters and digits, not starting TEST.
  *   Greet as        text      what PIP calls them
  *   Greeting note   text      one true thing PIP may say aloud when it says hello
  *   Context         text      who they are and what to bring out for them — not said aloud as such
@@ -34,8 +34,10 @@
  * And a second way into the same row, for Shreyas to try it before they do —
  * kept to the last columns so it is never mistaken for theirs:
  *
- *   Test code           text      a second code: the same greeting, context, photos and ticket, but
- *                                 nothing it does is written to their columns or their page
+ *   Test code           text      a second code, TEST-XXXX: the same greeting, context, photos and
+ *                                 ticket, but nothing it does is written to their columns or their page.
+ *                                 Only a code starting TEST works here, and none works in Code, so a
+ *                                 code pasted into the wrong column does nothing.
  *   Test conversations  text      written back by the site: test sessions, newest first, so the
  *                                 page itself only ever holds their own conversations
  *   Test cost           number    written back by the site: dollars spent testing
@@ -46,6 +48,8 @@ const VERSION = '2022-06-28';
 
 /** A code shorter than this could be guessed inside the wrong-code allowance, so its row is ignored. */
 export const MIN_CODE_LENGTH = 8;
+/** Every test code starts with this, and no real one may. */
+export const TEST_PREFIX = 'TEST';
 
 export type NotionVisitor = {
   /** The row's page id. */

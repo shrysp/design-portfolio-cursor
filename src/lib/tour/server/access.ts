@@ -25,6 +25,7 @@
 
 import {
   MIN_CODE_LENGTH,
+  TEST_PREFIX,
   type NotionVisitor,
   appendExchange,
   appendTestExchange,
@@ -145,7 +146,9 @@ export async function invitationFor(id: string): Promise<Invitation | null> {
 /** Whether a Notion row is the one this code id was made from — from its Test code, when `test`. */
 async function isRowFor(id: string, row: NotionVisitor, test = false) {
   const code = test ? row.testCode : row.code;
-  const letters = code.replace(/[^a-z0-9]/gi, '');
+  const letters = code.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  // TEST in front is what makes a code a test code, in either column.
+  if (letters.startsWith(TEST_PREFIX) !== test) return false;
   return letters.length >= MIN_CODE_LENGTH && (await hashCode(code)) === id;
 }
 
@@ -299,9 +302,8 @@ export async function unlock(code: string, address: string): Promise<UnlockResul
       // — the one moment the whole table is read, and it is behind the
       // attempt limit above.
       for (const row of await listVisitors()) {
-        // Their own code wins if a row has the same code in both columns.
         const real = await isRowFor(id, row);
-        const test = !real && (await isRowFor(id, row, true));
+        const test = await isRowFor(id, row, true);
         if (!real && !test) continue;
         await saveFromNotion(id, row, test);
         break;
