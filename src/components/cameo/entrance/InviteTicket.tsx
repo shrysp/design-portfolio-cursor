@@ -26,6 +26,10 @@ export type Invite = {
   note?: string;
 };
 
+/** Screen left under the stub for a pull to tear it (TEAR_AT), with some to spare. */
+const PULL_ROOM = 100;
+/** As small as a long note may make the ticket: below this the hand gets hard to read. */
+const MIN_SCALE = 0.7;
 /** How long the ticket takes to feed out of the slot (ticket.css, ticket-print). */
 const PRINT_MS = 1700;
 /** How long the torn stub takes to fall away, before the way in carries on. */
@@ -109,6 +113,7 @@ export default function InviteTicket({
     "idle",
   );
   const [ripped, setRipped] = useState(false);
+  const ticket = useRef<HTMLDivElement>(null);
   const stub = useRef<HTMLButtonElement>(null);
   const tug = useRef<HTMLDivElement>(null);
   /** The hand (target) and where the stub has got to (at), while a pull lasts. */
@@ -358,11 +363,37 @@ export default function InviteTicket({
   // In the document only: the layer is portalled to the body.
   const [host, setHost] = useState<HTMLElement | null>(null);
   useEffect(() => setHost(document.body), []);
+
+  // A long note makes a long ticket, and hung from under the greeting its stub
+  // went off the foot of a laptop screen, with no room to pull it down (the
+  // Sarvam and Cardboard notes). Smaller than ticket.css makes it, then, until
+  // the stub and a pull fit, as far as MIN_SCALE.
+  useEffect(() => {
+    const el = ticket.current;
+    if (!el) return;
+    const fit = () => {
+      el.style.scale = "";
+      // ticket.css's own scale for this screen height; "none" is 1.
+      const base = Number(getComputedStyle(el).scale) || 1;
+      const room = window.innerHeight - el.offsetTop - PULL_ROOM;
+      const s = Math.min(base, Math.max(MIN_SCALE, room / el.offsetHeight));
+      if (s < base) {
+        el.style.transformOrigin = "50% 0";
+        el.style.scale = String(s);
+      }
+    };
+    fit();
+    // The note's hand is a web font: the ticket is its true length once it has loaded.
+    void document.fonts.ready.then(fit);
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [host, invite.note, top]);
   if (!host) return null;
 
   return createPortal(
     <div className={`ticket-layer ${dots.variable}`}>
       <div
+        ref={ticket}
         className="ticket"
         data-show={show}
         data-phase={phase}
