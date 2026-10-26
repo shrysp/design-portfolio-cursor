@@ -12,6 +12,10 @@
  * an unticked Active box takes effect, and good enough to run on if Notion
  * cannot be reached. What a code has spent is never Notion's: it lives here.
  *
+ * A row's Test code is a record of its own, made from the same row and
+ * marked `test`: it has its own time, and what it costs and says goes to the
+ * row's Test columns, never to the visitor's.
+ *
  * Voice time is the cost that matters ($0.05 a minute, billed while connected),
  * so that is what the budget counts. A session's whole allowance is charged
  * when it starts and the unused part handed back when it ends, measured by
@@ -19,7 +23,18 @@
  * that never says goodbye simply keeps what it reserved.
  */
 
-import { MIN_CODE_LENGTH, type NotionVisitor, appendExchange, getVisitor, listVisitors, notionConfigured, reportUsage } from './notion';
+import {
+  MIN_CODE_LENGTH,
+  TEST_PREFIX,
+  type NotionVisitor,
+  appendExchange,
+  appendTestExchange,
+  getVisitor,
+  listVisitors,
+  notionConfigured,
+  reportTestCost,
+  reportUsage,
+} from './notion';
 import { type ResponsesUsage, backendMicros, voiceMicros } from './costs';
 import { getStore, hasRealStore, toRecord } from './store';
 
@@ -88,11 +103,12 @@ export type Visitor = {
   application?: boolean;
 };
 
-/** Copies a Notion row into this code's record. Never touches what the code has spent. */
-async function saveFromNotion(id: string, row: NotionVisitor) {
+/** Copies a Notion row into this code's record — its Test code's, when `test`. Never touches what the code has spent. */
+async function saveFromNotion(id: string, row: NotionVisitor, test = false) {
   await getStore().cmd(
     'HSET', codeKey(id),
-    'label', row.label,
+    'label', test ? `${row.label} (test)` : row.label,
+    'test', test ? '1' : '0',
     'budget', Math.round((row.minutes ?? DEFAULT_BUDGET_SECONDS / 60) * 60),
     'name', row.name,
     'note', row.note.slice(0, MAX_NOTE),
@@ -127,10 +143,13 @@ export async function invitationFor(id: string): Promise<Invitation | null> {
   return { name, number: Number(rec.inviteNo) || 0, note: rec.inviteNote?.trim() || undefined };
 }
 
-/** Whether a Notion row is the one this code id was made from. */
-async function isRowFor(id: string, row: NotionVisitor) {
-  const letters = row.code.replace(/[^a-z0-9]/gi, '');
-  return letters.length >= MIN_CODE_LENGTH && (await hashCode(row.code)) === id;
+/** Whether a Notion row is the one this code id was made from — from its Test code, when `test`. */
+async function isRowFor(id: string, row: NotionVisitor, test = false) {
+  const code = test ? row.testCode : row.code;
+  const letters = code.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  // TEST in front is what makes a code a test code, in either column.
+  if (letters.startsWith(TEST_PREFIX) !== test) return false;
+  return letters.length >= MIN_CODE_LENGTH && (await hashCode(code)) === id;
 }
 
 /**
@@ -146,7 +165,8 @@ export async function refreshVisitor(id: string, timeoutMs?: number): Promise<vo
   if (!rec.page || Date.now() - Number(rec.synced ?? 0) < SYNC_AFTER_MS) return;
   try {
     const row = await getVisitor(rec.page, timeoutMs);
-    if (row && (await isRowFor(id, row))) await saveFromNotion(id, row);
+    const test = rec.test === '1';
+    if (row && (await isRowFor(id, row, test))) await saveFromNotion(id, row, test);
     else await store.cmd('HSET', codeKey(id), 'revoked', '1', 'synced', Date.now());
   } catch (err) {
     console.error('[tour] Notion could not be read; using the saved copy.', err);
@@ -219,6 +239,8 @@ export async function reportVisit(id: string): Promise<void> {
   const used = Number(rec.used ?? 0);
   const cost = (voiceMicros(used) + Number(rec.apiMicros ?? 0)) / 1e6;
   try {
+    // A test is not a visit: only what it cost, in its own column.
+    if (rec.test === '1') return await reportTestCost(rec.page, Math.round(cost * 100) / 100);
     await reportUsage(rec.page, {
       minutesUsed: Math.round((used / 60) * 10) / 10,
       lastVisit: new Date(Number(rec.lastUsed) || Date.now()),
@@ -251,7 +273,8 @@ export async function saveExchange(id: string, raw: unknown): Promise<void> {
   const rec = toRecord(await getStore().cmd<string[]>('HGETALL', codeKey(id)));
   if (!rec.page) return;
   try {
-    await appendExchange(rec.page, lines, new Date());
+    if (rec.test === '1') await appendTestExchange(rec.page, lines, new Date());
+    else await appendExchange(rec.page, lines, new Date());
   } catch (err) {
     console.error('[tour] Could not save the conversation to Notion.', err);
   }
@@ -279,8 +302,10 @@ export async function unlock(code: string, address: string): Promise<UnlockResul
       // — the one moment the whole table is read, and it is behind the
       // attempt limit above.
       for (const row of await listVisitors()) {
-        if (!(await isRowFor(id, row))) continue;
-        await saveFromNotion(id, row);
+        const real = await isRowFor(id, row);
+        const test = await isRowFor(id, row, true);
+        if (!real && !test) continue;
+        await saveFromNotion(id, row, test);
         break;
       }
     }
