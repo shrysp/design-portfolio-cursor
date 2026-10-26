@@ -2414,7 +2414,9 @@ export default function TourStage({ visitor = '' }: { visitor?: string }) {
            * answered, and of the greeting only his note to them is kept.
            */
           const beat = secondBeat.current;
-          if (beat) {
+          // Words, not just a transcript event: one with nothing in it cut the hello short and had
+          // PIP say "Hi." back to no one before running on into the rest (Cardboard test, 26 Oct).
+          if (beat && intent.delta.trim()) {
             secondBeat.current = null;
             session.current?.think(
               // Not the note again: told to fit it in "if you had not got to it yet", PIP said it twice (Jordan, 24 Oct).
