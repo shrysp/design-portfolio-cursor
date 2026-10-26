@@ -545,7 +545,10 @@ export function openingFor(
       ? 'and let them know Shreyas mentioned they would be stopping by.'
       : 'and say who you are: the guide to Shreyas.') +
     time +
-    ' Two short sentences at most. Say only that, then stop and let them answer. Nothing else about Shreyas yet.';
+    // Ended on a statement ("Shreyas said you might stop by."), the pause after it led nowhere: the
+    // visitor could not tell whether to speak or wait (Sarvam tests, 26 Oct). A question makes it their turn.
+    ' Then end by asking how they are: one short, easy question to them, so the pause after it is theirs to answer.' +
+    ' Two short sentences at most, the question last. Say only that, then stop and let them answer. Nothing else about Shreyas yet.';
   const offer = visitor.application
     ? 'say you can tell them about Shreyas — his background, how he works, and why he would be worth talking to — and ask what they would like to hear about.'
     : 'say you can tell them about Shreyas — his background, his life beyond work, and the moments in the photos — and ask what they would like to hear about.';
