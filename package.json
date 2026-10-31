@@ -12,7 +12,8 @@
     "tour:notion": "node scripts/tour-notion.mjs",
     "tour:eval": "tsx scripts/tour-eval.ts",
     "tour:answers": "tsx scripts/tour-answers.ts",
-    "og:generate": "node scripts/generate-og-images.mjs"
+    "og:generate": "node scripts/generate-og-images.mjs",
+    "og:videos": "node scripts/generate-og-videos.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.7",
