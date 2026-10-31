@@ -166,7 +166,9 @@ const GLOSS = { sheen: 0.05, sheenPower: 14, glint: 0.2, glintPower: 45, dome: 0
 
 // The name sticker going onto the cover. It arrives curled up off the surface,
 // held down at its bottom-left corner, and is pressed flat toward the top-right.
-const STICKER = {
+// Shared with the home link's share scene (app/dev/og-scenes), which sticks the
+// same sticker on the same way.
+export const STICKER = {
   columns: 28,
   rows: 20,
   // Samples along the diagonal used to work out the curl
@@ -203,6 +205,84 @@ const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const clamp = THREE.MathUtils.clamp;
 const lerp = THREE.MathUtils.lerp;
+
+/** A sticker's mesh laid flat, and the diagonal its press runs along (stickerShape). */
+export interface StickerShape {
+  geometry: THREE.PlaneGeometry;
+  flat: Float32Array;
+  width: number;
+  height: number;
+  diagonal: number;
+  along: THREE.Vector2;
+}
+
+/** A sticker's mesh, fine enough to curl, with the diagonal the press runs along: bottom-left to top-right. */
+export function stickerShape(width: number, height: number): StickerShape {
+  const geometry = new THREE.PlaneGeometry(width, height, STICKER.columns, STICKER.rows);
+  const flat = Float32Array.from(geometry.attributes.position.array);
+  const diagonal = Math.hypot(width, height);
+  const along = new THREE.Vector2(width / diagonal, height / diagonal);
+  return { geometry, flat, width, height, diagonal, along };
+}
+
+/**
+ * How far a sticker has got, `elapsed` seconds after it started going on:
+ * `arrived` (it eases in, a little big and turned, above its place) and
+ * `pressed` (0 = curled up off its bottom-left corner, 1 = flat).
+ */
+export function stickOnProgress(elapsed: number) {
+  return {
+    arrived: easeOut(clamp(elapsed / STICKER.arriveTime, 0, 1)),
+    pressed: easeInOut(clamp((elapsed - STICKER.arriveTime * 0.5) / STICKER.pressTime, 0, 1)),
+  };
+}
+
+// Lays the sticker out for `pressed` (0 = curled up off its bottom-left corner,
+// 1 = flat). The bend is confined to a band that travels along the diagonal as
+// the sticker is pressed down.
+const curlProfile = new Float32Array((STICKER.samples + 1) * 2);
+export function curlSticker(sticker: StickerShape, pressed: number) {
+  // Where each point along the diagonal ends up: distance along it, and height off the cover.
+  const step = sticker.diagonal / STICKER.samples;
+  const totalCurl = THREE.MathUtils.degToRad(STICKER.curl);
+  let angle = 0;
+  let reach = 0;
+  let lift = 0;
+  for (let sample = 1; sample <= STICKER.samples; sample++) {
+    // How much of this stretch is still lifted, from 0 behind the press to 1 ahead of it
+    const position = (sample - 0.5) / STICKER.samples;
+    const lifted = clamp((position + STICKER.band - pressed * (1 + STICKER.band)) / STICKER.band, 0, 1);
+    angle += (totalCurl / STICKER.samples) * lifted;
+    reach += Math.cos(angle) * step;
+    lift += Math.sin(angle) * step;
+    curlProfile[sample * 2] = reach;
+    curlProfile[sample * 2 + 1] = lift;
+  }
+
+  const position = sticker.geometry.attributes.position;
+  const { flat, along } = sticker;
+  const cornerX = -sticker.width / 2;
+  const cornerY = -sticker.height / 2;
+  for (let vertex = 0; vertex < position.count; vertex++) {
+    const fromCornerX = flat[vertex * 3] - cornerX;
+    const fromCornerY = flat[vertex * 3 + 1] - cornerY;
+    const distance = fromCornerX * along.x + fromCornerY * along.y;
+    const across = -fromCornerX * along.y + fromCornerY * along.x;
+    const at = clamp(distance / step, 0, STICKER.samples);
+    const sample = Math.min(Math.floor(at), STICKER.samples - 1);
+    const blend = at - sample;
+    const curledDistance = lerp(curlProfile[sample * 2], curlProfile[sample * 2 + 2], blend);
+    const curledLift = lerp(curlProfile[sample * 2 + 1], curlProfile[sample * 2 + 3], blend);
+    position.setXYZ(
+      vertex,
+      cornerX + along.x * curledDistance - along.y * across,
+      cornerY + along.y * curledDistance + along.x * across,
+      curledLift
+    );
+  }
+  position.needsUpdate = true;
+  sticker.geometry.computeVertexNormals();
+}
 
 function sheetVertexPrelude(aspect: number) {
   return /* glsl */ `
@@ -535,9 +615,8 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
   // swapped for the cover texture that already has the sticker printed on it.
   function createSticker() {
     const { x, y, width, aspect: stickerAspect, rotation } = options.coverSticker;
-    const height = width / stickerAspect;
-    const geometry = new THREE.PlaneGeometry(width, height, STICKER.columns, STICKER.rows);
-    const flat = Float32Array.from(geometry.attributes.position.array);
+    const shape = stickerShape(width, width / stickerAspect);
+    const { geometry } = shape;
     const shineDirection = { value: new THREE.Vector3(0, 0, 1) };
 
     const material = new THREE.MeshLambertMaterial({ side: THREE.DoubleSide, transparent: true, alphaTest: 0.01, opacity: 0 });
@@ -559,62 +638,12 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
     const turn = -THREE.MathUtils.degToRad(rotation);
     book.add(mesh);
 
-    // The press runs along the diagonal from the bottom-left corner to the top-right.
-    const diagonal = Math.hypot(width, height);
-    const along = new THREE.Vector2(width / diagonal, height / diagonal);
-    return { mesh, geometry, material, depthMaterial, home, turn, width, height, flat, diagonal, along, shineDirection };
+    return { ...shape, mesh, material, depthMaterial, home, turn, shineDirection };
   }
 
   const sticker = createSticker();
   let stickerState: "waiting" | "sticking" | "done" = "waiting";
   let stickerStart = 0;
-
-  // Lays the sticker out for `pressed` (0 = curled up off its bottom-left corner,
-  // 1 = flat). The bend is confined to a band that travels along the diagonal as
-  // the sticker is pressed down.
-  const curlProfile = new Float32Array((STICKER.samples + 1) * 2);
-  function curlSticker(pressed: number) {
-    // Where each point along the diagonal ends up: distance along it, and height off the cover.
-    const step = sticker.diagonal / STICKER.samples;
-    const totalCurl = THREE.MathUtils.degToRad(STICKER.curl);
-    let angle = 0;
-    let reach = 0;
-    let lift = 0;
-    for (let sample = 1; sample <= STICKER.samples; sample++) {
-      // How much of this stretch is still lifted, from 0 behind the press to 1 ahead of it
-      const position = (sample - 0.5) / STICKER.samples;
-      const lifted = clamp((position + STICKER.band - pressed * (1 + STICKER.band)) / STICKER.band, 0, 1);
-      angle += (totalCurl / STICKER.samples) * lifted;
-      reach += Math.cos(angle) * step;
-      lift += Math.sin(angle) * step;
-      curlProfile[sample * 2] = reach;
-      curlProfile[sample * 2 + 1] = lift;
-    }
-
-    const position = sticker.geometry.attributes.position;
-    const { flat, along } = sticker;
-    const cornerX = -sticker.width / 2;
-    const cornerY = -sticker.height / 2;
-    for (let vertex = 0; vertex < position.count; vertex++) {
-      const fromCornerX = flat[vertex * 3] - cornerX;
-      const fromCornerY = flat[vertex * 3 + 1] - cornerY;
-      const distance = fromCornerX * along.x + fromCornerY * along.y;
-      const across = -fromCornerX * along.y + fromCornerY * along.x;
-      const at = clamp(distance / step, 0, STICKER.samples);
-      const sample = Math.min(Math.floor(at), STICKER.samples - 1);
-      const blend = at - sample;
-      const curledDistance = lerp(curlProfile[sample * 2], curlProfile[sample * 2 + 2], blend);
-      const curledLift = lerp(curlProfile[sample * 2 + 1], curlProfile[sample * 2 + 3], blend);
-      position.setXYZ(
-        vertex,
-        cornerX + along.x * curledDistance - along.y * across,
-        cornerY + along.y * curledDistance + along.x * across,
-        curledLift
-      );
-    }
-    position.needsUpdate = true;
-    sticker.geometry.computeVertexNormals();
-  }
 
   function finishSticker() {
     if (stickerState === "done") return;
@@ -642,10 +671,8 @@ export function createJournalScene(options: JournalSceneOptions): JournalScene {
   // Returns whether the sticker is still on its way down.
   function updateSticker(now: number) {
     if (stickerState !== "sticking") return false;
-    const elapsed = (now - stickerStart) / 1000;
-    const arrived = easeOut(clamp(elapsed / STICKER.arriveTime, 0, 1));
-    const pressed = easeInOut(clamp((elapsed - STICKER.arriveTime * 0.5) / STICKER.pressTime, 0, 1));
-    curlSticker(pressed);
+    const { arrived, pressed } = stickOnProgress((now - stickerStart) / 1000);
+    curlSticker(sticker, pressed);
     sticker.mesh.visible = true;
     sticker.material.opacity = arrived;
     sticker.mesh.scale.setScalar(lerp(STICKER.startScale, 1, arrived));

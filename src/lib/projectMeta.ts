@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { hasPreviewVideo, previewVideo } from "./linkPreview";
 
 // What a case study is called in a browser tab and how it reads when its link
 // is shared. The share images are composed from each project's hero by
 // `npm run og:generate` (scripts/generate-og-images.mjs), which reads `hero`
-// and `background` from here.
+// and `background` from here. A project with a clip in og-videos.json also
+// previews as that clip where the app plays one.
 export const projectMeta = {
   // Cameo's hero is the package running, not a picture. `hero` is a still of
   // it for the share image; the pages draw the live characters instead.
@@ -60,6 +62,8 @@ export function projectMetadata(slug: ProjectSlug): Metadata {
       type: "article",
       url: `/projects/${slug}`,
       images: [image],
+      // Played in place of the image where the app plays video (linkPreview.ts)
+      ...(hasPreviewVideo(slug) && { videos: previewVideo(slug) }),
     },
     twitter: {
       card: "summary_large_image",

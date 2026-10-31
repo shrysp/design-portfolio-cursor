@@ -81,6 +81,10 @@ async function seedDevCode() {
     'name', process.env.TOUR_DEV_NAME ?? '',
     'note', process.env.TOUR_DEV_NOTE ?? '',
     'photos', process.env.TOUR_DEV_PHOTOS ?? '',
+    // Set, it is an invitation: the ticket's number, and its note
+    'invite', process.env.TOUR_DEV_INVITE ? '1' : '0',
+    'inviteNo', process.env.TOUR_DEV_INVITE ?? '',
+    'inviteNote', process.env.TOUR_DEV_INVITE_NOTE ?? '',
   );
 }
 
@@ -284,12 +288,22 @@ export type UnlockResult = { ok: true; id: string } | { ok: false; status: 401 |
 
 export async function unlock(code: string, address: string): Promise<UnlockResult> {
   await seedDevCode();
-  const store = getStore();
-  const attempts = `tour:unlock:${address}`;
-  const n = await store.cmd<number>('INCR', attempts);
-  if (n === 1) await store.cmd('EXPIRE', attempts, UNLOCK_WINDOW_SECONDS);
-  if (n > UNLOCK_ATTEMPTS) return { ok: false, status: 429 };
+  if (await overLimit(`tour:unlock:${address}`, UNLOCK_ATTEMPTS)) return { ok: false, status: 429 };
+  const id = await findCode(code);
+  return id ? { ok: true, id } : { ok: false, status: 401 };
+}
 
+/** Counts one more try from an address in this window; whether that is past `limit`. */
+async function overLimit(key: string, limit: number): Promise<boolean> {
+  const store = getStore();
+  const n = await store.cmd<number>('INCR', key);
+  if (n === 1) await store.cmd('EXPIRE', key, UNLOCK_WINDOW_SECONDS);
+  return n > limit;
+}
+
+/** A code's id, if it opens anything: a live record here, or a Notion row made into one now. */
+async function findCode(code: string): Promise<string | null> {
+  const store = getStore();
   const id = await hashCode(code);
   let rec = toRecord(await store.cmd<string[]>('HGETALL', codeKey(id)));
   if (notionConfigured()) {
@@ -300,7 +314,7 @@ export async function unlock(code: string, address: string): Promise<UnlockResul
     if (!rec.label) {
       // A code this store has not seen. It may be a row added in Notion since
       // — the one moment the whole table is read, and it is behind the
-      // attempt limit above.
+      // callers' attempt limits.
       for (const row of await listVisitors()) {
         const real = await isRowFor(id, row);
         const test = await isRowFor(id, row, true);
@@ -311,8 +325,39 @@ export async function unlock(code: string, address: string): Promise<UnlockResul
     }
     rec = toRecord(await store.cmd<string[]>('HGETALL', codeKey(id)));
   }
-  if (!rec.label || rec.revoked === '1') return { ok: false, status: 401 };
-  return { ok: true, id };
+  if (!rec.label || rec.revoked === '1') return null;
+  return id;
+}
+
+/**
+ * Link previews read per address: an app fetching one invitation's preview
+ * asks twice (the page, then its picture), and a person pasting a few links
+ * at once is several more. Its own count, so a preview never uses up the
+ * guest's tries at the real thing — the sender's phone fetches an iMessage
+ * preview from the sender's own address.
+ */
+const PREVIEW_ATTEMPTS = 40;
+
+/** What a link preview may say about a code: who it is for, and their ticket if they have one. */
+export type InvitePreview = { name: string; ticket: Invitation | null };
+
+/**
+ * Who an invitation link is for, for the preview an app draws of it — read
+ * without unlocking anything or counting as a visit. Null for a code that
+ * opens nothing, or past the preview limit; the link then previews as the
+ * page it falls back to.
+ */
+export async function previewInvite(code: string, address: string): Promise<InvitePreview | null> {
+  await seedDevCode();
+  if (await overLimit(`tour:preview:${address}`, PREVIEW_ATTEMPTS)) return null;
+  const id = await findCode(code);
+  if (!id) return null;
+  // Sent the moment the row was written: the box just ticked is what it shows.
+  await refreshVisitor(id, 2500).catch(() => {});
+  const rec = toRecord(await getStore().cmd<string[]>('HGETALL', codeKey(id)));
+  if (rec.revoked === '1') return null;
+  const ticket = await invitationFor(id);
+  return { name: ticket?.name ?? (await visitorFirstName(id)), ticket };
 }
 
 export type StartResult =

@@ -1,0 +1,20 @@
+{
+  "$comment": "The short loops that play in a link's preview, where the app plays them (iMessage, Discord). Cut by `npm run og:videos` (scripts/generate-og-videos.mjs) into public/og/video/<name>.mp4; read by src/lib/linkPreview.ts. Each clip is a stretch of a video in public/: `cover` fills the frame, `contain` sits the whole picture at full height on `backdrop` (a picture, or a colour for footage with a flat ground of its own). `invite` and the home link's scenes are recorded from the site itself instead (see the script).",
+  "cameo": [
+    {
+      "src": "/videos/Portfolio-Tour-Thumbnail.mp4",
+      "start": 108.6,
+      "length": 6.4,
+      "fit": "cover"
+    }
+  ],
+  "itinerai": [
+    {
+      "src": "/videos/Walk-Through-Video.mp4",
+      "start": 1,
+      "length": 6,
+      "fit": "contain",
+      "backdrop": "#f7f7f7"
+    }
+  ]
+}
