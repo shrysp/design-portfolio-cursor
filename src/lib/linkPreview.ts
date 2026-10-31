@@ -1,10 +1,14 @@
 import clips from "./og-videos.json";
 
 // Where the site lives, so share previews can point at full addresses.
-// Vercel supplies the production domain; set NEXT_PUBLIC_SITE_URL to override it.
-export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
+// Vercel supplies the production domain, and a preview's own address on a
+// preview — whose pictures and loops may not be on the live site yet. Set
+// NEXT_PUBLIC_SITE_URL to override it.
+const vercelHost =
+  process.env.VERCEL_ENV === "preview"
+    ? (process.env.VERCEL_BRANCH_URL ?? process.env.VERCEL_URL)
+    : process.env.VERCEL_PROJECT_PRODUCTION_URL;
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? (vercelHost ? `https://${vercelHost}` : "http://localhost:3000");
 
 /**
  * The loops that play in a link's preview, in the apps that play them —
