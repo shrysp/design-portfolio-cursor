@@ -481,8 +481,19 @@ const REAL = 132;
 const PALETTE = resolvePalette(PIP);
 
 /** The three ways to direct the face: a state it holds, a gesture it plays once, an event it reacts to and comes back from. */
-export default function ControlsFigure() {
+/**
+ * `drive`, for a host that has something of its own to say, such as a microphone: it is filled with
+ * the same hand a visitor uses, so the host can hold a state, play a gesture or send an event.
+ */
+export default function ControlsFigure({ drive }: { drive?: React.RefObject<((action: Action) => void) | null> } = {}) {
   const act = React.useRef<((action: Action) => void) | null>(null);
+  React.useEffect(() => {
+    if (!drive) return;
+    drive.current = (action) => act.current?.(action);
+    return () => {
+      drive.current = null;
+    };
+  }, [drive]);
   const [showing, setShowing] = React.useState<Showing>({
     state: 0,
     gesture: -1,

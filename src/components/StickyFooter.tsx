@@ -201,7 +201,8 @@ export default function StickyFooter() {
   // The tour and an invitation are the whole screen from the first frame: no
   // dock to show and then slide away from under them. The invitation's preview
   // and review copies too, so they open as the real one does.
-  if (FULL_SCREEN.includes(pathname)) return null;
+  // Presentation decks take the whole window too.
+  if (FULL_SCREEN.includes(pathname) || pathname.startsWith('/present/')) return null;
 
   return (
       <motion.div

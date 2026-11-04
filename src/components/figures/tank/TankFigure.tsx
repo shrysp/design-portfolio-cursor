@@ -60,9 +60,13 @@ interface BenchProps {
   engine: Engine;
   onShow: (showing: Showing) => void;
   act: React.RefObject<((event: number) => void) | null>;
+  /** The level it starts at. */
+  start: number;
+  /** Whether, left alone, it tops itself up to show what events do. */
+  tour: boolean;
 }
 
-function Bench({ engine, onShow, act }: BenchProps) {
+function Bench({ engine, onShow, act, start, tour }: BenchProps) {
   const anchor = React.useRef<HTMLDivElement>(null);
   const clip = React.useId();
   const device = React.useRef<DeviceHandle | null>(null);
@@ -81,9 +85,9 @@ function Bench({ engine, onShow, act }: BenchProps) {
   const shown = React.useRef("");
 
   const state = React.useRef({
-    level: START,
-    seen: START,
-    band: bandOf(START),
+    level: start,
+    seen: start,
+    band: bandOf(start),
     pose: "idle",
     // The face's reaction to an event, and a gesture it is left to finish
     reaction: "",
@@ -96,7 +100,7 @@ function Bench({ engine, onShow, act }: BenchProps) {
     dumping: 0,
     signal: [0, 0, 0],
     dripping: 0,
-    levels: new Float32Array(KEPT).fill(START),
+    levels: new Float32Array(KEPT).fill(start),
     since: 0,
     elapsed: 0,
     step: 0,
@@ -137,7 +141,7 @@ function Bench({ engine, onShow, act }: BenchProps) {
     // Time drains it; left alone, the tour tops it up whenever it has fallen far enough
     if (!calm) s.level = drain(s.level, dt);
     s.hands = Math.max(0, s.hands - dt);
-    if (!s.hands && !calm && s.level < TOUR[s.step][0]) {
+    if (tour && !s.hands && !calm && s.level < TOUR[s.step][0]) {
       happen(TOUR[s.step][1], now);
       s.step = (s.step + 1) % TOUR.length;
     }
@@ -211,7 +215,7 @@ function Bench({ engine, onShow, act }: BenchProps) {
 
   const reach = GLASS.w + SCALE.reach;
   return (
-    <div ref={anchor} className="relative" role="img" aria-label={spokenOf(START, -1)}>
+    <div ref={anchor} className="relative" role="img" aria-label={spokenOf(start, -1)}>
       <IsoFigure width={WIDTH} height={HEIGHT} label={LABEL}>
         {BENCH}
         {[0, 1, 2].map((index) => (
@@ -262,10 +266,10 @@ function Bench({ engine, onShow, act }: BenchProps) {
           ))}
           <rect className="tk-glass" width={GLASS.w} height={GLASS.h} rx={3} />
           <g clipPath={`url(#${clip})`}>
-            <rect ref={water} className="tk-water" width={GLASS.w} y={GLASS.h * (1 - START)} height={GLASS.h * START} />
+            <rect ref={water} className="tk-water" width={GLASS.w} y={GLASS.h * (1 - start)} height={GLASS.h * start} />
           </g>
           {/* The float, and the pointer it carries along the scale */}
-          <g ref={surface} transform={`translate(0 ${GLASS.h * (1 - START)})`}>
+          <g ref={surface} transform={`translate(0 ${GLASS.h * (1 - start)})`}>
             <line className="tk-surface" x1={0} x2={GLASS.w} y1={0} y2={0} />
             <rect className="tk-float" x={3.5} y={-1.7} width={GLASS.w - 7} height={3.4} rx={1.4} />
             <line className="tk-pointer" x1={GLASS.w} x2={reach} y1={0} y2={0} />
@@ -380,9 +384,13 @@ const PALETTE = resolvePalette(PIP);
 const subscribe = () => () => {};
 
 /** Attention: everything that happens fills it, time drains it, and the band it is in is the face at rest. */
-export default function TankFigure() {
+/**
+ * `start` and `tour` are for a presentation that opens it empty and lets a room fill it by hand;
+ * left out, it starts where the package does and demonstrates itself.
+ */
+export default function TankFigure({ start = START, tour = true }: { start?: number; tour?: boolean } = {}) {
   const act = React.useRef<((event: number) => void) | null>(null);
-  const [showing, setShowing] = React.useState<Showing>({ level: Math.round(START * 100), band: bandOf(START), event: -1 });
+  const [showing, setShowing] = React.useState<Showing>({ level: Math.round(start * 100), band: bandOf(start), event: -1 });
   const [engine] = React.useState(() => createEngine("idle", PIP.eyeBuild));
   const look = React.useRef(LOOK);
   const voice = React.useRef(0);
@@ -420,7 +428,7 @@ export default function TankFigure() {
 
   return (
     <FigureCard className="tank" ratio={WIDTH / HEIGHT} caption={CAPTION} below={below}>
-      <Bench engine={engine} onShow={setShowing} act={act} />
+      <Bench engine={engine} onShow={setShowing} act={act} start={start} tour={tour} />
     </FigureCard>
   );
 }
