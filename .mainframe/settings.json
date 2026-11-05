@@ -1,0 +1,6 @@
+{
+  "setup": "npm ci",
+  "run": {
+    "web": { "command": "npm run dev -- --port $MAINFRAME_PORT" }
+  }
+}
